@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cz.cvut.kbss</groupId>
+    <artifactId>jaxb-jsonld</artifactId>
+    <version>0.0.1</version>
+    <name>JAXB JSON-LD</name>
+    <description>Serialization and deserialization of Java POJOs to/from JSON-LD. For use in JAXB implementations like
+        Jackson or Jersey.
+    </description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+        <cz.cvut.kbss.jopa.version>0.8.4</cz.cvut.kbss.jopa.version>
+
+        <org.slf4j.version>1.7.18</org.slf4j.version>
+        <ch.qos.logback.version>1.1.6</ch.qos.logback.version>
+        <junit.version>4.12</junit.version>
+        <org.mockito.version>1.10.19</org.mockito.version>
+    </properties>
+
+    <dependencies>
+        <!-- Logging facade -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${org.slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cz.cvut.kbss.jopa</groupId>
+            <artifactId>jopa-api</artifactId>
+            <version>${cz.cvut.kbss.jopa.version}</version>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${org.mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${ch.qos.logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${ch.qos.logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <extensions>
+            <!-- Enabling the use of FTP -->
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>2.10</version>
+            </extension>
+        </extensions>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+            </plugin>
+
+            <!-- Code coverage plugin -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.6.201602180812</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- use mvn license:check to check for missing license headers, mvn license:format to add license headers -->
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.11</version>
+                <configuration>
+                    <header>header.txt</header>
+                    <excludes>
+                        <exclude>**/src/test/resources/**</exclude>
+                        <exclude>**/src/main/resources/**</exclude>
+                        <exclude>license</exclude>
+                        <exclude>**/pom.xml</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration> <!-- add this to disable checking -->
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <aggregate>true</aggregate>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- explicitly define maven-deploy-plugin after other to force exec order -->
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <executions>
+                    <execution>
+                        <id>deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--<licenses>-->
+    <!--<license>-->
+    <!--<name>GNU Lesser General Public License</name>-->
+    <!--<url>http://www.gnu.org/copyleft/lesser.html</url>-->
+    <!--<distribution>repo</distribution>-->
+    <!--</license>-->
+    <!--</licenses>-->
+
+    <developers>
+        <developer>
+            <name>Martin Ledvinka</name>
+            <email>martin.ledvinka@fel.cvut.cz</email>
+            <!--<url>http://cyber.felk.cvut.cz/people</url>-->
+            <organization>Czech Technical University in Prague, Knowledge Based and Software Systems Group
+            </organization>
+            <organizationUrl>http://kbss.felk.cvut.cz</organizationUrl>
+            <roles>
+            </roles>
+        </developer>
+    </developers>
+
+    <organization>
+        <name>Czech Technical University in Prague, Knowledge Based and Software Systems Group</name>
+        <url>http://kbss.felk.cvut.cz</url>
+    </organization>
+
+    <scm>
+        <connection>scm:git:https://kbss.felk.cvut.cz/git/jaxb-jsonld.git</connection>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>kbss</id>
+            <name>KBSS Maven 2 Repository</name>
+            <url>sftp://kbss.felk.cvut.cz/var/www/m2repo</url>
+        </repository>
+    </distributionManagement>
+</project>
