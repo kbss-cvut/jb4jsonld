@@ -9,21 +9,29 @@ import java.util.Objects;
 public abstract class JsonNode {
 
     private final String name;
-    private final boolean root;
+    private final boolean valueNode;
 
     JsonNode() {
         this.name = null;
-        this.root = true;
+        this.valueNode = true;
     }
 
     public JsonNode(String name) {
         this.name = Objects.requireNonNull(name);
-        this.root = false;
+        this.valueNode = false;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isValueNode() {
+        return valueNode;
     }
 
     public void write(JsonSerializer writer) {
         try {
-            if (!root) {
+            if (!valueNode) {
                 writeKey(writer);
             }
             writeValue(writer);
@@ -37,4 +45,9 @@ public abstract class JsonNode {
     }
 
     abstract void writeValue(JsonSerializer writer) throws IOException;
+
+    @Override
+    public String toString() {
+        return name == null ? "{" : "{\"" + name + "\": ";
+    }
 }

@@ -26,4 +26,9 @@ public class ObjectIdNode extends JsonNode {
     void writeValue(JsonSerializer writer) throws IOException {
         writer.writeString(identifier.toString());
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + identifier + "}";
+    }
 }

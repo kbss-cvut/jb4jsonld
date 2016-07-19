@@ -14,4 +14,13 @@ abstract class Literal<T> extends JsonNode {
         super(name);
         this.value = Objects.requireNonNull(value);
     }
+
+    public T getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + value + "}";
+    }
 }
