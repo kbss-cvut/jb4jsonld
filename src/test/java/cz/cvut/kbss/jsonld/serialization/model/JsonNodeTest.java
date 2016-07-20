@@ -20,7 +20,7 @@ public class JsonNodeTest extends AbstractNodeTest {
     public void writeWritesFirstKeyAndThenValueOfTheNode() throws Exception {
         final String name = "test";
         final String value = "testValue";
-        final JsonNode node = spy(new StringLiteral(name, value));
+        final JsonNode node = spy(new StringLiteralNode(name, value));
         node.write(serializerMock);
         final InOrder inOrder = inOrder(node);
 
@@ -32,7 +32,7 @@ public class JsonNodeTest extends AbstractNodeTest {
     public void ioExceptionInJsonSerializationThrowsJsonLdSerializationException() throws Exception {
         final String name = "test";
         final String value = "testValue";
-        final JsonNode node = spy(new StringLiteral(name, value));
+        final JsonNode node = spy(new StringLiteralNode(name, value));
         doThrow(new IOException()).when(node).writeValue(serializerMock);
         node.write(serializerMock);
     }
@@ -40,7 +40,7 @@ public class JsonNodeTest extends AbstractNodeTest {
     @Test
     public void writeDoesNotWriteKeyWhenNodeIsNotAttribute() throws Exception {
         final String value = "testValue";
-        final JsonNode node = spy(new StringLiteral(value));
+        final JsonNode node = spy(new StringLiteralNode(value));
         node.write(serializerMock);
         verify(node).writeValue(serializerMock);
         verify(node, never()).writeKey(serializerMock);

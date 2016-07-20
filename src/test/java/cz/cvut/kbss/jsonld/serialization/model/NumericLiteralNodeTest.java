@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import static org.mockito.Mockito.verify;
 
-public class NumericLiteralTest extends AbstractNodeTest {
+public class NumericLiteralNodeTest extends AbstractNodeTest {
 
     @Before
     public void setUp() {
@@ -16,7 +16,7 @@ public class NumericLiteralTest extends AbstractNodeTest {
     public void writeValueWritesTheValueAsNumber() throws Exception {
         final String name = "test";
         final long value = System.currentTimeMillis();
-        final JsonNode node = new NumericLiteral<>(name, value);
+        final JsonNode node = new NumericLiteralNode<>(name, value);
         node.write(serializerMock);
         verify(serializerMock).writeNumber(value);
     }

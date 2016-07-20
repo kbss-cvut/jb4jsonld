@@ -4,6 +4,7 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.serialization.BeanAnnotationProcessor;
 import org.junit.Test;
 
 import java.lang.reflect.Field;

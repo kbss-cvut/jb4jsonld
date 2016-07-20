@@ -7,13 +7,13 @@ import java.io.IOException;
 /**
  * Represents a field value that should be serialized as a JSON boolean literal value.
  */
-public class BooleanLiteral extends Literal<Boolean> {
+public class BooleanLiteralNode extends LiteralNode<Boolean> {
 
-    public BooleanLiteral(Boolean value) {
+    public BooleanLiteralNode(Boolean value) {
         super(value);
     }
 
-    public BooleanLiteral(String name, Boolean value) {
+    public BooleanLiteralNode(String name, Boolean value) {
         super(name, value);
     }
 

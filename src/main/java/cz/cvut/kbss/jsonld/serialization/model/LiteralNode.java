@@ -2,15 +2,15 @@ package cz.cvut.kbss.jsonld.serialization.model;
 
 import java.util.Objects;
 
-abstract class Literal<T> extends JsonNode {
+public abstract class LiteralNode<T> extends JsonNode {
 
     final T value;
 
-    public Literal(T value) {
+    public LiteralNode(T value) {
         this.value = Objects.requireNonNull(value);
     }
 
-    public Literal(String name, T value) {
+    public LiteralNode(String name, T value) {
         super(name);
         this.value = Objects.requireNonNull(value);
     }

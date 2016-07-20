@@ -2,7 +2,7 @@ package cz.cvut.kbss.jsonld.serialization.model;
 
 import java.util.Collection;
 
-abstract class CollectionNode extends JsonNode {
+public abstract class CollectionNode extends JsonNode {
 
     Collection<JsonNode> items;
 

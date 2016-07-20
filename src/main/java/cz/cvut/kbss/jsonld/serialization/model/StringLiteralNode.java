@@ -7,16 +7,16 @@ import java.io.IOException;
 /**
  * Represents a field value that should be serialized as a JSON string literal value.
  */
-public class StringLiteral extends Literal<String> {
+public class StringLiteralNode extends LiteralNode<String> {
 
     // TODO add support for strings with language tag
 
 
-    public StringLiteral(String text) {
+    public StringLiteralNode(String text) {
         super(text);
     }
 
-    public StringLiteral(String name, String text) {
+    public StringLiteralNode(String name, String text) {
         super(name, text);
     }
 

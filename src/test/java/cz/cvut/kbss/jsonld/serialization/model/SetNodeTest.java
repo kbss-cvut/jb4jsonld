@@ -28,7 +28,7 @@ public class SetNodeTest extends AbstractNodeTest {
         final InOrder inOrder = inOrder(serializerMock);
         inOrder.verify(serializerMock).writeArrayStart();
         for (JsonNode item : items) {
-            inOrder.verify(serializerMock).writeString(((StringLiteral) item).getValue());
+            inOrder.verify(serializerMock).writeString(((StringLiteralNode) item).getValue());
         }
         inOrder.verify(serializerMock).writeArrayEnd();
         verify(serializerMock, never()).writeFieldName(anyString());
@@ -37,7 +37,7 @@ public class SetNodeTest extends AbstractNodeTest {
     private List<JsonNode> generateItems() {
         final List<JsonNode> nodes = new ArrayList<>();
         for (int i = 0; i < Generator.randomCount(10); i++) {
-            nodes.add(new StringLiteral("item" + i));
+            nodes.add(new StringLiteralNode("item" + i));
         }
         return nodes;
     }

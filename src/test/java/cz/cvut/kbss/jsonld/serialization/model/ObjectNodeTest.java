@@ -29,7 +29,7 @@ public class ObjectNodeTest extends AbstractNodeTest {
         inOrder.verify(serializerMock).writeObjectStart();
         for (JsonNode n : children) {
             inOrder.verify(serializerMock).writeFieldName(n.getName());
-            inOrder.verify(serializerMock).writeNumber((Number) ((NumericLiteral) n).getValue());
+            inOrder.verify(serializerMock).writeNumber((Number) ((NumericLiteralNode) n).getValue());
         }
         inOrder.verify(serializerMock).writeObjectEnd();
     }
@@ -37,7 +37,7 @@ public class ObjectNodeTest extends AbstractNodeTest {
     private List<JsonNode> generateChildren() {
         final List<JsonNode> nodes = new ArrayList<>();
         for (int i = 0; i < Generator.randomCount(10); i++) {
-            nodes.add(new NumericLiteral<>("http://krizik.felk.cvut.cz/ontologies/jsonld#" + i, i));
+            nodes.add(new NumericLiteralNode<>("http://krizik.felk.cvut.cz/ontologies/jsonld#" + i, i));
         }
         return nodes;
     }

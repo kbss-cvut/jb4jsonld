@@ -1,4 +1,4 @@
-package cz.cvut.kbss.jsonld.serialization.traversal;
+package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 

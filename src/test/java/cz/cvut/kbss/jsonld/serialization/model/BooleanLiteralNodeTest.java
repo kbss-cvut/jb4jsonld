@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import static org.mockito.Mockito.verify;
 
-public class BooleanLiteralTest extends AbstractNodeTest {
+public class BooleanLiteralNodeTest extends AbstractNodeTest {
 
     @Before
     public void setUp() {
@@ -18,7 +18,7 @@ public class BooleanLiteralTest extends AbstractNodeTest {
     public void writeValueWritesTheValueAsBoolean() throws IOException {
         final String name = "test";
         final boolean value = false;
-        final JsonNode node = new BooleanLiteral(name, value);
+        final JsonNode node = new BooleanLiteralNode(name, value);
         node.write(serializerMock);
         verify(serializerMock).writeBoolean(value);
     }
