@@ -1,10 +1,25 @@
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
-import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import java.util.*;
 
 public class ObjectGraphTraverser {
 
-    public JsonNode processObject(Object object) {
-        return null;
+    private final Set<InstanceVisitor> visitors = new HashSet<>(4);
+
+    private Map<Object, Object> knownInstances;
+
+    public void addVisitor(InstanceVisitor visitor) {
+        Objects.requireNonNull(visitor);
+        visitors.add(visitor);
+    }
+
+    private void resetKnownInstances() {
+        this.knownInstances = new IdentityHashMap<>();
+    }
+
+    public void traverse(Object instance) {
+        Objects.requireNonNull(instance);
+        resetKnownInstances();
+        // TODO
     }
 }
