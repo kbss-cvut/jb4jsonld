@@ -1,21 +1,12 @@
 package cz.cvut.kbss.jsonld.serialization.model;
 
-import java.util.Collection;
-
-public abstract class CollectionNode extends JsonNode {
-
-    Collection<JsonNode> items;
+public abstract class CollectionNode extends CompositeNode {
 
     CollectionNode() {
     }
 
     CollectionNode(String name) {
         super(name);
-    }
-
-    public void addItem(JsonNode item) {
-        assert items != null;
-        items.add(item);
     }
 
     @Override

@@ -5,6 +5,7 @@ import cz.cvut.kbss.jsonld.serialization.JsonSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Represents a node serialized as a JSON-LD list.
@@ -14,12 +15,15 @@ import java.util.ArrayList;
 public class ListNode extends CollectionNode {
 
     public ListNode() {
-        this.items = new ArrayList<>();
     }
 
     public ListNode(String name) {
         super(name);
-        this.items = new ArrayList<>();
+    }
+
+    @Override
+    Collection<JsonNode> initItems() {
+        return new ArrayList<>();
     }
 
     @Override

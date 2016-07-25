@@ -37,9 +37,10 @@ public class ObjectGraphTraverserTest {
         final User user = Generator.generateUser();
         traverser.traverse(user);
         final InOrder inOrder = inOrder(visitor);
-        // Verify that visitInstance was called before visitField
-        inOrder.verify(visitor).visitInstance(user);
+        // Verify that openInstance was called before visitField
+        inOrder.verify(visitor).openInstance(user);
         inOrder.verify(visitor, atLeastOnce()).visitField(any(Field.class), any());
+        inOrder.verify(visitor).closeInstance(user);
 
         verifyUserFieldsVisited(user);
     }
@@ -56,8 +57,10 @@ public class ObjectGraphTraverserTest {
         final Employee employee = Generator.generateEmployee();
         traverser.traverse(employee);
         final InOrder inOrder = inOrder(visitor);
-        inOrder.verify(visitor).visitInstance(employee);
-        inOrder.verify(visitor).visitInstance(employee.getEmployer());
+        inOrder.verify(visitor).openInstance(employee);
+        inOrder.verify(visitor).openInstance(employee.getEmployer());
+        inOrder.verify(visitor).closeInstance(employee.getEmployer());
+        inOrder.verify(visitor).closeInstance(employee);
 
         verifyUserFieldsVisited(employee);
         verify(visitor).visitField(Employee.class.getDeclaredField("employer"), employee.getEmployer());
@@ -73,8 +76,14 @@ public class ObjectGraphTraverserTest {
         generateEmployees(org);
         traverser.traverse(org);
 
-        verify(visitor).visitInstance(org);
-        org.getEmployees().forEach(e -> verify(visitor).visitInstance(e));
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).openInstance(org);
+        inOrder.verify(visitor).openCollection(org.getEmployees());
+        inOrder.verify(visitor).closeCollection(org.getEmployees());
+        inOrder.verify(visitor).closeInstance(org);
+
+        verify(visitor).openInstance(org);
+        org.getEmployees().forEach(e -> verify(visitor).openInstance(e));
     }
 
     private void generateEmployees(Organization org) {
@@ -94,7 +103,10 @@ public class ObjectGraphTraverserTest {
         traverser.traverse(employee);
 
         verifyUserFieldsVisited(employee);
-        verify(visitor).visitInstance(employee.getEmployer());
+        verify(visitor).openInstance(employee.getEmployer());
+        verify(visitor).openCollection(employee.getEmployer().getEmployees());
         verify(visitor).visitKnownInstance(employee);
+        verify(visitor).closeCollection(employee.getEmployer().getEmployees());
+        verify(visitor).closeInstance(employee.getEmployer());
     }
 }

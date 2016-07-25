@@ -3,6 +3,7 @@ package cz.cvut.kbss.jsonld.serialization.model;
 import cz.cvut.kbss.jsonld.serialization.JsonSerializer;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 
 /**
@@ -13,12 +14,15 @@ import java.util.LinkedHashSet;
 public class SetNode extends CollectionNode {
 
     public SetNode() {
-        this.items = new LinkedHashSet<>();
     }
 
     public SetNode(String name) {
         super(name);
-        this.items = new LinkedHashSet<>();
+    }
+
+    @Override
+    Collection<JsonNode> initItems() {
+        return new LinkedHashSet<>();
     }
 
     @Override

@@ -22,7 +22,7 @@ public class ObjectNodeTest extends AbstractNodeTest {
     public void writeOutputsAllTheChildrenAsKeyValuePairs() throws Exception {
         final ObjectNode node = new ObjectNode();
         final List<JsonNode> children = generateChildren();
-        children.forEach(node::addChild);
+        children.forEach(node::addItem);
         node.write(serializerMock);
 
         final InOrder inOrder = inOrder(serializerMock);
@@ -37,7 +37,7 @@ public class ObjectNodeTest extends AbstractNodeTest {
     private List<JsonNode> generateChildren() {
         final List<JsonNode> nodes = new ArrayList<>();
         for (int i = 0; i < Generator.randomCount(10); i++) {
-            nodes.add(new NumericLiteralNode<>("http://krizik.felk.cvut.cz/ontologies/jsonld#" + i, i));
+            nodes.add(new NumericLiteralNode<>(Generator.URI_BASE + i, i));
         }
         return nodes;
     }

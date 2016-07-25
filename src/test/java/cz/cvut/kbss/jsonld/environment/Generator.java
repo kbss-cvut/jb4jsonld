@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class Generator {
 
-    private static final String URI_BASE = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#";
+    public static final String URI_BASE = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#";
 
     private static final Random RAND = new Random();
 

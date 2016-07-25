@@ -27,18 +27,22 @@ public class ObjectGraphTraverser implements InstanceVisitor {
         Objects.requireNonNull(instance);
         resetKnownInstances();
         try {
-            traverseImpl(instance);
+            traverseImpl(null, instance);
         } catch (IllegalAccessException e) {
             throw new JsonLdSerializationException("Unable to extract field value.", e);
         }
     }
 
-    private void traverseImpl(Object instance) throws IllegalAccessException {
+    private void traverseImpl(Field field, Object instance) throws IllegalAccessException {
         if (knownInstances.containsKey(instance)) {
-            visitKnownInstance(instance);
+            if (field != null) {
+                visitKnownInstance(field, instance);
+            } else {
+                visitKnownInstance(instance);
+            }
             return;
         }
-        visitInstance(instance);
+        openInstance(instance);
         for (Field f : BeanAnnotationProcessor.getSerializableFields(instance)) {
             if (!f.isAccessible()) {
                 f.setAccessible(true);
@@ -46,31 +50,41 @@ public class ObjectGraphTraverser implements InstanceVisitor {
             final Object value = f.get(instance);
             visitField(f, value);
             if (value != null && BeanAnnotationProcessor.isObjectProperty(f)) {
-                traverseObjectPropertyValue(value);
+                traverseObjectPropertyValue(f, value);
             }
         }
+        closeInstance(instance);
     }
 
-    private void traverseObjectPropertyValue(Object value) throws IllegalAccessException {
+    private void traverseObjectPropertyValue(Field field, Object value) throws IllegalAccessException {
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
+            openCollection(col);
             for (Object elem : col) {
-                traverseImpl(elem);
+                traverseImpl(null, elem);
             }
+            closeCollection(col);
         } else if (value.getClass().isArray()) {
-            final Object[] arr = (Object[]) value;
-            for (Object ob : arr) {
-                traverseImpl(ob);
-            }
+            throw new JsonLdSerializationException("Arrays are not supported, yet.");
         } else {
-            traverseImpl(value);
+            traverseImpl(field, value);
         }
     }
 
     @Override
-    public void visitInstance(Object instance) {
+    public void openInstance(Object instance) {
         knownInstances.put(instance, EMPTY_OBJECT);
-        visitors.forEach(v -> v.visitInstance(instance));
+        visitors.forEach(v -> v.openInstance(instance));
+    }
+
+    @Override
+    public void closeInstance(Object instance) {
+        visitors.forEach(v -> v.closeInstance(instance));
+    }
+
+    @Override
+    public void visitKnownInstance(Field field, Object instance) {
+
     }
 
     @Override
@@ -81,5 +95,15 @@ public class ObjectGraphTraverser implements InstanceVisitor {
     @Override
     public void visitField(Field field, Object value) {
         visitors.forEach(v -> v.visitField(field, value));
+    }
+
+    @Override
+    public void openCollection(Collection<?> collection) {
+        visitors.forEach(v -> v.openCollection(collection));
+    }
+
+    @Override
+    public void closeCollection(Collection<?> collection) {
+        visitors.forEach(v -> v.closeCollection(collection));
     }
 }
