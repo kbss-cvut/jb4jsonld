@@ -79,4 +79,15 @@ public class BeanAnnotationProcessor {
                         field.getDeclaredAnnotation(OWLObjectProperty.class) == null &&
                         field.getDeclaredAnnotation(Id.class) == null);
     }
+
+    /**
+     * Checks whether the specified field is mapped to an OWL object property.
+     *
+     * @param field The field to examine
+     * @return Whether field has a {@link OWLObjectProperty} annotation
+     */
+    public static boolean isObjectProperty(Field field) {
+        Objects.requireNonNull(field);
+        return field.getDeclaredAnnotation(OWLObjectProperty.class) != null;
+    }
 }
