@@ -27,19 +27,15 @@ public class ObjectGraphTraverser implements InstanceVisitor {
         Objects.requireNonNull(instance);
         resetKnownInstances();
         try {
-            traverseImpl(null, instance);
+            traverseImpl(instance);
         } catch (IllegalAccessException e) {
             throw new JsonLdSerializationException("Unable to extract field value.", e);
         }
     }
 
-    private void traverseImpl(Field field, Object instance) throws IllegalAccessException {
+    private void traverseImpl(Object instance) throws IllegalAccessException {
         if (knownInstances.containsKey(instance)) {
-            if (field != null) {
-                visitKnownInstance(field, instance);
-            } else {
-                visitKnownInstance(instance);
-            }
+            visitKnownInstance(instance);
             return;
         }
         openInstance(instance);
@@ -50,24 +46,24 @@ public class ObjectGraphTraverser implements InstanceVisitor {
             final Object value = f.get(instance);
             visitField(f, value);
             if (value != null && BeanAnnotationProcessor.isObjectProperty(f)) {
-                traverseObjectPropertyValue(f, value);
+                traverseObjectPropertyValue(value);
             }
         }
         closeInstance(instance);
     }
 
-    private void traverseObjectPropertyValue(Field field, Object value) throws IllegalAccessException {
+    private void traverseObjectPropertyValue(Object value) throws IllegalAccessException {
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
             openCollection(col);
             for (Object elem : col) {
-                traverseImpl(null, elem);
+                traverseImpl(elem);
             }
             closeCollection(col);
         } else if (value.getClass().isArray()) {
             throw new JsonLdSerializationException("Arrays are not supported, yet.");
         } else {
-            traverseImpl(field, value);
+            traverseImpl(value);
         }
     }
 
@@ -80,11 +76,6 @@ public class ObjectGraphTraverser implements InstanceVisitor {
     @Override
     public void closeInstance(Object instance) {
         visitors.forEach(v -> v.closeInstance(instance));
-    }
-
-    @Override
-    public void visitKnownInstance(Field field, Object instance) {
-
     }
 
     @Override

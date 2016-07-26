@@ -1,6 +1,8 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jsonld.Constants;
+import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -89,5 +91,53 @@ public class BeanAnnotationProcessor {
     public static boolean isObjectProperty(Field field) {
         Objects.requireNonNull(field);
         return field.getDeclaredAnnotation(OWLObjectProperty.class) != null;
+    }
+
+    /**
+     * Resolves JSON-LD attribute identifier of the specified field.
+     * <p>
+     * For OWL properties, this will be their IRI. For id fields it will be the {@link
+     * cz.cvut.kbss.jsonld.Constants#JSON_LD_ID} string.
+     *
+     * @param field The field to resolve
+     * @return JSON-LD attribute identifier
+     */
+    public static String getAttributeIdentifier(Field field) {
+        if (field.getDeclaredAnnotation(Id.class) != null) {
+            return Constants.JSON_LD_ID;
+        }
+        final OWLDataProperty dp = field.getDeclaredAnnotation(OWLDataProperty.class);
+        if (dp != null) {
+            return dp.iri();
+        }
+        final OWLObjectProperty op = field.getDeclaredAnnotation(OWLObjectProperty.class);
+        if (op != null) {
+            return op.iri();
+        }
+        final OWLAnnotationProperty ap = field.getDeclaredAnnotation(OWLAnnotationProperty.class);
+        if (ap != null) {
+            return ap.iri();
+        }
+        throw new JsonLdSerializationException("Field " + field + " is not JSON-LD serializable.");
+    }
+
+    public static Object getInstanceIdentifier(Object instance) {
+        Objects.requireNonNull(instance);
+        final List<Class<?>> classes = getAncestors(instance.getClass());
+        for (Class<?> cls : classes) {
+            for (Field f : cls.getDeclaredFields()) {
+                if (f.getDeclaredAnnotation(Id.class) != null) {
+                    if (!f.isAccessible()) {
+                        f.setAccessible(true);
+                    }
+                    try {
+                        return f.get(instance);
+                    } catch (IllegalAccessException e) {
+                        throw new JsonLdSerializationException("Unable to extract identifier of instance " + instance);
+                    }
+                }
+            }
+        }
+        throw new JsonLdSerializationException("Instance " + instance + " contains no valid identifier field.");
     }
 }

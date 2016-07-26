@@ -1,6 +1,7 @@
 package cz.cvut.kbss.jsonld.serialization.model;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 public abstract class CompositeNode extends JsonNode {
@@ -24,6 +25,10 @@ public abstract class CompositeNode extends JsonNode {
     public void addItem(JsonNode item) {
         Objects.requireNonNull(item);
         items.add(item);
+    }
+
+    public Collection<JsonNode> getItems() {
+        return Collections.unmodifiableCollection(items);
     }
 
     public void close() {

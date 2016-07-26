@@ -13,6 +13,7 @@ public class Vocabulary {
     public static final String DATE_CREATED = "http://purl.org/dc/terms/created";
     public static final String IS_MEMBER_OF = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/isMemberOf";
     public static final String HAS_MEMBER = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/hasMember";
+    public static final String BRAND = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/brand";
 
     private Vocabulary() {
         throw new AssertionError();

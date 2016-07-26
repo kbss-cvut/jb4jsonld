@@ -6,6 +6,7 @@ import cz.cvut.kbss.jsonld.environment.model.User;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Random;
 
 public class Generator {
@@ -68,6 +69,10 @@ public class Generator {
         org.setUri(generateUri());
         org.setDateCreated(new Date());
         org.setName("Organization" + RAND.nextInt());
+        org.setBrands(new HashSet<>());
+        for (int i = 0; i < randomCount(10); i++) {
+            org.getBrands().add("Brandy" + i);
+        }
         return org;
     }
 }

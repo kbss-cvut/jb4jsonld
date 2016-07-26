@@ -27,16 +27,6 @@ public interface InstanceVisitor {
 
     /**
      * Called when an already known instance is encountered again by the object graph traverser.
-     * <p>
-     * This version is for attributes.
-     *
-     * @param field    Field whose value is visited
-     * @param instance The visited instance
-     */
-    void visitKnownInstance(Field field, Object instance);
-
-    /**
-     * Called when an already known instance is encountered again by the object graph traverser.
      *
      * @param instance The instance
      */

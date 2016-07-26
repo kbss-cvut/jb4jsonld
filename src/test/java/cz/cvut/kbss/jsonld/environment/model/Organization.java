@@ -1,10 +1,7 @@
 package cz.cvut.kbss.jsonld.environment.model;
 
 import cz.cvut.kbss.jopa.CommonVocabulary;
-import cz.cvut.kbss.jopa.model.annotations.Id;
-import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
-import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
+import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
 import java.net.URI;
@@ -24,6 +21,9 @@ public class Organization {
 
     @OWLAnnotationProperty(iri = CommonVocabulary.RDFS_LABEL)
     private String name;
+
+    @OWLDataProperty(iri = Vocabulary.BRAND)
+    private Set<String> brands;
 
     private Long age;
 
@@ -52,6 +52,14 @@ public class Organization {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<String> getBrands() {
+        return brands;
+    }
+
+    public void setBrands(Set<String> brands) {
+        this.brands = brands;
     }
 
     public Long getAge() {
