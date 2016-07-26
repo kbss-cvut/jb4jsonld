@@ -208,5 +208,22 @@ public class JsonLdTreeBuilderTest {
         assertTrue(referenceNode instanceof ObjectIdNode);
     }
 
-    // TODO test object id in collection, collection of objects as root
+    @Test
+    public void visitKnownInstanceAddsCollectionOfObjectIdsToTheParent() throws Exception {
+        final Employee employee = Generator.generateEmployee();
+        final Organization employer = employee.getEmployer();
+        employer.setEmployees(Collections.singleton(employee));
+        treeBuilder.openInstance(employee);
+        treeBuilder.visitField(Employee.class.getDeclaredField("employer"), employee.getEmployer());
+        treeBuilder.openInstance(employee.getEmployer());
+        treeBuilder.visitField(Organization.class.getDeclaredField("employees"), employer.getEmployees());
+        treeBuilder.openCollection(employer.getEmployees());
+        treeBuilder.visitKnownInstance(employer.getEmployees().iterator().next());
+        final CompositeNode node = treeBuilder.getTreeRoot();
+        assertTrue(node instanceof CollectionNode);
+        final JsonNode item = node.getItems().iterator().next();
+        assertTrue(item instanceof ObjectIdNode);
+    }
+
+    // TODO test collection of objects as root
 }
