@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class Generator {
 
@@ -42,6 +43,14 @@ public class Generator {
         final User user = new User();
         setUserAttributes(user);
         return user;
+    }
+
+    public static Set<User> generateUsers() {
+        final Set<User> users = new HashSet<>();
+        for (int i = 0; i < randomCount(10); i++) {
+            users.add(generateUser());
+        }
+        return users;
     }
 
     private static void setUserAttributes(User user) {

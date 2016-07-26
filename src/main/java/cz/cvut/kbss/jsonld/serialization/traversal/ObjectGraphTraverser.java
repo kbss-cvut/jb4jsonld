@@ -27,10 +27,22 @@ public class ObjectGraphTraverser implements InstanceVisitor {
         Objects.requireNonNull(instance);
         resetKnownInstances();
         try {
-            traverseImpl(instance);
+            if (instance instanceof Collection) {
+                traverseCollection((Collection<?>) instance);
+            } else {
+                traverseImpl(instance);
+            }
         } catch (IllegalAccessException e) {
             throw new JsonLdSerializationException("Unable to extract field value.", e);
         }
+    }
+
+    private void traverseCollection(Collection<?> col) throws IllegalAccessException {
+        openCollection(col);
+        for (Object item : col) {
+            traverseImpl(item);
+        }
+        closeCollection(col);
     }
 
     private void traverseImpl(Object instance) throws IllegalAccessException {

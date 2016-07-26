@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -108,5 +109,19 @@ public class ObjectGraphTraverserTest {
         verify(visitor).visitKnownInstance(employee);
         verify(visitor).closeCollection(employee.getEmployer().getEmployees());
         verify(visitor).closeInstance(employee.getEmployer());
+    }
+
+    @Test
+    public void traverseOnCollectionOpensCollectionAddsInstancesAndClosesCollection() throws Exception {
+        final Set<User> users = Generator.generateUsers();
+        traverser.traverse(users);
+
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).openCollection(users);
+        for (User u : users) {
+            inOrder.verify(visitor).openInstance(u);
+            inOrder.verify(visitor).closeInstance(u);
+        }
+        inOrder.verify(visitor).closeCollection(users);
     }
 }

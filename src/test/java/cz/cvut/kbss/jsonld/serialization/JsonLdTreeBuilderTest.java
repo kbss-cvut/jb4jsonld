@@ -225,5 +225,22 @@ public class JsonLdTreeBuilderTest {
         assertTrue(item instanceof ObjectIdNode);
     }
 
-    // TODO test collection of objects as root
+    @Test
+    public void testBuildTreeWithRootCollection() throws Exception {
+        final Set<User> users = Generator.generateUsers();
+        treeBuilder.openCollection(users);
+        for (User u : users) {
+            treeBuilder.openInstance(u);
+            treeBuilder.closeInstance(u);
+        }
+        treeBuilder.closeCollection(users);
+
+        final CompositeNode root = treeBuilder.getTreeRoot();
+        assertFalse(root.isOpen());
+        assertEquals(users.size(), root.getItems().size());
+        for (JsonNode item : root.getItems()) {
+            assertTrue(item instanceof ObjectNode);
+            assertNull(item.getName());
+        }
+    }
 }
