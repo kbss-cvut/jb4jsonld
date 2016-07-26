@@ -11,6 +11,10 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.Stack;
 
+/**
+ * Builds an abstract representation of a JSON-LD tree, which is a result of object graph traversal by {@link
+ * cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser}.
+ */
 public class JsonLdTreeBuilder implements InstanceVisitor {
 
     private final Stack<CompositeNode> nodeStack = new Stack<>();

@@ -71,6 +71,9 @@ public interface JsonSerializer {
 
     /**
      * Outputs JSON literal {@code null} value.
+     * <p>
+     * This is usually not used, because {@code null} values are by default omitted by the serialization. But this can
+     * be configurable.
      *
      * @throws IOException When JSON writing error occurs
      */

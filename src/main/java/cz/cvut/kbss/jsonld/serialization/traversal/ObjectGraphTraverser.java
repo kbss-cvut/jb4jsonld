@@ -19,6 +19,10 @@ public class ObjectGraphTraverser implements InstanceVisitor {
         visitors.add(visitor);
     }
 
+    public void removeVisitor(InstanceVisitor visitor) {
+        visitors.remove(visitor);
+    }
+
     private void resetKnownInstances() {
         this.knownInstances = new IdentityHashMap<>();
     }
