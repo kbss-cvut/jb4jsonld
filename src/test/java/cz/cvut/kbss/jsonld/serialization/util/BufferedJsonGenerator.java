@@ -1,11 +1,11 @@
 package cz.cvut.kbss.jsonld.serialization.util;
 
-import cz.cvut.kbss.jsonld.serialization.JsonSerializer;
+import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
 import java.util.Stack;
 
-public class BufferedJsonSerializer implements JsonSerializer {
+public class BufferedJsonGenerator implements JsonGenerator {
 
     private StringBuilder buffer = new StringBuilder();
 

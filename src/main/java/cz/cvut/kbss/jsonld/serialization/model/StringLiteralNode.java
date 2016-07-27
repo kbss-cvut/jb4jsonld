@@ -1,6 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization.model;
 
-import cz.cvut.kbss.jsonld.serialization.JsonSerializer;
+import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
 
@@ -21,7 +21,7 @@ public class StringLiteralNode extends LiteralNode<String> {
     }
 
     @Override
-    void writeValue(JsonSerializer writer) throws IOException {
+    void writeValue(JsonGenerator writer) throws IOException {
         writer.writeString(value);
     }
 }

@@ -9,8 +9,8 @@ import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
  */
 public class CompactedJsonLdSerializer extends JsonLdSerializer {
 
-    public CompactedJsonLdSerializer(JsonSerializer jsonSerializer) {
-        super(jsonSerializer);
+    public CompactedJsonLdSerializer(JsonGenerator jsonGenerator) {
+        super(jsonGenerator);
     }
 
     @Override

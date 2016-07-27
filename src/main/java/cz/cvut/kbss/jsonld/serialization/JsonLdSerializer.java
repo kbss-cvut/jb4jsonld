@@ -15,16 +15,16 @@ public abstract class JsonLdSerializer {
 
     final ObjectGraphTraverser traverser = new ObjectGraphTraverser();
 
-    final JsonSerializer jsonSerializer;
+    final JsonGenerator jsonGenerator;
 
-    protected JsonLdSerializer(JsonSerializer jsonSerializer) {
-        this.jsonSerializer = Objects.requireNonNull(jsonSerializer);
+    protected JsonLdSerializer(JsonGenerator jsonGenerator) {
+        this.jsonGenerator = Objects.requireNonNull(jsonGenerator);
     }
 
     /**
      * Serializes object graph with the specified root.
      * <p>
-     * The serialization builds a JSON-LD tree model and then writes it using a {@link JsonSerializer}, which was
+     * The serialization builds a JSON-LD tree model and then writes it using a {@link JsonGenerator}, which was
      * passed to this instance in constructor.
      *
      * @param root Object graph root
@@ -32,7 +32,7 @@ public abstract class JsonLdSerializer {
     public void serialize(Object root) {
         Objects.requireNonNull(root);
         final JsonNode jsonRoot = buildJsonTree(root);
-        jsonRoot.write(jsonSerializer);
+        jsonRoot.write(jsonGenerator);
     }
 
     /**
@@ -42,4 +42,8 @@ public abstract class JsonLdSerializer {
      * @return {@link JsonNode} corresponding to the JSON-LD's tree root
      */
     abstract JsonNode buildJsonTree(Object root);
+
+    public static JsonLdSerializer createCompactedJsonLdSerializer(JsonGenerator jsonWriter) {
+        return new CompactedJsonLdSerializer(jsonWriter);
+    }
 }

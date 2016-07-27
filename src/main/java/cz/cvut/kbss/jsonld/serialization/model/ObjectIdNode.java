@@ -1,6 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization.model;
 
-import cz.cvut.kbss.jsonld.serialization.JsonSerializer;
+import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,7 +23,7 @@ public class ObjectIdNode extends JsonNode {
     }
 
     @Override
-    void writeValue(JsonSerializer writer) throws IOException {
+    void writeValue(JsonGenerator writer) throws IOException {
         writer.writeString(identifier.toString());
     }
 

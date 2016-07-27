@@ -1,4 +1,4 @@
-package cz.cvut.kbss.jsonld.serialization.traversal;
+package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.CommonVocabulary;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
@@ -11,7 +11,6 @@ import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
-import cz.cvut.kbss.jsonld.serialization.BeanAnnotationProcessor;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -131,5 +130,20 @@ public class BeanAnnotationProcessorTest {
     private static class ClassWithoutIdentifier {
         @OWLAnnotationProperty(iri = CommonVocabulary.RDFS_LABEL)
         private String label;
+    }
+
+    @Test
+    public void isOwlClassEntityReturnsTrueForClassAnnotatedWithOWLClass() {
+        assertTrue(BeanAnnotationProcessor.isOwlClassEntity(User.class));
+    }
+
+    @Test
+    public void isOwlClassEntityReturnsFalseForClassWithoutOWLClassAnnotation() {
+        assertFalse(BeanAnnotationProcessor.isOwlClassEntity(String.class));
+    }
+
+    @Test
+    public void isOwlClassEntityReturnsFalseForNullArgument() {
+        assertFalse(BeanAnnotationProcessor.isOwlClassEntity(null));
     }
 }

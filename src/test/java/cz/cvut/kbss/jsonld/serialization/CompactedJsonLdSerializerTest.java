@@ -5,7 +5,7 @@ import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.User;
-import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonSerializer;
+import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,13 +15,13 @@ import static org.junit.Assert.assertNotNull;
 
 public class CompactedJsonLdSerializerTest {
 
-    private BufferedJsonSerializer jsonWriter;
+    private BufferedJsonGenerator jsonWriter;
 
     private JsonLdSerializer serializer;
 
     @Before
     public void setUp() {
-        this.jsonWriter = new BufferedJsonSerializer();
+        this.jsonWriter = new BufferedJsonGenerator();
         this.serializer = new CompactedJsonLdSerializer(jsonWriter);
     }
 

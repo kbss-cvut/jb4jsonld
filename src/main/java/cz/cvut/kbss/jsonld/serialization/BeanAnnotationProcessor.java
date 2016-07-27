@@ -15,6 +15,16 @@ public class BeanAnnotationProcessor {
     }
 
     /**
+     * Checks whether the specified class is annotated with the {@link OWLClass} annotation.
+     *
+     * @param cls The class to examine
+     * @return Whether it is annotated with {@link OWLClass}
+     */
+    public static boolean isOwlClassEntity(Class<?> cls) {
+        return cls != null && cls.getDeclaredAnnotation(OWLClass.class) != null;
+    }
+
+    /**
      * Resolves ontological type of the specified object, as specified by the {@link OWLClass} annotation.
      *
      * @param object The object to resolve

@@ -5,7 +5,7 @@ import java.io.IOException;
 /**
  * Represents interface to the underlying JAXB implementation, which handles the actual value serialization.
  */
-public interface JsonSerializer {
+public interface JsonGenerator {
 
     /**
      * Writes a field name (JSON string surrounded by double quotes).

@@ -1,6 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization.model;
 
-import cz.cvut.kbss.jsonld.serialization.JsonSerializer;
+import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class ObjectNode extends CompositeNode {
     }
 
     @Override
-    void writeValue(JsonSerializer writer) throws IOException {
+    void writeValue(JsonGenerator writer) throws IOException {
         writer.writeObjectStart();
         items.forEach(child -> child.write(writer));
         writer.writeObjectEnd();

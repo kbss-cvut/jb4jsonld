@@ -1,7 +1,7 @@
 package cz.cvut.kbss.jsonld.serialization.model;
 
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
-import cz.cvut.kbss.jsonld.serialization.JsonSerializer;
+import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -29,7 +29,7 @@ public abstract class JsonNode {
         return valueNode;
     }
 
-    public void write(JsonSerializer writer) {
+    public void write(JsonGenerator writer) {
         try {
             if (!valueNode) {
                 writeKey(writer);
@@ -40,11 +40,11 @@ public abstract class JsonNode {
         }
     }
 
-    void writeKey(JsonSerializer writer) throws IOException {
+    void writeKey(JsonGenerator writer) throws IOException {
         writer.writeFieldName(name);
     }
 
-    abstract void writeValue(JsonSerializer writer) throws IOException;
+    abstract void writeValue(JsonGenerator writer) throws IOException;
 
     @Override
     public String toString() {
