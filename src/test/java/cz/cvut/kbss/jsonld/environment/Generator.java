@@ -58,6 +58,7 @@ public class Generator {
         user.setUsername("user" + number);
         user.setFirstName("FirstName" + number);
         user.setLastName("LastName" + number);
+        user.setAdmin(randomBoolean());
         user.setUri(generateUri());
     }
 
