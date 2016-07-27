@@ -134,6 +134,35 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
+    public void openCollectionPushesCurrentNodeToStack() throws Exception {
+        final Organization org = Generator.generateOrganization();
+        final Employee employee = Generator.generateEmployee();
+        employee.setEmployer(org);
+        org.addEmployee(employee);
+        treeBuilder.openInstance(org);
+        assertTrue(getNodeStack().isEmpty());
+        treeBuilder.visitField(Organization.class.getDeclaredField("employees"), org.getEmployees());
+        treeBuilder.openCollection(org.getEmployees());
+        assertFalse(getNodeStack().isEmpty());
+        assertTrue(treeBuilder.getTreeRoot() instanceof CollectionNode);
+    }
+
+    @Test
+    public void closeCollectionPopsOriginalFromNodeFromStack() throws Exception {
+        final Organization org = Generator.generateOrganization();
+        final Employee employee = Generator.generateEmployee();
+        employee.setEmployer(org);
+        org.addEmployee(employee);
+        treeBuilder.openInstance(org);
+        treeBuilder.visitField(Organization.class.getDeclaredField("employees"), org.getEmployees());
+        treeBuilder.openCollection(org.getEmployees());
+        assertFalse(getNodeStack().isEmpty());
+        treeBuilder.closeCollection(org.getEmployees());
+        assertTrue(getNodeStack().isEmpty());
+        assertTrue(treeBuilder.getTreeRoot() instanceof ObjectNode);
+    }
+
+    @Test
     public void visitFieldDoesNothingWhenFieldValueIsNull() throws Exception {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(null);
@@ -223,6 +252,25 @@ public class JsonLdTreeBuilderTest {
         assertTrue(node instanceof CollectionNode);
         final JsonNode item = node.getItems().iterator().next();
         assertTrue(item instanceof ObjectIdNode);
+    }
+
+    @Test
+    public void testAddCollectionItemAfterVisitKnownInstanceWasCalledInObject() throws Exception {
+        final Employee employee = Generator.generateEmployee();
+        final Employee employeeTwo = Generator.generateEmployee();
+        final Organization employer = employee.getEmployer();
+        employer.addEmployee(employee);
+        employer.addEmployee(employeeTwo);
+        employeeTwo.setEmployer(employer);
+        treeBuilder.openInstance(employer);
+        treeBuilder.visitField(Organization.class.getDeclaredField("employees"), employer.getEmployees());
+        treeBuilder.openCollection(employer.getEmployees());
+        treeBuilder.openInstance(employee);
+        treeBuilder.visitField(Employee.class.getDeclaredField("employer"), employee.getEmployer());
+        treeBuilder.visitKnownInstance(employee.getEmployer());
+        treeBuilder.closeInstance(employee);
+        treeBuilder.openInstance(employeeTwo);
+        assertNull(treeBuilder.getTreeRoot().getName());
     }
 
     @Test

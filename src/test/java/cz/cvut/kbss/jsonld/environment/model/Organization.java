@@ -6,6 +6,8 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.ORGANIZATION)
@@ -76,5 +78,13 @@ public class Organization {
 
     public void setEmployees(Set<Employee> employees) {
         this.employees = employees;
+    }
+
+    public void addEmployee(Employee employee) {
+        Objects.requireNonNull(employee);
+        if (employees == null) {
+            this.employees = new HashSet<>();
+        }
+        employees.add(employee);
     }
 }

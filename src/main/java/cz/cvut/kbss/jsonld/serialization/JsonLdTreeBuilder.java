@@ -23,17 +23,21 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void openInstance(Object instance) {
-        if (currentNode != null && currentNode.isOpen()) {
-            nodeStack.push(currentNode);
-        }
         final CompositeNode newCurrent = visitedField != null ? JsonNodeFactory.createObjectNode(attId(visitedField)) :
                                          JsonNodeFactory.createObjectNode();
-        if (currentNode != null) {
-            currentNode.addItem(newCurrent);
-        }
-        this.currentNode = newCurrent;
+        openNewNode(newCurrent);
         addTypes(instance);
         this.visitedField = null;
+    }
+
+    private void openNewNode(CompositeNode newNode) {
+        if (currentNode != null) {
+            if (currentNode.isOpen()) {
+                nodeStack.push(currentNode);
+            }
+            currentNode.addItem(newNode);
+        }
+        this.currentNode = newNode;
     }
 
     private String attId(Field field) {
@@ -65,6 +69,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
         } else {
             currentNode.addItem(JsonNodeFactory.createObjectIdNode(instance));
         }
+        this.visitedField = null;
     }
 
     @Override
@@ -97,9 +102,10 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void openCollection(Collection<?> collection) {
-        this.currentNode =
+        final CollectionNode newCurrent =
                 visitedField != null ? JsonNodeFactory.createCollectionNode(attId(visitedField), collection) :
                 JsonNodeFactory.createCollectionNode(collection);
+        openNewNode(newCurrent);
         this.visitedField = null;
     }
 
