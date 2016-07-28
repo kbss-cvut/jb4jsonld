@@ -1,4 +1,4 @@
-package cz.cvut.kbss.jsonld.serialization;
+package cz.cvut.kbss.jsonld.common;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.Constants;
@@ -72,6 +72,10 @@ public class BeanAnnotationProcessor {
     public static List<Field> getSerializableFields(Object object) {
         Objects.requireNonNull(object);
         final Class<?> cls = object.getClass();
+        return getSerializableFields(cls);
+    }
+
+    private static List<Field> getSerializableFields(Class<?> cls) {
         final List<Class<?>> classes = getAncestors(cls);
         final Set<Field> fields = new HashSet<>();
         for (Class<?> c : classes) {
@@ -82,6 +86,23 @@ public class BeanAnnotationProcessor {
             }
         }
         return new ArrayList<>(fields);
+    }
+
+    /**
+     * Creates a map of JSON-LD serializable fields, where the keys are IRIs of properties mapped by the fields.
+     * <p>
+     * Identifier field is mapped to the {@link Constants#JSON_LD_ID} property identifier. Ancestors of the specified
+     * class are also scanned.
+     *
+     * @param cls Class for which the mapping should be determined
+     * @return Mapping of OWL properties to fields
+     */
+    public static Map<String, Field> mapSerializableFields(Class<?> cls) {
+        Objects.requireNonNull(cls);
+        final List<Field> fields = getSerializableFields(cls);
+        final Map<String, Field> fieldMap = new HashMap<>(fields.size());
+        fields.forEach(f -> fieldMap.put(getAttributeIdentifier(f), f));
+        return fieldMap;
     }
 
     private static boolean isFieldTransient(Field field) {

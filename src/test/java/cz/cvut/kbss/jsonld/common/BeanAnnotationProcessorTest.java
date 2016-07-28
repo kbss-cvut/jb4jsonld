@@ -1,4 +1,4 @@
-package cz.cvut.kbss.jsonld.serialization;
+package cz.cvut.kbss.jsonld.common;
 
 import cz.cvut.kbss.jopa.CommonVocabulary;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -72,6 +73,16 @@ public class BeanAnnotationProcessorTest {
         final Organization org = new Organization();
         final List<Field> fields = BeanAnnotationProcessor.getSerializableFields(org);
         assertFalse(fields.contains(Organization.class.getDeclaredField("age")));
+    }
+
+    @Test
+    public void mapSerializableFieldsReturnsMapOfSerializableFieldsWithPropertyIriKeys() throws Exception {
+        final Map<String, Field> result = BeanAnnotationProcessor.mapSerializableFields(Employee.class);
+        assertEquals(result.get(Vocabulary.FIRST_NAME), Person.class.getDeclaredField("firstName"));
+        assertEquals(result.get(Vocabulary.LAST_NAME), Person.class.getDeclaredField("lastName"));
+        assertEquals(result.get(Vocabulary.USERNAME), User.class.getDeclaredField("username"));
+        assertEquals(result.get(Vocabulary.IS_ADMIN), User.class.getDeclaredField("admin"));
+        assertEquals(result.get(Vocabulary.IS_MEMBER_OF), Employee.class.getDeclaredField("employer"));
     }
 
     @Test

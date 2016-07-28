@@ -1,6 +1,7 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jsonld.Constants;
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;

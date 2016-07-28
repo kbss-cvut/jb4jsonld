@@ -1,7 +1,8 @@
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
+import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
-import cz.cvut.kbss.jsonld.serialization.BeanAnnotationProcessor;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -56,10 +57,7 @@ public class ObjectGraphTraverser implements InstanceVisitor {
         }
         openInstance(instance);
         for (Field f : BeanAnnotationProcessor.getSerializableFields(instance)) {
-            if (!f.isAccessible()) {
-                f.setAccessible(true);
-            }
-            final Object value = f.get(instance);
+            final Object value = BeanClassProcessor.getFieldValue(f, instance);
             visitField(f, value);
             if (value != null && BeanAnnotationProcessor.isObjectProperty(f)) {
                 traverseObjectPropertyValue(value);

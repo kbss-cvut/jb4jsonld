@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 
 import java.net.URI;
@@ -14,10 +15,6 @@ public class JsonNodeFactory {
 
     private JsonNodeFactory() {
         throw new AssertionError();
-    }
-
-    private enum CollectionType {
-        LIST, SET
     }
 
     private enum LiteralType {

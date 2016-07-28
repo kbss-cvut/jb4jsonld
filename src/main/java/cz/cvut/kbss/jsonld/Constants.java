@@ -2,10 +2,6 @@ package cz.cvut.kbss.jsonld;
 
 public class Constants {
 
-    private Constants() {
-        throw new AssertionError();
-    }
-
     /**
      * JSON-LD {@code @list} keyword.
      */
@@ -20,4 +16,8 @@ public class Constants {
      * JSON-LD {@code @type} keyword.
      */
     public static final String JSON_LD_TYPE = "@type";
+
+    private Constants() {
+        throw new AssertionError();
+    }
 }
