@@ -1,5 +1,7 @@
 package cz.cvut.kbss.jsonld.common;
 
+import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.exception.BeanProcessingException;
 import org.junit.Rule;
@@ -49,5 +51,32 @@ public class BeanClassProcessorTest {
     public void testCreateCollectionOfSetType() {
         final Collection<?> res = BeanClassProcessor.createCollection(CollectionType.SET);
         assertTrue(res instanceof Set);
+    }
+
+    @Test
+    public void testCreateCollectionFromSetField() throws Exception {
+        final Collection<?> res = BeanClassProcessor.createCollection(Organization.class.getDeclaredField("employees"));
+        assertTrue(res instanceof Set);
+    }
+
+    @Test
+    public void testCreateCollectionFromListField() throws Exception {
+        final Collection<?> res = BeanClassProcessor
+                .createCollection(ClassWithListField.class.getDeclaredField("list"));
+        assertTrue(res instanceof List);
+    }
+
+    private static class ClassWithListField {
+
+        @OWLDataProperty(iri = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/List")
+        private List<Integer> list;
+    }
+
+    @Test
+    public void createCollectionFromFieldThrowsIllegalArgumentForNonCollectionField() throws Exception {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage(
+                "Field " + Person.class.getDeclaredField("firstName") + " is not of any supported collection type.");
+        BeanClassProcessor.createCollection(Person.class.getDeclaredField("firstName"));
     }
 }

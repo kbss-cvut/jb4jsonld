@@ -3,10 +3,7 @@ package cz.cvut.kbss.jsonld.common;
 import cz.cvut.kbss.jsonld.exception.BeanProcessingException;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 public class BeanClassProcessor {
 
@@ -30,6 +27,25 @@ public class BeanClassProcessor {
             return field.get(instance);
         } catch (IllegalAccessException e) {
             throw new BeanProcessingException("Unable to extract value of field " + field, e);
+        }
+    }
+
+    /**
+     * Sets value of the specified field.
+     *
+     * @param field    The field to set
+     * @param instance Instance on which the field will be set
+     * @param value    The value to use
+     */
+    public static void setFieldValue(Field field, Object instance, Object value) {
+        Objects.requireNonNull(field);
+        if (!field.isAccessible()) {
+            field.setAccessible(true);
+        }
+        try {
+            field.set(instance, value);
+        } catch (IllegalAccessException e) {
+            throw new BeanProcessingException("Unable to set value of field " + field, e);
         }
     }
 
@@ -63,5 +79,26 @@ public class BeanClassProcessor {
             default:
                 throw new IllegalArgumentException("Unsupported collection type " + type);
         }
+    }
+
+    /**
+     * Creates a collection to fill the specified field.
+     * <p>
+     * I.e. the type of the collection is determined from the declared type of the field.
+     *
+     * @param field The field to create collection for
+     * @return New collection instance
+     */
+    public static Collection<?> createCollection(Field field) {
+        Objects.requireNonNull(field);
+        CollectionType type = null;
+        if (Set.class.isAssignableFrom(field.getType())) {
+            type = CollectionType.SET;
+        } else if (List.class.isAssignableFrom(field.getType())) {
+            type = CollectionType.LIST;
+        } else {
+            throw new IllegalArgumentException("Field " + field + " is not of any supported collection type.");
+        }
+        return createCollection(type);
     }
 }

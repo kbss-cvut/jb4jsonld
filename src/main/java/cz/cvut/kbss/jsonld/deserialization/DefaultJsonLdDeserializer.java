@@ -4,8 +4,9 @@ import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 
-import java.util.Collection;
-import java.util.Stack;
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.util.*;
 
 /**
  * Default implementation of the JSON-LD deserializer, which takes values parsed from a JSON-LD document and builds
@@ -13,6 +14,8 @@ import java.util.Stack;
  */
 public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
 
+    // Identifiers to instances
+    private final Map<URI, Object> knownInstances = new HashMap<>();
     private final Stack<InstanceContext> openInstances = new Stack<>();
 
     private InstanceContext currentInstance;
@@ -20,13 +23,27 @@ public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
     // TODO Add support for polymorphism
     @Override
     public void openObject(String property) {
-
+        Objects.requireNonNull(property);
+        final Field targetField = currentInstance.getFieldForProperty(property);
+        final Class<?> type = targetField.getType();
+        assert BeanAnnotationProcessor.isOwlClassEntity(type);
+        final Object instance = BeanClassProcessor.createInstance(type);
+        final InstanceContext<?> ctx = new InstanceContext<>(instance,
+                BeanAnnotationProcessor.mapSerializableFields(type));
+        currentInstance.setFieldValue(targetField, instance);
+        openInstances.push(currentInstance);
+        this.currentInstance = ctx;
     }
 
     @Override
     public <T> void openObject(Class<T> cls) {
         final T instance = BeanClassProcessor.createInstance(cls);
-        final InstanceContext ctx = new InstanceContext(instance, BeanAnnotationProcessor.mapSerializableFields(cls));
+        final InstanceContext<?> ctx = new InstanceContext<>(instance,
+                BeanAnnotationProcessor.mapSerializableFields(cls));
+        replaceCurrentContext(instance, ctx);
+    }
+
+    private <T> void replaceCurrentContext(T instance, InstanceContext<?> ctx) {
         if (currentInstance != null) {
             currentInstance.addItem(instance);
             openInstances.push(currentInstance);
@@ -43,24 +60,34 @@ public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
 
     @Override
     public void openCollection(String property) {
-
+        Objects.requireNonNull(property);
+        final Field targetField = currentInstance.getFieldForProperty(property);
+        final Collection<?> instance = BeanClassProcessor.createCollection(targetField);
+        final InstanceContext<Collection<?>> ctx = new InstanceContext<Collection<?>>(instance);
+        currentInstance.setFieldValue(targetField, instance);
+        openInstances.push(currentInstance);
+        this.currentInstance = ctx;
     }
 
     @Override
     public void openCollection(CollectionType collectionType) {
         final Collection<?> collection = BeanClassProcessor.createCollection(collectionType);
-        final InstanceContext context = new InstanceContext(collection);
-        this.currentInstance = context;
+        final InstanceContext<?> context = new InstanceContext<>(collection);
+        replaceCurrentContext(collection, context);
     }
 
     @Override
     public void closeCollection() {
-
+        if (!openInstances.isEmpty()) {
+            currentInstance = openInstances.pop();
+        }
     }
 
     @Override
     public void addValue(String property, Object value) {
-
+        assert currentInstance != null;
+        final Field targetField = currentInstance.getFieldForProperty(property);
+        currentInstance.setFieldValue(targetField, value);
     }
 
     @Override
