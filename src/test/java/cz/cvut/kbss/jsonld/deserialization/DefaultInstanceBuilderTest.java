@@ -18,12 +18,12 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class DefaultJsonLdDeserializerTest {
+public class DefaultInstanceBuilderTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private JsonLdDeserializer deserializer = new DefaultJsonLdDeserializer();
+    private InstanceBuilder deserializer = new DefaultInstanceBuilder();
 
     @Test
     public void getCurrentRootReturnsNullIfThereIsNoRoot() {
@@ -70,7 +70,7 @@ public class DefaultJsonLdDeserializerTest {
 
     @SuppressWarnings("unchecked")
     private Stack<InstanceContext> getOpenInstances() throws Exception {
-        final Field stackField = DefaultJsonLdDeserializer.class.getDeclaredField("openInstances");
+        final Field stackField = DefaultInstanceBuilder.class.getDeclaredField("openInstances");
         stackField.setAccessible(true);
         return (Stack<InstanceContext>) stackField.get(deserializer);
     }
@@ -194,7 +194,7 @@ public class DefaultJsonLdDeserializerTest {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getKnownInstances() throws Exception {
-        final Field field = DefaultJsonLdDeserializer.class.getDeclaredField("knownInstances");
+        final Field field = DefaultInstanceBuilder.class.getDeclaredField("knownInstances");
         field.setAccessible(true);
         return (Map<String, Object>) field.get(deserializer);
     }

@@ -12,7 +12,7 @@ import java.util.*;
  * Default implementation of the JSON-LD deserializer, which takes values parsed from a JSON-LD document and builds
  * Java instances from them.
  */
-public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
+public class DefaultInstanceBuilder implements InstanceBuilder {
 
     // Identifiers to instances
     private final Map<String, Object> knownInstances = new HashMap<>();
