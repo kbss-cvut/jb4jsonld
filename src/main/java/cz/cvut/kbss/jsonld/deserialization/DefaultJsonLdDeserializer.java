@@ -5,7 +5,6 @@ import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.util.*;
 
 /**
@@ -15,7 +14,7 @@ import java.util.*;
 public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
 
     // Identifiers to instances
-    private final Map<URI, Object> knownInstances = new HashMap<>();
+    private final Map<String, Object> knownInstances = new HashMap<>();
     private final Stack<InstanceContext> openInstances = new Stack<>();
 
     private InstanceContext currentInstance;
@@ -29,7 +28,7 @@ public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
         assert BeanAnnotationProcessor.isOwlClassEntity(type);
         final Object instance = BeanClassProcessor.createInstance(type);
         final InstanceContext<?> ctx = new InstanceContext<>(instance,
-                BeanAnnotationProcessor.mapSerializableFields(type));
+                BeanAnnotationProcessor.mapSerializableFields(type), knownInstances);
         currentInstance.setFieldValue(targetField, instance);
         openInstances.push(currentInstance);
         this.currentInstance = ctx;
@@ -39,7 +38,7 @@ public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
     public <T> void openObject(Class<T> cls) {
         final T instance = BeanClassProcessor.createInstance(cls);
         final InstanceContext<?> ctx = new InstanceContext<>(instance,
-                BeanAnnotationProcessor.mapSerializableFields(cls));
+                BeanAnnotationProcessor.mapSerializableFields(cls), knownInstances);
         replaceCurrentContext(instance, ctx);
     }
 
@@ -63,7 +62,7 @@ public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
         Objects.requireNonNull(property);
         final Field targetField = currentInstance.getFieldForProperty(property);
         final Collection<?> instance = BeanClassProcessor.createCollection(targetField);
-        final InstanceContext<Collection<?>> ctx = new InstanceContext<Collection<?>>(instance);
+        final InstanceContext<Collection<?>> ctx = new InstanceContext<>(instance, knownInstances);
         currentInstance.setFieldValue(targetField, instance);
         openInstances.push(currentInstance);
         this.currentInstance = ctx;
@@ -72,7 +71,7 @@ public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
     @Override
     public void openCollection(CollectionType collectionType) {
         final Collection<?> collection = BeanClassProcessor.createCollection(collectionType);
-        final InstanceContext<?> context = new InstanceContext<>(collection);
+        final InstanceContext<?> context = new InstanceContext<>(collection, knownInstances);
         replaceCurrentContext(collection, context);
     }
 
@@ -88,6 +87,15 @@ public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
         assert currentInstance != null;
         final Field targetField = currentInstance.getFieldForProperty(property);
         currentInstance.setFieldValue(targetField, value);
+
+        if (BeanAnnotationProcessor.isInstanceIdentifier(targetField)) {
+            registerKnownInstance(targetField);
+        }
+    }
+
+    private void registerKnownInstance(Field targetField) {
+        final Object instance = currentInstance.getInstance();
+        knownInstances.put(BeanClassProcessor.getFieldValue(targetField, instance).toString(), instance);
     }
 
     @Override

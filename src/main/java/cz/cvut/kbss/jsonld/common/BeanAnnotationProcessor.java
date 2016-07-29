@@ -125,6 +125,17 @@ public class BeanAnnotationProcessor {
     }
 
     /**
+     * Checks whether the specified field is an identifier field.
+     *
+     * @param field The field to examine
+     * @return Whether the field as a {@link Id} annotation
+     */
+    public static boolean isInstanceIdentifier(Field field) {
+        Objects.requireNonNull(field);
+        return field.getDeclaredAnnotation(Id.class) != null;
+    }
+
+    /**
      * Resolves JSON-LD attribute identifier of the specified field.
      * <p>
      * For OWL properties, this will be their IRI. For id fields it will be the {@link

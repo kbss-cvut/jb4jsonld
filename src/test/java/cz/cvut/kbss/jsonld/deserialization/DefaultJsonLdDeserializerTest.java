@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jsonld.Constants;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
@@ -10,10 +11,7 @@ import cz.cvut.kbss.jsonld.environment.model.User;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -176,5 +174,22 @@ public class DefaultJsonLdDeserializerTest {
         deserializer.closeCollection();
         assertTrue(getOpenInstances().isEmpty());
         assertSame(root, deserializer.getCurrentRoot());
+    }
+
+    @Test
+    public void objectIsStoredInKnownInstancesWhenItsIdIsRead() throws Exception {
+        final User user = Generator.generateUser();
+        deserializer.openObject(User.class);
+        deserializer.addValue(Constants.JSON_LD_ID, user.getUri().toString());
+        assertTrue(getKnownInstances().containsKey(user.getUri().toString()));
+        assertTrue(getKnownInstances().get(user.getUri().toString()) instanceof User);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getKnownInstances() throws Exception {
+        final Field field = DefaultJsonLdDeserializer.class.getDeclaredField("knownInstances");
+        field.setAccessible(true);
+        return (Map<String, Object>) field.get(deserializer);
     }
 }

@@ -157,4 +157,14 @@ public class BeanAnnotationProcessorTest {
     public void isOwlClassEntityReturnsFalseForNullArgument() {
         assertFalse(BeanAnnotationProcessor.isOwlClassEntity(null));
     }
+
+    @Test
+    public void isInstanceIdentifierReturnsTrueForIdField() throws Exception {
+        assertTrue(BeanAnnotationProcessor.isInstanceIdentifier(Person.class.getDeclaredField("uri")));
+    }
+
+    @Test
+    public void isInstanceIdentifierReturnsFalseForNonIdField() throws Exception {
+        assertFalse(BeanAnnotationProcessor.isInstanceIdentifier(Person.class.getDeclaredField("firstName")));
+    }
 }
