@@ -34,6 +34,11 @@ class InstanceContext<T> {
         return instance;
     }
 
+    @SuppressWarnings("unchecked")
+    Class<T> getInstanceType() {
+        return (Class<T>) instance.getClass();
+    }
+
     Field getFieldForProperty(String property) {
         // TODO Add handling of @Properties
         return fieldMap.get(property);

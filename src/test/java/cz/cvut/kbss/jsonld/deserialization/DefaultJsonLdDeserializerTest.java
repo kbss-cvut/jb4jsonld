@@ -8,7 +8,10 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -16,6 +19,9 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class DefaultJsonLdDeserializerTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private JsonLdDeserializer deserializer = new DefaultJsonLdDeserializer();
 
@@ -191,5 +197,15 @@ public class DefaultJsonLdDeserializerTest {
         final Field field = DefaultJsonLdDeserializer.class.getDeclaredField("knownInstances");
         field.setAccessible(true);
         return (Map<String, Object>) field.get(deserializer);
+    }
+
+    @Test
+    public void addValueOfUnknownPropertyUriThrowsUnknownPropertyException() throws Exception {
+        final String property = Generator.generateUri().toString();
+        thrown.expect(UnknownPropertyException.class);
+        thrown.expectMessage("No field matching property " + property + " was found in class " + Person.class +
+                " or its ancestors.");
+        deserializer.openObject(Person.class);
+        deserializer.addValue(property, "Test");
     }
 }

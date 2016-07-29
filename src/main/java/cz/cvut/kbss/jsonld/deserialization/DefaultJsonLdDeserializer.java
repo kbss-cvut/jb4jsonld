@@ -3,6 +3,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.CollectionType;
+import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -86,6 +87,9 @@ public class DefaultJsonLdDeserializer implements JsonLdDeserializer {
     public void addValue(String property, Object value) {
         assert currentInstance != null;
         final Field targetField = currentInstance.getFieldForProperty(property);
+        if (targetField == null) {
+            throw UnknownPropertyException.create(property, currentInstance.getInstanceType());
+        }
         currentInstance.setFieldValue(targetField, value);
 
         if (BeanAnnotationProcessor.isInstanceIdentifier(targetField)) {
