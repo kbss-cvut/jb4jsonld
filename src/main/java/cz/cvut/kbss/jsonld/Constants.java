@@ -17,6 +17,11 @@ public class Constants {
      */
     public static final String JSON_LD_TYPE = "@type";
 
+    /**
+     * JSON-LD {@code @value} keyword.
+     */
+    public static final String JSON_LD_VALUE = "@value";
+
     private Constants() {
         throw new AssertionError();
     }

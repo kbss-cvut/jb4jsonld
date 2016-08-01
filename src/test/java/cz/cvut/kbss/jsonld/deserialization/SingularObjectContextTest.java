@@ -12,39 +12,19 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.net.URI;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 
 import static org.junit.Assert.*;
 
-public class InstanceContextTest {
+public class SingularObjectContextTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void addItemAddsObjectToCollectionInTheContext() {
-        final InstanceContext<?> ctx = new InstanceContext<>(new HashSet<>(), Collections.emptyMap());
-        final User u = Generator.generateUser();
-        ctx.addItem(u);
-        final Collection<?> col = (Collection<?>) ctx.getInstance();
-        assertEquals(1, col.size());
-        assertSame(u, col.iterator().next());
-    }
-
-    @Test(expected = JsonLdDeserializationException.class)
-    public void addItemsThrowsExceptionWhenCurrentInstanceIsNotCollection() {
-        final InstanceContext<Person> ctx = new InstanceContext<>(new Person(),
-                BeanAnnotationProcessor.mapSerializableFields(
-                        Person.class), Collections.emptyMap());
-        ctx.addItem(Generator.generateUser());
-    }
-
-    @Test
     public void setFieldValueSetsFieldValueOnInstance() throws Exception {
-        final InstanceContext<Person> ctx = new InstanceContext<>(new Person(),
+        final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
                 BeanAnnotationProcessor.mapSerializableFields(
                         Person.class), Collections.emptyMap());
         final String testFirstName = "John";
@@ -58,7 +38,7 @@ public class InstanceContextTest {
         thrown.expect(JsonLdDeserializationException.class);
         thrown.expectMessage("Type mismatch. Cannot set value " + invalidValue + " of type " + invalidValue.getClass() +
                 " on field " + Person.class.getDeclaredField("firstName"));
-        final InstanceContext<Person> ctx = new InstanceContext<>(new Person(),
+        final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
                 BeanAnnotationProcessor.mapSerializableFields(
                         Person.class), Collections.emptyMap());
         ctx.setFieldValue(Person.class.getDeclaredField("firstName"), invalidValue);
@@ -68,7 +48,7 @@ public class InstanceContextTest {
     public void setFieldValueSetsReferenceToAlreadyVisitedObjectWhenObjectIdIsPassedIn() throws Exception {
         final Organization org = Generator.generateOrganization();
         final Map<String, Object> knownInstances = Collections.singletonMap(org.getUri().toString(), org);
-        final InstanceContext<Employee> ctx = new InstanceContext<>(new Employee(),
+        final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
                 BeanAnnotationProcessor.mapSerializableFields(Employee.class),
                 knownInstances);
         ctx.setFieldValue(Employee.class.getDeclaredField("employer"), org.getUri().toString());
@@ -82,7 +62,7 @@ public class InstanceContextTest {
         thrown.expect(JsonLdDeserializationException.class);
         thrown.expectMessage("Type mismatch. Cannot set value " + org.getUri().toString() + " of type " + String.class +
                 " on field " + Employee.class.getDeclaredField("employer"));
-        final InstanceContext<Employee> ctx = new InstanceContext<>(new Employee(),
+        final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
                 BeanAnnotationProcessor.mapSerializableFields(Employee.class),
                 Collections.emptyMap());
         ctx.setFieldValue(Employee.class.getDeclaredField("employer"), org.getUri().toString());
@@ -96,7 +76,7 @@ public class InstanceContextTest {
         thrown.expect(JsonLdDeserializationException.class);
         thrown.expectMessage("Type mismatch. Cannot set value " + u + " of type " + u.getClass() + " on field " +
                 Employee.class.getDeclaredField("employer"));
-        final InstanceContext<Employee> ctx = new InstanceContext<>(new Employee(),
+        final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
                 BeanAnnotationProcessor.mapSerializableFields(Employee.class),
                 knownInstances);
         ctx.setFieldValue(Employee.class.getDeclaredField("employer"), u.getUri().toString());
@@ -105,7 +85,7 @@ public class InstanceContextTest {
     @Test
     public void setFieldValueHandlesConversionFromStringToUri() throws Exception {
         final URI id = Generator.generateUri();
-        final InstanceContext<Person> ctx = new InstanceContext<>(new Person(),
+        final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
                 BeanAnnotationProcessor.mapSerializableFields(
                         Person.class), Collections.emptyMap());
         ctx.setFieldValue(Person.class.getDeclaredField("uri"), id.toString());

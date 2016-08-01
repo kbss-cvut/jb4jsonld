@@ -3,6 +3,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.CollectionType;
+import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 
 import java.lang.reflect.Field;
@@ -28,7 +29,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         final Class<?> type = targetField.getType();
         assert BeanAnnotationProcessor.isOwlClassEntity(type);
         final Object instance = BeanClassProcessor.createInstance(type);
-        final InstanceContext<?> ctx = new InstanceContext<>(instance,
+        final InstanceContext<?> ctx = new SingularObjectContext<>(instance,
                 BeanAnnotationProcessor.mapSerializableFields(type), knownInstances);
         currentInstance.setFieldValue(targetField, instance);
         openInstances.push(currentInstance);
@@ -38,7 +39,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public <T> void openObject(Class<T> cls) {
         final T instance = BeanClassProcessor.createInstance(cls);
-        final InstanceContext<?> ctx = new InstanceContext<>(instance,
+        final SingularObjectContext<?> ctx = new SingularObjectContext<>(instance,
                 BeanAnnotationProcessor.mapSerializableFields(cls), knownInstances);
         replaceCurrentContext(instance, ctx);
     }
@@ -63,7 +64,8 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         Objects.requireNonNull(property);
         final Field targetField = currentInstance.getFieldForProperty(property);
         final Collection<?> instance = BeanClassProcessor.createCollection(targetField);
-        final InstanceContext<Collection<?>> ctx = new InstanceContext<>(instance, knownInstances);
+        final InstanceContext<Collection<?>> ctx = new CollectionInstanceContext<>(instance,
+                BeanClassProcessor.getCollectionItemType(targetField), knownInstances);
         currentInstance.setFieldValue(targetField, instance);
         openInstances.push(currentInstance);
         this.currentInstance = ctx;
@@ -72,7 +74,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public void openCollection(CollectionType collectionType) {
         final Collection<?> collection = BeanClassProcessor.createCollection(collectionType);
-        final InstanceContext<?> context = new InstanceContext<>(collection, knownInstances);
+        final InstanceContext<?> context = new CollectionInstanceContext<>(collection, knownInstances);
         replaceCurrentContext(collection, context);
     }
 
@@ -111,5 +113,14 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public Object getCurrentRoot() {
         return currentInstance != null ? currentInstance.getInstance() : null;
+    }
+
+    @Override
+    public Class<?> getCurrentCollectionElementType() {
+        try {
+            return currentInstance.getItemType();
+        } catch (UnsupportedOperationException e) {
+            throw new JsonLdDeserializationException("The current instance is not a collection.", e);
+        }
     }
 }

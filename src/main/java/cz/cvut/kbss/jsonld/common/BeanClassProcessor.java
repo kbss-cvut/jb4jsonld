@@ -3,6 +3,7 @@ package cz.cvut.kbss.jsonld.common;
 import cz.cvut.kbss.jsonld.exception.BeanProcessingException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
 public class BeanClassProcessor {
@@ -91,7 +92,7 @@ public class BeanClassProcessor {
      */
     public static Collection<?> createCollection(Field field) {
         Objects.requireNonNull(field);
-        CollectionType type = null;
+        CollectionType type;
         if (Set.class.isAssignableFrom(field.getType())) {
             type = CollectionType.SET;
         } else if (List.class.isAssignableFrom(field.getType())) {
@@ -100,5 +101,21 @@ public class BeanClassProcessor {
             throw new IllegalArgumentException("Field " + field + " is not of any supported collection type.");
         }
         return createCollection(type);
+    }
+
+    /**
+     * Determines the declared element type of collection represented by the specified field.
+     *
+     * @param field Field whose type is a collection
+     * @return Declared element type of the collection
+     */
+    public static Class<?> getCollectionItemType(Field field) {
+        Objects.requireNonNull(field);
+        try {
+            final ParameterizedType fieldType = (ParameterizedType) field.getGenericType();
+            return (Class<?>) fieldType.getActualTypeArguments()[0];
+        } catch (ClassCastException e) {
+            throw new BeanProcessingException("Field " + field + "is not a collection-valued field.");
+        }
     }
 }

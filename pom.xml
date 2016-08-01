@@ -39,13 +39,6 @@
 
     <dependencies>
 
-        <!-- JSON-LD Java implementation -->
-        <dependency>
-            <groupId>com.github.jsonld-java</groupId>
-            <artifactId>jsonld-java</artifactId>
-            <version>${com.github.jsonld-java.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>cz.cvut.kbss.jopa</groupId>
             <artifactId>jopa-api</artifactId>
@@ -63,6 +56,13 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${org.mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JSON-LD Java implementation -->
+        <dependency>
+            <groupId>com.github.jsonld-java</groupId>
+            <artifactId>jsonld-java</artifactId>
+            <version>${com.github.jsonld-java.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

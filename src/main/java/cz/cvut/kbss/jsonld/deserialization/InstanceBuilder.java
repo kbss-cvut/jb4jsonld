@@ -2,6 +2,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.common.CollectionType;
+import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 
 /**
@@ -118,4 +119,12 @@ public interface InstanceBuilder {
      * @return Object graph root, it can be a {@link OWLClass} instance, or a {@link java.util.Collection}
      */
     Object getCurrentRoot();
+
+    /**
+     * Returns the declared type of elements of the current instance, if it is a collection.
+     *
+     * @return Collection element type
+     * @throws JsonLdDeserializationException If the current instance is not a collection
+     */
+    Class<?> getCurrentCollectionElementType();
 }

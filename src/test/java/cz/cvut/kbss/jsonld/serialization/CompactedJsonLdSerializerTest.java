@@ -73,7 +73,6 @@ public class CompactedJsonLdSerializerTest {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, true);
         serializer.serialize(org);
-        System.out.println(jsonWriter.getResult());
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
     }

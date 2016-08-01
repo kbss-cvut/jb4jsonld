@@ -1,6 +1,7 @@
 package cz.cvut.kbss.jsonld.common;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.exception.BeanProcessingException;
@@ -12,8 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BeanClassProcessorTest {
 
@@ -78,5 +78,19 @@ public class BeanClassProcessorTest {
         thrown.expectMessage(
                 "Field " + Person.class.getDeclaredField("firstName") + " is not of any supported collection type.");
         BeanClassProcessor.createCollection(Person.class.getDeclaredField("firstName"));
+    }
+
+    @Test
+    public void getCollectionItemTypeReturnsDeclaredCollectionGenericArgument() throws Exception {
+        final Class<?> res = BeanClassProcessor.getCollectionItemType(Organization.class.getDeclaredField("employees"));
+        assertEquals(Employee.class, res);
+    }
+
+    @Test
+    public void getCollectionItemThrowsBeanProcessingExceptionWhenFieldIsNotCollection() throws Exception {
+        thrown.expect(BeanProcessingException.class);
+        thrown.expectMessage(
+                "Field " + Person.class.getDeclaredField("firstName") + "is not a collection-valued field.");
+        BeanClassProcessor.getCollectionItemType(Person.class.getDeclaredField("firstName"));
     }
 }

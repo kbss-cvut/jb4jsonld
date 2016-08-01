@@ -5,6 +5,8 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
+import java.net.URI;
+
 @OWLClass(iri = Vocabulary.USER)
 public class User extends Person {
 
@@ -13,6 +15,17 @@ public class User extends Person {
 
     @OWLAnnotationProperty(iri = Vocabulary.IS_ADMIN)
     private Boolean admin;
+
+    public User() {
+    }
+
+    public User(URI uri, String firstName, String lastName, String username, Boolean admin) {
+        this.setUri(uri);
+        this.setFirstName(firstName);
+        this.setLastName(lastName);
+        this.username = username;
+        this.admin = admin;
+    }
 
     public String getUsername() {
         return username;

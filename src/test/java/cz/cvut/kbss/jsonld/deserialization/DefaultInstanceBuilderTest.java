@@ -69,10 +69,10 @@ public class DefaultInstanceBuilderTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Stack<InstanceContext> getOpenInstances() throws Exception {
+    private Stack<InstanceContext<?>> getOpenInstances() throws Exception {
         final Field stackField = DefaultInstanceBuilder.class.getDeclaredField("openInstances");
         stackField.setAccessible(true);
-        return (Stack<InstanceContext>) stackField.get(deserializer);
+        return (Stack<InstanceContext<?>>) stackField.get(deserializer);
     }
 
     @Test

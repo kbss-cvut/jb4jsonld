@@ -1,0 +1,28 @@
+{
+  "@context": {
+    "firstName": "http://xmlns.com/foaf/0.1/firstName",
+    "lastName": "http://xmlns.com/foaf/0.1/lastName",
+    "accountName": "http://xmlns.com/foaf/0.1/accountName",
+    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/isAdmin"
+  },
+  "@id": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#Catherine+Halsey",
+  "@type": [
+    "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+    "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Employee",
+    "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/User"
+  ],
+  "isAdmin": true,
+  "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/isMemberOf": {
+    "@id": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#UNSC",
+    "@type": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Organization",
+    "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/brand": [
+      "Spartan-II",
+      "Mjolnir IV"
+    ],
+    "http://purl.org/dc/terms/created": "Fri Jul 29 14:52:04 CEST 2016",
+    "http://www.w3.org/2000/01/rdf-schema#label": "UNSC"
+  },
+  "accountName": "halsey@unsc.org",
+  "firstName": "Catherine",
+  "lastName": "Halsey"
+}
