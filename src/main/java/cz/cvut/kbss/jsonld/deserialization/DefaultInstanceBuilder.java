@@ -92,10 +92,16 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         if (targetField == null) {
             throw UnknownPropertyException.create(property, currentInstance.getInstanceType());
         }
-        currentInstance.setFieldValue(targetField, value);
-
-        if (BeanAnnotationProcessor.isInstanceIdentifier(targetField)) {
-            registerKnownInstance(targetField);
+        // This is in case there is only one value in the JSON-LD array, because then it might be treated as single valued attribute
+        if (BeanClassProcessor.isCollection(targetField)) {
+            openCollection(property);
+            addValue(value);
+            closeCollection();
+        } else {
+            currentInstance.setFieldValue(targetField, value);
+            if (BeanAnnotationProcessor.isInstanceIdentifier(targetField)) {
+                registerKnownInstance(targetField);
+            }
         }
     }
 

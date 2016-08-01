@@ -118,4 +118,15 @@ public class BeanClassProcessor {
             throw new BeanProcessingException("Field " + field + "is not a collection-valued field.");
         }
     }
+
+    /**
+     * Checks whether the specified field represents a collection.
+     *
+     * @param field The field to examine
+     * @return Whether the field is a collection or not
+     */
+    public static boolean isCollection(Field field) {
+        Objects.requireNonNull(field);
+        return Collection.class.isAssignableFrom(field.getType());
+    }
 }

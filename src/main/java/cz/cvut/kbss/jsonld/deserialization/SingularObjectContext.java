@@ -1,6 +1,5 @@
 package cz.cvut.kbss.jsonld.deserialization;
 
-import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.deserialization.util.DataTypeTransformer;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
@@ -47,7 +46,7 @@ class SingularObjectContext<T> extends InstanceContext<T> {
     }
 
     private boolean trySettingReferenceToKnownInstance(Field field, Object value) {
-        if (!BeanAnnotationProcessor.isObjectProperty(field) || !knownInstances.containsKey(value.toString())) {
+        if (!knownInstances.containsKey(value.toString())) {
             return false;
         }
         final Object knownInstance = knownInstances.get(value.toString());

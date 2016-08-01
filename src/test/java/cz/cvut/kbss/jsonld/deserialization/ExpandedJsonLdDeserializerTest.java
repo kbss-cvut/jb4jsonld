@@ -97,7 +97,7 @@ public class ExpandedJsonLdDeserializerTest {
     }
 
     @Test
-    public void testDeserializerInstanceWithPluralObjectPropertyWithBackwardReferencesToOriginalInstance()
+    public void testDeserializeInstanceWithPluralObjectPropertyWithBackwardReferencesToOriginalInstance()
             throws Exception {
         final Object input = readAndExpand("objectWithPluralObjectPropertyWithBackwardReferences.json");
         final Organization result = deserializer.deserialize(input, Organization.class);
@@ -109,5 +109,17 @@ public class ExpandedJsonLdDeserializerTest {
             assertNotNull(e.getEmployer());
             assertSame(result, e.getEmployer());
         }
+    }
+
+    @Test
+    public void testDeserializeInstanceWithSingularObjectPropertyWithBackwardReference() throws Exception {
+        final Object input = readAndExpand("objectWithSingularObjectPropertyWithBackwardReference.json");
+        final Employee result = deserializer.deserialize(input, Employee.class);
+        verifyUserAttributes(USERS.get(HALSEY_URI), result);
+        final Organization org = result.getEmployer();
+        assertNotNull(org);
+        verifyOrganizationAttributes(org);
+        assertEquals(1, org.getEmployees().size());
+        assertSame(result, org.getEmployees().iterator().next());
     }
 }

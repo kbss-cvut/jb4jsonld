@@ -26,18 +26,18 @@ abstract class InstanceContext<T> {
     // These methods are intended for overriding, because the behaviour is supported only by some context implementations
 
     Field getFieldForProperty(String property) {
-        throw new UnsupportedOperationException("Not supported by this type of instance context");
+        throw new UnsupportedOperationException("Not supported by this type of instance context.");
     }
 
     void setFieldValue(Field field, Object value) {
-        throw new UnsupportedOperationException("Not supported by this type of instance context");
+        throw new UnsupportedOperationException("Not supported by this type of instance context.");
     }
 
     void addItem(Object item) {
-        throw new UnsupportedOperationException("Not supported by this type of instance context");
+        throw new UnsupportedOperationException("Not supported by this type of instance context.");
     }
 
     Class<?> getItemType() {
-        throw new UnsupportedOperationException("Not supported by this type of instance context");
+        throw new UnsupportedOperationException("Not supported by this type of instance context.");
     }
 }
