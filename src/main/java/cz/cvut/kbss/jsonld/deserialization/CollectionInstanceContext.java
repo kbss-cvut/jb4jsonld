@@ -24,6 +24,7 @@ class CollectionInstanceContext<T extends Collection> extends InstanceContext<T>
      */
     @Override
     void addItem(Object item) {
+        // TODO Type matching/transformation, known instance reference resolving
         instance.add(item);
     }
 

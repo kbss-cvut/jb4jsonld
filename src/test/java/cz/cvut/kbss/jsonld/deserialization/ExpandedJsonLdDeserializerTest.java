@@ -95,4 +95,19 @@ public class ExpandedJsonLdDeserializerTest {
             verifyUserAttributes(USERS.get(e.getUri()), e);
         }
     }
+
+    @Test
+    public void testDeserializerInstanceWithPluralObjectPropertyWithBackwardReferencesToOriginalInstance()
+            throws Exception {
+        final Object input = readAndExpand("objectWithPluralObjectPropertyWithBackwardReferences.json");
+        final Organization result = deserializer.deserialize(input, Organization.class);
+        verifyOrganizationAttributes(result);
+        assertEquals(3, result.getEmployees().size());
+        for (Employee e : result.getEmployees()) {
+            assertTrue(USERS.containsKey(e.getUri()));
+            verifyUserAttributes(USERS.get(e.getUri()), e);
+            assertNotNull(e.getEmployer());
+            assertSame(result, e.getEmployer());
+        }
+    }
 }
