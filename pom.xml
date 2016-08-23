@@ -167,13 +167,13 @@
         </plugins>
     </build>
 
-    <!--<licenses>-->
-    <!--<license>-->
-    <!--<name>GNU Lesser General Public License</name>-->
-    <!--<url>http://www.gnu.org/copyleft/lesser.html</url>-->
-    <!--<distribution>repo</distribution>-->
-    <!--</license>-->
-    <!--</licenses>-->
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License</name>
+            <url>http://www.gnu.org/copyleft/lesser.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <developers>
         <developer>
@@ -194,7 +194,7 @@
     </organization>
 
     <scm>
-        <connection>scm:git:https://kbss.felk.cvut.cz/git/jaxb-jsonld.git</connection>
+        <connection>scm:git:https://github.com/kbss-cvut/jaxb-jsonld.git</connection>
     </scm>
 
     <distributionManagement>
@@ -203,5 +203,10 @@
             <name>KBSS Maven 2 Repository</name>
             <url>sftp://kbss.felk.cvut.cz/var/www/m2repo</url>
         </repository>
+        <site>
+            <id>jaxb-jsonld</id>
+            <name>JAXB-JSON-LD</name>
+            <url>https://github.com/kbss-cvut/jaxb-jsonld</url>
+        </site>
     </distributionManagement>
 </project>
