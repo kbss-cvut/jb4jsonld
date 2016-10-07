@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -14,29 +14,37 @@
  */
 package cz.cvut.kbss.jsonld;
 
-public class Constants {
+/**
+ * JSON-LD constants.
+ */
+public class JsonLd {
 
     /**
      * JSON-LD {@code @list} keyword.
      */
-    public static final String JSON_LD_LIST = "@list";
+    public static final String LIST = "@list";
 
     /**
      * JSON-LD {@code @id} keyword.
      */
-    public static final String JSON_LD_ID = "@id";
+    public static final String ID = "@id";
 
     /**
      * JSON-LD {@code @type} keyword.
      */
-    public static final String JSON_LD_TYPE = "@type";
+    public static final String TYPE = "@type";
 
     /**
      * JSON-LD {@code @value} keyword.
      */
-    public static final String JSON_LD_VALUE = "@value";
+    public static final String VALUE = "@value";
 
-    private Constants() {
+    /**
+     * JSON-LD media type.
+     */
+    public static final String MEDIA_TYPE = "application/ld+json";
+
+    private JsonLd() {
         throw new AssertionError();
     }
 }

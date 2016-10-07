@@ -14,7 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
-import cz.cvut.kbss.jsonld.Constants;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     }
 
     private void resolveCollectionValue(String property, List<?> value) {
-        if (property.equals(Constants.JSON_LD_TYPE)) {
+        if (property.equals(JsonLd.TYPE)) {
             // TODO This is not entirely correct, if the target type has a @Types field, types should be added to it
             // But only those which are not in the @OWLClass annotation on the target type or its ancestors
             return;
@@ -72,8 +72,8 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     }
 
     private void resolveValue(Map<?, ?> value) {
-        if (value.size() == 1 && value.containsKey(Constants.JSON_LD_VALUE)) {
-            instanceBuilder.addValue(value.get(Constants.JSON_LD_VALUE));
+        if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
+            instanceBuilder.addValue(value.get(JsonLd.VALUE));
         } else {
             final Class<?> elementType = instanceBuilder.getCurrentCollectionElementType();
             instanceBuilder.openObject(elementType);
@@ -83,8 +83,8 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     }
 
     private void resolvePropertyValue(String property, Map<?, ?> value) {
-        if (value.size() == 1 && value.containsKey(Constants.JSON_LD_VALUE)) {
-            instanceBuilder.addValue(property, value.get(Constants.JSON_LD_VALUE));
+        if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
+            instanceBuilder.addValue(property, value.get(JsonLd.VALUE));
         } else {
             instanceBuilder.openObject(property);
             processObject(value);

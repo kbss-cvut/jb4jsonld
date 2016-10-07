@@ -17,7 +17,7 @@ package cz.cvut.kbss.jsonld.common;
 import cz.cvut.kbss.jopa.CommonVocabulary;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jsonld.Constants;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
@@ -102,7 +102,7 @@ public class BeanAnnotationProcessorTest {
     @Test
     public void getAttributeIdentifierReturnsIdForIdAttribute() throws Exception {
         final String id = BeanAnnotationProcessor.getAttributeIdentifier(Person.class.getDeclaredField("uri"));
-        assertEquals(Constants.JSON_LD_ID, id);
+        assertEquals(JsonLd.ID, id);
     }
 
     @Test

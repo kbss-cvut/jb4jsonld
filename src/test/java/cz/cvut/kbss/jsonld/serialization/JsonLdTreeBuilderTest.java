@@ -15,7 +15,7 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.CommonVocabulary;
-import cz.cvut.kbss.jsonld.Constants;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
@@ -75,7 +75,7 @@ public class JsonLdTreeBuilderTest {
         treeBuilder.openInstance(p);
         assertNotNull(treeBuilder.getTreeRoot());
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
-        final CollectionNode typesNode = (CollectionNode) getNode(treeBuilder.getTreeRoot(), Constants.JSON_LD_TYPE);
+        final CollectionNode typesNode = (CollectionNode) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
         assertTrue(typesNode.getItems().contains(JsonNodeFactory.createLiteralNode(Vocabulary.PERSON)));
     }
@@ -87,7 +87,7 @@ public class JsonLdTreeBuilderTest {
         assertTrue(getNodeStack().isEmpty());
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         final Set<String> types = new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE));
-        final CollectionNode typesNode = (CollectionNode) getNode(treeBuilder.getTreeRoot(), Constants.JSON_LD_TYPE);
+        final CollectionNode typesNode = (CollectionNode) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
         for (String t : types) {
             assertTrue(typesNode.getItems().contains(JsonNodeFactory.createLiteralNode(t)));

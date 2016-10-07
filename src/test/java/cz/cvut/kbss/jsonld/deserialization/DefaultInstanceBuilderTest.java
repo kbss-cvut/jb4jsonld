@@ -14,7 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
-import cz.cvut.kbss.jsonld.Constants;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
@@ -200,7 +200,7 @@ public class DefaultInstanceBuilderTest {
     public void objectIsStoredInKnownInstancesWhenItsIdIsRead() throws Exception {
         final User user = Generator.generateUser();
         deserializer.openObject(User.class);
-        deserializer.addValue(Constants.JSON_LD_ID, user.getUri().toString());
+        deserializer.addValue(JsonLd.ID, user.getUri().toString());
         assertTrue(getKnownInstances().containsKey(user.getUri().toString()));
         assertTrue(getKnownInstances().get(user.getUri().toString()) instanceof User);
 

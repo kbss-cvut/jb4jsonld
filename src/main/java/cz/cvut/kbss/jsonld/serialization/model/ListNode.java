@@ -14,7 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization.model;
 
-import cz.cvut.kbss.jsonld.Constants;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class ListNode extends CollectionNode {
     @Override
     void writeValue(final JsonGenerator writer) throws IOException {
         writer.writeObjectStart();
-        writer.writeFieldName(Constants.JSON_LD_LIST);
+        writer.writeFieldName(JsonLd.LIST);
         writer.writeArrayStart();
         items.forEach(item -> item.write(writer));
         writer.writeArrayEnd();

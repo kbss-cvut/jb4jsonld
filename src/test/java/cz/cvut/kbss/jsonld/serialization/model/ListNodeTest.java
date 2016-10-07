@@ -14,7 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization.model;
 
-import cz.cvut.kbss.jsonld.Constants;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public class ListNodeTest extends AbstractNodeTest {
         final InOrder inOrder = inOrder(serializerMock);
         inOrder.verify(serializerMock).writeFieldName(node.getName());
         inOrder.verify(serializerMock).writeObjectStart();
-        inOrder.verify(serializerMock).writeFieldName(Constants.JSON_LD_LIST);
+        inOrder.verify(serializerMock).writeFieldName(JsonLd.LIST);
         inOrder.verify(serializerMock).writeArrayStart();
         for (JsonNode item : items) {
             inOrder.verify(serializerMock).writeNumber((Number) ((NumericLiteralNode) item).getValue());
@@ -66,7 +66,7 @@ public class ListNodeTest extends AbstractNodeTest {
 
         final InOrder inOrder = inOrder(serializerMock);
         inOrder.verify(serializerMock).writeObjectStart();
-        inOrder.verify(serializerMock).writeFieldName(Constants.JSON_LD_LIST);
+        inOrder.verify(serializerMock).writeFieldName(JsonLd.LIST);
         inOrder.verify(serializerMock).writeArrayStart();
         inOrder.verify(serializerMock).writeArrayEnd();
         inOrder.verify(serializerMock).writeObjectEnd();

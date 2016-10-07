@@ -15,7 +15,7 @@
 package cz.cvut.kbss.jsonld.common;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
-import cz.cvut.kbss.jsonld.Constants;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 
 import java.lang.reflect.Field;
@@ -105,7 +105,7 @@ public class BeanAnnotationProcessor {
     /**
      * Creates a map of JSON-LD serializable fields, where the keys are IRIs of properties mapped by the fields.
      * <p>
-     * Identifier field is mapped to the {@link Constants#JSON_LD_ID} property identifier. Ancestors of the specified
+     * Identifier field is mapped to the {@link JsonLd#ID} property identifier. Ancestors of the specified
      * class are also scanned.
      *
      * @param cls Class for which the mapping should be determined
@@ -153,14 +153,14 @@ public class BeanAnnotationProcessor {
      * Resolves JSON-LD attribute identifier of the specified field.
      * <p>
      * For OWL properties, this will be their IRI. For id fields it will be the {@link
-     * cz.cvut.kbss.jsonld.Constants#JSON_LD_ID} string.
+     * JsonLd#ID} string.
      *
      * @param field The field to resolve
      * @return JSON-LD attribute identifier
      */
     public static String getAttributeIdentifier(Field field) {
         if (field.getDeclaredAnnotation(Id.class) != null) {
-            return Constants.JSON_LD_ID;
+            return JsonLd.ID;
         }
         final OWLDataProperty dp = field.getDeclaredAnnotation(OWLDataProperty.class);
         if (dp != null) {
