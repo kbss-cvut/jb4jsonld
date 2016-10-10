@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -41,11 +41,24 @@ public class Generator {
      * @return random integer
      */
     public static int randomCount(int max) {
+        return randomCount(1, max);
+    }
+
+    /**
+     * Returns a (pseudo)random positive integer between {@code min} (inclusive) and {@code max} (exclusive).
+     *
+     * @param min Lower bound
+     * @param max Upper bound
+     * @return random integer
+     */
+    public static int randomCount(int min, int max) {
+        assert min >= 0;
         assert max > 1;
+        assert min < max;
         int res;
         do {
             res = RAND.nextInt(max);
-        } while (res < 1);
+        } while (res < min);
         return res;
     }
 
