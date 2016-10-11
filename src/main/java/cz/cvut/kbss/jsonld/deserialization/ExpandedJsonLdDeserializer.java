@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -14,8 +14,11 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jsonld.ConfigParam;
+import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,13 @@ import java.util.Map;
 public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
     private InstanceBuilder instanceBuilder;
+
+    ExpandedJsonLdDeserializer() {
+    }
+
+    ExpandedJsonLdDeserializer(Configuration configuration) {
+        super(configuration);
+    }
 
     @Override
     public <T> T deserialize(Object jsonLd, Class<T> resultClass) {
@@ -44,6 +54,10 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     private void processObject(Map<?, ?> root) {
         for (Map.Entry<?, ?> e : root.entrySet()) {
             final String property = e.getKey().toString();
+            final boolean shouldSkip = verifyPropertyMapping(property);
+            if (shouldSkip) {
+                continue;
+            }
             if (e.getValue() instanceof List) {
                 resolveCollectionValue(property, (List<?>) e.getValue());
             } else {
@@ -53,13 +67,23 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         }
     }
 
+    private boolean verifyPropertyMapping(String property) {
+        if (!instanceBuilder.isPropertyMapped(property) && !JsonLd.TYPE.equals(property)) {
+            if (!configure().is(ConfigParam.IGNORE_UNKNOWN_PROPERTIES)) {
+                throw UnknownPropertyException.create(property, instanceBuilder.getCurrentContextType());
+            }
+            return true;
+        }
+        return false;
+    }
+
     private void resolveCollectionValue(String property, List<?> value) {
         if (property.equals(JsonLd.TYPE)) {
             // TODO This is not entirely correct, if the target type has a @Types field, types should be added to it
             // But only those which are not in the @OWLClass annotation on the target type or its ancestors
             return;
         }
-        if (value.size() == 1 && value.get(0) instanceof Map) {
+        if (value.size() == 1 && value.get(0) instanceof Map && !instanceBuilder.isPlural(property)) {
             resolvePropertyValue(property, (Map<?, ?>) value.get(0));
         } else {
             instanceBuilder.openCollection(property);

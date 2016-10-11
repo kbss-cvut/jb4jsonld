@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -17,7 +17,6 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
-import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 
 /**
  * Builds instances from parsed JSON-LD.
@@ -34,10 +33,11 @@ public interface InstanceBuilder {
      * <p>
      * This method should also verify cardinality, i.e. multiple objects cannot be set for the same property, if the
      * field it maps to is singular.
+     * <p>
+     * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      *
      * @param property Property identifier (IRI)
-     * @throws IllegalStateException    If there is no {@link OWLClass} instance open
-     * @throws UnknownPropertyException If a matching field for the specified property is not found
+     * @throws IllegalStateException If there is no {@link OWLClass} instance open
      */
     void openObject(String property);
 
@@ -72,10 +72,11 @@ public interface InstanceBuilder {
      * <p>
      * This method should also verify cardinality, i.e. a collection cannot be set as value of a
      * field mapped by {@code property}, if the field is singular.
+     * <p>
+     * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      *
      * @param property Property identifier (IRI)
-     * @throws IllegalStateException    If there is no {@link OWLClass} instance open
-     * @throws UnknownPropertyException If a matching field for the specified property is not found
+     * @throws IllegalStateException If there is no {@link OWLClass} instance open
      */
     void openCollection(String property);
 
@@ -108,11 +109,12 @@ public interface InstanceBuilder {
      * <p>
      * This method should also verify cardinality and correct typing, e.g. multiple values cannot be set for the same
      * property, if the field it maps to is singular.
+     * <p>
+     * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      *
      * @param property Property identifier (IRI)
      * @param value    The value to set
-     * @throws IllegalStateException    If there is no {@link OWLClass} instance open
-     * @throws UnknownPropertyException If a matching field for the specified property is not found
+     * @throws IllegalStateException If there is no {@link OWLClass} instance open
      */
     void addValue(String property, Object value);
 
@@ -141,4 +143,29 @@ public interface InstanceBuilder {
      * @throws JsonLdDeserializationException If the current instance is not a collection
      */
     Class<?> getCurrentCollectionElementType();
+
+    /**
+     * Gets the Java type of the current object context.
+     *
+     * @return Java class of the instance currently being built
+     */
+    Class<?> getCurrentContextType();
+
+    /**
+     * Checks whether the specified property is mapped to a plural field.
+     * <p>
+     * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
+     *
+     * @param property Property identifier (IRI)
+     * @return Whether mapped field is collection-valued or not
+     */
+    boolean isPlural(String property);
+
+    /**
+     * Checks whether the specified property is mapped by the class representing the current instance context.
+     *
+     * @param property Property identifier (IRI)
+     * @return Whether the property is mapped in the current instance context
+     */
+    boolean isPropertyMapped(String property);
 }

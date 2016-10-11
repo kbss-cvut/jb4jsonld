@@ -6,7 +6,7 @@
 
     <groupId>cz.cvut.kbss</groupId>
     <artifactId>jaxb-jsonld</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <name>JAXB JSON-LD</name>
     <description>Serialization and deserialization of Java POJOs to/from JSON-LD. For use in JAXB implementations like
         Jackson or Jersey.

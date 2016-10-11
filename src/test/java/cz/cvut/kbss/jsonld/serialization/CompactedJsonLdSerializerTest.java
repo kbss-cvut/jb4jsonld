@@ -162,4 +162,25 @@ public class CompactedJsonLdSerializerTest {
         assertEquals(employee.getLastName(), json.get(Vocabulary.LAST_NAME));
         assertEquals(employee.getUsername(), json.get(Vocabulary.USERNAME));
     }
+
+    @Test
+    public void serializationOfCollectionOfInstancesReferencingSameInstanceUsesReferenceUri() throws Exception {
+        final Organization org = Generator.generateOrganization();
+        generateEmployees(org, true);
+        final Set<Employee> employees = org.getEmployees();
+        org.setEmployees(null);
+        serializer.serialize(employees);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        assertNotNull(jsonObject);
+        final List<?> jsonList = (List<?>) jsonObject;
+        for (int i = 0; i < jsonList.size(); i++) {
+            final Map<?, ?> item = (Map<?, ?>) jsonList.get(i);
+            if (i == 0) {
+                assertTrue(item.get(Vocabulary.IS_MEMBER_OF) instanceof Map);
+            } else {
+                assertTrue(item.get(Vocabulary.IS_MEMBER_OF) instanceof String);
+                assertEquals(org.getUri(), URI.create(item.get(Vocabulary.IS_MEMBER_OF).toString()));
+            }
+        }
+    }
 }

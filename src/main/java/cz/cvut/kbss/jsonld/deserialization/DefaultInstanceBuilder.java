@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -18,7 +18,6 @@ import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
-import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -40,6 +39,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     public void openObject(String property) {
         Objects.requireNonNull(property);
         final Field targetField = currentInstance.getFieldForProperty(property);
+        assert targetField != null;
         final Class<?> type = targetField.getType();
         assert BeanAnnotationProcessor.isOwlClassEntity(type);
         final Object instance = BeanClassProcessor.createInstance(type);
@@ -77,6 +77,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     public void openCollection(String property) {
         Objects.requireNonNull(property);
         final Field targetField = currentInstance.getFieldForProperty(property);
+        assert targetField != null;
         final Collection<?> instance = BeanClassProcessor.createCollection(targetField);
         final InstanceContext<Collection<?>> ctx = new CollectionInstanceContext<>(instance,
                 BeanClassProcessor.getCollectionItemType(targetField), knownInstances);
@@ -103,9 +104,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     public void addValue(String property, Object value) {
         assert currentInstance != null;
         final Field targetField = currentInstance.getFieldForProperty(property);
-        if (targetField == null) {
-            throw UnknownPropertyException.create(property, currentInstance.getInstanceType());
-        }
+        assert targetField != null;
         // This is in case there is only one value in the JSON-LD array, because then it might be treated as single valued attribute
         if (BeanClassProcessor.isCollection(targetField)) {
             openCollection(property);
@@ -142,5 +141,21 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         } catch (UnsupportedOperationException e) {
             throw new JsonLdDeserializationException("The current instance is not a collection.", e);
         }
+    }
+
+    @Override
+    public boolean isPlural(String property) {
+        assert isPropertyMapped(property);
+        return BeanClassProcessor.isCollection(currentInstance.getFieldForProperty(property));
+    }
+
+    @Override
+    public boolean isPropertyMapped(String property) {
+        return currentInstance.isPropertyMapped(property);
+    }
+
+    @Override
+    public Class<?> getCurrentContextType() {
+        return currentInstance.getInstanceType();
     }
 }

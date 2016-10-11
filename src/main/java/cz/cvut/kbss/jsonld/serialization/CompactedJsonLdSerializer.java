@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 
 /**
@@ -23,8 +24,12 @@ import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
  */
 public class CompactedJsonLdSerializer extends JsonLdSerializer {
 
-    public CompactedJsonLdSerializer(JsonGenerator jsonGenerator) {
+    CompactedJsonLdSerializer(JsonGenerator jsonGenerator) {
         super(jsonGenerator);
+    }
+
+    CompactedJsonLdSerializer(JsonGenerator jsonGenerator, Configuration configuration) {
+        super(jsonGenerator, configuration);
     }
 
     @Override

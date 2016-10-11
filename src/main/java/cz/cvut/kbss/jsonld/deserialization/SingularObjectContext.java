@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -24,6 +24,8 @@ import java.util.Map;
 
 class SingularObjectContext<T> extends InstanceContext<T> {
 
+    // TODO Add handling of @Properties
+
     private final Map<String, Field> fieldMap;
 
     SingularObjectContext(T instance, Map<String, Field> fieldMap, Map<String, Object> knownInstances) {
@@ -33,7 +35,6 @@ class SingularObjectContext<T> extends InstanceContext<T> {
 
     @Override
     Field getFieldForProperty(String property) {
-        // TODO Add handling of @Properties
         return fieldMap.get(property);
     }
 
@@ -80,5 +81,10 @@ class SingularObjectContext<T> extends InstanceContext<T> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    boolean isPropertyMapped(String property) {
+        return fieldMap.containsKey(property);
     }
 }
