@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -59,5 +59,20 @@ public class DataTypeTransformerTest {
         // Get rid of millis in Date, they are not expressed in the string form
         final Date date = new Date((System.currentTimeMillis() / 1000) * 1000);
         assertEquals(date, DataTypeTransformer.transformValue(date.toString(), Date.class));
+    }
+
+    @Test
+    public void transformationPerformsTypeWideningConversionFromInteger() {
+        final Integer value = 117;
+        assertEquals(value.longValue(), DataTypeTransformer.transformValue(value, Long.class));
+        assertEquals(value.floatValue(), DataTypeTransformer.transformValue(value, Float.class));
+        assertEquals(value.doubleValue(), DataTypeTransformer.transformValue(value, Double.class));
+    }
+
+    @Test
+    public void transformationPerformsTypeWideningConversionFromLong() {
+        final Long value = System.currentTimeMillis();
+        assertEquals(value.floatValue(), DataTypeTransformer.transformValue(value, Float.class));
+        assertEquals(value.doubleValue(), DataTypeTransformer.transformValue(value, Double.class));
     }
 }

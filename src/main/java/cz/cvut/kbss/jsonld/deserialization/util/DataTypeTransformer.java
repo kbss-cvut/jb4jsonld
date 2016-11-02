@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -46,6 +46,13 @@ public class DataTypeTransformer {
                 throw new IllegalArgumentException("Unable to parse date " + src, e);
             }
         });
+        rules.put(new TransformationRuleIdentifier<>(Integer.class, Long.class), (src) -> ((Integer) src).longValue());
+        rules.put(new TransformationRuleIdentifier<>(Integer.class, Float.class),
+                (src) -> ((Integer) src).floatValue());
+        rules.put(new TransformationRuleIdentifier<>(Integer.class, Double.class),
+                (src) -> ((Integer) src).doubleValue());
+        rules.put(new TransformationRuleIdentifier<>(Long.class, Float.class), (src) -> ((Long) src).floatValue());
+        rules.put(new TransformationRuleIdentifier<>(Long.class, Double.class), (src) -> ((Long) src).doubleValue());
     }
 
     /**
