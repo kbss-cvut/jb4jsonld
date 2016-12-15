@@ -107,7 +107,9 @@ public class CompactedJsonLdSerializerTest {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, true);
         org.getEmployees().stream().filter(emp -> Generator.randomBoolean()).forEach(org::addAdmin);
-        assertFalse(org.getAdmins().isEmpty());
+        if (org.getAdmins() == null || org.getAdmins().isEmpty()) {
+            org.setAdmins(new HashSet<>(Collections.singletonList(org.getEmployees().iterator().next())));
+        }
         serializer.serialize(org);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
