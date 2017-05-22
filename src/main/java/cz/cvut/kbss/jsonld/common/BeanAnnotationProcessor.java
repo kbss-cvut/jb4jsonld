@@ -39,6 +39,22 @@ public class BeanAnnotationProcessor {
     }
 
     /**
+     * Gets IRI of the OWL class represented by the specified Java class.
+     *
+     * @param cls Java class to examine
+     * @return Represented ontological class
+     * @throws IllegalArgumentException If the specified class is not mapped by {@link OWLClass}
+     */
+    public static String getOwlClass(Class<?> cls) {
+        Objects.requireNonNull(cls);
+        final OWLClass owlClass = cls.getDeclaredAnnotation(OWLClass.class);
+        if (owlClass == null) {
+            throw new IllegalArgumentException(cls + " is not an OWL class entity.");
+        }
+        return owlClass.iri();
+    }
+
+    /**
      * Resolves ontological types of the specified object, as specified by the {@link OWLClass} annotation.
      *
      * @param object The object to resolve

@@ -22,6 +22,7 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Study;
 import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 import org.junit.Before;
 import org.junit.Rule;
@@ -203,5 +204,15 @@ public class ExpandedJsonLdDeserializerTest {
         final User result = deserializer.deserialize(input, User.class);
         assertTrue(result.getTypes().contains(Vocabulary.AGENT));
         assertFalse(result.getTypes().contains(Vocabulary.USER));   // Type of the class should not be in @Types
+    }
+
+    @Test
+    public void deserializationThrowsExceptionWhenTypesAttributeDoesNotContainTargetClassType() throws Exception {
+        final Object input = readAndExpand("objectWithDataProperties.json");
+        thrown.expect(TargetTypeException.class);
+        thrown.expectMessage(
+                "Type <" + Vocabulary.EMPLOYEE + "> mapped by the target Java class " + Employee.class +
+                        " not found in input JSON-LD object.");
+        deserializer.deserialize(input, Employee.class);
     }
 }

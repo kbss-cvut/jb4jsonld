@@ -188,4 +188,16 @@ public class BeanAnnotationProcessorTest {
     public void isInstanceIdentifierReturnsFalseForNonIdField() throws Exception {
         assertFalse(BeanAnnotationProcessor.isInstanceIdentifier(Person.class.getDeclaredField("firstName")));
     }
+
+    @Test
+    public void getOwlClassExtractsClassIriFromJavaType() {
+        assertEquals(Vocabulary.EMPLOYEE, BeanAnnotationProcessor.getOwlClass(Employee.class));
+    }
+
+    @Test
+    public void getOwlClassThrowsIllegalArgumentWhenNonOwlClassJavaTypeIsPassedAsArgument() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage(Integer.class + " is not an OWL class entity.");
+        BeanAnnotationProcessor.getOwlClass(Integer.class);
+    }
 }

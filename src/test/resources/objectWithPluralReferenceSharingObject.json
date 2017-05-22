@@ -13,7 +13,8 @@
       "http://xmlns.com/foaf/0.1/lastName": "Cuddy",
       "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/isMemberOf": {
         "@type": [
-          "http://krizik.felk.cvut.cz/ontologies/study-manager/organization"
+          "http://krizik.felk.cvut.cz/ontologies/study-manager/organization",
+          "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Organization"
         ],
         "http://www.w3.org/2000/01/rdf-schema#label": "Princeton-Plainsboro Teaching Hospital",
         "http://purl.org/dc/terms/created": "Mon Oct 10 17:34:04 CEST 2016",

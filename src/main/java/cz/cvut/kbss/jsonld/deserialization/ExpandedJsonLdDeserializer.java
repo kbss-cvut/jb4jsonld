@@ -17,11 +17,14 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
@@ -52,6 +55,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     }
 
     private void processObject(Map<?, ?> root) {
+        verifyTargetType(root);
         for (Map.Entry<?, ?> e : root.entrySet()) {
             final String property = e.getKey().toString();
             final boolean shouldSkip = verifyPropertyMapping(property);
@@ -65,6 +69,22 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
                 instanceBuilder.addValue(property, e.getValue());
             }
         }
+    }
+
+    private void verifyTargetType(Map<?, ?> jsonLdObject) {
+        final Object types = jsonLdObject.get(JsonLd.TYPE);
+        final Class<?> targetType = instanceBuilder.getCurrentContextType();
+        final String targetTypeIri = BeanAnnotationProcessor.getOwlClass(targetType);
+        if (types != null) {
+            assert types instanceof List;
+            final List<?> typesList = (List<?>) types;
+            final Optional<?> type = typesList.stream().filter(t -> t.toString().equals(targetTypeIri)).findAny();
+            if (type.isPresent()) {
+                return;
+            }
+        }
+        throw new TargetTypeException("Type <" + targetTypeIri + "> mapped by the target Java class " + targetType +
+                " not found in input JSON-LD object.");
     }
 
     private boolean verifyPropertyMapping(String property) {
