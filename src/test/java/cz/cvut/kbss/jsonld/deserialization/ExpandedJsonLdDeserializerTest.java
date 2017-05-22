@@ -17,6 +17,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jsonld.ConfigParam;
+import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Study;
@@ -194,5 +195,13 @@ public class ExpandedJsonLdDeserializerTest {
         for (Employee e : result.getMembers()) {
             assertSame(org, e.getEmployer());
         }
+    }
+
+    @Test
+    public void deserializationSetsValueOfTypesSpecification() throws Exception {
+        final Object input = readAndExpand("objectWithDataProperties.json");
+        final User result = deserializer.deserialize(input, User.class);
+        assertTrue(result.getTypes().contains(Vocabulary.AGENT));
+        assertFalse(result.getTypes().contains(Vocabulary.USER));   // Type of the class should not be in @Types
     }
 }

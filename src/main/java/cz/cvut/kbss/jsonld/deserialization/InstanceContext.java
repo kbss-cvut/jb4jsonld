@@ -39,22 +39,52 @@ abstract class InstanceContext<T> {
 
     // These methods are intended for overriding, because the behaviour is supported only by some context implementations
 
+    /**
+     * Gets a Java field mapped by the specified property.
+     * <p>
+     * This applies to singular object contexts only.
+     *
+     * @param property Property IRI
+     * @return Field mapped by the specified property. Can be {@code null}
+     */
     Field getFieldForProperty(String property) {
         throw new UnsupportedOperationException("Not supported by this type of instance context.");
     }
 
+    /**
+     * Sets value of the specified field on the instance represented by this context
+     *
+     * @param field The field to set
+     * @param value The value to set
+     */
     void setFieldValue(Field field, Object value) {
         throw new UnsupportedOperationException("Not supported by this type of instance context.");
     }
 
+    /**
+     * Adds item to the collection represented by this context.
+     *
+     * @param item Item to add
+     */
     void addItem(Object item) {
         throw new UnsupportedOperationException("Not supported by this type of instance context.");
     }
 
+    /**
+     * Gets type of the element type of a collection represented by this context.
+     *
+     * @return Collection element type
+     */
     Class<?> getItemType() {
         throw new UnsupportedOperationException("Not supported by this type of instance context.");
     }
 
+    /**
+     * Whether the specified property is mapped by a field in this context.
+     *
+     * @param property The property to check
+     * @return {@code true} if a field mapping the property exists in this context, {@code false} otherwise
+     */
     boolean isPropertyMapped(String property) {
         // Default behaviour
         return false;

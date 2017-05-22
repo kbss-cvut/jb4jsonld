@@ -21,6 +21,7 @@ public class Vocabulary {
     public static final String EMPLOYEE = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Employee";
     public static final String ORGANIZATION = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Organization";
     public static final String STUDY = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Study";
+    public static final String AGENT = "http://onto.fel.cvut.cz/ontologies/ufo/Agent";
 
     public static final String FIRST_NAME = "http://xmlns.com/foaf/0.1/firstName";
     public static final String LAST_NAME = "http://xmlns.com/foaf/0.1/lastName";

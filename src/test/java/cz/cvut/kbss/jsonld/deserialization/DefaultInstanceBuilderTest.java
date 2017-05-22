@@ -88,6 +88,12 @@ public class DefaultInstanceBuilderTest {
         return (Stack<InstanceContext<?>>) stackField.get(deserializer);
     }
 
+    private InstanceContext<?> getCurrentInstance() throws Exception {
+        final Field instField = DefaultInstanceBuilder.class.getDeclaredField("currentInstance");
+        instField.setAccessible(true);
+        return (InstanceContext<?>) instField.get(deserializer);
+    }
+
     @Test
     public void closeObjectPopsPreviousInstanceFromTheStack() throws Exception {
         deserializer.openCollection(CollectionType.SET);
@@ -210,5 +216,15 @@ public class DefaultInstanceBuilderTest {
         final Field field = DefaultInstanceBuilder.class.getDeclaredField("knownInstances");
         field.setAccessible(true);
         return (Map<String, Object>) field.get(deserializer);
+    }
+
+    @Test
+    public void openCollectionCreatesTypesContextForTypesField() throws Exception {
+        deserializer.openObject(User.class);
+        deserializer.openCollection(JsonLd.TYPE);
+        final InstanceContext<?> result = getCurrentInstance();
+        assertTrue(result instanceof TypesContext);
+        final TypesContext<?, ?> ctx = (TypesContext<?, ?>) result;
+        assertEquals(String.class, ctx.getItemType());
     }
 }

@@ -74,13 +74,13 @@ public class DataTypeTransformer {
         rules.put(new TransformationRuleIdentifier<>(sourceClass, targetClass), rule);
     }
 
-    public static Object transformValue(Object value, Class<?> targetClass) {
+    public static <T> T transformValue(Object value, Class<T> targetClass) {
         Objects.requireNonNull(value);
         Objects.requireNonNull(targetClass);
         final Class<?> sourceClass = value.getClass();
         final TransformationRuleIdentifier<?, ?> identifier = new TransformationRuleIdentifier<>(sourceClass,
                 targetClass);
-        return rules.containsKey(identifier) ? rules.get(identifier).apply(value) : null;
+        return rules.containsKey(identifier) ? (T) rules.get(identifier).apply(value) : null;
     }
 
     public static class TransformationRuleIdentifier<S, T> {

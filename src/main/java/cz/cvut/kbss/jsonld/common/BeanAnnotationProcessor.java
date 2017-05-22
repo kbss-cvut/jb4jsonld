@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -39,14 +39,28 @@ public class BeanAnnotationProcessor {
     }
 
     /**
-     * Resolves ontological type of the specified object, as specified by the {@link OWLClass} annotation.
+     * Resolves ontological types of the specified object, as specified by the {@link OWLClass} annotation.
      *
      * @param object The object to resolve
-     * @return Resolved OWL type or {@code null} if the object's class is not annotated with {@link OWLClass}
+     * @return Resolved OWL types or an empty set if the object's class is not annotated with {@link OWLClass}
+     * @see #getOwlClasses(Class)
      */
     public static Set<String> getOwlClasses(Object object) {
         Objects.requireNonNull(object);
         final Class<?> cls = object.getClass();
+        return getOwlClasses(cls);
+    }
+
+    /**
+     * Resolves a transitive closure of ontological types of the specified class, as specified by the {@link OWLClass}
+     * annotation.
+     * <p>
+     * I.e. the result contains also types mapped by the class's ancestors.
+     *
+     * @param cls The class to process
+     * @return Set of mapped ontological classes (possibly empty)
+     */
+    public static Set<String> getOwlClasses(Class<?> cls) {
         final Set<String> classes = new HashSet<>();
         getAncestors(cls).forEach(c -> {
             final OWLClass owlClass = c.getDeclaredAnnotation(OWLClass.class);
@@ -124,7 +138,8 @@ public class BeanAnnotationProcessor {
                 field.getDeclaredAnnotation(OWLAnnotationProperty.class) == null &&
                         field.getDeclaredAnnotation(OWLDataProperty.class) == null &&
                         field.getDeclaredAnnotation(OWLObjectProperty.class) == null &&
-                        field.getDeclaredAnnotation(Id.class) == null);
+                        field.getDeclaredAnnotation(Id.class) == null) &&
+                field.getDeclaredAnnotation(Types.class) == null;
     }
 
     /**
@@ -173,6 +188,9 @@ public class BeanAnnotationProcessor {
         final OWLAnnotationProperty ap = field.getDeclaredAnnotation(OWLAnnotationProperty.class);
         if (ap != null) {
             return ap.iri();
+        }
+        if (field.getDeclaredAnnotation(Types.class) != null) {
+            return JsonLd.TYPE;
         }
         throw new JsonLdSerializationException("Field " + field + " is not JSON-LD serializable.");
     }

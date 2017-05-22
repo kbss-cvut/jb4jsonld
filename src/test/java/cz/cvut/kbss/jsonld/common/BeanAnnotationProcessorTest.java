@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -92,11 +92,18 @@ public class BeanAnnotationProcessorTest {
     @Test
     public void mapSerializableFieldsReturnsMapOfSerializableFieldsWithPropertyIriKeys() throws Exception {
         final Map<String, Field> result = BeanAnnotationProcessor.mapSerializableFields(Employee.class);
-        assertEquals(result.get(Vocabulary.FIRST_NAME), Person.class.getDeclaredField("firstName"));
-        assertEquals(result.get(Vocabulary.LAST_NAME), Person.class.getDeclaredField("lastName"));
-        assertEquals(result.get(Vocabulary.USERNAME), User.class.getDeclaredField("username"));
-        assertEquals(result.get(Vocabulary.IS_ADMIN), User.class.getDeclaredField("admin"));
-        assertEquals(result.get(Vocabulary.IS_MEMBER_OF), Employee.class.getDeclaredField("employer"));
+        assertEquals(Person.class.getDeclaredField("firstName"), result.get(Vocabulary.FIRST_NAME));
+        assertEquals(Person.class.getDeclaredField("lastName"), result.get(Vocabulary.LAST_NAME));
+        assertEquals(User.class.getDeclaredField("username"), result.get(Vocabulary.USERNAME));
+        assertEquals(User.class.getDeclaredField("admin"), result.get(Vocabulary.IS_ADMIN));
+        assertEquals(Employee.class.getDeclaredField("employer"), result.get(Vocabulary.IS_MEMBER_OF));
+    }
+
+    @Test
+    public void mapSerializableFieldsResultContainsTypesFieldMappedToRdfType() throws Exception {
+        final Map<String, Field> result = BeanAnnotationProcessor.mapSerializableFields(User.class);
+        assertTrue(result.containsKey(JsonLd.TYPE));
+        assertEquals(User.class.getDeclaredField("types"), result.get(JsonLd.TYPE));
     }
 
     @Test

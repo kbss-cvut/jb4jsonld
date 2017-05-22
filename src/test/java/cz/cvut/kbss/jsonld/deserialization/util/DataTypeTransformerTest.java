@@ -64,15 +64,15 @@ public class DataTypeTransformerTest {
     @Test
     public void transformationPerformsTypeWideningConversionFromInteger() {
         final Integer value = 117;
-        assertEquals(value.longValue(), DataTypeTransformer.transformValue(value, Long.class));
-        assertEquals(value.floatValue(), DataTypeTransformer.transformValue(value, Float.class));
-        assertEquals(value.doubleValue(), DataTypeTransformer.transformValue(value, Double.class));
+        assertEquals(Long.valueOf(value), DataTypeTransformer.transformValue(value, Long.class));
+        assertEquals(Float.valueOf(value), DataTypeTransformer.transformValue(value, Float.class));
+        assertEquals(Double.valueOf(value), DataTypeTransformer.transformValue(value, Double.class));
     }
 
     @Test
     public void transformationPerformsTypeWideningConversionFromLong() {
         final Long value = System.currentTimeMillis();
-        assertEquals(value.floatValue(), DataTypeTransformer.transformValue(value, Float.class));
-        assertEquals(value.doubleValue(), DataTypeTransformer.transformValue(value, Double.class));
+        assertEquals(Float.valueOf(value), DataTypeTransformer.transformValue(value, Float.class));
+        assertEquals(Double.valueOf(value), DataTypeTransformer.transformValue(value, Double.class));
     }
 }

@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.CollectionType;
@@ -79,8 +80,14 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         final Field targetField = currentInstance.getFieldForProperty(property);
         assert targetField != null;
         final Collection<?> instance = BeanClassProcessor.createCollection(targetField);
-        final InstanceContext<Collection<?>> ctx = new CollectionInstanceContext<>(instance,
-                BeanClassProcessor.getCollectionItemType(targetField), knownInstances);
+        final InstanceContext<Collection<?>> ctx;
+        if (property.equals(JsonLd.TYPE)) {
+            ctx = new TypesContext(instance, knownInstances,
+                    BeanClassProcessor.getCollectionItemType(targetField), currentInstance.getInstanceType());
+        } else {
+            ctx = new CollectionInstanceContext<>(instance, BeanClassProcessor.getCollectionItemType(targetField),
+                    knownInstances);
+        }
         currentInstance.setFieldValue(targetField, instance);
         openInstances.push(currentInstance);
         this.currentInstance = ctx;

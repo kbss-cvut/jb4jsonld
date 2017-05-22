@@ -68,8 +68,8 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     }
 
     private boolean verifyPropertyMapping(String property) {
-        if (!instanceBuilder.isPropertyMapped(property) && !JsonLd.TYPE.equals(property)) {
-            if (!configure().is(ConfigParam.IGNORE_UNKNOWN_PROPERTIES)) {
+        if (!instanceBuilder.isPropertyMapped(property)) {
+            if (!JsonLd.TYPE.equals(property) && !configure().is(ConfigParam.IGNORE_UNKNOWN_PROPERTIES)) {
                 throw UnknownPropertyException.create(property, instanceBuilder.getCurrentContextType());
             }
             return true;
@@ -78,18 +78,16 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     }
 
     private void resolveCollectionValue(String property, List<?> value) {
-        if (property.equals(JsonLd.TYPE)) {
-            // TODO This is not entirely correct, if the target type has a @Types field, types should be added to it
-            // But only those which are not in the @OWLClass annotation on the target type or its ancestors
-            return;
-        }
         if (value.size() == 1 && value.get(0) instanceof Map && !instanceBuilder.isPlural(property)) {
             resolvePropertyValue(property, (Map<?, ?>) value.get(0));
         } else {
             instanceBuilder.openCollection(property);
             for (Object item : value) {
-                assert item instanceof Map;
-                resolveValue((Map<?, ?>) item);
+                if (item instanceof Map) {
+                    resolveValue((Map<?, ?>) item);
+                } else {
+                    instanceBuilder.addValue(item);
+                }
             }
             instanceBuilder.closeCollection();
         }
