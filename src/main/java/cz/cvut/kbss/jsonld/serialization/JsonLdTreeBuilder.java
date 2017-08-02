@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -18,7 +18,6 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
-import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.InstanceVisitor;
 
 import java.lang.reflect.Field;
@@ -36,10 +35,12 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     private CompositeNode currentNode;
     private Field visitedField;
 
+    private final FieldSerializer literalSerializer = new LiteralFieldSerializer();
+
     @Override
     public void openInstance(Object instance) {
         final CompositeNode newCurrent = visitedField != null ? JsonNodeFactory.createObjectNode(attId(visitedField)) :
-                                         JsonNodeFactory.createObjectNode();
+                JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
         addTypes(instance);
         this.visitedField = null;
@@ -97,30 +98,15 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
             this.visitedField = field;
         } else {
             assert currentNode != null;
-            final String attName = attId(field);
-            final JsonNode attNode = createLiteralAttribute(attName, value);
-            currentNode.addItem(attNode);
+            literalSerializer.serializeField(field, value).forEach(node -> currentNode.addItem(node));
         }
-    }
-
-    private JsonNode createLiteralAttribute(String attName, Object value) {
-        final JsonNode result;
-        if (value instanceof Collection) {
-            final Collection<?> col = (Collection<?>) value;
-            final CollectionNode node = JsonNodeFactory.createCollectionNode(attName, col);
-            col.forEach(obj -> node.addItem(JsonNodeFactory.createLiteralNode(obj)));
-            result = node;
-        } else {
-            result = JsonNodeFactory.createLiteralNode(attName, value);
-        }
-        return result;
     }
 
     @Override
     public void openCollection(Collection<?> collection) {
         final CollectionNode newCurrent =
                 visitedField != null ? JsonNodeFactory.createCollectionNode(attId(visitedField), collection) :
-                JsonNodeFactory.createCollectionNode(collection);
+                        JsonNodeFactory.createCollectionNode(collection);
         openNewNode(newCurrent);
         this.visitedField = null;
     }

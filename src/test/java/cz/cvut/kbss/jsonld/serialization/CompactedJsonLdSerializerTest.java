@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -24,6 +24,7 @@ import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.URI;
@@ -184,5 +185,44 @@ public class CompactedJsonLdSerializerTest {
                 assertEquals(org.getUri(), URI.create(item.get(Vocabulary.IS_MEMBER_OF).toString()));
             }
         }
+    }
+
+    @Ignore
+    @Test
+    public void testSerializationOfObjectWithStringBasedUnmappedProperties() throws Exception {
+        final Person person = generatePerson();
+        serializer.serialize(person);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertEquals(person.getUri().toString(), json.get(JsonLd.ID));
+        final List<?> types = (List<?>) json.get(JsonLd.TYPE);
+        assertEquals(1, types.size());
+        assertEquals(Vocabulary.PERSON, types.get(0));
+        assertEquals(person.getFirstName(), json.get(Vocabulary.FIRST_NAME));
+        assertEquals(person.getLastName(), json.get(Vocabulary.LAST_NAME));
+        for (Map.Entry<String, Set<String>> entry : person.getProperties().entrySet()) {
+            assertTrue(json.containsKey(entry.getKey()));
+            final List<?> values = (List<?>) json.get(entry.getKey());
+            assertNotNull(values);
+            assertEquals(entry.getValue().size(), values.size());
+            values.forEach(v -> assertTrue(entry.getValue().contains(v)));
+        }
+    }
+
+    private Person generatePerson() {
+        final Person person = new Person();
+        person.setUri(Generator.generateUri());
+        person.setFirstName("Catherine");
+        person.setLastName("Halsey");
+        person.setProperties(new HashMap<>());
+        for (int i = 0; i < Generator.randomCount(5, 10); i++) {
+            final URI property = Generator.generateUri();
+            final Set<String> value = new HashSet<>();
+            person.getProperties().put(property.toString(), value);
+            for (int j = 0; j < Generator.randomCount(2, 5); j++) {
+                value.add(UUID.randomUUID().toString());
+            }
+        }
+        return person;
     }
 }

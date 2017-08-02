@@ -17,9 +17,12 @@ package cz.cvut.kbss.jsonld.environment.model;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.Set;
 
 @OWLClass(iri = Vocabulary.PERSON)
 public class Person {
@@ -32,6 +35,9 @@ public class Person {
 
     @OWLDataProperty(iri = Vocabulary.LAST_NAME)
     private String lastName;
+
+    @Properties
+    private Map<String, Set<String>> properties;
 
     public URI getUri() {
         return uri;
@@ -55,5 +61,13 @@ public class Person {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Map<String, Set<String>> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Set<String>> properties) {
+        this.properties = properties;
     }
 }
