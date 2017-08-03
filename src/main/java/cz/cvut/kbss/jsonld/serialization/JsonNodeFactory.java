@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -68,10 +66,27 @@ public class JsonNodeFactory {
         return LiteralType.STRING;
     }
 
+    /**
+     * Creates collection node for the specified collection.
+     * <p>
+     * The node is without name, so it cannot be used as attribute.
+     *
+     * @param value The collection. It is used only to determine the type of the target node, no values are added to the
+     *              result
+     * @return An empty collection node
+     */
     public static CollectionNode createCollectionNode(Collection<?> value) {
         return createCollectionNode(null, value);
     }
 
+    /**
+     * Creates collection node with the specified name, for the specified collection.
+     *
+     * @param name  Name of the node (attribute)
+     * @param value The collection. It is used only to determine the type of the target node, no values are added to the
+     *              result
+     * @return An empty collection node
+     */
     public static CollectionNode createCollectionNode(String name, Collection<?> value) {
         final CollectionType type = determineCollectionType(value);
         CollectionNode n = null;

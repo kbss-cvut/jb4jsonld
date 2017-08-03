@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -18,10 +16,12 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
+import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.InstanceVisitor;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
@@ -36,11 +36,12 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     private Field visitedField;
 
     private final FieldSerializer literalSerializer = new LiteralFieldSerializer();
+    private final FieldSerializer propertiesSerializer = new PropertiesFieldSerializer();
 
     @Override
     public void openInstance(Object instance) {
         final CompositeNode newCurrent = visitedField != null ? JsonNodeFactory.createObjectNode(attId(visitedField)) :
-                JsonNodeFactory.createObjectNode();
+                                         JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
         addTypes(instance);
         this.visitedField = null;
@@ -98,7 +99,14 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
             this.visitedField = field;
         } else {
             assert currentNode != null;
-            literalSerializer.serializeField(field, value).forEach(node -> currentNode.addItem(node));
+            final List<JsonNode> nodes;
+            if (BeanAnnotationProcessor.isPropertiesField(field)) {
+                // A problem could be when the properties contain a property mapped by the model as well
+                nodes = propertiesSerializer.serializeField(field, value);
+            } else {
+                nodes = literalSerializer.serializeField(field, value);
+            }
+            nodes.forEach(node -> currentNode.addItem(node));
         }
     }
 
@@ -106,7 +114,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     public void openCollection(Collection<?> collection) {
         final CollectionNode newCurrent =
                 visitedField != null ? JsonNodeFactory.createCollectionNode(attId(visitedField), collection) :
-                        JsonNodeFactory.createCollectionNode(collection);
+                JsonNodeFactory.createCollectionNode(collection);
         openNewNode(newCurrent);
         this.visitedField = null;
     }

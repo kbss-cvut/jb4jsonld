@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.environment;
 
@@ -19,10 +17,7 @@ import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.User;
 
 import java.net.URI;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class Generator {
 
@@ -111,5 +106,28 @@ public class Generator {
             org.getBrands().add("Brandy" + i);
         }
         return org;
+    }
+
+    /**
+     * Generates random count of random properties with random values.
+     *
+     * @param singletons Whether the values should be singletons or collections of more than 1 value
+     * @return The generated properties
+     */
+    public static Map<String, Set<String>> generateProperties(boolean singletons) {
+        final Map<String, Set<String>> map = new HashMap<>();
+        for (int i = 0; i < Generator.randomCount(5, 10); i++) {
+            final String property = Generator.generateUri().toString();
+            if (singletons) {
+                map.put(property, Collections.singleton(Generator.generateUri().toString()));
+            } else {
+                final Set<String> value = new HashSet<>();
+                for (int j = 0; j < Generator.randomCount(2, 5); j++) {
+                    value.add(Generator.generateUri().toString());
+                }
+                map.put(property, value);
+            }
+        }
+        return map;
     }
 }

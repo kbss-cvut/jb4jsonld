@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -24,7 +22,6 @@ import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.URI;
@@ -187,7 +184,6 @@ public class CompactedJsonLdSerializerTest {
         }
     }
 
-    @Ignore
     @Test
     public void testSerializationOfObjectWithStringBasedUnmappedProperties() throws Exception {
         final Person person = generatePerson();
@@ -214,15 +210,7 @@ public class CompactedJsonLdSerializerTest {
         person.setUri(Generator.generateUri());
         person.setFirstName("Catherine");
         person.setLastName("Halsey");
-        person.setProperties(new HashMap<>());
-        for (int i = 0; i < Generator.randomCount(5, 10); i++) {
-            final URI property = Generator.generateUri();
-            final Set<String> value = new HashSet<>();
-            person.getProperties().put(property.toString(), value);
-            for (int j = 0; j < Generator.randomCount(2, 5); j++) {
-                value.add(UUID.randomUUID().toString());
-            }
-        }
+        person.setProperties(Generator.generateProperties(false));
         return person;
     }
 }
