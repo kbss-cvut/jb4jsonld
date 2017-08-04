@@ -25,6 +25,6 @@ public class UnknownPropertyException extends JsonLdDeserializationException {
 
     public static UnknownPropertyException create(String property, Class<?> cls) {
         return new UnknownPropertyException(
-                "No field matching property " + property + " was found in class " + cls + " or its ancestors.");
+                "No field matching property " + property + " was found in " + cls + " or its ancestors.");
     }
 }

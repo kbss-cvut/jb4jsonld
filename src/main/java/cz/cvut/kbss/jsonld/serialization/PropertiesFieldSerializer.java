@@ -6,6 +6,12 @@ import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import java.lang.reflect.Field;
 import java.util.*;
 
+/**
+ * Serializes a {@link cz.cvut.kbss.jopa.model.annotations.Properties} field.
+ * <p>
+ * Note that at the moment, when the map also contains a property which is already map by another field, a conflict in
+ * the resulting JSON-LD will arise.
+ */
 class PropertiesFieldSerializer implements FieldSerializer {
 
     @Override

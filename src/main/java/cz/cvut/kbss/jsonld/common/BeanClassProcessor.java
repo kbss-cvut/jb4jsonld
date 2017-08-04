@@ -1,23 +1,23 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.common;
 
 import cz.cvut.kbss.jsonld.exception.BeanProcessingException;
+import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class BeanClassProcessor {
@@ -106,13 +106,26 @@ public class BeanClassProcessor {
      */
     public static Collection<?> createCollection(Field field) {
         Objects.requireNonNull(field);
+        return createCollection(field.getType());
+    }
+
+    /**
+     * Creates an instance of the specified collection type.
+     * <p>
+     * Lists and sets are supported.
+     *
+     * @param collectionType Type of the collection
+     * @return New collection instance
+     */
+    public static Collection<?> createCollection(Class<?> collectionType) {
+        Objects.requireNonNull(collectionType);
         CollectionType type;
-        if (Set.class.isAssignableFrom(field.getType())) {
+        if (Set.class.isAssignableFrom(collectionType)) {
             type = CollectionType.SET;
-        } else if (List.class.isAssignableFrom(field.getType())) {
+        } else if (List.class.isAssignableFrom(collectionType)) {
             type = CollectionType.LIST;
         } else {
-            throw new IllegalArgumentException("Field " + field + " is not of any supported collection type.");
+            throw new IllegalArgumentException(collectionType + " is not a supported collection type.");
         }
         return createCollection(type);
     }
@@ -125,11 +138,81 @@ public class BeanClassProcessor {
      */
     public static Class<?> getCollectionItemType(Field field) {
         Objects.requireNonNull(field);
+        return getGenericType(field, 0);
+    }
+
+    private static Class<?> getGenericType(Field field, int paramIndex) {
         try {
             final ParameterizedType fieldType = (ParameterizedType) field.getGenericType();
-            return (Class<?>) fieldType.getActualTypeArguments()[0];
+            final Type typeArgument = fieldType.getActualTypeArguments()[paramIndex];
+            if (typeArgument instanceof Class) {
+                return (Class<?>) typeArgument;
+            } else {
+                return (Class<?>) ((ParameterizedType) typeArgument).getRawType();
+            }
         } catch (ClassCastException e) {
-            throw new BeanProcessingException("Field " + field + "is not a collection-valued field.");
+            throw new BeanProcessingException("Field " + field + " is not of parametrized type.");
+        }
+    }
+
+    /**
+     * Determines the declared type of keys of the map represented by the specified field.
+     *
+     * @param field Map field
+     * @return Declared type of values
+     */
+    public static Class<?> getMapKeyType(Field field) {
+        return getGenericType(field, 0);
+    }
+
+    /**
+     * Gets the declared type of values of the map represented by the specified field.
+     *
+     * @param field Map field
+     * @return Declared type of values
+     */
+    public static Class<?> getMapValueType(Field field) {
+        Objects.requireNonNull(field);
+        try {
+            return getGenericType(field, 1);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new BeanProcessingException("Unable to determine declared Map value type of field " + field + ".", e);
+        }
+    }
+
+    /**
+     * In case the map represent by the specified field has as value another generic type, this method retrieves this
+     * generic type's actual first argument.
+     * <p>
+     * This implementation is supposed to determine value type of {@link cz.cvut.kbss.jopa.model.annotations.Properties}
+     * fields with the following declaration {@code Map<String, Collection<?>>}, where the collection can be replaced by
+     * a more specific type (List, Set) and the map key type can be also different.
+     *
+     * @param field Map field
+     * @return Value type if present, {@code null} otherwise
+     */
+    public static Class<?> getMapGenericValueType(Field field) {
+        try {
+            final ParameterizedType fieldType = (ParameterizedType) field.getGenericType();
+            final Type typeArgument = fieldType.getActualTypeArguments()[1];
+            if (typeArgument instanceof Class) {
+                if (Collection.class.isAssignableFrom((Class<?>) typeArgument)) {
+                    // For raw value type - Map<?, Collection>
+                    return null;
+                }
+                throw new BeanProcessingException("Expected map value type to be generic. Field: " + field);
+            } else {
+                final ParameterizedType valueType = (ParameterizedType) typeArgument;
+                final Type actualType = valueType.getActualTypeArguments()[0];
+                if (Class.class.isAssignableFrom(actualType.getClass())) {
+                    // For Map<?, Collection<String>>
+                    return Class.class.cast(actualType);
+                }
+                // For Map<?, Collection<?>>
+                return null;
+            }
+        } catch (ClassCastException e) {
+            throw new BeanProcessingException("Field " + field + " is not of parametrized type.");
         }
     }
 
@@ -142,5 +225,17 @@ public class BeanClassProcessor {
     public static boolean isCollection(Field field) {
         Objects.requireNonNull(field);
         return Collection.class.isAssignableFrom(field.getType());
+    }
+
+    /**
+     * Checks that the properties field is a {@link Map}.
+     *
+     * @param field The field to check
+     * @throws cz.cvut.kbss.jsonld.exception.TargetTypeException When the field is not a Map
+     */
+    public static void verifyPropertiesFieldType(Field field) {
+        if (!Map.class.isAssignableFrom(field.getType())) {
+            throw new TargetTypeException("@Properties field " + field + " must be a java.util.Map.");
+        }
     }
 }

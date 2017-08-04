@@ -4,16 +4,30 @@
     "lastName": "http://xmlns.com/foaf/0.1/lastName",
     "accountName": "http://xmlns.com/foaf/0.1/accountName",
     "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/isAdmin",
-    "created": "http://purl.org/dc/terms/created"
+    "brands": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/brand",
+    "members": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/hasMember"
   },
-  "@id": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#Catherine+Halsey",
-  "@type": [
-    "http://onto.fel.cvut.cz/ontologies/ufo/Person",
-    "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/User"
+  "@id": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#UNSC",
+  "@type": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Organization",
+  "brands": [
+    "Spartan-II",
+    "Mjolnir IV"
   ],
-  "isAdmin": true,
-  "accountName": "halsey@unsc.org",
-  "firstName": "Catherine",
-  "lastName": "Halsey",
-  "created": "Fri Jul 29 14:52:04 CEST 2016"
+  "members": [
+    {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#Catherine+Halsey",
+      "@type": [
+        "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+        "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Employee",
+        "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/User"
+      ],
+      "isAdmin": true,
+      "accountName": "halsey@unsc.org",
+      "firstName": "Catherine",
+      "lastName": "Halsey"
+    }
+  ],
+  "http://purl.org/dc/terms/created": "Mon Aug 01 10:43:04 CEST 2016",
+  "http://www.w3.org/2000/01/rdf-schema#label": "UNSC",
+  "http://purl.org/dc/terms/description": "This property is not mapped, so it will not be deserialized."
 }

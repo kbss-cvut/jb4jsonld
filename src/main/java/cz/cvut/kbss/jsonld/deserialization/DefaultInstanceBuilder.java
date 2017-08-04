@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
@@ -24,8 +22,8 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * Default implementation of the JSON-LD deserializer, which takes values parsed from a JSON-LD document and builds
- * Java instances from them.
+ * Default implementation of the JSON-LD deserializer, which takes values parsed from a JSON-LD document and builds Java
+ * instances from them.
  */
 public class DefaultInstanceBuilder implements InstanceBuilder {
 
@@ -78,19 +76,39 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     public void openCollection(String property) {
         Objects.requireNonNull(property);
         final Field targetField = currentInstance.getFieldForProperty(property);
-        assert targetField != null;
-        final Collection<?> instance = BeanClassProcessor.createCollection(targetField);
-        final InstanceContext<Collection<?>> ctx;
-        if (property.equals(JsonLd.TYPE)) {
-            ctx = new TypesContext(instance, knownInstances,
-                    BeanClassProcessor.getCollectionItemType(targetField), currentInstance.getInstanceType());
+        final InstanceContext<?> ctx;
+        if (targetField == null) {
+            if (BeanAnnotationProcessor.hasPropertiesField(currentInstance.getInstanceType()) &&
+                    !JsonLd.TYPE.equals(property)) {
+                ctx = buildPropertiesContext(property);
+            } else {
+                ctx = new DummyCollectionInstanceContext(knownInstances);
+            }
         } else {
-            ctx = new CollectionInstanceContext<>(instance, BeanClassProcessor.getCollectionItemType(targetField),
-                    knownInstances);
+            final Collection<?> instance = BeanClassProcessor.createCollection(targetField);
+            if (JsonLd.TYPE.equals(property)) {
+                ctx = new TypesContext(instance, knownInstances,
+                        BeanClassProcessor.getCollectionItemType(targetField), currentInstance.getInstanceType());
+            } else {
+                ctx = new CollectionInstanceContext<>(instance, BeanClassProcessor.getCollectionItemType(targetField),
+                        knownInstances);
+            }
+            currentInstance.setFieldValue(targetField, instance);
         }
-        currentInstance.setFieldValue(targetField, instance);
         openInstances.push(currentInstance);
         this.currentInstance = ctx;
+    }
+
+    private InstanceContext<?> buildPropertiesContext(String property) {
+        final Field propsField = BeanAnnotationProcessor.getPropertiesField(currentInstance.getInstanceType());
+        BeanClassProcessor.verifyPropertiesFieldType(propsField);
+        Map<?, ?> propertiesMap = (Map<?, ?>) BeanClassProcessor
+                .getFieldValue(propsField, currentInstance.getInstance());
+        if (propertiesMap == null) {
+            propertiesMap = new HashMap<>();
+            currentInstance.setFieldValue(propsField, propertiesMap);
+        }
+        return new PropertiesInstanceContext(propertiesMap, property, propsField);
     }
 
     @Override
@@ -153,12 +171,13 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public boolean isPlural(String property) {
         assert isPropertyMapped(property);
-        return BeanClassProcessor.isCollection(currentInstance.getFieldForProperty(property));
+        final Field mappedField = currentInstance.getFieldForProperty(property);
+        return mappedField == null || BeanClassProcessor.isCollection(mappedField);
     }
 
     @Override
     public boolean isPropertyMapped(String property) {
-        return currentInstance.isPropertyMapped(property);
+        return currentInstance.isPropertyMapped(property) || JsonLd.TYPE.equals(property);
     }
 
     @Override

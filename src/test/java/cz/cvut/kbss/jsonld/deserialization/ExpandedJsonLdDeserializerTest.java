@@ -1,27 +1,25 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
+import cz.cvut.kbss.jopa.model.annotations.Id;
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.Employee;
-import cz.cvut.kbss.jsonld.environment.model.Organization;
-import cz.cvut.kbss.jsonld.environment.model.Study;
-import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 import org.junit.Before;
@@ -33,6 +31,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -162,19 +161,19 @@ public class ExpandedJsonLdDeserializerTest {
             throws Exception {
         final Object input = readAndExpand("objectWithUnknownProperty.json");
         thrown.expect(UnknownPropertyException.class);
-        final String property = "http://purl.org/dc/terms/created";
-        thrown.expectMessage(
-                "No field matching property " + property + " was found in class " + User.class + " or its ancestors.");
+        final String property = "http://purl.org/dc/terms/description";
+        thrown.expectMessage("No field matching property " + property + " was found in " + Organization.class +
+                " or its ancestors.");
 
-        deserializer.deserialize(input, User.class);
+        deserializer.deserialize(input, Organization.class);
     }
 
     @Test
     public void skipsUnknownPropertyWhenIgnoreIsConfiguredAndUnmappedPropertyIsEncountered() throws Exception {
         final Object input = readAndExpand("objectWithUnknownProperty.json");
         deserializer.configure().set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
-        final User result = deserializer.deserialize(input, User.class);
-        verifyUserAttributes(USERS.get(HALSEY_URI), result);
+        final Organization result = deserializer.deserialize(input, Organization.class);
+        verifyOrganizationAttributes(result);
     }
 
     @Test
@@ -214,5 +213,46 @@ public class ExpandedJsonLdDeserializerTest {
                 "Type <" + Vocabulary.EMPLOYEE + "> mapped by the target Java class " + Employee.class +
                         " not found in input JSON-LD object.");
         deserializer.deserialize(input, Employee.class);
+    }
+
+    @Test
+    public void deserializationPopulatesPropertiesFieldWithUnmappedPropertiesFoundInInput() throws Exception {
+        final Object input = readAndExpand("objectWithUnmappedProperties.json");
+        final Person result = deserializer.deserialize(input, Person.class);
+        final User model = USERS.get(HALSEY_URI);
+        assertEquals(model.getUri(), result.getUri());
+        assertEquals(model.getFirstName(), result.getFirstName());
+        assertEquals(model.getLastName(), result.getLastName());
+        assertFalse(result.getProperties().isEmpty());
+        assertTrue(result.getProperties().containsKey(Vocabulary.USERNAME));
+        assertEquals(1, result.getProperties().get(Vocabulary.USERNAME).size());
+        assertEquals(model.getUsername(), result.getProperties().get(Vocabulary.USERNAME).iterator().next());
+        assertTrue(result.getProperties().containsKey(Vocabulary.IS_ADMIN));
+        assertEquals(1, result.getProperties().get(Vocabulary.IS_ADMIN).size());
+        assertEquals(Boolean.TRUE.toString(), result.getProperties().get(Vocabulary.IS_ADMIN).iterator().next());
+    }
+
+    @Test
+    public void deserializationPopulatesTypedProperties() throws Exception {
+        final Object input = readAndExpand("objectWithUnmappedProperties.json");
+        final ClassWithProperties result = deserializer.deserialize(input, ClassWithProperties.class);
+        assertNotNull(result);
+        final User model = USERS.get(HALSEY_URI);
+        assertEquals(model.getUri(), result.uri);
+        assertTrue(result.properties.containsKey(URI.create(Vocabulary.FIRST_NAME)));
+        assertEquals(model.getFirstName(), result.properties.get(URI.create(Vocabulary.FIRST_NAME)).iterator().next());
+        assertTrue((Boolean) result.properties.get(URI.create(Vocabulary.IS_ADMIN)).iterator().next());
+    }
+
+    @OWLClass(iri = Vocabulary.PERSON)
+    public static class ClassWithProperties {
+        @Id
+        private URI uri;
+
+        @Properties
+        private Map<URI, Set<?>> properties;
+
+        public ClassWithProperties() {
+        }
     }
 }

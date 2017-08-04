@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
@@ -58,7 +56,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         verifyTargetType(root);
         for (Map.Entry<?, ?> e : root.entrySet()) {
             final String property = e.getKey().toString();
-            final boolean shouldSkip = verifyPropertyMapping(property);
+            final boolean shouldSkip = shouldSkipProperty(property);
             if (shouldSkip) {
                 continue;
             }
@@ -87,12 +85,12 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
                 " not found in input JSON-LD object.");
     }
 
-    private boolean verifyPropertyMapping(String property) {
+    private boolean shouldSkipProperty(String property) {
         if (!instanceBuilder.isPropertyMapped(property)) {
-            if (!JsonLd.TYPE.equals(property) && !configure().is(ConfigParam.IGNORE_UNKNOWN_PROPERTIES)) {
-                throw UnknownPropertyException.create(property, instanceBuilder.getCurrentContextType());
+            if (configure().is(ConfigParam.IGNORE_UNKNOWN_PROPERTIES)) {
+                return true;
             }
-            return true;
+            throw UnknownPropertyException.create(property, instanceBuilder.getCurrentContextType());
         }
         return false;
     }

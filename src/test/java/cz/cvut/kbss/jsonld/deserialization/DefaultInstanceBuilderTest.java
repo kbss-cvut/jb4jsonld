@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
@@ -226,5 +224,70 @@ public class DefaultInstanceBuilderTest {
         assertTrue(result instanceof TypesContext);
         final TypesContext<?, ?> ctx = (TypesContext<?, ?>) result;
         assertEquals(String.class, ctx.getItemType());
+    }
+
+    @Test
+    public void isPropertyMappedReturnsTrueForMappedProperty() {
+        deserializer.openObject(Person.class);
+        assertTrue(deserializer.isPropertyMapped(Vocabulary.FIRST_NAME));
+    }
+
+    @Test
+    public void isPropertyMappedReturnsFalseForUnknownProperty() {
+        deserializer.openObject(Organization.class);
+        assertFalse(deserializer.isPropertyMapped(Vocabulary.IS_ADMIN));
+    }
+
+    @Test
+    public void isPropertyMappedReturnsTrueForType() {
+        deserializer.openObject(Person.class);
+        assertTrue(deserializer.isPropertyMapped(JsonLd.TYPE));
+    }
+
+    @Test
+    public void isPluralReturnsTrueForType() {
+        deserializer.openObject(Person.class);
+        assertTrue(deserializer.isPlural(JsonLd.TYPE));
+    }
+
+    @Test
+    public void openCollectionOpensDummyCollectionContextForTypeInInstanceWithoutTypesField() throws Exception {
+        deserializer.openObject(Person.class);
+        assertTrue(getCurrentInstance() instanceof SingularObjectContext);
+        deserializer.openCollection(JsonLd.TYPE);
+        assertTrue(getCurrentInstance() instanceof DummyCollectionInstanceContext);
+        deserializer.closeCollection();
+        assertTrue(getCurrentInstance() instanceof SingularObjectContext);
+    }
+
+    @Test
+    public void addingTypesToInstanceWithoutTypesFieldDoesNothing() {
+        deserializer.openObject(Person.class);
+        deserializer.openCollection(JsonLd.TYPE);
+        deserializer.addValue(Vocabulary.EMPLOYEE);
+        deserializer.addValue(Vocabulary.USER);
+        deserializer.closeCollection();
+        assertNotNull(deserializer.getCurrentRoot());
+    }
+
+    @Test
+    public void openCollectionCreatesPropertiesContextAndSetsNewPropertiesMapOnTargetInstanceWhenItDoesNotExist() {
+        deserializer.openObject(Person.class);
+        final Person instance = (Person) deserializer.getCurrentRoot();
+        assertNull(instance.getProperties());
+        deserializer.openCollection(Vocabulary.IS_ADMIN);
+        assertNotNull(instance.getProperties());
+    }
+
+    @Test
+    public void openCollectionReusesPropertiesInstanceWhenItAlreadyExistsOnTargetInstance() {
+        deserializer.openObject(Person.class);
+        final Person instance = (Person) deserializer.getCurrentRoot();
+        assertNull(instance.getProperties());
+        deserializer.openCollection(Vocabulary.IS_ADMIN);
+        final Map<String, Set<String>> propsMap = instance.getProperties();
+        deserializer.closeCollection();
+        deserializer.openCollection(Vocabulary.USERNAME);
+        assertSame(propsMap, instance.getProperties());
     }
 }

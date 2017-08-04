@@ -26,8 +26,4 @@ public class BeanProcessingException extends RuntimeException {
     public BeanProcessingException(String message, Throwable cause) {
         super(message, cause);
     }
-
-    public BeanProcessingException(Throwable cause) {
-        super(cause);
-    }
 }

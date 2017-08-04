@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.common;
 
@@ -136,8 +134,8 @@ public class BeanAnnotationProcessor {
     /**
      * Creates a map of JSON-LD serializable fields, where the keys are IRIs of properties mapped by the fields.
      * <p>
-     * Identifier field is mapped to the {@link JsonLd#ID} property identifier. Ancestors of the specified
-     * class are also scanned.
+     * Identifier field is mapped to the {@link JsonLd#ID} property identifier. Ancestors of the specified class are
+     * also scanned.
      *
      * @param cls Class for which the mapping should be determined
      * @return Mapping of OWL properties to fields
@@ -171,6 +169,36 @@ public class BeanAnnotationProcessor {
     }
 
     /**
+     * Checks whether the specified class contains a {@link Properties} field.
+     *
+     * @param cls The class to examine
+     * @return Whether the class has properties field
+     */
+    public static boolean hasPropertiesField(Class<?> cls) {
+        Objects.requireNonNull(cls);
+        final List<Field> fields = getSerializableFields(cls);
+        final Optional<Field> propertiesField = fields.stream().filter(BeanAnnotationProcessor::isPropertiesField)
+                                                      .findAny();
+        return propertiesField.isPresent();
+    }
+
+    /**
+     * Retrieves a field representing {@link Properties} in the specified class.
+     *
+     * @param cls The class to get properties field from
+     * @return Properties field
+     * @throws IllegalArgumentException When the specified class does not have a {@link Properties} field
+     */
+    public static Field getPropertiesField(Class<?> cls) {
+        final List<Field> fields = getSerializableFields(cls);
+        final Optional<Field> propsField = fields.stream().filter(BeanAnnotationProcessor::isPropertiesField).findAny();
+        if (propsField.isPresent()) {
+            return propsField.get();
+        }
+        throw new IllegalArgumentException(cls + " does not have a @Properties field.");
+    }
+
+    /**
      * Checks whether the specified field is mapped to an OWL object property.
      *
      * @param field The field to examine
@@ -195,8 +223,7 @@ public class BeanAnnotationProcessor {
     /**
      * Resolves JSON-LD attribute identifier of the specified field.
      * <p>
-     * For OWL properties, this will be their IRI. For id fields it will be the {@link
-     * JsonLd#ID} string.
+     * For OWL properties, this will be their IRI. For id fields it will be the {@link JsonLd#ID} string.
      *
      * @param field The field to resolve
      * @return JSON-LD attribute identifier

@@ -26,8 +26,4 @@ public class JsonLdSerializationException extends RuntimeException {
     public JsonLdSerializationException(String message, Throwable cause) {
         super(message, cause);
     }
-
-    public JsonLdSerializationException(Throwable cause) {
-        super(cause);
-    }
 }

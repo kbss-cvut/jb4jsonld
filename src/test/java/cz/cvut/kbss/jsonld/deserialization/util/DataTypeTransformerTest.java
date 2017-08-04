@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization.util;
 
@@ -74,5 +72,18 @@ public class DataTypeTransformerTest {
         final Long value = System.currentTimeMillis();
         assertEquals(Float.valueOf(value), DataTypeTransformer.transformValue(value, Float.class));
         assertEquals(Double.valueOf(value), DataTypeTransformer.transformValue(value, Double.class));
+    }
+
+    @Test
+    public void transformationReturnsValueIfItsTypeAlreadyCorrespondsToTarget() {
+        final String value = "halsey@unsc.org";
+        assertSame(value, DataTypeTransformer.transformValue(value, String.class));
+    }
+
+    @Test
+    public void transformationTransformsAnyValueToString() {
+        assertEquals(Boolean.TRUE.toString(), DataTypeTransformer.transformValue(true, String.class));
+        assertEquals(Integer.toString(117), DataTypeTransformer.transformValue(117, String.class));
+        assertEquals(Float.toString(3.141792F), DataTypeTransformer.transformValue(3.141792F, String.class));
     }
 }

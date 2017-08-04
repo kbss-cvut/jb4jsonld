@@ -1,20 +1,19 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 
@@ -62,16 +61,16 @@ public interface InstanceBuilder {
     void closeObject();
 
     /**
-     * Creates new instance of appropriate collection and sets it as value of the specified property of the
-     * currently open object.
+     * Creates new instance of appropriate collection and sets it as value of the specified property of the currently
+     * open object.
      * <p>
      * The collection type is determined from the declared type of the mapped field, which is taken from the currently
      * open object. Therefore, another object has to be already open before this method can be called.
      * <p>
      * The new collection also becomes the currently open object.
      * <p>
-     * This method should also verify cardinality, i.e. a collection cannot be set as value of a
-     * field mapped by {@code property}, if the field is singular.
+     * This method should also verify cardinality, i.e. a collection cannot be set as value of a field mapped by {@code
+     * property}, if the field is singular.
      * <p>
      * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      *
@@ -155,6 +154,9 @@ public interface InstanceBuilder {
      * Checks whether the specified property is mapped to a plural field.
      * <p>
      * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
+     * <p>
+     * Note that {@link Types} and {@link cz.cvut.kbss.jopa.model.annotations.Properties}
+     * fields are always treated as plural.
      *
      * @param property Property identifier (IRI)
      * @return Whether mapped field is collection-valued or not
@@ -163,6 +165,10 @@ public interface InstanceBuilder {
 
     /**
      * Checks whether the specified property is mapped by the class representing the current instance context.
+     * <p>
+     * Returns true also for the {@link cz.cvut.kbss.jsonld.JsonLd#TYPE} property, even though the target instance may
+     * not contain a {@link Types} field. The builder has to be able to handle types
+     * no matter whether a types field is present or not.
      *
      * @param property Property identifier (IRI)
      * @return Whether the property is mapped in the current instance context

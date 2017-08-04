@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2016 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.common;
 
@@ -36,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 public class BeanAnnotationProcessorTest {
@@ -211,5 +210,29 @@ public class BeanAnnotationProcessorTest {
     public void mapSerializableFieldsSkipsPropertiesField() throws Exception {
         final Map<String, Field> fields = BeanAnnotationProcessor.mapSerializableFields(Person.class);
         assertFalse(fields.containsValue(Person.class.getDeclaredField("properties")));
+    }
+
+    @Test
+    public void hasPropertiesFieldReturnsFalseForClassWithoutProperties() {
+        assertFalse(BeanAnnotationProcessor.hasPropertiesField(Organization.class));
+    }
+
+    @Test
+    public void hasPropertiesFieldReturnsTrueForClassWithProperties() {
+        assertTrue(BeanAnnotationProcessor.hasPropertiesField(Person.class));
+        assertTrue(BeanAnnotationProcessor.hasPropertiesField(User.class)); // Check also subclasses
+    }
+
+    @Test
+    public void getPropertiesFieldReturnsPropertiesFieldOfClass() throws Exception {
+        final Field result = BeanAnnotationProcessor.getPropertiesField(Person.class);
+        assertEquals(Person.class.getDeclaredField("properties"), result);
+    }
+
+    @Test
+    public void getPropertiesFieldThrowsIllegalArgumentForClassWithoutPropertiesField() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage(containsString(Organization.class + " does not have a @Properties field."));
+        BeanAnnotationProcessor.getPropertiesField(Organization.class);
     }
 }
