@@ -85,6 +85,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
                 ctx = new DummyCollectionInstanceContext(knownInstances);
             }
         } else {
+            verifyPluralAttribute(property, targetField);
             final Collection<?> instance = BeanClassProcessor.createCollection(targetField);
             if (JsonLd.TYPE.equals(property)) {
                 ctx = new TypesContext(instance, knownInstances,
@@ -109,6 +110,12 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             currentInstance.setFieldValue(propsField, propertiesMap);
         }
         return new PropertiesInstanceContext(propertiesMap, property, propsField);
+    }
+
+    private void verifyPluralAttribute(String property, Field field) {
+        if (!isPlural(property)) {
+            throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, field);
+        }
     }
 
     @Override

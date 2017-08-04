@@ -2,6 +2,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.deserialization.util.DataTypeTransformer;
+import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -36,6 +37,9 @@ public class PropertiesInstanceContext extends InstanceContext<Map> {
             final Object itemValue = itemType != null ? DataTypeTransformer.transformValue(item, itemType) : item;
             values.add(itemValue);
         } else {
+            if (instance.containsKey(typedProperty)) {
+                throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, propertiesField);
+            }
             final Object typedValue = DataTypeTransformer.transformValue(item, valueType);
             instance.put(typedProperty, typedValue);
         }

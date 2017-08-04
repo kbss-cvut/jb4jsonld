@@ -3,8 +3,11 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -13,6 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -21,6 +25,9 @@ public class PropertiesInstanceContextTest {
     private static final String VALUE = "halsey@unsc.org";
 
     private Field personProperties;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -93,5 +100,17 @@ public class PropertiesInstanceContextTest {
         final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.IS_ADMIN, personProperties);
         ctx.addItem(true);
         assertEquals(Boolean.TRUE.toString(), map.get(Vocabulary.IS_ADMIN).iterator().next());
+    }
+
+    @Test
+    public void addItemThrowsExceptionWhenMultipleItemsForSingularPropertyAreAdded() throws Exception {
+        final Map<String, String> map = new HashMap<>();
+        final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.USERNAME,
+                SingleValued.class.getDeclaredField("properties"));
+        thrown.expect(JsonLdDeserializationException.class);
+        thrown.expectMessage(
+                containsString("Encountered multiple values of property " + Vocabulary.USERNAME));
+        ctx.addItem(VALUE);
+        ctx.addItem("halsey@oni.org");
     }
 }

@@ -20,6 +20,7 @@ import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
+import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 import org.junit.Before;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 public class ExpandedJsonLdDeserializerTest {
@@ -253,6 +255,37 @@ public class ExpandedJsonLdDeserializerTest {
         private Map<URI, Set<?>> properties;
 
         public ClassWithProperties() {
+        }
+    }
+
+    @Test
+    public void deserializationThrowsExceptionWhenMultipleValuesForSingularFieldAreEncountered() throws Exception {
+        thrown.expect(JsonLdDeserializationException.class);
+        thrown.expectMessage(
+                containsString("Encountered multiple values of property " + Vocabulary.FIRST_NAME));
+        final Object input = readAndExpand("objectWithAttributeCardinalityViolation.json");
+        deserializer.deserialize(input, Person.class);
+    }
+
+    @Test
+    public void deserializationThrowsExceptionWhenMultipleValuesOfUnmappedPropertyForPropertiesWithSingularValuesAreEncountered()
+            throws Exception {
+        thrown.expect(JsonLdDeserializationException.class);
+        thrown.expectMessage(
+                containsString("Encountered multiple values of property " + Vocabulary.FIRST_NAME));
+        final Object input = readAndExpand("objectWithAttributeCardinalityViolation.json");
+        deserializer.deserialize(input, ClassWithSingularProperties.class);
+    }
+
+    @OWLClass(iri = Vocabulary.PERSON)
+    public static class ClassWithSingularProperties {
+        @Id
+        private URI uri;
+
+        @Properties
+        private Map<String, String> properties;
+
+        public ClassWithSingularProperties() {
         }
     }
 }
