@@ -11,6 +11,7 @@
     <description>Java Binding for JSON-LD allows serialization and deserialization of Java POJOs to/from JSON-LD.
         This is the core implementation, which has to be integrated with Jackson, Jersey etc.
     </description>
+    <url>https://github.com/kbss-cvut/jb4jsonld</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
