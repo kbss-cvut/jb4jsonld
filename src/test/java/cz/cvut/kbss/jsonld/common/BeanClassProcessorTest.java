@@ -87,7 +87,7 @@ public class BeanClassProcessorTest {
 
     private static class ClassWithListField {
 
-        @OWLDataProperty(iri = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/List")
+        @OWLDataProperty(iri = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/List")
         private List<Integer> list;
     }
 

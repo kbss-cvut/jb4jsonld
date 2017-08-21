@@ -1,20 +1,20 @@
 {
   "@type": [
-    "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Study"
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Study"
   ],
   "http://www.w3.org/2000/01/rdf-schema#label": "LupusStudy",
-  "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/hasMember": [
+  "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/hasMember": [
     {
       "@type": [
-        "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Employee"
+        "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee"
       ],
       "http://xmlns.com/foaf/0.1/accountName": "Lisa.Cuddy@jopaexample.org",
       "http://xmlns.com/foaf/0.1/firstName": "Lisa",
       "http://xmlns.com/foaf/0.1/lastName": "Cuddy",
-      "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/isMemberOf": {
+      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": {
         "@type": [
           "http://krizik.felk.cvut.cz/ontologies/study-manager/organization",
-          "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Organization"
+          "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Organization"
         ],
         "http://www.w3.org/2000/01/rdf-schema#label": "Princeton-Plainsboro Teaching Hospital",
         "http://purl.org/dc/terms/created": "Mon Oct 10 17:34:04 CEST 2016",
@@ -23,15 +23,15 @@
       "@id": "http://krizik.felk.cvut.cz/ontologies/study-manager/Lisa+Cuddy"
     }
   ],
-  "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/hasParticipant": [
+  "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/hasParticipant": [
     {
       "@type": [
-        "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/Employee"
+        "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee"
       ],
       "http://xmlns.com/foaf/0.1/accountName": "Greg.House@jopaexample.org",
       "http://xmlns.com/foaf/0.1/firstName": "Greg",
       "http://xmlns.com/foaf/0.1/lastName": "House",
-      "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/isMemberOf": "http://krizik.felk.cvut.cz/ontologies/study-manager/Organization-PrincetonPlainsboro",
+      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": "http://krizik.felk.cvut.cz/ontologies/study-manager/Organization-PrincetonPlainsboro",
       "@id": "http://krizik.felk.cvut.cz/ontologies/study-manager/Greg+House"
     }
   ],

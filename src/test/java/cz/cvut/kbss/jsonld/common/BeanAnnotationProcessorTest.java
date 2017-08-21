@@ -159,7 +159,7 @@ public class BeanAnnotationProcessorTest {
         BeanAnnotationProcessor.getInstanceIdentifier(instance);
     }
 
-    @OWLClass(iri = "http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld/ClassWithoutIdentifier")
+    @OWLClass(iri = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ClassWithoutIdentifier")
     private static class ClassWithoutIdentifier {
         @OWLAnnotationProperty(iri = CommonVocabulary.RDFS_LABEL)
         private String label;

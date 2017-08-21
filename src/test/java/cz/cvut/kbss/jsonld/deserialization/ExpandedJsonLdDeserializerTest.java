@@ -42,15 +42,15 @@ import static org.junit.Assert.*;
 public class ExpandedJsonLdDeserializerTest {
 
     private static final URI HALSEY_URI = URI
-            .create("http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#Catherine+Halsey");
+            .create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey");
     private static final URI LASKY_URI = URI
-            .create("http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#Thomas+Lasky");
+            .create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Thomas+Lasky");
     private static final URI PALMER_URI = URI
-            .create("http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#Sarah+Palmer");
+            .create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Sarah+Palmer");
 
     private static final Map<URI, User> USERS = initUsers();
 
-    private static final URI ORG_URI = URI.create("http://krizik.felk.cvut.cz/ontologies/jaxb-jsonld#UNSC");
+    private static final URI ORG_URI = URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC");
     private static final String ORG_NAME = "UNSC";
     private static final String[] ORG_BRANDS = {"Spartan-II", "Mjolnir IV"};
 
