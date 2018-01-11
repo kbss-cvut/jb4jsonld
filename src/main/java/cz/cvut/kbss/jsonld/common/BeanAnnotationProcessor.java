@@ -192,18 +192,14 @@ public class BeanAnnotationProcessor {
      * @throws IllegalArgumentException When the specified class does not have a {@link Properties} field
      */
     public static Field getPropertiesField(Class<?> cls) {
-        // TODO Rewrite this to return optional?
         final List<Field> fields = getSerializableFields(cls);
         final Optional<Field> propsField = fields.stream().filter(BeanAnnotationProcessor::isPropertiesField).findAny();
-        if (propsField.isPresent()) {
-            return propsField.get();
-        }
-        throw new IllegalArgumentException(cls + " does not have a @Properties field.");
+        return propsField.orElseThrow(() -> new IllegalArgumentException(cls + " does not have a @Properties field."));
     }
 
     /**
      * Extracts types field from the specified class or any of its ancestors.
-     *
+     * <p>
      * This method assumes there is at most one types field in the class hierarchy.
      *
      * @param cls The class to scan

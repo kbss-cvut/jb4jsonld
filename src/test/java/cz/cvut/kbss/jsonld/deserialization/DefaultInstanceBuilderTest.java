@@ -117,7 +117,7 @@ public class DefaultInstanceBuilderTest {
     }
 
     @Test
-    public void addValueAddsValuesToCurrentlyOpenCollection() throws Exception {
+    public void addValueAddsValuesToCurrentlyOpenCollection() {
         final List<Integer> items = new ArrayList<>();
         for (int i = 0; i < Generator.randomCount(10); i++) {
             items.add(Generator.randomCount(Integer.MAX_VALUE));
@@ -132,7 +132,7 @@ public class DefaultInstanceBuilderTest {
     }
 
     @Test
-    public void openObjectByPropertyCreatesObjectOfCorrectType() throws Exception {
+    public void openObjectByPropertyCreatesObjectOfCorrectType() {
         deserializer.openObject(Employee.class);
         deserializer.openObject(Vocabulary.IS_MEMBER_OF);
         assertTrue(deserializer.getCurrentRoot() instanceof Organization);
@@ -149,7 +149,7 @@ public class DefaultInstanceBuilderTest {
     }
 
     @Test
-    public void addValueSetsPropertyValue() throws Exception {
+    public void addValueSetsPropertyValue() {
         deserializer.openObject(User.class);
         final String firstName = "Catherine";
         final String lastName = "Halsey";

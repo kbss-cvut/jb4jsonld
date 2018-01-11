@@ -45,10 +45,8 @@ public abstract class LiteralNode<T> extends JsonNode {
 
         LiteralNode<?> that = (LiteralNode<?>) o;
 
-        if (getName() != null && !getName().equals(that.getName()) || getName() == null && that.getName() != null) {
-            return false;
-        }
-        return value.equals(that.value);
+        return (getName() == null || getName().equals(that.getName())) &&
+                (getName() != null || that.getName() == null) && value.equals(that.value);
 
     }
 

@@ -109,7 +109,7 @@ public class PropertiesInstanceContextTest {
     }
 
     @Test
-    public void addItemConvertsValuesToCorrectType() throws Exception {
+    public void addItemConvertsValuesToCorrectType() {
         final Map<String, Set<String>> map = new HashMap<>();
         final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.IS_ADMIN, personProperties);
         ctx.addItem(true);

@@ -105,8 +105,7 @@ public class DataTypeTransformer {
 
             TransformationRuleIdentifier<?, ?> that = (TransformationRuleIdentifier<?, ?>) o;
 
-            if (!sourceType.equals(that.sourceType)) return false;
-            return targetType.equals(that.targetType);
+            return sourceType.equals(that.sourceType) && targetType.equals(that.targetType);
 
         }
 

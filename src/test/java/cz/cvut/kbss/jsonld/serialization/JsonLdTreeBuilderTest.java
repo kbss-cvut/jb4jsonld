@@ -140,7 +140,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void openCollectionCreatesCollectionNode() throws Exception {
+    public void openCollectionCreatesCollectionNode() {
         treeBuilder.openCollection(Collections.singleton(Generator.generateEmployee()));
         final CompositeNode root = treeBuilder.getTreeRoot();
         assertNotNull(root);
@@ -288,7 +288,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void testBuildTreeWithRootCollection() throws Exception {
+    public void testBuildTreeWithRootCollection() {
         final Set<User> users = Generator.generateUsers();
         treeBuilder.openCollection(users);
         for (User u : users) {

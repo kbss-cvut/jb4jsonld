@@ -86,7 +86,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseTraversesObjectPropertyCollection() throws Exception {
+    public void traverseTraversesObjectPropertyCollection() {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org);
         traverser.traverse(org);
@@ -126,7 +126,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseOnCollectionOpensCollectionAddsInstancesAndClosesCollection() throws Exception {
+    public void traverseOnCollectionOpensCollectionAddsInstancesAndClosesCollection() {
         final Set<User> users = Generator.generateUsers();
         traverser.traverse(users);
 
