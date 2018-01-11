@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -39,6 +39,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     private final FieldSerializer literalSerializer = new LiteralFieldSerializer();
     private final FieldSerializer propertiesSerializer = new PropertiesFieldSerializer();
+    private final InstanceTypeResolver typeResolver = new InstanceTypeResolver();
 
     @Override
     public void openInstance(Object instance) {
@@ -64,11 +65,9 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     }
 
     private void addTypes(Object instance) {
-        final Set<String> types = BeanAnnotationProcessor.getOwlClasses(instance);
+        final Set<String> types = typeResolver.resolveTypes(instance);
         final CollectionNode typesNode = JsonNodeFactory.createCollectionNode(JsonLd.TYPE, types);
-        for (String type : types) {
-            typesNode.addItem(JsonNodeFactory.createLiteralNode(type));
-        }
+        types.forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
         currentNode.addItem(typesNode);
     }
 
@@ -94,7 +93,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void visitField(Field field, Object value) {
-        if (value == null) {
+        if (value == null || BeanAnnotationProcessor.isTypesField(field)) {
             return;
         }
         if (BeanAnnotationProcessor.isObjectProperty(field)) {

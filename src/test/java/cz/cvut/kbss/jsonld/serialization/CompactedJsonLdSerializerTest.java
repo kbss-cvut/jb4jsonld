@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -188,7 +188,7 @@ public class CompactedJsonLdSerializerTest {
 
     @Test
     public void testSerializationOfObjectWithStringBasedUnmappedProperties() throws Exception {
-        final Person person = generatePerson();
+        final Person person = Generator.generatePerson();
         serializer.serialize(person);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
@@ -207,12 +207,16 @@ public class CompactedJsonLdSerializerTest {
         }
     }
 
-    private Person generatePerson() {
-        final Person person = new Person();
-        person.setUri(Generator.generateUri());
-        person.setFirstName("Catherine");
-        person.setLastName("Halsey");
-        person.setProperties(Generator.generateProperties(false));
-        return person;
+    @Test
+    public void serializationPutsOwlClassAndTypesContentIntoOneTypeProperty() throws Exception {
+        final User user = Generator.generateUser();
+        final String type = Generator.URI_BASE + "TypeOne";
+        user.setTypes(Collections.singleton(type));
+        serializer.serialize(user);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final List<?> types = (List<?>) json.get(JsonLd.TYPE);
+        assertTrue(types.contains(Vocabulary.USER));
+        assertTrue(types.contains(type));
     }
 }

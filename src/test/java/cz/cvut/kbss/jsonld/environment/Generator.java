@@ -16,6 +16,7 @@ package cz.cvut.kbss.jsonld.environment;
 
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 
 import java.net.URI;
@@ -96,6 +97,15 @@ public class Generator {
         final Organization company = generateOrganization();
         employee.setEmployer(company);
         return employee;
+    }
+
+    public static Person generatePerson() {
+        final Person person = new Person();
+        person.setUri(Generator.generateUri());
+        person.setFirstName("Catherine");
+        person.setLastName("Halsey");
+        person.setProperties(Generator.generateProperties(false));
+        return person;
     }
 
     public static Organization generateOrganization() {

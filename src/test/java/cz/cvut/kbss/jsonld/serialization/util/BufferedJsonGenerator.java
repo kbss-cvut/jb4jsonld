@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -16,7 +16,6 @@ package cz.cvut.kbss.jsonld.serialization.util;
 
 import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
-import java.io.IOException;
 import java.util.Stack;
 
 public class BufferedJsonGenerator implements JsonGenerator {
@@ -32,7 +31,7 @@ public class BufferedJsonGenerator implements JsonGenerator {
     }
 
     @Override
-    public void writeFieldName(String name) throws IOException {
+    public void writeFieldName(String name) {
         if (!firstAttribute) {
             buffer.append(',');
         }
@@ -41,7 +40,7 @@ public class BufferedJsonGenerator implements JsonGenerator {
     }
 
     @Override
-    public void writeObjectStart() throws IOException {
+    public void writeObjectStart() {
         if (!nodes.isEmpty() && nodes.peek() == NodeType.ARRAY) {
             if (!firstElement) {
                 buffer.append(',');
@@ -54,26 +53,26 @@ public class BufferedJsonGenerator implements JsonGenerator {
     }
 
     @Override
-    public void writeObjectEnd() throws IOException {
+    public void writeObjectEnd() {
         buffer.append('}');
         nodes.pop();
     }
 
     @Override
-    public void writeArrayStart() throws IOException {
+    public void writeArrayStart() {
         buffer.append('[');
         this.firstElement = true;
         nodes.push(NodeType.ARRAY);
     }
 
     @Override
-    public void writeArrayEnd() throws IOException {
+    public void writeArrayEnd() {
         buffer.append(']');
         nodes.pop();
     }
 
     @Override
-    public void writeNumber(Number number) throws IOException {
+    public void writeNumber(Number number) {
         if (!nodes.isEmpty() && nodes.peek() == NodeType.ARRAY) {
             if (!firstElement) {
                 buffer.append(',');
@@ -84,7 +83,7 @@ public class BufferedJsonGenerator implements JsonGenerator {
     }
 
     @Override
-    public void writeBoolean(boolean value) throws IOException {
+    public void writeBoolean(boolean value) {
         if (!nodes.isEmpty() && nodes.peek() == NodeType.ARRAY) {
             if (!firstElement) {
                 buffer.append(',');
@@ -95,7 +94,7 @@ public class BufferedJsonGenerator implements JsonGenerator {
     }
 
     @Override
-    public void writeNull() throws IOException {
+    public void writeNull() {
         if (!nodes.isEmpty() && nodes.peek() == NodeType.ARRAY) {
             if (!firstElement) {
                 buffer.append(',');
@@ -106,7 +105,7 @@ public class BufferedJsonGenerator implements JsonGenerator {
     }
 
     @Override
-    public void writeString(String text) throws IOException {
+    public void writeString(String text) {
         if (!nodes.isEmpty() && nodes.peek() == NodeType.ARRAY) {
             if (!firstElement) {
                 buffer.append(',');

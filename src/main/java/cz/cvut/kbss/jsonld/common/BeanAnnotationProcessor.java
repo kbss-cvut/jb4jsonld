@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -192,12 +192,26 @@ public class BeanAnnotationProcessor {
      * @throws IllegalArgumentException When the specified class does not have a {@link Properties} field
      */
     public static Field getPropertiesField(Class<?> cls) {
+        // TODO Rewrite this to return optional?
         final List<Field> fields = getSerializableFields(cls);
         final Optional<Field> propsField = fields.stream().filter(BeanAnnotationProcessor::isPropertiesField).findAny();
         if (propsField.isPresent()) {
             return propsField.get();
         }
         throw new IllegalArgumentException(cls + " does not have a @Properties field.");
+    }
+
+    /**
+     * Extracts types field from the specified class or any of its ancestors.
+     *
+     * This method assumes there is at most one types field in the class hierarchy.
+     *
+     * @param cls The class to scan
+     * @return Types field
+     */
+    public static Optional<Field> getTypesField(Class<?> cls) {
+        final List<Field> fields = getSerializableFields(cls);
+        return fields.stream().filter(BeanAnnotationProcessor::isTypesField).findFirst();
     }
 
     /**
@@ -220,6 +234,11 @@ public class BeanAnnotationProcessor {
     public static boolean isInstanceIdentifier(Field field) {
         Objects.requireNonNull(field);
         return field.getDeclaredAnnotation(Id.class) != null;
+    }
+
+    public static boolean isTypesField(Field field) {
+        Objects.requireNonNull(field);
+        return field.getDeclaredAnnotation(Types.class) != null;
     }
 
     /**
