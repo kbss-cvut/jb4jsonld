@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -291,5 +292,21 @@ public class DefaultInstanceBuilderTest {
         deserializer.closeCollection();
         deserializer.openCollection(Vocabulary.USERNAME);
         assertSame(propsMap, instance.getProperties());
+    }
+
+    @Test
+    public void openObjectCreatesIdentifierContextWhenTargetTypeIsIdentifier() throws Exception {
+        deserializer.openCollection(CollectionType.LIST);
+        deserializer.openObject(URI.class);
+        final InstanceContext<?> ctx = getCurrentInstance();
+        assertTrue(ctx instanceof NodeReferenceContext);
+    }
+
+    @Test
+    public void openObjectCreatesIdentifierContextForPropertyWithPlainIdentifierTargetFieldType() throws Exception {
+        deserializer.openObject(Organization.class);
+        deserializer.openObject(Vocabulary.ORIGIN);
+        final InstanceContext<?> ctx = getCurrentInstance();
+        assertTrue(ctx instanceof NodeReferenceContext);
     }
 }

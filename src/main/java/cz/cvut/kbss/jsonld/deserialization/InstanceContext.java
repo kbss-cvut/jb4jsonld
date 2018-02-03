@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -14,12 +14,14 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jsonld.JsonLd;
+
 import java.lang.reflect.Field;
 import java.util.Map;
 
 abstract class InstanceContext<T> {
 
-    final T instance;
+    T instance;
 
     final Map<String, Object> knownInstances;
 
@@ -35,6 +37,18 @@ abstract class InstanceContext<T> {
     @SuppressWarnings("unchecked")
     Class<T> getInstanceType() {
         return (Class<T>) instance.getClass();
+    }
+
+    /**
+     * Sets identifier of the instance specified by this context.
+     *
+     * @param value Identifier value
+     */
+    void setIdentifierValue(Object value) {
+        final Field idField = getFieldForProperty(JsonLd.ID);
+        assert idField != null;
+        setFieldValue(idField, value);
+        knownInstances.put(value.toString(), instance);
     }
 
     // These methods are intended for overriding, because the behaviour is supported only by some context implementations
@@ -91,5 +105,12 @@ abstract class InstanceContext<T> {
     boolean isPropertyMapped(String property) {
         // Default behaviour
         return false;
+    }
+
+    /**
+     * Called when  this context is being closed
+     */
+    void close() {
+        // Do nothing by default
     }
 }

@@ -290,4 +290,12 @@ public class ExpandedJsonLdDeserializerTest {
         public ClassWithSingularProperties() {
         }
     }
+
+    @Test
+    public void deserializationSupportsPlainIdentifierObjectPropertyValues() throws Exception {
+        final Object input = readAndExpand("objectWithPlainIdentifierObjectPropertyValue.json");
+        final Organization result = deserializer.deserialize(input, Organization.class);
+        assertNotNull(result);
+        assertEquals(URI.create("http://dbpedia.org/resource/Czech_Republic"), result.getCountry());
+    }
 }

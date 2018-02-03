@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -42,21 +42,33 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         final Field targetField = currentInstance.getFieldForProperty(property);
         assert targetField != null;
         final Class<?> type = targetField.getType();
-        assert BeanAnnotationProcessor.isOwlClassEntity(type);
-        final Object instance = BeanClassProcessor.createInstance(type);
-        final InstanceContext<?> ctx = new SingularObjectContext<>(instance,
-                BeanAnnotationProcessor.mapSerializableFields(type), knownInstances);
-        currentInstance.setFieldValue(targetField, instance);
+        final InstanceContext<?> ctx;
+        if (BeanClassProcessor.isIdentifierType(type)) {
+            ctx = new NodeReferenceContext<>(currentInstance, targetField, knownInstances);
+        } else {
+            assert BeanAnnotationProcessor.isOwlClassEntity(type);
+            final Object instance = BeanClassProcessor.createInstance(type);
+            ctx = new SingularObjectContext<>(instance,
+                    BeanAnnotationProcessor.mapSerializableFields(type), knownInstances);
+            currentInstance.setFieldValue(targetField, instance);
+        }
         openInstances.push(currentInstance);
         this.currentInstance = ctx;
     }
 
     @Override
     public <T> void openObject(Class<T> cls) {
-        final T instance = BeanClassProcessor.createInstance(cls);
-        final SingularObjectContext<?> ctx = new SingularObjectContext<>(instance,
-                BeanAnnotationProcessor.mapSerializableFields(cls), knownInstances);
-        replaceCurrentContext(instance, ctx);
+        if (BeanClassProcessor.isIdentifierType(cls)) {
+            final InstanceContext<T> context = new NodeReferenceContext<>(currentInstance, knownInstances);
+            assert currentInstance != null;
+            openInstances.push(currentInstance);
+            this.currentInstance = context;
+        } else {
+            final T instance = BeanClassProcessor.createInstance(cls);
+            final InstanceContext<T> context = new SingularObjectContext<>(instance,
+                    BeanAnnotationProcessor.mapSerializableFields(cls), knownInstances);
+            replaceCurrentContext(instance, context);
+        }
     }
 
     private <T> void replaceCurrentContext(T instance, InstanceContext<?> ctx) {
@@ -69,6 +81,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
 
     @Override
     public void closeObject() {
+        currentInstance.close();
         if (!openInstances.isEmpty()) {
             this.currentInstance = openInstances.pop();
         }
@@ -105,8 +118,8 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     private InstanceContext<?> buildPropertiesContext(String property) {
         final Field propsField = BeanAnnotationProcessor.getPropertiesField(currentInstance.getInstanceType());
         BeanClassProcessor.verifyPropertiesFieldType(propsField);
-        Map<?, ?> propertiesMap = (Map<?, ?>) BeanClassProcessor
-                .getFieldValue(propsField, currentInstance.getInstance());
+        Map<?, ?> propertiesMap =
+                (Map<?, ?>) BeanClassProcessor.getFieldValue(propsField, currentInstance.getInstance());
         if (propertiesMap == null) {
             propertiesMap = new HashMap<>();
             currentInstance.setFieldValue(propsField, propertiesMap);
@@ -137,6 +150,10 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public void addValue(String property, Object value) {
         assert currentInstance != null;
+        if (JsonLd.ID.equals(property)) {
+            currentInstance.setIdentifierValue(value);
+            return;
+        }
         final Field targetField = currentInstance.getFieldForProperty(property);
         assert targetField != null;
         // This is in case there is only one value in the JSON-LD array, because then it might be treated as single valued attribute
@@ -146,15 +163,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             closeCollection();
         } else {
             currentInstance.setFieldValue(targetField, value);
-            if (BeanAnnotationProcessor.isInstanceIdentifier(targetField)) {
-                registerKnownInstance(targetField);
-            }
         }
-    }
-
-    private void registerKnownInstance(Field targetField) {
-        final Object instance = currentInstance.getInstance();
-        knownInstances.put(BeanClassProcessor.getFieldValue(targetField, instance).toString(), instance);
     }
 
     @Override

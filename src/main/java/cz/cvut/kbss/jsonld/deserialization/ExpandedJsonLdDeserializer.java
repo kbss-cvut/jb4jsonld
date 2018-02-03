@@ -72,6 +72,9 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     }
 
     private void verifyTargetType(Map<?, ?> jsonLdObject) {
+        if (isNodeReference(jsonLdObject)) {
+            return;
+        }
         final Object types = jsonLdObject.get(JsonLd.TYPE);
         final Class<?> targetType = instanceBuilder.getCurrentContextType();
         final String targetTypeIri = BeanAnnotationProcessor.getOwlClass(targetType);
@@ -85,6 +88,10 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         }
         throw new TargetTypeException("Type <" + targetTypeIri + "> mapped by the target Java class " + targetType +
                 " not found in input JSON-LD object.");
+    }
+
+    private boolean isNodeReference(Map<?, ?> jsonLdObject) {
+        return jsonLdObject.size() == 1 && jsonLdObject.containsKey(JsonLd.ID);
     }
 
     private boolean shouldSkipProperty(String property) {

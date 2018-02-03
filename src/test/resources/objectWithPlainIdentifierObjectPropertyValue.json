@@ -1,0 +1,21 @@
+{
+  "@context": {
+    "firstName": "http://xmlns.com/foaf/0.1/firstName",
+    "lastName": "http://xmlns.com/foaf/0.1/lastName",
+    "accountName": "http://xmlns.com/foaf/0.1/accountName",
+    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin",
+    "brands": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/brand",
+    "members": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/hasMember"
+  },
+  "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC",
+  "@type": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Organization",
+  "brands": [
+    "Spartan-II",
+    "Mjolnir IV"
+  ],
+  "http://purl.org/dc/terms/created": "Mon Aug 01 10:43:04 CEST 2016",
+  "http://www.w3.org/2000/01/rdf-schema#label": "UNSC",
+  "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/origin": {
+    "@id": "http://dbpedia.org/resource/Czech_Republic"
+  }
+}
