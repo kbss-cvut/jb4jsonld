@@ -70,6 +70,14 @@ public class User {
 }
 ```
 
+## Configuration
+
+Parameter | Default value | Explanation
+----------|---------------|-----------
+`ignoreUnknownProperties` | `false` | Whether to ignore unknown properties when deserializing JSON-LD. Default behavior throws an exception.
+
+See `cz.cvut.kbss.jsonld.ConfigParam`.
+
 ## Getting JB4JSON-LD
 
 There are two ways to get JB4JSON-LD:
