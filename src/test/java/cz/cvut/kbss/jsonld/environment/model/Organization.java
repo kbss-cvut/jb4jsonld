@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -27,6 +27,7 @@ import java.util.Set;
 @OWLClass(iri = Vocabulary.ORGANIZATION)
 public class Organization {
 
+    @SuppressWarnings("unused")
     private static final String DEFAULT_COUNTRY = "Czech Republic";
 
     @Id
@@ -48,6 +49,9 @@ public class Organization {
 
     @OWLObjectProperty(iri = Vocabulary.HAS_MEMBER)
     private Set<Employee> employees;
+
+    @OWLObjectProperty(iri = Vocabulary.ORIGIN)
+    private URI country;
 
     public URI getUri() {
         return uri;
@@ -119,6 +123,14 @@ public class Organization {
             this.employees = new HashSet<>();
         }
         employees.add(employee);
+    }
+
+    public URI getCountry() {
+        return country;
+    }
+
+    public void setCountry(URI country) {
+        this.country = country;
     }
 
     @Override

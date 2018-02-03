@@ -33,6 +33,7 @@ public class Vocabulary {
     public static final String HAS_ADMIN = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/hasAdmin";
     public static final String BRAND = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/brand";
     public static final String IS_ADMIN = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin";
+    public static final String ORIGIN = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/origin";
 
     private Vocabulary() {
         throw new AssertionError();

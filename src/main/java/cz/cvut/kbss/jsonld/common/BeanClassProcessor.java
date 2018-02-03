@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -20,6 +20,8 @@ import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
 
 public class BeanClassProcessor {
@@ -239,5 +241,17 @@ public class BeanClassProcessor {
         if (!Map.class.isAssignableFrom(field.getType())) {
             throw new TargetTypeException("@Properties field " + field + " must be a java.util.Map.");
         }
+    }
+
+    /**
+     * Checks whether the specified type is a valid identifier type.
+     * <p>
+     * Valid identifiers in JOPA are: {@link URI}, {@link URL}, and {@link String}.
+     *
+     * @param cls Class to check
+     * @return {@code true} if the specified class can be used as identifier field type, {@code false} otherwise
+     */
+    public static boolean isIdentifierType(Class<?> cls) {
+        return URI.class.equals(cls) || URL.class.equals(cls) || String.class.equals(cls);
     }
 }

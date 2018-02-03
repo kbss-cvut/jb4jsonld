@@ -16,6 +16,7 @@ package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
+import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -46,7 +47,11 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
         final CompositeNode newCurrent = visitedField != null ? JsonNodeFactory.createObjectNode(attId(visitedField)) :
                                          JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
-        addTypes(instance);
+        if (BeanClassProcessor.isIdentifierType(instance.getClass())) {
+            currentNode.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, instance));
+        } else {
+            addTypes(instance);
+        }
         this.visitedField = null;
     }
 
@@ -66,6 +71,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     private void addTypes(Object instance) {
         final Set<String> types = typeResolver.resolveTypes(instance);
+        assert !types.isEmpty();
         final CollectionNode typesNode = JsonNodeFactory.createCollectionNode(JsonLd.TYPE, types);
         types.forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
         currentNode.addItem(typesNode);

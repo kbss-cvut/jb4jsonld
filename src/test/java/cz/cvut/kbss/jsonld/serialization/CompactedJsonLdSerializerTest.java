@@ -219,4 +219,38 @@ public class CompactedJsonLdSerializerTest {
         assertTrue(types.contains(Vocabulary.USER));
         assertTrue(types.contains(type));
     }
+
+    @Test
+    public void serializationSkipsNullDataPropertyValues() throws Exception {
+        final User user = Generator.generateUser();
+        user.setAdmin(null);
+        serializer.serialize(user);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertFalse(json.containsKey(Vocabulary.IS_ADMIN));
+    }
+
+    @Test
+    public void serializationSkipsNullObjectPropertyValues() throws Exception {
+        final Employee employee = Generator.generateEmployee();
+        employee.setEmployer(null);
+        serializer.serialize(employee);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertFalse(json.containsKey(Vocabulary.IS_MEMBER_OF));
+    }
+
+    @Test
+    public void serializationSerializesPlainIdentifierObjectPropertyValue() throws Exception {
+        final Organization company = Generator.generateOrganization();
+        company.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
+        serializer.serialize(company);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Object value = json.get(Vocabulary.ORIGIN);
+        assertTrue(value instanceof Map);
+        final Map<String, ?> country = (Map<String, ?>) value;
+        assertEquals(1, country.size());
+        assertEquals(company.getCountry().toString(), country.get(JsonLd.ID));
+    }
 }

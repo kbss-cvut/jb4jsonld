@@ -26,9 +26,12 @@ import cz.cvut.kbss.jsonld.serialization.model.*;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class JsonLdTreeBuilderTest {
 
@@ -304,5 +307,28 @@ public class JsonLdTreeBuilderTest {
             assertTrue(item instanceof ObjectNode);
             assertNull(item.getName());
         }
+    }
+
+    @Test
+    public void openInstanceDoesNotAddTypesWhenThereAreNotAny() {
+        final URI uri = Generator.generateUri();
+        treeBuilder.openInstance(uri);
+        treeBuilder.closeInstance(uri);
+        final CompositeNode result = treeBuilder.getTreeRoot();
+        result.getItems().forEach(n -> assertNotEquals(JsonLd.TYPE, n.getName()));
+    }
+
+    @Test
+    public void openInstanceAddsIdAttributeWhenInstanceIsOnlyIdentifier() throws Exception {
+        final URI uri = Generator.generateUri();
+        treeBuilder.openInstance(uri);
+        treeBuilder.closeInstance(uri);
+        final CompositeNode result = treeBuilder.getTreeRoot();
+        assertEquals(1, result.getItems().size());
+        final JsonNode value = result.getItems().iterator().next();
+        assertEquals(JsonLd.ID, value.getName());
+        final JsonGenerator generatorMock = mock(JsonGenerator.class);
+        value.write(generatorMock);
+        verify(generatorMock).writeString(uri.toString());
     }
 }
