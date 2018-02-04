@@ -239,7 +239,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitKnownInstanceAddsSingularObjectIdAttributeToTheParent() throws Exception {
+    public void visitKnownInstanceAddsNodeWithObjectIdAttributeToTheParent() throws Exception {
         final Employee employee = Generator.generateEmployee();
         final Organization employer = employee.getEmployer();
         employer.setEmployees(Collections.singleton(employee));
@@ -251,11 +251,14 @@ public class JsonLdTreeBuilderTest {
         treeBuilder.visitKnownInstance(employee.getEmployer());
         final JsonNode referenceNode = getNode(treeBuilder.getTreeRoot(), Vocabulary.IS_MEMBER_OF);
         assertNotNull(referenceNode);
-        assertTrue(referenceNode instanceof ObjectIdNode);
+        assertTrue(referenceNode instanceof ObjectNode);
+        final Collection<JsonNode> attributes = ((ObjectNode) referenceNode).getItems();
+        assertEquals(1, attributes.size());
+        assertEquals(JsonLd.ID, attributes.iterator().next().getName());
     }
 
     @Test
-    public void visitKnownInstanceAddsCollectionOfObjectIdsToTheParent() throws Exception {
+    public void visitKnownInstanceAddsCollectionOfObjectsWithIdAttributeToTheParent() throws Exception {
         final Employee employee = Generator.generateEmployee();
         final Organization employer = employee.getEmployer();
         employer.setEmployees(Collections.singleton(employee));
@@ -267,8 +270,12 @@ public class JsonLdTreeBuilderTest {
         treeBuilder.visitKnownInstance(employer.getEmployees().iterator().next());
         final CompositeNode node = treeBuilder.getTreeRoot();
         assertTrue(node instanceof CollectionNode);
-        final JsonNode item = node.getItems().iterator().next();
-        assertTrue(item instanceof ObjectIdNode);
+        node.getItems().forEach(item -> {
+            assertTrue(item instanceof ObjectNode);
+            final Collection<JsonNode> attributes = ((ObjectNode) item).getItems();
+            assertEquals(1, attributes.size());
+            assertEquals(JsonLd.ID, attributes.iterator().next().getName());
+        });
     }
 
     @Test

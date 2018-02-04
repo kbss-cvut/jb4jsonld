@@ -139,34 +139,32 @@ public class CompactedJsonLdSerializerTest {
     private void verifyOrganizationMembers(List<?> json, Set<Employee> members) {
         final Set<URI> memberUris = members.stream().map(Person::getUri).collect(Collectors.toSet());
         for (Object member : json) {
-            if (member instanceof String) {
-                assertTrue(memberUris.contains(URI.create(member.toString())));
-            } else {
-                assertTrue(member instanceof Map);
-                final Map<?, ?> memberMap = (Map<?, ?>) member;
-                final URI memberUri = URI.create(memberMap.get(JsonLd.ID).toString());
-                assertTrue(memberUris.contains(memberUri));
-                final Optional<Employee> e = members.stream().filter(emp -> emp.getUri().equals(memberUri))
-                                                    .findFirst();
-                assert e.isPresent();
-                verifyEmployee(e.get(), memberMap);
-            }
+            assertTrue(member instanceof Map);
+            final Map<?, ?> memberMap = (Map<?, ?>) member;
+            final URI memberUri = URI.create(memberMap.get(JsonLd.ID).toString());
+            assertTrue(memberUris.contains(memberUri));
+            final Optional<Employee> e = members.stream().filter(emp -> emp.getUri().equals(memberUri))
+                                                .findFirst();
+            assert e.isPresent();
+            verifyEmployee(e.get(), memberMap);
         }
     }
 
     private void verifyEmployee(Employee employee, Map<?, ?> json) {
         assertEquals(employee.getUri().toString(), json.get(JsonLd.ID));
-        final List<?> types = (List<?>) json.get(JsonLd.TYPE);
-        assertTrue(types.contains(Vocabulary.EMPLOYEE));
-        assertTrue(types.contains(Vocabulary.USER));
-        assertTrue(types.contains(Vocabulary.PERSON));
-        assertEquals(employee.getFirstName(), json.get(Vocabulary.FIRST_NAME));
-        assertEquals(employee.getLastName(), json.get(Vocabulary.LAST_NAME));
-        assertEquals(employee.getUsername(), json.get(Vocabulary.USERNAME));
+        if (json.size() > 1) {
+            final List<?> types = (List<?>) json.get(JsonLd.TYPE);
+            assertTrue(types.contains(Vocabulary.EMPLOYEE));
+            assertTrue(types.contains(Vocabulary.USER));
+            assertTrue(types.contains(Vocabulary.PERSON));
+            assertEquals(employee.getFirstName(), json.get(Vocabulary.FIRST_NAME));
+            assertEquals(employee.getLastName(), json.get(Vocabulary.LAST_NAME));
+            assertEquals(employee.getUsername(), json.get(Vocabulary.USERNAME));
+        }
     }
 
     @Test
-    public void serializationOfCollectionOfInstancesReferencingSameInstanceUsesReferenceUri() throws Exception {
+    public void serializationOfCollectionOfInstancesReferencingSameInstanceUsesReferenceNode() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, true);
         final Set<Employee> employees = org.getEmployees();
@@ -175,14 +173,12 @@ public class CompactedJsonLdSerializerTest {
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
         final List<?> jsonList = (List<?>) jsonObject;
-        for (int i = 0; i < jsonList.size(); i++) {
+        for (int i = 1; i < jsonList.size(); i++) { // Start from 1, the first one contains the full object
             final Map<?, ?> item = (Map<?, ?>) jsonList.get(i);
-            if (i == 0) {
-                assertTrue(item.get(Vocabulary.IS_MEMBER_OF) instanceof Map);
-            } else {
-                assertTrue(item.get(Vocabulary.IS_MEMBER_OF) instanceof String);
-                assertEquals(org.getUri(), URI.create(item.get(Vocabulary.IS_MEMBER_OF).toString()));
-            }
+            assertTrue(item.get(Vocabulary.IS_MEMBER_OF) instanceof Map);
+            final Map<?, ?> map = (Map<?, ?>) item.get(Vocabulary.IS_MEMBER_OF);
+            assertEquals(1, map.size());
+            assertEquals(org.getUri().toString(), map.get(JsonLd.ID));
         }
     }
 

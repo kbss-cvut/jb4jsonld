@@ -45,7 +45,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void openInstance(Object instance) {
         final CompositeNode newCurrent = visitedField != null ? JsonNodeFactory.createObjectNode(attId(visitedField)) :
-                                         JsonNodeFactory.createObjectNode();
+                JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
         if (BeanClassProcessor.isIdentifierType(instance.getClass())) {
             currentNode.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, instance));
@@ -88,12 +88,13 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void visitKnownInstance(Object instance) {
         if (visitedField != null) {
-            currentNode.addItem(JsonNodeFactory
-                    .createObjectIdNode(attId(visitedField), BeanAnnotationProcessor.getInstanceIdentifier(instance)));
+            openNewNode(JsonNodeFactory.createObjectNode(attId(visitedField)));
         } else {
-            currentNode.addItem(
-                    JsonNodeFactory.createObjectIdNode(BeanAnnotationProcessor.getInstanceIdentifier(instance)));
+            openNewNode(JsonNodeFactory.createObjectNode());
         }
+        currentNode.addItem(
+                JsonNodeFactory.createLiteralNode(JsonLd.ID, BeanAnnotationProcessor.getInstanceIdentifier(instance)));
+        closeInstance(instance);
         this.visitedField = null;
     }
 
@@ -121,7 +122,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     public void openCollection(Collection<?> collection) {
         final CollectionNode newCurrent =
                 visitedField != null ? JsonNodeFactory.createCollectionNode(attId(visitedField), collection) :
-                JsonNodeFactory.createCollectionNode(collection);
+                        JsonNodeFactory.createCollectionNode(collection);
         openNewNode(newCurrent);
         this.visitedField = null;
     }
