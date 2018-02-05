@@ -278,6 +278,16 @@ public class DefaultInstanceBuilderTest {
     }
 
     @Test
+    public void addValueOpensCollectionAndAddsSingleItemToItWhenSingleValueForPluralAttributeIsSpecified() {
+        deserializer.openObject(Organization.class);
+        final String value = "Mjolnir-IV";
+        deserializer.addValue(Vocabulary.BRAND, value);
+        final Organization object = (Organization) deserializer.getCurrentRoot();
+        assertEquals(1, object.getBrands().size());
+        assertTrue(object.getBrands().contains(value));
+    }
+
+    @Test
     public void openCollectionCreatesPropertiesContextAndSetsNewPropertiesMapOnTargetInstanceWhenItDoesNotExist() {
         deserializer.openObject(Person.class);
         final Person instance = (Person) deserializer.getCurrentRoot();

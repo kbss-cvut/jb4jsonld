@@ -6,7 +6,7 @@
 
     <groupId>cz.cvut.kbss.jsonld</groupId>
     <artifactId>jb4jsonld</artifactId>
-    <version>0.1.2</version>
+    <version>0.2.0</version>
     <name>JB4JSON-LD</name>
     <description>Java Binding for JSON-LD allows serialization and deserialization of Java POJOs to/from JSON-LD.
         This is the core implementation, which has to be integrated with Jackson, Jersey etc.
@@ -134,14 +134,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.7.0</version>
             </plugin>
 
             <!-- Code coverage plugin -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.6.201602180812</version>
+                <version>0.8.0</version>
                 <executions>
                     <execution>
                         <goals>
