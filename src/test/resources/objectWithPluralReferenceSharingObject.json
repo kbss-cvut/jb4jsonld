@@ -31,7 +31,9 @@
       "http://xmlns.com/foaf/0.1/accountName": "Greg.House@jopaexample.org",
       "http://xmlns.com/foaf/0.1/firstName": "Greg",
       "http://xmlns.com/foaf/0.1/lastName": "House",
-      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": "http://krizik.felk.cvut.cz/ontologies/study-manager/Organization-PrincetonPlainsboro",
+      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": {
+        "@id": "http://krizik.felk.cvut.cz/ontologies/study-manager/Organization-PrincetonPlainsboro"
+      },
       "@id": "http://krizik.felk.cvut.cz/ontologies/study-manager/Greg+House"
     }
   ],

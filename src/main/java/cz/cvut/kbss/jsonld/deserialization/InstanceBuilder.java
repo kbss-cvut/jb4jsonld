@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -129,6 +129,34 @@ public interface InstanceBuilder {
      * @param value The value to add
      */
     void addValue(Object value);
+
+    /**
+     * Adds a reference to a node to the currently open object.
+     * <p>
+     * This methods is invoked in case the deserializer encounters an object with a single attribute - @id. This assumes
+     * that the node either references an already encountered object (known instance) or that the node is a value of a
+     * plain identifier-valued object property.
+     * <p>
+     * This method should also verify cardinality and correct typing, e.g. multiple values cannot be set for the same
+     * property, if the field it maps to is singular.
+     * <p>
+     * It is assumed that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
+     *
+     * @param property Property identifier (IRI)
+     * @param nodeId   Identifier (IRI) of the node, i.e. value of the @id attribute
+     */
+    void addNodeReference(String property, String nodeId);
+
+    /**
+     * Adds the specified value to the currently open collection.
+     * <p>
+     * This methods is invoked in case the deserializer encounters an object with a single attribute - @id. This assumes
+     * that the node either references an already encountered object (known instance) or that the node is a value of a
+     * plain identifier-valued object property.
+     *
+     * @param nodeId Identifier (IRI) of the node, i.e. value of the @id attribute
+     */
+    void addNodeReference(String nodeId);
 
     /**
      * Returns current root of the deserialized object graph.

@@ -43,7 +43,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         assert targetField != null;
         final Class<?> type = targetField.getType();
         final InstanceContext<?> ctx;
-        if (BeanClassProcessor.isIdentifierType(type)) {
+        if (BeanClassProcessor.isIdentifierType(type)) {    // This will be useful for Enhancement #5
             ctx = new NodeReferenceContext<>(currentInstance, targetField, knownInstances);
         } else {
             assert BeanAnnotationProcessor.isOwlClassEntity(type);
@@ -58,7 +58,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
 
     @Override
     public <T> void openObject(Class<T> cls) {
-        if (BeanClassProcessor.isIdentifierType(cls)) {
+        if (BeanClassProcessor.isIdentifierType(cls)) {     // This will be useful for Enhancement #5
             final InstanceContext<T> context = new NodeReferenceContext<>(currentInstance, knownInstances);
             assert currentInstance != null;
             openInstances.push(currentInstance);
@@ -170,6 +170,36 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     public void addValue(Object value) {
         assert currentInstance != null;
         currentInstance.addItem(value);
+    }
+
+    @Override
+    public void addNodeReference(String property, String nodeId) {
+        final Field field = currentInstance.getFieldForProperty(property);
+        assert field != null;
+        final Class<?> type = field.getType();
+        if (BeanClassProcessor.isIdentifierType(type)) {
+            currentInstance.setFieldValue(field, nodeId);
+        } else {
+            currentInstance.setFieldValue(field, getKnownInstance(nodeId));
+        }
+    }
+
+    private Object getKnownInstance(String nodeId) {
+        if (!knownInstances.containsKey(nodeId)) {
+            throw new JsonLdDeserializationException(
+                    "Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.");
+        }
+        return knownInstances.get(nodeId);
+    }
+
+    @Override
+    public void addNodeReference(String nodeId) {
+        final Class<?> targetType = getCurrentCollectionElementType();
+        if (BeanClassProcessor.isIdentifierType(targetType)) {
+            currentInstance.addItem(nodeId);
+        } else {
+            currentInstance.addItem(getKnownInstance(nodeId));
+        }
     }
 
     @Override

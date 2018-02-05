@@ -22,7 +22,9 @@
         "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
       ],
       "isAdmin": true,
-      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC",
+      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": {
+        "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC"
+      },
       "accountName": "halsey@unsc.org",
       "firstName": "Catherine",
       "lastName": "Halsey"
@@ -35,7 +37,9 @@
         "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
       ],
       "isAdmin": false,
-      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC",
+      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": {
+        "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC"
+      },
       "accountName": "lasky@unsc.org",
       "firstName": "Thomas",
       "lastName": "Lasky"
@@ -48,7 +52,9 @@
         "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
       ],
       "isAdmin": false,
-      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC",
+      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": {
+        "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC"
+      },
       "accountName": "palmer@unsc.org",
       "firstName": "Sarah",
       "lastName": "Palmer"

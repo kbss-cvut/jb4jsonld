@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -14,6 +14,9 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jopa.model.annotations.Id;
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.environment.Generator;
@@ -22,6 +25,7 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -308,5 +312,77 @@ public class DefaultInstanceBuilderTest {
         deserializer.openObject(Vocabulary.ORIGIN);
         final InstanceContext<?> ctx = getCurrentInstance();
         assertTrue(ctx instanceof NodeReferenceContext);
+    }
+
+    @Test
+    public void addNodeReferenceForPropertySetsPlainIdentifierObjectPropertyValue() {
+        deserializer.openObject(Organization.class);
+        final String uri = Generator.generateUri().toString();
+        deserializer.addNodeReference(Vocabulary.ORIGIN, uri);
+        final Organization object = (Organization) deserializer.getCurrentRoot();
+        assertEquals(uri, object.getCountry().toString());
+    }
+
+    @Test
+    public void addNodeReferenceForPropertySetsFieldValueToKnownInstance() throws Exception {
+        final Organization org = Generator.generateOrganization();
+        getKnownInstances().put(org.getUri().toString(), org);
+        deserializer.openObject(Employee.class);
+        deserializer.addNodeReference(Vocabulary.IS_MEMBER_OF, org.getUri().toString());
+        final Employee object = (Employee) deserializer.getCurrentRoot();
+        assertEquals(org, object.getEmployer());
+    }
+
+    @Test
+    public void addNodeReferenceForPropertyThrowsDeserializationExceptionWhenNoKnownInstanceIsFound() {
+        final String nodeId = Generator.generateUri().toString();
+        thrown.expect(JsonLdDeserializationException.class);
+        thrown.expectMessage(
+                "Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.");
+        deserializer.openObject(Employee.class);
+        deserializer.addNodeReference(Vocabulary.IS_MEMBER_OF, nodeId);
+    }
+
+    @Test
+    public void addNodeReferenceAddsPlainIdentifierObjectPropertyValueToCollection() {
+        final URI nodeId = Generator.generateUri();
+        deserializer.openObject(Event.class);
+        deserializer.openCollection(Vocabulary.HAS_EVENT_TYPE);
+        deserializer.addNodeReference(nodeId.toString());
+        deserializer.closeCollection();
+        final Event object = (Event) deserializer.getCurrentRoot();
+        assertTrue(object.eventTypes.contains(nodeId));
+    }
+
+    @OWLClass(iri = Generator.URI_BASE + "Event")
+    public static class Event {
+        @Id
+        private URI uri;
+
+        @OWLObjectProperty(iri = Vocabulary.HAS_EVENT_TYPE)
+        private Set<URI> eventTypes;
+    }
+
+    @Test
+    public void addNodeReferenceAddsKnownInstanceWithMatchingIdentifier() throws Exception {
+        final Employee employee = Generator.generateEmployee();
+        getKnownInstances().put(employee.getUri().toString(), employee);
+        deserializer.openObject(Organization.class);
+        deserializer.openCollection(Vocabulary.HAS_MEMBER);
+        deserializer.addNodeReference(employee.getUri().toString());
+        deserializer.closeCollection();
+        final Organization object = (Organization) deserializer.getCurrentRoot();
+        assertTrue(object.getEmployees().contains(employee));
+    }
+
+    @Test
+    public void addNodeReferenceThrowsDeserializationExceptionWhenNoKnownInstanceIsFound() {
+        final String nodeId = Generator.generateUri().toString();
+        thrown.expect(JsonLdDeserializationException.class);
+        thrown.expectMessage(
+                "Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.");
+        deserializer.openObject(Organization.class);
+        deserializer.openCollection(Vocabulary.HAS_MEMBER);
+        deserializer.addNodeReference(nodeId);
     }
 }

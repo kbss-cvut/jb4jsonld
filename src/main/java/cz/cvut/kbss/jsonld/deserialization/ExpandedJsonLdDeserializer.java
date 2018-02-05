@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -123,6 +123,8 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     private void resolveValue(Map<?, ?> value) {
         if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
             instanceBuilder.addValue(value.get(JsonLd.VALUE));
+        } else if (value.size() == 1 && value.containsKey(JsonLd.ID)) {
+            instanceBuilder.addNodeReference(value.get(JsonLd.ID).toString());
         } else {
             final Class<?> elementType = instanceBuilder.getCurrentCollectionElementType();
             instanceBuilder.openObject(elementType);
@@ -134,6 +136,8 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     private void resolvePropertyValue(String property, Map<?, ?> value) {
         if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
             instanceBuilder.addValue(property, value.get(JsonLd.VALUE));
+        } else if (value.size() == 1 && value.containsKey(JsonLd.ID)) {
+            instanceBuilder.addNodeReference(property, value.get(JsonLd.ID).toString());
         } else {
             instanceBuilder.openObject(property);
             processObject(value);

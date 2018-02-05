@@ -1,12 +1,9 @@
 package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.exception.TargetTypeException;
+import cz.cvut.kbss.jsonld.deserialization.util.DataTypeTransformer;
 
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.util.Map;
 
 /**
@@ -37,18 +34,7 @@ class NodeReferenceContext<T> extends InstanceContext<T> {
     }
 
     private Object transformToTargetType(String id, Class<?> targetType) {
-        // TODO This should also be reused from JOPA API
-        if (URI.class.equals(targetType)) {
-            return URI.create(id);
-        } else if (URL.class.equals(targetType)) {
-            try {
-                return new URL(id);
-            } catch (MalformedURLException e) {
-                throw new TargetTypeException(id + " is not a valid URL.");
-            }
-        } else {
-            return id;
-        }
+        return DataTypeTransformer.transformValue(id, targetType);
     }
 
     @Override
