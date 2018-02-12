@@ -1,0 +1,18 @@
+{
+  "@context": {
+    "firstName": "http://xmlns.com/foaf/0.1/firstName",
+    "lastName": "http://xmlns.com/foaf/0.1/lastName",
+    "accountName": "http://xmlns.com/foaf/0.1/accountName",
+    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin"
+  },
+  "@id": "_:b1",
+  "@type": [
+    "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User",
+    "http://onto.fel.cvut.cz/ontologies/ufo/Agent"
+  ],
+  "isAdmin": true,
+  "accountName": "halsey@unsc.org",
+  "firstName": "Catherine",
+  "lastName": "Halsey"
+}

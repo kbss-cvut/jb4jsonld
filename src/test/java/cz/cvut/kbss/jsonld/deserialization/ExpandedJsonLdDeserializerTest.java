@@ -298,4 +298,12 @@ public class ExpandedJsonLdDeserializerTest {
         assertNotNull(result);
         assertEquals(URI.create("http://dbpedia.org/resource/Czech_Republic"), result.getCountry());
     }
+
+    @Test
+    public void deserializationSupportsObjectsWithBlankNodeIds() throws Exception {
+        final Object input = readAndExpand("objectWithBlankNodeIdentifier.json");
+        final User result = deserializer.deserialize(input, User.class);
+        assertNotNull(result);
+        assertNull(result.getUri());
+    }
 }

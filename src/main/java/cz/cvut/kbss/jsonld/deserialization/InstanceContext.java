@@ -21,6 +21,11 @@ import java.util.Map;
 
 abstract class InstanceContext<T> {
 
+    /**
+     * Blank node id start, as per <a href="https://www.w3.org/TR/turtle/#BNodes">https://www.w3.org/TR/turtle/#BNodes</a>
+     */
+    private static final String BLANK_NODE_ID_START = "_:";
+
     T instance;
 
     final Map<String, Object> knownInstances;
@@ -47,8 +52,15 @@ abstract class InstanceContext<T> {
     void setIdentifierValue(Object value) {
         final Field idField = getFieldForProperty(JsonLd.ID);
         assert idField != null;
+        if (isBlankNodeIdentifier(value.toString()) && !idField.getType().equals(String.class)) {
+            return;
+        }
         setFieldValue(idField, value);
         knownInstances.put(value.toString(), instance);
+    }
+
+    private boolean isBlankNodeIdentifier(String identifier) {
+        return identifier.startsWith(BLANK_NODE_ID_START);
     }
 
     // These methods are intended for overriding, because the behaviour is supported only by some context implementations
