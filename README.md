@@ -1,12 +1,14 @@
 # Java Binding for JSON-LD
 
+[![Build Status](https://kbss.felk.cvut.cz/jenkins/buildStatus/icon?job=jaxb-jsonld)](https://kbss.felk.cvut.cz/jenkins/job/jaxb-jsonld)
+
 Java Binding for JSON-LD (JB4JSON-LD) is a simple library for serialization of Java objects into JSON-LD and vice versa.
 
 Note that this is the core, abstract implementation. For actual usage, a binding like 
 [https://github.com/kbss-cvut/jb4jsonld-jackson](https://github.com/kbss-cvut/jb4jsonld-jackson)
 has to be used.
 
-More information can be found at [https://kbss.felk.cvut.cz/web/portal/jb4jsonld](https://kbss.felk.cvut.cz/web/portal/jb4jsonld).
+More information can be found at [https://kbss.felk.cvut.cz/web/kbss/jb4json-ld](https://kbss.felk.cvut.cz/web/kbss/jb4json-ld).
 
 ## Usage
 
