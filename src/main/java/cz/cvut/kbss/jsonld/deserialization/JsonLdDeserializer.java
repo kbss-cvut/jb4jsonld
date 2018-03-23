@@ -14,8 +14,12 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.common.Configurable;
+import cz.cvut.kbss.jsonld.deserialization.util.ClasspathScanner;
+import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 
 import java.util.Objects;
 
@@ -26,16 +30,30 @@ public abstract class JsonLdDeserializer implements Configurable {
 
     private final Configuration configuration;
 
+    protected final TypeMap typeMap = new TypeMap();
+
     protected JsonLdDeserializer() {
         this.configuration = new Configuration();
+        buildTypeMap();
     }
 
     protected JsonLdDeserializer(Configuration configuration) {
         this.configuration = Objects.requireNonNull(configuration);
+        buildTypeMap();
+    }
+
+    private void buildTypeMap() {
+        final String scanPath = configuration.get(ConfigParam.SCAN_PACKAGE, "");
+        new ClasspathScanner(c -> {
+            final OWLClass ann = c.getDeclaredAnnotation(OWLClass.class);
+            if (ann != null) {
+                typeMap.register(ann.iri(), c);
+            }
+        }).processClasses(scanPath);
     }
 
     @Override
-    public Configuration configure() {
+    public Configuration configuration() {
         return configuration;
     }
 

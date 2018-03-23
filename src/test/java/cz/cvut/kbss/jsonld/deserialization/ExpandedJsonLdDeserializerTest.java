@@ -175,7 +175,7 @@ public class ExpandedJsonLdDeserializerTest {
     @Test
     public void skipsUnknownPropertyWhenIgnoreIsConfiguredAndUnmappedPropertyIsEncountered() throws Exception {
         final Object input = readAndExpand("objectWithUnknownProperty.json");
-        deserializer.configure().set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
+        deserializer.configuration().set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
         final Organization result = deserializer.deserialize(input, Organization.class);
         verifyOrganizationAttributes(result);
     }

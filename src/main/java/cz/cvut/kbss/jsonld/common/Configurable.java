@@ -26,5 +26,5 @@ public interface Configurable {
      *
      * @return Configuration
      */
-    Configuration configure();
+    Configuration configuration();
 }

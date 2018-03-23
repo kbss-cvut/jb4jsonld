@@ -96,7 +96,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
     private boolean shouldSkipProperty(String property) {
         if (!instanceBuilder.isPropertyMapped(property)) {
-            if (configure().is(ConfigParam.IGNORE_UNKNOWN_PROPERTIES)) {
+            if (configuration().is(ConfigParam.IGNORE_UNKNOWN_PROPERTIES)) {
                 return true;
             }
             throw UnknownPropertyException.create(property, instanceBuilder.getCurrentContextType());

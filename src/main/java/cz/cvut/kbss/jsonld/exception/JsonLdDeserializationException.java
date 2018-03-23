@@ -19,7 +19,7 @@ import java.lang.reflect.Field;
 /**
  * Thrown when an error occurs during deserialization of JSON-LD into POJO(s).
  */
-public class JsonLdDeserializationException extends RuntimeException {
+public class JsonLdDeserializationException extends JsonLdException {
 
     public JsonLdDeserializationException(String message) {
         super(message);

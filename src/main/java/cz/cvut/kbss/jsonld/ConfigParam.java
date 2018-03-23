@@ -16,7 +16,8 @@ package cz.cvut.kbss.jsonld;
 
 public enum ConfigParam {
 
-    IGNORE_UNKNOWN_PROPERTIES("ignoreUnknownProperties");
+    IGNORE_UNKNOWN_PROPERTIES("ignoreUnknownProperties"),
+    SCAN_PACKAGE("scanPackage");
 
     private final String name;
 

@@ -17,7 +17,7 @@ package cz.cvut.kbss.jsonld.exception;
 /**
  * Thrown when an error occurs during instance processing.
  */
-public class BeanProcessingException extends RuntimeException {
+public class BeanProcessingException extends JsonLdException {
 
     public BeanProcessingException(String message) {
         super(message);

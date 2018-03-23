@@ -46,7 +46,7 @@ public abstract class JsonLdSerializer implements Configurable {
     }
 
     @Override
-    public Configuration configure() {
+    public Configuration configuration() {
         return configuration;
     }
 

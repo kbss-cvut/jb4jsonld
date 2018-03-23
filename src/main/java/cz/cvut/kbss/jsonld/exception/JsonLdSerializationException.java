@@ -17,7 +17,7 @@ package cz.cvut.kbss.jsonld.exception;
 /**
  * Represents an error during POJO serialization to JSON-LD.
  */
-public class JsonLdSerializationException extends RuntimeException {
+public class JsonLdSerializationException extends JsonLdException {
 
     public JsonLdSerializationException(String message) {
         super(message);
