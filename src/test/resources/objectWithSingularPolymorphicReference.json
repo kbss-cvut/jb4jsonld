@@ -1,0 +1,40 @@
+{
+  "@context": {
+    "firstName": "http://xmlns.com/foaf/0.1/firstName",
+    "lastName": "http://xmlns.com/foaf/0.1/lastName",
+    "accountName": "http://xmlns.com/foaf/0.1/accountName",
+    "knows": "http://xmlns.com/foaf/0.1/knows",
+    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin"
+  },
+  "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Thomas+Lasky",
+  "@type": [
+    "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
+  ],
+  "isAdmin": true,
+  "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": {
+    "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC",
+    "@type": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Organization",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/brand": [
+      "UNSC Infinity"
+    ],
+    "http://purl.org/dc/terms/created": "Fri Jul 29 14:52:04 CEST 2016",
+    "http://www.w3.org/2000/01/rdf-schema#label": "UNSC"
+  },
+  "accountName": "lasky@unsc.org",
+  "firstName": "Thomas",
+  "lastName": "Lasky",
+  "knows": {
+    "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Sarah+Palmer",
+    "@type": [
+      "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee",
+      "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
+    ],
+    "isAdmin": true,
+    "accountName": "palmer@unsc.org",
+    "firstName": "Sarah",
+    "lastName": "Palmer"
+  }
+}

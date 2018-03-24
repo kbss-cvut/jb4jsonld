@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -17,14 +17,12 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
-import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
@@ -46,16 +44,27 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         final List<?> input = (List<?>) jsonLd;
         assert input.size() == 1;
         final Map<?, ?> root = (Map<?, ?>) input.get(0);
-        this.instanceBuilder = new DefaultInstanceBuilder();
-        instanceBuilder.openObject(resultClass);
+        this.instanceBuilder = new DefaultInstanceBuilder(classResolver);
+        final Class<? extends T> targetClass = resolveTargetClass(root, resultClass);
+        instanceBuilder.openObject(targetClass);
         processObject(root);
         instanceBuilder.closeObject();
         assert resultClass.isAssignableFrom(instanceBuilder.getCurrentRoot().getClass());
-        return resultClass.cast(instanceBuilder.getCurrentRoot());
+        return targetClass.cast(instanceBuilder.getCurrentRoot());
+    }
+
+    @Override
+    protected List<String> getObjectTypes(Object jsonLdObject) {
+        assert jsonLdObject instanceof Map;
+        final Object types = ((Map<?, ?>) jsonLdObject).get(JsonLd.TYPE);
+        if (types == null) {
+            return Collections.emptyList();
+        }
+        assert types instanceof List;
+        return (List<String>) types;
     }
 
     private void processObject(Map<?, ?> root) {
-        verifyTargetType(root);
         for (Map.Entry<?, ?> e : root.entrySet()) {
             final String property = e.getKey().toString();
             final boolean shouldSkip = shouldSkipProperty(property);
@@ -69,25 +78,6 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
                 instanceBuilder.addValue(property, e.getValue());
             }
         }
-    }
-
-    private void verifyTargetType(Map<?, ?> jsonLdObject) {
-        if (isNodeReference(jsonLdObject)) {
-            return;
-        }
-        final Object types = jsonLdObject.get(JsonLd.TYPE);
-        final Class<?> targetType = instanceBuilder.getCurrentContextType();
-        final String targetTypeIri = BeanAnnotationProcessor.getOwlClass(targetType);
-        if (types != null) {
-            assert types instanceof List;
-            final List<?> typesList = (List<?>) types;
-            final Optional<?> type = typesList.stream().filter(t -> t.toString().equals(targetTypeIri)).findAny();
-            if (type.isPresent()) {
-                return;
-            }
-        }
-        throw new TargetTypeException("Type <" + targetTypeIri + "> mapped by the target Java class " + targetType +
-                " not found in input JSON-LD object.");
     }
 
     private boolean isNodeReference(Map<?, ?> jsonLdObject) {
@@ -127,7 +117,9 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
             instanceBuilder.addNodeReference(value.get(JsonLd.ID).toString());
         } else {
             final Class<?> elementType = instanceBuilder.getCurrentCollectionElementType();
-            instanceBuilder.openObject(elementType);
+            final Class<?> targetClass = resolveTargetClass(value, elementType);
+            assert elementType.isAssignableFrom(targetClass);
+            instanceBuilder.openObject(targetClass);
             processObject(value);
             instanceBuilder.closeObject();
         }
@@ -139,7 +131,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         } else if (value.size() == 1 && value.containsKey(JsonLd.ID)) {
             instanceBuilder.addNodeReference(property, value.get(JsonLd.ID).toString());
         } else {
-            instanceBuilder.openObject(property);
+            instanceBuilder.openObject(property, getObjectTypes(value));
             processObject(value);
             instanceBuilder.closeObject();
         }

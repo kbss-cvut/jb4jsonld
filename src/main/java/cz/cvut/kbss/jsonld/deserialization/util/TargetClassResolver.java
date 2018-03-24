@@ -27,7 +27,7 @@ public class TargetClassResolver {
      * @return Resolved target class. It has to be a subtype of the {@code expectedClass}
      * @throws TargetTypeException If the resulting candidate is not assignable to the expected class
      */
-    public Class<?> getTargetClass(Class<?> expectedClass, Collection<String> types) {
+    public <T> Class<? extends T> getTargetClass(Class<T> expectedClass, Collection<String> types) {
         final List<Class<?>> candidates = getTargetClassCandidates(types);
         final Class<?> targetCandidate;
         reduceTargetClassCandidates(expectedClass, candidates);
@@ -43,7 +43,7 @@ public class TargetClassResolver {
             targetCandidate = candidates.get(0);
         }
         assert expectedClass.isAssignableFrom(targetCandidate);
-        return targetCandidate;
+        return (Class<? extends T>) targetCandidate;
     }
 
     private List<Class<?>> getTargetClassCandidates(Collection<String> types) {

@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -18,8 +18,10 @@ import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.ConfigParam;
+import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
@@ -213,9 +215,8 @@ public class ExpandedJsonLdDeserializerTest {
     public void deserializationThrowsExceptionWhenTypesAttributeDoesNotContainTargetClassType() throws Exception {
         final Object input = readAndExpand("objectWithDataProperties.json");
         thrown.expect(TargetTypeException.class);
-        thrown.expectMessage(
-                "Type <" + Vocabulary.EMPLOYEE + "> mapped by the target Java class " + Employee.class +
-                        " not found in input JSON-LD object.");
+        thrown.expectMessage(containsString(
+                "Neither " + Employee.class + " nor any of its subclasses matches the types "));
         deserializer.deserialize(input, Employee.class);
     }
 
@@ -305,5 +306,64 @@ public class ExpandedJsonLdDeserializerTest {
         final User result = deserializer.deserialize(input, User.class);
         assertNotNull(result);
         assertNull(result.getUri());
+    }
+
+    @Test
+    public void deserializationReturnsSubclassInstanceWhenTypesMatch() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithDataProperties.json");
+        final Person result = deserializer.deserialize(input, Person.class);
+        assertTrue(result instanceof User);
+    }
+
+    @Test
+    public void deserializationSupportsPolymorphismForCollections() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithPluralReference.json");
+        final PolymorphicOrganization result = deserializer.deserialize(input, PolymorphicOrganization.class);
+        assertNotNull(result.employees);
+        assertEquals(3, result.employees.size());
+        result.employees.forEach(e -> assertTrue(e instanceof Employee));
+    }
+
+    @OWLClass(iri = Vocabulary.ORGANIZATION)
+    public static class PolymorphicOrganization {
+
+        @Id
+        private URI id;
+
+        @OWLObjectProperty(iri = Vocabulary.HAS_MEMBER)
+        private Set<Person> employees;
+
+        public PolymorphicOrganization() {
+        }
+    }
+
+    @Test
+    public void deserializationSupportsPolymorphismForAttributes() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithSingularPolymorphicReference.json");
+        final PolymorphicPerson result = deserializer.deserialize(input, PolymorphicPerson.class);
+        assertTrue(result.friend instanceof Employee);
+    }
+
+    @OWLClass(iri = Vocabulary.PERSON)
+    public static class PolymorphicPerson {
+        @Id
+        private URI id;
+
+        @OWLObjectProperty(iri = Vocabulary.KNOWS)
+        private Person friend;
+
+        public PolymorphicPerson() {
+        }
     }
 }

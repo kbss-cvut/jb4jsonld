@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -19,7 +19,9 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.CollectionType;
+import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.environment.Generator;
+import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
@@ -41,7 +43,7 @@ public class DefaultInstanceBuilderTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private InstanceBuilder deserializer = new DefaultInstanceBuilder();
+    private InstanceBuilder deserializer = new DefaultInstanceBuilder(new TargetClassResolver(TestUtil.getDefaultTypeMap()));
 
     @Test
     public void getCurrentRootReturnsNullIfThereIsNoRoot() {
@@ -139,14 +141,14 @@ public class DefaultInstanceBuilderTest {
     @Test
     public void openObjectByPropertyCreatesObjectOfCorrectType() {
         deserializer.openObject(Employee.class);
-        deserializer.openObject(Vocabulary.IS_MEMBER_OF);
+        deserializer.openObject(Vocabulary.IS_MEMBER_OF, Collections.singletonList(Vocabulary.ORGANIZATION));
         assertTrue(deserializer.getCurrentRoot() instanceof Organization);
     }
 
     @Test
     public void openObjectByPropertySetsNewInstanceAsFieldValueAndReplacesCurrentContext() throws Exception {
         deserializer.openObject(Employee.class);
-        deserializer.openObject(Vocabulary.IS_MEMBER_OF);
+        deserializer.openObject(Vocabulary.IS_MEMBER_OF, Collections.singletonList(Vocabulary.ORGANIZATION));
         assertFalse(getOpenInstances().isEmpty());
         final Object top = getOpenInstances().peek().getInstance();
         assertTrue(top instanceof Employee);
@@ -319,7 +321,7 @@ public class DefaultInstanceBuilderTest {
     @Test
     public void openObjectCreatesIdentifierContextForPropertyWithPlainIdentifierTargetFieldType() throws Exception {
         deserializer.openObject(Organization.class);
-        deserializer.openObject(Vocabulary.ORIGIN);
+        deserializer.openObject(Vocabulary.ORIGIN, Collections.emptyList());
         final InstanceContext<?> ctx = getCurrentInstance();
         assertTrue(ctx instanceof NodeReferenceContext);
     }

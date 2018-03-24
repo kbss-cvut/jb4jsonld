@@ -19,8 +19,10 @@ import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.common.Configurable;
 import cz.cvut.kbss.jsonld.deserialization.util.ClasspathScanner;
+import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -30,19 +32,20 @@ public abstract class JsonLdDeserializer implements Configurable {
 
     private final Configuration configuration;
 
-    protected final TypeMap typeMap = new TypeMap();
+    protected final TargetClassResolver classResolver;
 
     protected JsonLdDeserializer() {
         this.configuration = new Configuration();
-        buildTypeMap();
+        this.classResolver = initializeTargetClassResolver();
     }
 
     protected JsonLdDeserializer(Configuration configuration) {
         this.configuration = Objects.requireNonNull(configuration);
-        buildTypeMap();
+        this.classResolver = initializeTargetClassResolver();
     }
 
-    private void buildTypeMap() {
+    private TargetClassResolver initializeTargetClassResolver() {
+        final TypeMap typeMap = new TypeMap();
         final String scanPath = configuration.get(ConfigParam.SCAN_PACKAGE, "");
         new ClasspathScanner(c -> {
             final OWLClass ann = c.getDeclaredAnnotation(OWLClass.class);
@@ -50,12 +53,26 @@ public abstract class JsonLdDeserializer implements Configurable {
                 typeMap.register(ann.iri(), c);
             }
         }).processClasses(scanPath);
+        return new TargetClassResolver(typeMap);
     }
 
     @Override
     public Configuration configuration() {
         return configuration;
     }
+
+    protected <T> Class<? extends T> resolveTargetClass(Object jsonRoot, Class<T> resultClass) {
+        final List<String> types = getObjectTypes(jsonRoot);
+        return classResolver.getTargetClass(resultClass, types);
+    }
+
+    /**
+     * Extracts types attribute value from the specified JSON-LD object.
+     *
+     * @param jsonLdObject JSON-LD object (singular)
+     * @return Types attribute ({@literal @type}) values of the specified object
+     */
+    protected abstract List<String> getObjectTypes(Object jsonLdObject);
 
     /**
      * Deserializes the specified JSON-LD data.

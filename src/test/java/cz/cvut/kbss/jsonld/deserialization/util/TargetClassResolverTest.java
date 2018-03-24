@@ -1,6 +1,7 @@
 package cz.cvut.kbss.jsonld.deserialization.util;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.AmbiguousTargetTypeException;
@@ -28,18 +29,8 @@ public class TargetClassResolverTest {
 
     @Before
     public void setUp() {
-        this.typeMap = initDefaultTypeMap();
+        this.typeMap = TestUtil.getDefaultTypeMap();
         this.resolver = new TargetClassResolver(typeMap);
-    }
-
-    private TypeMap initDefaultTypeMap() {
-        final TypeMap tm = new TypeMap();
-        tm.register(Vocabulary.EMPLOYEE, Employee.class);
-        tm.register(Vocabulary.ORGANIZATION, Organization.class);
-        tm.register(Vocabulary.PERSON, Person.class);
-        tm.register(Vocabulary.STUDY, Study.class);
-        tm.register(Vocabulary.USER, User.class);
-        return tm;
     }
 
     @Test

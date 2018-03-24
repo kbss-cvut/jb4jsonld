@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -19,6 +19,8 @@ import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 
+import java.util.List;
+
 /**
  * Builds instances from parsed JSON-LD.
  */
@@ -28,7 +30,7 @@ public interface InstanceBuilder {
      * Creates new instance to fill filled mapped by the specified property.
      * <p>
      * The instance type is determined from the declared type of the mapped field, which is taken from the currently
-     * open object. Therefore, another object has to be already open before this method can be called.
+     * open object, and from the specified types. Therefore, another object has to be already open before this method can be called.
      * <p>
      * The new instance also becomes the currently open object.
      * <p>
@@ -38,9 +40,10 @@ public interface InstanceBuilder {
      * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      *
      * @param property Property identifier (IRI)
+     * @param types    Types of the object being open
      * @throws IllegalStateException If there is no {@link OWLClass} instance open
      */
-    void openObject(String property);
+    void openObject(String property, List<String> types);
 
     /**
      * Creates new instance of the specified class.
@@ -50,10 +53,10 @@ public interface InstanceBuilder {
      * The new instance also becomes the currently open object.
      * <p>
      * This method is intended for creating top level objects or adding objects to collections. Use {@link
-     * #openObject(String)} for opening objects as values of attributes.
+     * #openObject(String, List)} for opening objects as values of attributes.
      *
      * @param cls Java type of the object being open
-     * @see #openObject(String)
+     * @see #openObject(String, List)
      */
     <T> void openObject(Class<T> cls);
 
