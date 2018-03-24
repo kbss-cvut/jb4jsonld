@@ -77,6 +77,8 @@ public class User {
 Parameter | Default value | Explanation
 ----------|---------------|-----------
 `ignoreUnknownProperties` | `false` | Whether to ignore unknown properties when deserializing JSON-LD. Default behavior throws an exception.
+`scanPackage` | `""` | Package in which the library should look for mapped classes. The scan is important for support for polymorphism in object deserialization. 
+It is highly recommended to specify this value, otherwise the library will load and scan all classes on the classpath.
 
 See `cz.cvut.kbss.jsonld.ConfigParam`.
 
