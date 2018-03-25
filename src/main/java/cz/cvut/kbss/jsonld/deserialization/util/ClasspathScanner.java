@@ -119,7 +119,7 @@ public class ClasspathScanner {
                 }
             }
         } catch (IOException e) {
-            throw new JsonLdException("Unexpected IOException reading JAR File " + jarPath, e);
+            LOG.error("Unable to scan classes in JAR file " + jarPath, e);
         }
     }
 
@@ -128,7 +128,7 @@ public class ClasspathScanner {
             final Class<?> cls = Class.forName(className);
             listener.accept(cls);
         } catch (ClassNotFoundException e) {
-            throw new JsonLdException("Unexpected ClassNotFoundException when scanning classpath.", e);
+            LOG.error("Unable to process class " + className, e);
         }
     }
 
