@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -15,6 +15,7 @@
 package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -117,6 +118,15 @@ abstract class InstanceContext<T> {
     boolean isPropertyMapped(String property) {
         // Default behaviour
         return false;
+    }
+
+    /**
+     * Checks whether the class represented by this context contains a {@link cz.cvut.kbss.jopa.model.annotations.Properties} field.
+     *
+     * @return Whether the represented class has properties field
+     */
+    boolean hasPropertiesField() {
+        return BeanAnnotationProcessor.hasPropertiesField(getInstanceType());
     }
 
     /**

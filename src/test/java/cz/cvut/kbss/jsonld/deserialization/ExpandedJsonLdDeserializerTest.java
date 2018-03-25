@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -14,8 +14,6 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
-import com.github.jsonldjava.core.JsonLdProcessor;
-import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
@@ -32,15 +30,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static cz.cvut.kbss.jsonld.environment.TestUtil.readAndExpand;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
+@SuppressWarnings("unused")
 public class ExpandedJsonLdDeserializerTest {
 
     private static final URI HALSEY_URI = URI
@@ -87,12 +86,6 @@ public class ExpandedJsonLdDeserializerTest {
         assertEquals(expected.getFirstName(), actual.getFirstName());
         assertEquals(expected.getLastName(), actual.getLastName());
         assertEquals(expected.getUsername(), actual.getUsername());
-    }
-
-    private Object readAndExpand(String fileName) throws Exception {
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(fileName);
-        final Object jsonObject = JsonUtils.fromInputStream(is);
-        return JsonLdProcessor.expand(jsonObject);
     }
 
     @Test
@@ -364,6 +357,56 @@ public class ExpandedJsonLdDeserializerTest {
         private Person friend;
 
         public PolymorphicPerson() {
+        }
+    }
+
+    @Test
+    public void deserializationSupportsDeserializingObjectAsPlainIdentifier() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithSingularPolymorphicReference.json");
+        final PersonWithPlainIdentifierAttribute result =
+                deserializer.deserialize(input, PersonWithPlainIdentifierAttribute.class);
+        assertEquals(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Sarah+Palmer"), result.friend);
+    }
+
+    @OWLClass(iri = Vocabulary.PERSON)
+    public static class PersonWithPlainIdentifierAttribute {
+        @Id
+        private URI id;
+
+        @OWLObjectProperty(iri = Vocabulary.KNOWS)
+        private URI friend;
+
+        public PersonWithPlainIdentifierAttribute() {
+        }
+    }
+
+    @Test
+    public void deserializationSupportsDeserializingObjectsAsPluralPlainIdentifiers() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithPluralReference.json");
+        final OrganizationWithPlainIdentifiers result =
+                deserializer.deserialize(input, OrganizationWithPlainIdentifiers.class);
+        assertNotNull(result.members);
+        assertTrue(result.members
+                .contains(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey")));
+        assertTrue(result.members.contains(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Thomas+Lasky")));
+        assertTrue(result.members.contains(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Sarah+Palmer")));
+    }
+
+    @OWLClass(iri = Vocabulary.ORGANIZATION)
+    public static class OrganizationWithPlainIdentifiers {
+        @Id
+        private URI id;
+
+        @OWLObjectProperty(iri = Vocabulary.HAS_MEMBER)
+        private Set<URI> members;
+
+        public OrganizationWithPlainIdentifiers() {
         }
     }
 }

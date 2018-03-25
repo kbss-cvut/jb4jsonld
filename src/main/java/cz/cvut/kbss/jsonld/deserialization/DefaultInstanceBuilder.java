@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -49,7 +49,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         assert targetField != null;
         final Class<?> type = targetField.getType();
         final InstanceContext<?> ctx;
-        if (BeanClassProcessor.isIdentifierType(type)) {    // This will be useful for Enhancement #5
+        if (BeanClassProcessor.isIdentifierType(type)) {
             ctx = new NodeReferenceContext<>(currentInstance, targetField, knownInstances);
         } else {
             assert BeanAnnotationProcessor.isOwlClassEntity(type);
@@ -65,7 +65,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
 
     @Override
     public <T> void openObject(Class<T> cls) {
-        if (BeanClassProcessor.isIdentifierType(cls)) {     // This will be useful for Enhancement #5
+        if (BeanClassProcessor.isIdentifierType(cls)) {
             final InstanceContext<T> context = new NodeReferenceContext<>(currentInstance, knownInstances);
             assert currentInstance != null;
             openInstances.push(currentInstance);
@@ -100,8 +100,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         final Field targetField = currentInstance.getFieldForProperty(property);
         final InstanceContext<?> ctx;
         if (targetField == null) {
-            if (BeanAnnotationProcessor.hasPropertiesField(currentInstance.getInstanceType()) &&
-                    !JsonLd.TYPE.equals(property)) {
+            if (currentInstance.hasPropertiesField() && !JsonLd.TYPE.equals(property)) {
                 ctx = buildPropertiesContext(property);
             } else {
                 ctx = new DummyCollectionInstanceContext(knownInstances);

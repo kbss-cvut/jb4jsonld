@@ -70,4 +70,14 @@ class NodeReferenceContext<T> extends InstanceContext<T> {
     Class<T> getInstanceType() {
         return null;
     }
+
+    @Override
+    Field getFieldForProperty(String property) {
+        return null;
+    }
+
+    @Override
+    boolean hasPropertiesField() {
+        return false;
+    }
 }

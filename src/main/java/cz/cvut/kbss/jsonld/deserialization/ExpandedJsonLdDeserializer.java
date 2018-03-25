@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -78,10 +78,6 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
                 instanceBuilder.addValue(property, e.getValue());
             }
         }
-    }
-
-    private boolean isNodeReference(Map<?, ?> jsonLdObject) {
-        return jsonLdObject.size() == 1 && jsonLdObject.containsKey(JsonLd.ID);
     }
 
     private boolean shouldSkipProperty(String property) {

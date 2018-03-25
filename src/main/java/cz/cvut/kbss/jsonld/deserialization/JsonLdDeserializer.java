@@ -17,6 +17,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.Configurable;
 import cz.cvut.kbss.jsonld.deserialization.util.ClasspathScanner;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
@@ -62,6 +63,9 @@ public abstract class JsonLdDeserializer implements Configurable {
     }
 
     protected <T> Class<? extends T> resolveTargetClass(Object jsonRoot, Class<T> resultClass) {
+        if (BeanClassProcessor.isIdentifierType(resultClass)) {
+            return resultClass;
+        }
         final List<String> types = getObjectTypes(jsonRoot);
         return classResolver.getTargetClass(resultClass, types);
     }
