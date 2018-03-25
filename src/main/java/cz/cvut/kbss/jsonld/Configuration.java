@@ -25,6 +25,14 @@ public class Configuration {
 
     private final Map<String, String> config = new HashMap<>();
 
+    public Configuration() {
+    }
+
+    public Configuration(Configuration other) {
+        Objects.requireNonNull(other);
+        config.putAll(other.config);
+    }
+
     public String get(ConfigParam param) {
         Objects.requireNonNull(param);
         return get(param.getName());
