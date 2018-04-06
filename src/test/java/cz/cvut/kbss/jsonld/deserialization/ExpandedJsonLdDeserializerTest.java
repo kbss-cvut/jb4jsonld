@@ -32,6 +32,7 @@ import org.junit.rules.ExpectedException;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -407,6 +408,32 @@ public class ExpandedJsonLdDeserializerTest {
         private Set<URI> members;
 
         public OrganizationWithPlainIdentifiers() {
+        }
+    }
+
+    @Test
+    public void deserializationHandlesJsonLdListOfValues() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithList.json");
+        final OrganizationWithListOfMembers result =
+                deserializer.deserialize(input, OrganizationWithListOfMembers.class);
+        assertEquals(3, result.members.size());
+        assertEquals(HALSEY_URI, result.members.get(0).getUri());
+        assertEquals(LASKY_URI, result.members.get(1).getUri());
+        assertEquals(PALMER_URI, result.members.get(2).getUri());
+    }
+
+    @OWLClass(iri = Vocabulary.ORGANIZATION)
+    public static class OrganizationWithListOfMembers {
+        @Id
+        private URI id;
+
+        @OWLObjectProperty(iri = Vocabulary.HAS_MEMBER)
+        private List<Employee> members;
+
+        public OrganizationWithListOfMembers() {
         }
     }
 }

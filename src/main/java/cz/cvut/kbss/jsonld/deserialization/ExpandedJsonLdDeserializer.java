@@ -91,19 +91,27 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     }
 
     private void resolveCollectionValue(String property, List<?> value) {
-        if (value.size() == 1 && value.get(0) instanceof Map && !instanceBuilder.isPlural(property)) {
-            resolvePropertyValue(property, (Map<?, ?>) value.get(0));
-        } else {
-            instanceBuilder.openCollection(property);
-            for (Object item : value) {
-                if (item instanceof Map) {
-                    resolveValue((Map<?, ?>) item);
-                } else {
-                    instanceBuilder.addValue(item);
-                }
+        if (value.size() == 1 && value.get(0) instanceof Map) {
+            final Map<?, ?> map = (Map<?, ?>) value.get(0);
+            if (!instanceBuilder.isPlural(property)) {
+                resolvePropertyValue(property, map);
+                return;
             }
-            instanceBuilder.closeCollection();
+            if (map.size() == 1 && map.containsKey(JsonLd.LIST)) {
+                assert map.get(JsonLd.LIST) instanceof List;
+                resolveCollectionValue(property, (List<?>) map.get(JsonLd.LIST));
+                return;
+            }
         }
+        instanceBuilder.openCollection(property);
+        for (Object item : value) {
+            if (item instanceof Map) {
+                resolveValue((Map<?, ?>) item);
+            } else {
+                instanceBuilder.addValue(item);
+            }
+        }
+        instanceBuilder.closeCollection();
     }
 
     private void resolveValue(Map<?, ?> value) {
