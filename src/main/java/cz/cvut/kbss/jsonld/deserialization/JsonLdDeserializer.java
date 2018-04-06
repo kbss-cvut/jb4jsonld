@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -17,13 +17,12 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
-import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.Configurable;
+import cz.cvut.kbss.jsonld.deserialization.expanded.ExpandedJsonLdDeserializer;
 import cz.cvut.kbss.jsonld.deserialization.util.ClasspathScanner;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -61,22 +60,6 @@ public abstract class JsonLdDeserializer implements Configurable {
     public Configuration configuration() {
         return configuration;
     }
-
-    protected <T> Class<? extends T> resolveTargetClass(Object jsonRoot, Class<T> resultClass) {
-        if (BeanClassProcessor.isIdentifierType(resultClass)) {
-            return resultClass;
-        }
-        final List<String> types = getObjectTypes(jsonRoot);
-        return classResolver.getTargetClass(resultClass, types);
-    }
-
-    /**
-     * Extracts types attribute value from the specified JSON-LD object.
-     *
-     * @param jsonLdObject JSON-LD object (singular)
-     * @return Types attribute ({@literal @type}) values of the specified object
-     */
-    protected abstract List<String> getObjectTypes(Object jsonLdObject);
 
     /**
      * Deserializes the specified JSON-LD data.

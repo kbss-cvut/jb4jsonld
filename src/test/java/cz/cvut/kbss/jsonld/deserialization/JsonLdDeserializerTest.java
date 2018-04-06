@@ -19,15 +19,14 @@ import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
-import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Study;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.net.URI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class JsonLdDeserializerTest {
 
@@ -55,12 +54,5 @@ public class JsonLdDeserializerTest {
 
     @OWLClass(iri = Vocabulary.AGENT)
     public static class TestClass {
-    }
-
-    @Test
-    public void resolveTargetClassReturnsExpectedClassWhenItIsPlainIdentifierType() throws Exception {
-        final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer();
-        assertEquals(URI.class,
-                deserializer.resolveTargetClass(TestUtil.readAndExpand("objectWithDataProperties.json"), URI.class));
     }
 }
