@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -18,12 +18,10 @@ import cz.cvut.kbss.jopa.CommonVocabulary;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.Employee;
-import cz.cvut.kbss.jsonld.environment.model.Organization;
-import cz.cvut.kbss.jsonld.environment.model.Person;
-import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -236,5 +234,17 @@ public class BeanAnnotationProcessorTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(containsString(Organization.class + " does not have a @Properties field."));
         BeanAnnotationProcessor.getPropertiesField(Organization.class);
+    }
+
+    @Test
+    public void getAttributeOrderReturnsValueOfJsonLdAttributeOrderAnnotation() {
+        final String[] result = BeanAnnotationProcessor.getAttributeOrder(Study.class);
+        assertTrue(Arrays.equals(Study.class.getDeclaredAnnotation(JsonLdAttributeOrder.class).value(), result));
+    }
+
+    @Test
+    public void getAttributeOrderReturnsEmptyArrayWhenOrderIsNotSpecifiedOnClass() {
+        final String[] result = BeanAnnotationProcessor.getAttributeOrder(Person.class);
+        assertEquals(0, result.length);
     }
 }

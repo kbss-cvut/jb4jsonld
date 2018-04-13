@@ -70,7 +70,10 @@ public class ObjectGraphTraverser implements InstanceVisitor {
             return;
         }
         openInstance(instance);
-        for (Field f : BeanAnnotationProcessor.getSerializableFields(instance)) {
+        final List<Field> fieldsToSerialize =
+                orderAttributesForSerialization(BeanAnnotationProcessor.getSerializableFields(instance),
+                        BeanAnnotationProcessor.getAttributeOrder(instance.getClass()));
+        for (Field f : fieldsToSerialize) {
             final Object value = BeanClassProcessor.getFieldValue(f, instance);
             visitField(f, value);
             if (value != null && BeanAnnotationProcessor.isObjectProperty(f)) {
@@ -78,6 +81,23 @@ public class ObjectGraphTraverser implements InstanceVisitor {
             }
         }
         closeInstance(instance);
+    }
+
+    private List<Field> orderAttributesForSerialization(List<Field> fields, String[] ordering) {
+        final List<Field> result = new ArrayList<>(fields.size());
+        for (String item : ordering) {
+            final Iterator<Field> it = fields.iterator();
+            while (it.hasNext()) {
+                final Field f = it.next();
+                if (f.getName().equals(item)) {
+                    it.remove();
+                    result.add(f);
+                    break;
+                }
+            }
+        }
+        result.addAll(fields);
+        return result;
     }
 
     private void traverseObjectPropertyValue(Object value) throws IllegalAccessException {

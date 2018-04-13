@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -16,12 +16,10 @@ package cz.cvut.kbss.jsonld.serialization.traversal;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.Employee;
-import cz.cvut.kbss.jsonld.environment.model.Organization;
-import cz.cvut.kbss.jsonld.environment.model.Person;
-import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.environment.model.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -163,5 +161,45 @@ public class ObjectGraphTraverserTest {
 
         @OWLObjectProperty(iri = Vocabulary.IS_MEMBER_OF)
         private URI employer;
+    }
+
+    @Test
+    public void traverseUsesAttributePropertyOrderingInformationWhenSerializingObject() throws Exception {
+        final Study study = generateStudy();
+
+        traverser.traverse(study);
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).visitField(Study.class.getDeclaredField("uri"), study.getUri());
+        inOrder.verify(visitor).visitField(Study.class.getDeclaredField("name"), study.getName());
+        inOrder.verify(visitor).visitField(Study.class.getDeclaredField("participants"), study.getParticipants());
+        inOrder.verify(visitor).visitField(Study.class.getDeclaredField("members"), study.getMembers());
+    }
+
+    private Study generateStudy() {
+        final Study study = new Study();
+        study.setUri(Generator.generateUri());
+        study.setName("TestStudy");
+        study.setMembers(Collections.singleton(Generator.generateEmployee()));
+        study.setParticipants(Collections.singleton(Generator.generateEmployee()));
+        return study;
+    }
+
+    @Test
+    public void traverseUsesPartialAttributePropertyOrderingWhenSerializingObject() throws Exception {
+        final PartiallyOrderedStudy ps = new PartiallyOrderedStudy();
+        ps.setUri(Generator.generateUri());
+        ps.setName("TestStudy");
+        ps.setMembers(Collections.singleton(Generator.generateEmployee()));
+        ps.setParticipants(Collections.singleton(Generator.generateEmployee()));
+
+        traverser.traverse(ps);
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).visitField(Study.class.getDeclaredField("participants"), ps.getParticipants());
+        inOrder.verify(visitor).visitField(Study.class.getDeclaredField("members"), ps.getMembers());
+        inOrder.verify(visitor).visitField(Study.class.getDeclaredField("name"), ps.getName());
+    }
+
+    @JsonLdAttributeOrder({"participants", "members"})
+    private static class PartiallyOrderedStudy extends Study {
     }
 }

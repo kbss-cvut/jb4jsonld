@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -17,6 +17,7 @@ package cz.cvut.kbss.jsonld.common;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 
 import java.lang.reflect.Field;
@@ -24,6 +25,8 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class BeanAnnotationProcessor {
+
+    private static final String[] EMPTY_ARRAY = new String[0];
 
     private BeanAnnotationProcessor() {
         throw new AssertionError();
@@ -267,6 +270,12 @@ public class BeanAnnotationProcessor {
         throw new JsonLdSerializationException("Field " + field + " is not JSON-LD serializable.");
     }
 
+    /**
+     * Resolves value of the identifier attribute (i.e. annotated with {@link Id}) of the specified instance.
+     *
+     * @param instance Instance to get identifier value from
+     * @return Identifier value
+     */
     public static Object getInstanceIdentifier(Object instance) {
         Objects.requireNonNull(instance);
         final List<Class<?>> classes = getAncestors(instance.getClass());
@@ -285,5 +294,17 @@ public class BeanAnnotationProcessor {
             }
         }
         throw new JsonLdSerializationException("Instance " + instance + " contains no valid identifier field.");
+    }
+
+    /**
+     * Retrieves an array of attribute names specifying (partial) order in which they should be (de)serialized.
+     *
+     * @param cls Class whose attribute order should be retrieved
+     * @return Array declaring attribute order, possibly empty
+     */
+    public static String[] getAttributeOrder(Class<?> cls) {
+        Objects.requireNonNull(cls);
+        final JsonLdAttributeOrder order = cls.getDeclaredAnnotation(JsonLdAttributeOrder.class);
+        return order != null ? order.value() : EMPTY_ARRAY;
     }
 }
