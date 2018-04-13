@@ -14,7 +14,10 @@
  */
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.environment.Generator;
+import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
@@ -26,10 +29,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -137,5 +143,25 @@ public class ObjectGraphTraverserTest {
             inOrder.verify(visitor).closeInstance(u);
         }
         inOrder.verify(visitor).closeCollection(users);
+    }
+
+    @Test
+    public void traverseDoesNotPutPlainIdentifierObjectPropertyValueIntoKnownInstances() throws Exception {
+        final EmployeeWithUriEmployer employee = new EmployeeWithUriEmployer();
+        employee.setUri(Generator.generateUri());
+        employee.employer = Generator.generateUri();
+
+        traverser.traverse(employee);
+        final Field knownField = ObjectGraphTraverser.class.getDeclaredField("knownInstances");
+        knownField.setAccessible(true);
+        final Map<Object, Object> knownInstances = (Map<Object, Object>) knownField.get(traverser);
+        assertFalse(knownInstances.containsKey(employee.employer));
+    }
+
+    @OWLClass(iri = Vocabulary.EMPLOYEE)
+    private class EmployeeWithUriEmployer extends User {
+
+        @OWLObjectProperty(iri = Vocabulary.IS_MEMBER_OF)
+        private URI employer;
     }
 }
