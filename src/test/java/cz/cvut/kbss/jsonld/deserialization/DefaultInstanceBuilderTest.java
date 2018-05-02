@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -28,6 +28,7 @@ import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -36,6 +37,7 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.*;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 public class DefaultInstanceBuilderTest {
@@ -43,7 +45,8 @@ public class DefaultInstanceBuilderTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private InstanceBuilder deserializer = new DefaultInstanceBuilder(new TargetClassResolver(TestUtil.getDefaultTypeMap()));
+    private InstanceBuilder deserializer =
+            new DefaultInstanceBuilder(new TargetClassResolver(TestUtil.getDefaultTypeMap()));
 
     @Test
     public void getCurrentRootReturnsNullIfThereIsNoRoot() {
@@ -52,7 +55,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void openObjectCreatesNewInstanceOfSpecifiedClass() {
-        deserializer.openObject(Person.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         final Object res = deserializer.getCurrentRoot();
         assertNotNull(res);
         assertTrue(res instanceof Person);
@@ -77,7 +80,7 @@ public class DefaultInstanceBuilderTest {
     @Test
     public void openObjectAddsObjectToCurrentlyOpenCollectionAndBecomesCurrentInstance() throws Exception {
         deserializer.openCollection(CollectionType.SET);
-        deserializer.openObject(Employee.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         final Object root = deserializer.getCurrentRoot();
         assertTrue(root instanceof Employee);
         assertFalse(getOpenInstances().isEmpty());
@@ -106,7 +109,7 @@ public class DefaultInstanceBuilderTest {
         deserializer.openCollection(CollectionType.SET);
         final Object originalRoot = deserializer.getCurrentRoot();
         assertTrue(originalRoot instanceof Set);
-        deserializer.openObject(Employee.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         assertFalse(getOpenInstances().isEmpty());
         deserializer.closeObject();
         assertTrue(getOpenInstances().isEmpty());
@@ -115,7 +118,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void closeObjectDoesNothingForRootObject() throws Exception {
-        deserializer.openObject(Person.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         assertTrue(getOpenInstances().isEmpty());
         final Object root = deserializer.getCurrentRoot();
         deserializer.closeObject();
@@ -140,15 +143,17 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void openObjectByPropertyCreatesObjectOfCorrectType() {
-        deserializer.openObject(Employee.class);
-        deserializer.openObject(Vocabulary.IS_MEMBER_OF, Collections.singletonList(Vocabulary.ORGANIZATION));
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        deserializer.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
+                Collections.singletonList(Vocabulary.ORGANIZATION));
         assertTrue(deserializer.getCurrentRoot() instanceof Organization);
     }
 
     @Test
     public void openObjectByPropertySetsNewInstanceAsFieldValueAndReplacesCurrentContext() throws Exception {
-        deserializer.openObject(Employee.class);
-        deserializer.openObject(Vocabulary.IS_MEMBER_OF, Collections.singletonList(Vocabulary.ORGANIZATION));
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        deserializer.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
+                Collections.singletonList(Vocabulary.ORGANIZATION));
         assertFalse(getOpenInstances().isEmpty());
         final Object top = getOpenInstances().peek().getInstance();
         assertTrue(top instanceof Employee);
@@ -157,7 +162,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void addValueSetsPropertyValue() {
-        deserializer.openObject(User.class);
+        deserializer.openObject(TestUtil.HALSEY_URI.toString(), User.class);
         final String firstName = "Catherine";
         final String lastName = "Halsey";
         deserializer.addValue(Vocabulary.FIRST_NAME, firstName);
@@ -171,7 +176,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void openCollectionByPropertyCreatesCollectionOfCorrectType() throws Exception {
-        deserializer.openObject(Organization.class);
+        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
         deserializer.openCollection(Vocabulary.HAS_MEMBER);
         assertFalse(getOpenInstances().isEmpty());
         assertTrue(deserializer.getCurrentRoot() instanceof Set);
@@ -179,7 +184,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void openCollectionByPropertySetsFieldValueAndPushesCurrentInstanceToStack() throws Exception {
-        deserializer.openObject(Organization.class);
+        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
         deserializer.openCollection(Vocabulary.HAS_MEMBER);
         assertFalse(getOpenInstances().isEmpty());
         assertTrue(getOpenInstances().peek().getInstance() instanceof Organization);
@@ -189,7 +194,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void closeCollectionPopsLastInstanceFromStack() throws Exception {
-        deserializer.openObject(Organization.class);
+        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
         final Object originalRoot = deserializer.getCurrentRoot();
         deserializer.openCollection(Vocabulary.HAS_MEMBER);
         assertFalse(getOpenInstances().isEmpty());
@@ -208,16 +213,6 @@ public class DefaultInstanceBuilderTest {
         assertSame(root, deserializer.getCurrentRoot());
     }
 
-    @Test
-    public void objectIsStoredInKnownInstancesWhenItsIdIsRead() throws Exception {
-        final User user = Generator.generateUser();
-        deserializer.openObject(User.class);
-        deserializer.addValue(JsonLd.ID, user.getUri().toString());
-        assertTrue(getKnownInstances().containsKey(user.getUri().toString()));
-        assertTrue(getKnownInstances().get(user.getUri().toString()) instanceof User);
-
-    }
-
     @SuppressWarnings("unchecked")
     private Map<String, Object> getKnownInstances() throws Exception {
         final Field field = DefaultInstanceBuilder.class.getDeclaredField("knownInstances");
@@ -227,7 +222,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void openCollectionCreatesTypesContextForTypesField() throws Exception {
-        deserializer.openObject(User.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), User.class);
         deserializer.openCollection(JsonLd.TYPE);
         final InstanceContext<?> result = getCurrentInstance();
         assertTrue(result instanceof TypesContext);
@@ -237,31 +232,31 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void isPropertyMappedReturnsTrueForMappedProperty() {
-        deserializer.openObject(Person.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         assertTrue(deserializer.isPropertyMapped(Vocabulary.FIRST_NAME));
     }
 
     @Test
     public void isPropertyMappedReturnsFalseForUnknownProperty() {
-        deserializer.openObject(Organization.class);
+        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
         assertFalse(deserializer.isPropertyMapped(Vocabulary.IS_ADMIN));
     }
 
     @Test
     public void isPropertyMappedReturnsTrueForType() {
-        deserializer.openObject(Person.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         assertTrue(deserializer.isPropertyMapped(JsonLd.TYPE));
     }
 
     @Test
     public void isPluralReturnsTrueForType() {
-        deserializer.openObject(Person.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         assertTrue(deserializer.isPlural(JsonLd.TYPE));
     }
 
     @Test
     public void openCollectionOpensDummyCollectionContextForTypeInInstanceWithoutTypesField() throws Exception {
-        deserializer.openObject(Person.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         assertTrue(getCurrentInstance() instanceof SingularObjectContext);
         deserializer.openCollection(JsonLd.TYPE);
         assertTrue(getCurrentInstance() instanceof DummyCollectionInstanceContext);
@@ -271,7 +266,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void addingTypesToInstanceWithoutTypesFieldDoesNothing() {
-        deserializer.openObject(Person.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         deserializer.openCollection(JsonLd.TYPE);
         deserializer.addValue(Vocabulary.EMPLOYEE);
         deserializer.addValue(Vocabulary.USER);
@@ -281,7 +276,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void addValueOpensCollectionAndAddsSingleItemToItWhenSingleValueForPluralAttributeIsSpecified() {
-        deserializer.openObject(Organization.class);
+        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
         final String value = "Mjolnir-IV";
         deserializer.addValue(Vocabulary.BRAND, value);
         final Organization object = (Organization) deserializer.getCurrentRoot();
@@ -291,7 +286,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void openCollectionCreatesPropertiesContextAndSetsNewPropertiesMapOnTargetInstanceWhenItDoesNotExist() {
-        deserializer.openObject(Person.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         final Person instance = (Person) deserializer.getCurrentRoot();
         assertNull(instance.getProperties());
         deserializer.openCollection(Vocabulary.IS_ADMIN);
@@ -300,7 +295,7 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void openCollectionReusesPropertiesInstanceWhenItAlreadyExistsOnTargetInstance() {
-        deserializer.openObject(Person.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         final Person instance = (Person) deserializer.getCurrentRoot();
         assertNull(instance.getProperties());
         deserializer.openCollection(Vocabulary.IS_ADMIN);
@@ -312,23 +307,24 @@ public class DefaultInstanceBuilderTest {
 
     @Test
     public void openObjectCreatesIdentifierContextWhenTargetTypeIsIdentifier() throws Exception {
-        deserializer.openCollection(CollectionType.LIST);
-        deserializer.openObject(URI.class);
+        deserializer.openObject(Generator.generateUri().toString(), Event.class);
+        deserializer.openCollection(Vocabulary.HAS_EVENT_TYPE);
+        deserializer.openObject(Generator.generateUri().toString(), URI.class);
         final InstanceContext<?> ctx = getCurrentInstance();
         assertTrue(ctx instanceof NodeReferenceContext);
     }
 
     @Test
     public void openObjectCreatesIdentifierContextForPropertyWithPlainIdentifierTargetFieldType() throws Exception {
-        deserializer.openObject(Organization.class);
-        deserializer.openObject(Vocabulary.ORIGIN, Collections.emptyList());
+        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
+        deserializer.openObject(Generator.generateUri().toString(), Vocabulary.ORIGIN, Collections.emptyList());
         final InstanceContext<?> ctx = getCurrentInstance();
         assertTrue(ctx instanceof NodeReferenceContext);
     }
 
     @Test
     public void addNodeReferenceForPropertySetsPlainIdentifierObjectPropertyValue() {
-        deserializer.openObject(Organization.class);
+        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
         final String uri = Generator.generateUri().toString();
         deserializer.addNodeReference(Vocabulary.ORIGIN, uri);
         final Organization object = (Organization) deserializer.getCurrentRoot();
@@ -339,7 +335,7 @@ public class DefaultInstanceBuilderTest {
     public void addNodeReferenceForPropertySetsFieldValueToKnownInstance() throws Exception {
         final Organization org = Generator.generateOrganization();
         getKnownInstances().put(org.getUri().toString(), org);
-        deserializer.openObject(Employee.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         deserializer.addNodeReference(Vocabulary.IS_MEMBER_OF, org.getUri().toString());
         final Employee object = (Employee) deserializer.getCurrentRoot();
         assertEquals(org, object.getEmployer());
@@ -351,14 +347,14 @@ public class DefaultInstanceBuilderTest {
         thrown.expect(JsonLdDeserializationException.class);
         thrown.expectMessage(
                 "Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.");
-        deserializer.openObject(Employee.class);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         deserializer.addNodeReference(Vocabulary.IS_MEMBER_OF, nodeId);
     }
 
     @Test
     public void addNodeReferenceAddsPlainIdentifierObjectPropertyValueToCollection() {
         final URI nodeId = Generator.generateUri();
-        deserializer.openObject(Event.class);
+        deserializer.openObject(Generator.generateUri().toString(), Event.class);
         deserializer.openCollection(Vocabulary.HAS_EVENT_TYPE);
         deserializer.addNodeReference(nodeId.toString());
         deserializer.closeCollection();
@@ -379,7 +375,7 @@ public class DefaultInstanceBuilderTest {
     public void addNodeReferenceAddsKnownInstanceWithMatchingIdentifier() throws Exception {
         final Employee employee = Generator.generateEmployee();
         getKnownInstances().put(employee.getUri().toString(), employee);
-        deserializer.openObject(Organization.class);
+        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
         deserializer.openCollection(Vocabulary.HAS_MEMBER);
         deserializer.addNodeReference(employee.getUri().toString());
         deserializer.closeCollection();
@@ -393,8 +389,86 @@ public class DefaultInstanceBuilderTest {
         thrown.expect(JsonLdDeserializationException.class);
         thrown.expectMessage(
                 "Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.");
-        deserializer.openObject(Organization.class);
+        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
         deserializer.openCollection(Vocabulary.HAS_MEMBER);
         deserializer.addNodeReference(nodeId);
+    }
+
+    @Test
+    public void openObjectSetsInstanceIdentifier() {
+        deserializer.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
+        final Employee root = (Employee) deserializer.getCurrentRoot();
+        assertEquals(TestUtil.HALSEY_URI, root.getUri());
+    }
+
+    @Test
+    public void openObjectAsPropertyValueSetsInstanceIdentifier() {
+        deserializer.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
+        deserializer.openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
+                Collections.singletonList(Vocabulary.ORGANIZATION));
+        final Organization root = (Organization) deserializer.getCurrentRoot();
+        assertEquals(TestUtil.UNSC_URI, root.getUri());
+    }
+
+    @Test
+    public void objectIsStoredInKnownInstancesWhenItIsOpen() throws Exception {
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), User.class);
+        assertTrue(getKnownInstances().containsKey(TestUtil.PALMER_URI.toString()));
+        assertTrue(getKnownInstances().get(TestUtil.PALMER_URI.toString()) instanceof User);
+    }
+
+    @Test
+    public void openObjectReopensAlreadyKnownInstance() throws Exception {
+        final Employee employee = Generator.generateEmployee();
+        getKnownInstances().put(employee.getUri().toString(), employee);
+        deserializer.openObject(employee.getUri().toString(), Employee.class);
+        assertSame(employee, deserializer.getCurrentRoot());
+    }
+
+    @Test
+    public void openObjectThrowsTargetTypeExceptionWhenReopenObjectHasIncompatibleTypeWithTarget() throws Exception {
+        thrown.expect(TargetTypeException.class);
+        thrown.expectMessage(containsString(
+                "instance with id " + TestUtil.PALMER_URI + " already exists, but its type " + Employee.class + " is not compatible with target type " + Organization.class));
+        final Employee employee = Generator.generateEmployee();
+        employee.setUri(TestUtil.PALMER_URI);
+        getKnownInstances().put(employee.getUri().toString(), employee);
+        deserializer.openObject(employee.getUri().toString(), Organization.class);
+    }
+
+    @Test
+    public void openObjectForPropertyReopensAlreadyKnownInstance() throws Exception {
+        final Organization org = Generator.generateOrganization();
+        getKnownInstances().put(org.getUri().toString(), org);
+        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        deserializer.openObject(org.getUri().toString(), Vocabulary.IS_MEMBER_OF,
+                Collections.singletonList(Vocabulary.ORGANIZATION));
+        assertSame(org, deserializer.getCurrentRoot());
+    }
+
+    @Test
+    public void openCollectionForPropertyReusesExistingCollectionIfItWasSetOnReopenObject() {
+        deserializer.openObject(TestUtil.UNSC_URI.toString(), Organization.class);
+        deserializer.openCollection(Vocabulary.HAS_MEMBER);
+        deserializer.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
+        deserializer.closeObject();
+        deserializer.closeCollection();
+        deserializer.openCollection(Vocabulary.HAS_MEMBER);
+        final Set<Employee> root = (Set<Employee>) deserializer.getCurrentRoot();
+        assertFalse(root.isEmpty());
+        assertEquals(TestUtil.HALSEY_URI, root.iterator().next().getUri());
+    }
+
+    @Test
+    public void openObjectThrowsDeserializationExceptionWhenTryingToSetSingularAttributeValueForSecondTime() {
+        deserializer.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
+        deserializer.openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
+                Collections.singletonList(Vocabulary.ORGANIZATION));
+        deserializer.closeObject();
+        assertNotNull(((Employee) deserializer.getCurrentRoot()).getEmployer());
+        thrown.expect(JsonLdDeserializationException.class);
+        thrown.expectMessage(containsString("Encountered multiple values of property"));
+        deserializer.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
+                Collections.singletonList(Vocabulary.ORGANIZATION));
     }
 }

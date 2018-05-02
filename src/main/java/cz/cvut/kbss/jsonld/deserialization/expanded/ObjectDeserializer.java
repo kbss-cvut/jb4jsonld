@@ -1,6 +1,7 @@
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
 import cz.cvut.kbss.jsonld.ConfigParam;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
@@ -37,25 +38,27 @@ class ObjectDeserializer extends Deserializer<Map<?, ?>> {
             if (shouldSkip) {
                 continue;
             }
-            if (e.getValue() instanceof List) {
-                new CollectionDeserializer(instanceBuilder, config, property).processValue((List<?>) e.getValue());
-            } else {
-                // Presumably @id
-                instanceBuilder.addValue(property, e.getValue());
-            }
+            assert e.getValue() instanceof List;
+            new CollectionDeserializer(instanceBuilder, config, property).processValue((List<?>) e.getValue());
         }
         instanceBuilder.closeObject();
     }
 
     private void openObject(Map<?, ?> value) {
         if (property != null) {
-            instanceBuilder.openObject(property, getObjectTypes(value));
+            instanceBuilder.openObject(getId(value), property, getObjectTypes(value));
         } else {
             assert targetClass != null;
             final Class<?> cls = resolveTargetClass(value, targetClass);
             assert targetClass.isAssignableFrom(cls);
-            instanceBuilder.openObject(cls);
+            instanceBuilder.openObject(getId(value), cls);
         }
+    }
+
+    private String getId(Map<?, ?> object) {
+        assert object.containsKey(JsonLd.ID);
+        // TODO We should be able to generate ID if the object does not contain it
+        return object.get(JsonLd.ID).toString();
     }
 
     private Map<?, ?> orderAttributesForProcessing(Map<?, ?> value) {
@@ -102,6 +105,9 @@ class ObjectDeserializer extends Deserializer<Map<?, ?>> {
     }
 
     private boolean shouldSkipProperty(String property) {
+        if (JsonLd.ID.equals(property)) {
+            return true;
+        }
         if (!instanceBuilder.isPropertyMapped(property)) {
             if (configuration().is(ConfigParam.IGNORE_UNKNOWN_PROPERTIES)) {
                 return true;

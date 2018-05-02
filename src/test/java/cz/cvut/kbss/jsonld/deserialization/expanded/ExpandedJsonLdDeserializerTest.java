@@ -37,19 +37,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static cz.cvut.kbss.jsonld.environment.TestUtil.readAndExpand;
+import static cz.cvut.kbss.jsonld.environment.TestUtil.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 @SuppressWarnings("unused")
 public class ExpandedJsonLdDeserializerTest {
-
-    private static final URI HALSEY_URI = URI
-            .create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey");
-    private static final URI LASKY_URI = URI
-            .create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Thomas+Lasky");
-    private static final URI PALMER_URI = URI
-            .create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Sarah+Palmer");
 
     private static final Map<URI, User> USERS = initUsers();
 
@@ -436,5 +429,12 @@ public class ExpandedJsonLdDeserializerTest {
 
         public OrganizationWithListOfMembers() {
         }
+    }
+
+    @Test
+    public void deserializationReconstructsObjectFromMultiplePlaces() throws Exception {
+        final Object input = readAndExpand("objectWithDefinitionSpreadOverMultipleReferences.json");
+        final Employee result = deserializer.deserialize(input, Employee.class);
+        verifyUserAttributes(USERS.get(HALSEY_URI), result);
     }
 }

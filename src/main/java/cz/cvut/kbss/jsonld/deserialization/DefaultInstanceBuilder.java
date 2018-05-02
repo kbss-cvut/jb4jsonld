@@ -20,6 +20,7 @@ import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -43,7 +44,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     }
 
     @Override
-    public void openObject(String property, List<String> types) {
+    public void openObject(String id, String property, List<String> types) {
         Objects.requireNonNull(property);
         final Field targetField = currentInstance.getFieldForProperty(property);
         assert targetField != null;
@@ -51,30 +52,65 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         final InstanceContext<?> ctx;
         if (BeanClassProcessor.isIdentifierType(type)) {
             ctx = new NodeReferenceContext<>(currentInstance, targetField, knownInstances);
+            ctx.setIdentifierValue(id);
         } else {
-            assert BeanAnnotationProcessor.isOwlClassEntity(type);
-            final Class<?> targetClass = classResolver.getTargetClass(type, types);
-            final Object instance = BeanClassProcessor.createInstance(targetClass);
-            ctx = new SingularObjectContext<>(instance,
-                    BeanAnnotationProcessor.mapSerializableFields(targetClass), knownInstances);
-            currentInstance.setFieldValue(targetField, instance);
+            ctx = openObjectForProperty(id, types, targetField);
+            if (!isPlural(property) && BeanClassProcessor
+                    .getFieldValue(targetField, currentInstance.getInstance()) != null) {
+                // Value already set on singular attribute of a reopen instance
+                throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, targetField);
+            }
+            currentInstance.setFieldValue(targetField, ctx.getInstance());
         }
         openInstances.push(currentInstance);
         this.currentInstance = ctx;
+
+    }
+
+    private InstanceContext<?> openObjectForProperty(String id, List<String> types, Field targetField) {
+        final Class<?> type = targetField.getType();
+        assert BeanAnnotationProcessor.isOwlClassEntity(type);
+        final Class<?> targetClass = classResolver.getTargetClass(type, types);
+        if (knownInstances.containsKey(id)) {
+            return reopenExistingInstance(id, targetClass);
+        } else {
+            final Object instance = BeanClassProcessor.createInstance(targetClass);
+            final InstanceContext<?> ctx = new SingularObjectContext<>(instance,
+                    BeanAnnotationProcessor.mapSerializableFields(targetClass), knownInstances);
+            ctx.setIdentifierValue(id);
+            return ctx;
+        }
+    }
+
+    private <T> InstanceContext<T> reopenExistingInstance(String id, Class<T> cls) {
+        final Object instance = knownInstances.get(id);
+        if (!cls.isAssignableFrom(instance.getClass())) {
+            throw new TargetTypeException("An instance with id " + id + " already exists, but its type " + instance
+                    .getClass() + " is not compatible with target type " + cls + ".");
+        }
+        return new SingularObjectContext<>(cls.cast(instance),
+                BeanAnnotationProcessor.mapSerializableFields(cls), knownInstances);
     }
 
     @Override
-    public <T> void openObject(Class<T> cls) {
+    public <T> void openObject(String id, Class<T> cls) {
         if (BeanClassProcessor.isIdentifierType(cls)) {
             final InstanceContext<T> context = new NodeReferenceContext<>(currentInstance, knownInstances);
+            context.setIdentifierValue(id);
             assert currentInstance != null;
             openInstances.push(currentInstance);
             this.currentInstance = context;
         } else {
-            final T instance = BeanClassProcessor.createInstance(cls);
-            final InstanceContext<T> context = new SingularObjectContext<>(instance,
-                    BeanAnnotationProcessor.mapSerializableFields(cls), knownInstances);
-            replaceCurrentContext(instance, context);
+            if (knownInstances.containsKey(id)) {
+                final InstanceContext<T> context = reopenExistingInstance(id, cls);
+                replaceCurrentContext(context.getInstance(), context);
+            } else {
+                final T instance = BeanClassProcessor.createInstance(cls);
+                final InstanceContext<T> context = new SingularObjectContext<>(instance,
+                        BeanAnnotationProcessor.mapSerializableFields(cls), knownInstances);
+                replaceCurrentContext(instance, context);
+                currentInstance.setIdentifierValue(id);
+            }
         }
     }
 
@@ -107,7 +143,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             }
         } else {
             verifyPluralAttribute(property, targetField);
-            final Collection<?> instance = BeanClassProcessor.createCollection(targetField);
+            final Collection<?> instance = (Collection<?>) getCollectionForField(targetField);
             if (JsonLd.TYPE.equals(property)) {
                 ctx = new TypesContext(instance, knownInstances,
                         BeanClassProcessor.getCollectionItemType(targetField), currentInstance.getInstanceType());
@@ -124,12 +160,8 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     private InstanceContext<?> buildPropertiesContext(String property) {
         final Field propsField = BeanAnnotationProcessor.getPropertiesField(currentInstance.getInstanceType());
         BeanClassProcessor.verifyPropertiesFieldType(propsField);
-        Map<?, ?> propertiesMap =
-                (Map<?, ?>) BeanClassProcessor.getFieldValue(propsField, currentInstance.getInstance());
-        if (propertiesMap == null) {
-            propertiesMap = new HashMap<>();
-            currentInstance.setFieldValue(propsField, propertiesMap);
-        }
+        final Map<?, ?> propertiesMap = (Map<?, ?>) getCollectionForField(propsField);
+        currentInstance.setFieldValue(propsField, propertiesMap);
         return new PropertiesInstanceContext(propertiesMap, property, propsField);
     }
 
@@ -137,6 +169,15 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         if (!isPlural(property)) {
             throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, field);
         }
+    }
+
+    private Object getCollectionForField(Field targetField) {
+        final Object existing = BeanClassProcessor.getFieldValue(targetField, currentInstance.getInstance());
+        if (existing != null) {
+            return existing;
+        }
+        return BeanAnnotationProcessor.isPropertiesField(targetField) ? new HashMap<>() :
+                BeanClassProcessor.createCollection(targetField);
     }
 
     @Override
@@ -156,10 +197,6 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public void addValue(String property, Object value) {
         assert currentInstance != null;
-        if (JsonLd.ID.equals(property)) {
-            currentInstance.setIdentifierValue(value);
-            return;
-        }
         final Field targetField = currentInstance.getFieldForProperty(property);
         assert targetField != null;
         // This is in case there is only one value in the JSON-LD array, because then it might be treated as single valued attribute

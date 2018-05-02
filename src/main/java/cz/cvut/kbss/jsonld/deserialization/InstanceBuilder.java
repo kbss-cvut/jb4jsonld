@@ -39,11 +39,12 @@ public interface InstanceBuilder {
      * <p>
      * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      *
+     * @param id Identifier of the object being open
      * @param property Property identifier (IRI)
      * @param types    Types of the object being open
      * @throws IllegalStateException If there is no {@link OWLClass} instance open
      */
-    void openObject(String property, List<String> types);
+    void openObject(String id, String property, List<String> types);
 
     /**
      * Creates new instance of the specified class.
@@ -53,12 +54,13 @@ public interface InstanceBuilder {
      * The new instance also becomes the currently open object.
      * <p>
      * This method is intended for creating top level objects or adding objects to collections. Use {@link
-     * #openObject(String, List)} for opening objects as values of attributes.
+     * #openObject(String, String, List)} for opening objects as values of attributes.
      *
+     * @param id Identifier of the object being open
      * @param cls Java type of the object being open
-     * @see #openObject(String, List)
+     * @see #openObject(String, String, List)
      */
-    <T> void openObject(Class<T> cls);
+    <T> void openObject(String id, Class<T> cls);
 
     /**
      * Closes the most recently open object.
