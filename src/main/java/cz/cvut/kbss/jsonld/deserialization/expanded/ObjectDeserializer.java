@@ -3,6 +3,7 @@ package cz.cvut.kbss.jsonld.deserialization.expanded;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
+import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
@@ -56,9 +57,7 @@ class ObjectDeserializer extends Deserializer<Map<?, ?>> {
     }
 
     private String getId(Map<?, ?> object) {
-        assert object.containsKey(JsonLd.ID);
-        // TODO We should be able to generate ID if the object does not contain it
-        return object.get(JsonLd.ID).toString();
+        return object.containsKey(JsonLd.ID) ? object.get(JsonLd.ID).toString() : IdentifierUtil.generateBlankNodeId();
     }
 
     private Map<?, ?> orderAttributesForProcessing(Map<?, ?> value) {

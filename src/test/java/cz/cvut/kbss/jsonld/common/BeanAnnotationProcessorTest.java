@@ -140,13 +140,13 @@ public class BeanAnnotationProcessorTest {
     @Test
     public void getInstanceIdentifierExtractsIdFieldValue() {
         final Organization org = Generator.generateOrganization();
-        assertEquals(org.getUri(), BeanAnnotationProcessor.getInstanceIdentifier(org));
+        assertEquals(org.getUri(), BeanAnnotationProcessor.getInstanceIdentifier(org).get());
     }
 
     @Test
     public void getInstanceIdentifierExtractsIdFieldFromAncestorClass() {
         final Employee e = Generator.generateEmployee();
-        assertEquals(e.getUri(), BeanAnnotationProcessor.getInstanceIdentifier(e));
+        assertEquals(e.getUri(), BeanAnnotationProcessor.getInstanceIdentifier(e).get());
     }
 
     @Test

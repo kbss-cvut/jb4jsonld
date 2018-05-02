@@ -20,6 +20,7 @@ import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
+import org.hamcrest.core.StringStartsWith;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -33,7 +34,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -124,7 +125,7 @@ public class ObjectGraphTraverserTest {
         verifyUserFieldsVisited(employee);
         verify(visitor).openInstance(employee.getEmployer());
         verify(visitor).openCollection(employee.getEmployer().getEmployees());
-        verify(visitor).visitKnownInstance(employee);
+        verify(visitor).visitKnownInstance(employee.getUri().toString(), employee);
         verify(visitor).closeCollection(employee.getEmployer().getEmployees());
         verify(visitor).closeInstance(employee.getEmployer());
     }
@@ -150,10 +151,14 @@ public class ObjectGraphTraverserTest {
         employee.employer = Generator.generateUri();
 
         traverser.traverse(employee);
+        final Map<Object, String> knownInstances = getKnownInstances();
+        assertFalse(knownInstances.containsKey(employee.employer));
+    }
+
+    private Map<Object, String> getKnownInstances() throws NoSuchFieldException, IllegalAccessException {
         final Field knownField = ObjectGraphTraverser.class.getDeclaredField("knownInstances");
         knownField.setAccessible(true);
-        final Map<Object, Object> knownInstances = (Map<Object, Object>) knownField.get(traverser);
-        assertFalse(knownInstances.containsKey(employee.employer));
+        return (Map<Object, String>) knownField.get(traverser);
     }
 
     @OWLClass(iri = Vocabulary.EMPLOYEE)
@@ -201,5 +206,25 @@ public class ObjectGraphTraverserTest {
 
     @JsonLdAttributeOrder({"participants", "members"})
     private static class PartiallyOrderedStudy extends Study {
+    }
+
+    @Test
+    public void traversePutsVisitedInstanceTogetherWithIdentifierIntoKnownInstancesOnOpeningObject() throws Exception {
+        final Person person = Generator.generatePerson();
+        traverser.traverse(person);
+        final Map<Object, String> knownInstances = getKnownInstances();
+        assertTrue(knownInstances.containsKey(person));
+        assertEquals(person.getUri().toString(), knownInstances.get(person));
+    }
+
+    @Test
+    public void traverseGeneratesBlankNodeIdentifierWhenPuttingInstanceWithoutIdentifierIntoKnownInstances() throws
+                                                                                                             Exception {
+        final Person person = Generator.generatePerson();
+        person.setUri(null);
+        traverser.traverse(person);
+        final Map<Object, String> knownInstances = getKnownInstances();
+        assertTrue(knownInstances.containsKey(person));
+        assertThat(knownInstances.get(person), StringStartsWith.startsWith("_:"));
     }
 }

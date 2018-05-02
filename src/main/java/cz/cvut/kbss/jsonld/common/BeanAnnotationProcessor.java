@@ -276,7 +276,7 @@ public class BeanAnnotationProcessor {
      * @param instance Instance to get identifier value from
      * @return Identifier value
      */
-    public static Object getInstanceIdentifier(Object instance) {
+    public static Optional<Object> getInstanceIdentifier(Object instance) {
         Objects.requireNonNull(instance);
         final List<Class<?>> classes = getAncestors(instance.getClass());
         for (Class<?> cls : classes) {
@@ -286,7 +286,7 @@ public class BeanAnnotationProcessor {
                         f.setAccessible(true);
                     }
                     try {
-                        return f.get(instance);
+                        return Optional.ofNullable(f.get(instance));
                     } catch (IllegalAccessException e) {
                         throw new JsonLdSerializationException("Unable to extract identifier of instance " + instance);
                     }

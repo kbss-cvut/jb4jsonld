@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -23,6 +23,7 @@ import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
+import org.hamcrest.core.StringStartsWith;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -248,5 +249,35 @@ public class CompactedJsonLdSerializerTest {
         final Map<String, ?> country = (Map<String, ?>) value;
         assertEquals(1, country.size());
         assertEquals(company.getCountry().toString(), country.get(JsonLd.ID));
+    }
+
+    @Test
+    public void serializationGeneratesBlankNodeIfInstancesDoesNotHaveIdentifierValue() throws Exception {
+        final Organization company = Generator.generateOrganization();
+        company.setUri(null);
+        serializer.serialize(company);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertTrue(json.containsKey(JsonLd.ID));
+        assertThat(json.get(JsonLd.ID).toString(), StringStartsWith.startsWith("_:"));
+    }
+
+    @Test
+    public void serializationUsesGeneratedBlankNodeForObjectReference() throws Exception {
+        final Organization company = Generator.generateOrganization();
+        company.setUri(null);
+        final Employee employee = Generator.generateEmployee();
+        employee.setEmployer(company);
+        company.addEmployee(employee);
+        serializer.serialize(company);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final String id = (String) json.get(JsonLd.ID);
+        final List<?> employees = (List<?>) json.get(Vocabulary.HAS_MEMBER);
+        for (Object e : employees) {
+            final Map<?, ?> eMap = (Map<?, ?>) e;
+            final Map<?, ?> employer = (Map<?, ?>) eMap.get(Vocabulary.IS_MEMBER_OF);
+            assertEquals(id, employer.get(JsonLd.ID));
+        }
     }
 }

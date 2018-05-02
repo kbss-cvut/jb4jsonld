@@ -16,6 +16,7 @@ package cz.cvut.kbss.jsonld.serialization.traversal;
 
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
+import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 
 import java.lang.reflect.Field;
@@ -23,11 +24,9 @@ import java.util.*;
 
 public class ObjectGraphTraverser implements InstanceVisitor {
 
-    private static final Object EMPTY_OBJECT = new Object();
-
     private final Set<InstanceVisitor> visitors = new HashSet<>(4);
 
-    private Map<Object, Object> knownInstances;
+    private Map<Object, String> knownInstances;
 
     public void addVisitor(InstanceVisitor visitor) {
         Objects.requireNonNull(visitor);
@@ -66,7 +65,7 @@ public class ObjectGraphTraverser implements InstanceVisitor {
 
     private void traverseImpl(Object instance) throws IllegalAccessException {
         if (knownInstances.containsKey(instance)) {
-            visitKnownInstance(instance);
+            visitKnownInstance(knownInstances.get(instance), instance);
             return;
         }
         openInstance(instance);
@@ -74,7 +73,11 @@ public class ObjectGraphTraverser implements InstanceVisitor {
                 orderAttributesForSerialization(BeanAnnotationProcessor.getSerializableFields(instance),
                         BeanAnnotationProcessor.getAttributeOrder(instance.getClass()));
         for (Field f : fieldsToSerialize) {
-            final Object value = BeanClassProcessor.getFieldValue(f, instance);
+            Object value = BeanClassProcessor.getFieldValue(f, instance);
+            if (value == null && BeanAnnotationProcessor.isInstanceIdentifier(f)) {
+                // If the value is null for an identifier field, we have already generated one when opening the object
+                value = knownInstances.get(instance);
+            }
             visitField(f, value);
             if (value != null && BeanAnnotationProcessor.isObjectProperty(f)) {
                 traverseObjectPropertyValue(value);
@@ -118,7 +121,8 @@ public class ObjectGraphTraverser implements InstanceVisitor {
     @Override
     public void openInstance(Object instance) {
         if (!BeanClassProcessor.isIdentifierType(instance.getClass())) {
-            knownInstances.put(instance, EMPTY_OBJECT);
+            final Optional<Object> identifier = BeanAnnotationProcessor.getInstanceIdentifier(instance);
+            knownInstances.put(instance, identifier.orElse(IdentifierUtil.generateBlankNodeId()).toString());
         }
         visitors.forEach(v -> v.openInstance(instance));
     }
@@ -129,8 +133,8 @@ public class ObjectGraphTraverser implements InstanceVisitor {
     }
 
     @Override
-    public void visitKnownInstance(Object instance) {
-        visitors.forEach(v -> v.visitKnownInstance((instance)));
+    public void visitKnownInstance(String id, Object instance) {
+        visitors.forEach(v -> v.visitKnownInstance(id, instance));
     }
 
     @Override

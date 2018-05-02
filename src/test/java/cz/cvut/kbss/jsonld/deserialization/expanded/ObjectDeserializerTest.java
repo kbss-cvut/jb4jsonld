@@ -15,10 +15,12 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Study;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import org.hamcrest.core.StringStartsWith;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -28,6 +30,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Mockito.*;
 
@@ -137,5 +141,21 @@ public class ObjectDeserializerTest {
         deserializer.processValue((Map<?, ?>) input.get(0));
         verify(instanceBuilderMock).openObject(TestUtil.HALSEY_URI.toString(), User.class);
         verify(instanceBuilderMock, never()).addValue(eq(JsonLd.ID), any());
+    }
+
+    @Test
+    public void processValueGeneratesIdWhenIncomingObjectDoesNotContainIt() throws Exception {
+        when(tcResolverMock.getTargetClass(eq(User.class), anyCollection())).thenReturn(User.class);
+        when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
+        this.deserializer =
+                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
+                        User.class);
+        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
+        ((Map<?, ?>) input.get(0)).remove(JsonLd.ID);
+        deserializer.processValue((Map<?, ?>) input.get(0));
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(instanceBuilderMock).openObject(captor.capture(), eq(User.class));
+        assertNotNull(captor.getValue());
+        assertThat(captor.getValue(), StringStartsWith.startsWith("_:"));
     }
 }
