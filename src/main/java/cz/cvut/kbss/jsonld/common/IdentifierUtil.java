@@ -25,6 +25,11 @@ import java.util.Random;
  */
 public class IdentifierUtil {
 
+    /**
+     * Prefix of a blank node identifier.
+     */
+    public static final String B_NODE_PREFIX = "_:";
+
     private static final Random RANDOM = new Random();
 
     /**
@@ -33,6 +38,6 @@ public class IdentifierUtil {
      * @return Blank node identifier
      */
     public static String generateBlankNodeId() {
-        return "_:" + RANDOM.nextInt(Integer.MAX_VALUE);
+        return B_NODE_PREFIX + RANDOM.nextInt(Integer.MAX_VALUE);
     }
 }

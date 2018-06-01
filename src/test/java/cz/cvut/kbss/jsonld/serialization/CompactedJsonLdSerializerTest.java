@@ -15,7 +15,10 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import com.github.jsonldjava.utils.JsonUtils;
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
@@ -31,6 +34,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 public class CompactedJsonLdSerializerTest {
@@ -279,5 +283,28 @@ public class CompactedJsonLdSerializerTest {
             final Map<?, ?> employer = (Map<?, ?>) eMap.get(Vocabulary.IS_MEMBER_OF);
             assertEquals(id, employer.get(JsonLd.ID));
         }
+    }
+
+    @Test
+    public void serializationGeneratesBlankNodeIdentifierForInstanceOfClassWithoutIdentifierField() throws Exception {
+        final PersonWithoutIdentifier person = new PersonWithoutIdentifier();
+        person.firstName = "Thomas";
+        person.lastName = "Lasky";
+        serializer.serialize(person);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final String id = (String) json.get(JsonLd.ID);
+        assertNotNull(id);
+        assertThat(id, startsWith(IdentifierUtil.B_NODE_PREFIX));
+    }
+
+    @OWLClass(iri = Vocabulary.PERSON)
+    private static class PersonWithoutIdentifier {
+
+        @OWLDataProperty(iri = Vocabulary.FIRST_NAME)
+        private String firstName;
+
+        @OWLDataProperty(iri = Vocabulary.LAST_NAME)
+        private String lastName;
     }
 }

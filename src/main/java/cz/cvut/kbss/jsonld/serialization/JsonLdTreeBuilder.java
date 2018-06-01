@@ -92,8 +92,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
         } else {
             openNewNode(JsonNodeFactory.createObjectNode());
         }
-        currentNode.addItem(
-                JsonNodeFactory.createLiteralNode(JsonLd.ID, id));
+        currentNode.addItem(JsonNodeFactory.createLiteralNode(JsonLd.ID, id));
         closeInstance(instance);
         this.visitedField = null;
     }
