@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -17,7 +17,6 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -49,11 +48,11 @@ public class JsonNodeFactory {
                 break;
             case NUMBER:
                 node = name != null ? new NumericLiteralNode<>(name, (Number) value) :
-                       new NumericLiteralNode<>((Number) value);
+                        new NumericLiteralNode<>((Number) value);
                 break;
             case STRING:
                 node = name != null ? new StringLiteralNode(name, value.toString()) :
-                       new StringLiteralNode(value.toString());
+                        new StringLiteralNode(value.toString());
                 break;
         }
         return node;
@@ -130,10 +129,10 @@ public class JsonNodeFactory {
     }
 
     public static ObjectIdNode createObjectIdNode(Object id) {
-        return new ObjectIdNode(URI.create(id.toString()));
+        return new ObjectIdNode(id.toString());
     }
 
     public static ObjectIdNode createObjectIdNode(String name, Object id) {
-        return new ObjectIdNode(name, URI.create(id.toString()));
+        return new ObjectIdNode(name, id.toString());
     }
 }

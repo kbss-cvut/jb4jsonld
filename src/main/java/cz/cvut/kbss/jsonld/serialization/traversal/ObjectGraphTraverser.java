@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -25,6 +25,8 @@ import java.util.*;
 public class ObjectGraphTraverser implements InstanceVisitor {
 
     private final Set<InstanceVisitor> visitors = new HashSet<>(4);
+
+    private final InstanceTypeResolver typeResolver = new InstanceTypeResolver();
 
     private Map<Object, String> knownInstances;
 
@@ -69,21 +71,28 @@ public class ObjectGraphTraverser implements InstanceVisitor {
             return;
         }
         openInstance(instance);
+        visitIdentifier(null, instance);
+        if (!BeanClassProcessor.isIdentifierType(instance.getClass())) {
+            visitTypes(null, instance);
+            serializeFields(instance);
+        }
+        closeInstance(instance);
+    }
+
+    private void serializeFields(Object instance) throws IllegalAccessException {
         final List<Field> fieldsToSerialize =
                 orderAttributesForSerialization(BeanAnnotationProcessor.getSerializableFields(instance),
                         BeanAnnotationProcessor.getAttributeOrder(instance.getClass()));
         for (Field f : fieldsToSerialize) {
-            Object value = BeanClassProcessor.getFieldValue(f, instance);
-            if (value == null && BeanAnnotationProcessor.isInstanceIdentifier(f)) {
-                // If the value is null for an identifier field, we have already generated one when opening the object
-                value = knownInstances.get(instance);
+            if (BeanAnnotationProcessor.isInstanceIdentifier(f)) {
+                continue;
             }
+            Object value = BeanClassProcessor.getFieldValue(f, instance);
             visitField(f, value);
             if (value != null && BeanAnnotationProcessor.isObjectProperty(f)) {
                 traverseObjectPropertyValue(value);
             }
         }
-        closeInstance(instance);
     }
 
     private List<Field> orderAttributesForSerialization(List<Field> fields, String[] ordering) {
@@ -135,6 +144,26 @@ public class ObjectGraphTraverser implements InstanceVisitor {
     @Override
     public void visitKnownInstance(String id, Object instance) {
         visitors.forEach(v -> v.visitKnownInstance(id, instance));
+    }
+
+    @Override
+    public void visitIdentifier(String identifier, Object instance) {
+        final String id;
+        if (BeanClassProcessor.isIdentifierType(instance.getClass())) {
+            id = instance.toString();
+        } else {
+            final Optional<Object> extractedId = BeanAnnotationProcessor.getInstanceIdentifier(instance);
+            id = extractedId.orElse(IdentifierUtil.generateBlankNodeId()).toString();
+            knownInstances.put(instance, id);
+        }
+        visitors.forEach(v -> v.visitIdentifier(id, instance));
+    }
+
+    @Override
+    public void visitTypes(Collection<String> types, Object instance) {
+        final Set<String> resolvedTypes = typeResolver.resolveTypes(instance);
+        assert !resolvedTypes.isEmpty();
+        visitors.forEach(v -> v.visitTypes(resolvedTypes, instance));
     }
 
     @Override

@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -17,7 +17,6 @@ package cz.cvut.kbss.jsonld.serialization.model;
 import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Objects;
 
 /**
@@ -25,20 +24,20 @@ import java.util.Objects;
  */
 public class ObjectIdNode extends JsonNode {
 
-    private final URI identifier;
+    private final String identifier;
 
-    public ObjectIdNode(URI identifier) {
+    public ObjectIdNode(String identifier) {
         this.identifier = Objects.requireNonNull(identifier);
     }
 
-    public ObjectIdNode(String name, URI identifier) {
+    public ObjectIdNode(String name, String identifier) {
         super(name);
         this.identifier = Objects.requireNonNull(identifier);
     }
 
     @Override
     void writeValue(JsonGenerator writer) throws IOException {
-        writer.writeString(identifier.toString());
+        writer.writeString(identifier);
     }
 
     @Override

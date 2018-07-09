@@ -66,7 +66,7 @@ public class ObjectGraphTraverserTest {
     }
 
     private void verifyUserFieldsVisited(User user) throws NoSuchFieldException {
-        verify(visitor).visitField(Person.class.getDeclaredField("uri"), user.getUri());
+        verify(visitor).visitIdentifier(user.getUri().toString(), user);
         verify(visitor).visitField(Person.class.getDeclaredField("firstName"), user.getFirstName());
         verify(visitor).visitField(Person.class.getDeclaredField("lastName"), user.getLastName());
         verify(visitor).visitField(User.class.getDeclaredField("username"), user.getUsername());
@@ -84,7 +84,7 @@ public class ObjectGraphTraverserTest {
 
         verifyUserFieldsVisited(employee);
         verify(visitor).visitField(Employee.class.getDeclaredField("employer"), employee.getEmployer());
-        verify(visitor).visitField(Organization.class.getDeclaredField("uri"), employee.getEmployer().getUri());
+        verify(visitor).visitIdentifier(employee.getEmployer().getUri().toString(), employee.getEmployer());
         verify(visitor).visitField(Organization.class.getDeclaredField("dateCreated"),
                 employee.getEmployer().getDateCreated());
         verify(visitor).visitField(Organization.class.getDeclaredField("name"), employee.getEmployer().getName());
@@ -174,7 +174,7 @@ public class ObjectGraphTraverserTest {
 
         traverser.traverse(study);
         final InOrder inOrder = inOrder(visitor);
-        inOrder.verify(visitor).visitField(Study.class.getDeclaredField("uri"), study.getUri());
+        inOrder.verify(visitor).visitIdentifier(study.getUri().toString(), study);
         inOrder.verify(visitor).visitField(Study.class.getDeclaredField("name"), study.getName());
         inOrder.verify(visitor).visitField(Study.class.getDeclaredField("participants"), study.getParticipants());
         inOrder.verify(visitor).visitField(Study.class.getDeclaredField("members"), study.getMembers());
@@ -226,5 +226,38 @@ public class ObjectGraphTraverserTest {
         final Map<Object, String> knownInstances = getKnownInstances();
         assertTrue(knownInstances.containsKey(person));
         assertThat(knownInstances.get(person), StringStartsWith.startsWith("_:"));
+    }
+
+    @Test
+    public void traverseInvokesVisitIdentifierWithInstanceIdentifier() {
+        final Person person = Generator.generatePerson();
+        traverser.traverse(person);
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).openInstance(person);
+        inOrder.verify(visitor).visitIdentifier(person.getUri().toString(), person);
+    }
+
+    @Test
+    public void traverseInvokesVisitWhenInstanceIsPlainIdentifierPropertyValue() throws Exception {
+        final EmployeeWithUriEmployer employee = new EmployeeWithUriEmployer();
+        employee.setUri(Generator.generateUri());
+        employee.employer = Generator.generateUri();
+
+        traverser.traverse(employee);
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).openInstance(employee);
+        inOrder.verify(visitor).visitField(EmployeeWithUriEmployer.class.getDeclaredField("employer"), employee.employer);
+        inOrder.verify(visitor).openInstance(employee.employer);
+        inOrder.verify(visitor).visitIdentifier(employee.employer.toString(), employee.employer);
+    }
+
+    @Test
+    public void traverseInvokesVisitTypesAfterOpeningInstance() {
+        final Employee employee = Generator.generateEmployee();
+        traverser.traverse(employee);
+
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).openInstance(employee);
+        inOrder.verify(visitor).visitTypes(new InstanceTypeResolver().resolveTypes(employee), employee);
     }
 }

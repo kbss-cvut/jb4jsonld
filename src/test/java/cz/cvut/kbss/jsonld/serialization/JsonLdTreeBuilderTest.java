@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -26,7 +26,6 @@ import cz.cvut.kbss.jsonld.serialization.model.*;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -73,10 +72,11 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void openInstanceAddsSingularTypeAttributeToNode() {
+    public void visitTypesAddsSingularTypeAttributeToNode() {
         final Person p = new Person();
         treeBuilder.openInstance(p);
         assertNotNull(treeBuilder.getTreeRoot());
+        treeBuilder.visitTypes(Collections.singleton(Vocabulary.PERSON), p);
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         final CollectionNode typesNode = (CollectionNode) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
@@ -84,10 +84,11 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void openInstanceAddsArrayOfTypesToNode() throws Exception {
+    public void visitTypesAddsArrayOfTypesToNode() throws Exception {
         final Employee employee = Generator.generateEmployee();
         treeBuilder.openInstance(employee);
         assertTrue(getNodeStack().isEmpty());
+        treeBuilder.visitTypes(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE), employee);
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         final Set<String> types = new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE));
         final CollectionNode typesNode = (CollectionNode) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
@@ -317,25 +318,18 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void openInstanceDoesNotAddTypesWhenThereAreNotAny() {
-        final URI uri = Generator.generateUri();
-        treeBuilder.openInstance(uri);
-        treeBuilder.closeInstance(uri);
-        final CompositeNode result = treeBuilder.getTreeRoot();
-        result.getItems().forEach(n -> assertNotEquals(JsonLd.TYPE, n.getName()));
-    }
-
-    @Test
-    public void openInstanceAddsIdAttributeWhenInstanceIsOnlyIdentifier() throws Exception {
-        final URI uri = Generator.generateUri();
-        treeBuilder.openInstance(uri);
-        treeBuilder.closeInstance(uri);
-        final CompositeNode result = treeBuilder.getTreeRoot();
-        assertEquals(1, result.getItems().size());
-        final JsonNode value = result.getItems().iterator().next();
-        assertEquals(JsonLd.ID, value.getName());
-        final JsonGenerator generatorMock = mock(JsonGenerator.class);
-        value.write(generatorMock);
-        verify(generatorMock).writeString(uri.toString());
+    public void visitIdentifierAddsIdNodeToCurrentObjectNode() throws Exception {
+        final Person p = Generator.generatePerson();
+        treeBuilder.openInstance(p);
+        treeBuilder.visitIdentifier(p.getUri().toString(), p);
+        final CompositeNode root = treeBuilder.getTreeRoot();
+        final Collection<JsonNode> nodes = root.getItems();
+        final Optional<JsonNode> idNode = nodes.stream().filter(n -> n.getName().equals(JsonLd.ID)).findAny();
+        assertTrue(idNode.isPresent());
+        assertTrue(idNode.get() instanceof ObjectIdNode);
+        final ObjectIdNode node = (ObjectIdNode) idNode.get();
+        JsonGenerator generator = mock(JsonGenerator.class);
+        node.write(generator);
+        verify(generator).writeString(p.getUri().toString());
     }
 }
