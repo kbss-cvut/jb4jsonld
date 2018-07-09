@@ -18,6 +18,7 @@ import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
+import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -27,6 +28,8 @@ public class ObjectGraphTraverser implements InstanceVisitor {
     private final Set<InstanceVisitor> visitors = new HashSet<>(4);
 
     private final InstanceTypeResolver typeResolver = new InstanceTypeResolver();
+
+    private boolean requireId = false;
 
     private Map<Object, String> knownInstances;
 
@@ -153,6 +156,9 @@ public class ObjectGraphTraverser implements InstanceVisitor {
             id = instance.toString();
         } else {
             final Optional<Object> extractedId = BeanAnnotationProcessor.getInstanceIdentifier(instance);
+            if (!extractedId.isPresent() && requireId) {
+                throw MissingIdentifierException.create(instance);
+            }
             id = extractedId.orElse(IdentifierUtil.generateBlankNodeId()).toString();
             knownInstances.put(instance, id);
         }
@@ -179,5 +185,9 @@ public class ObjectGraphTraverser implements InstanceVisitor {
     @Override
     public void closeCollection(Collection<?> collection) {
         visitors.forEach(v -> v.closeCollection(collection));
+    }
+
+    public void setRequireId(boolean requireId) {
+        this.requireId = requireId;
     }
 }

@@ -17,6 +17,7 @@ package cz.cvut.kbss.jsonld.serialization;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
@@ -25,10 +26,13 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.net.URI;
 import java.util.*;
@@ -38,6 +42,9 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 public class CompactedJsonLdSerializerTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private BufferedJsonGenerator jsonWriter;
 
@@ -298,6 +305,7 @@ public class CompactedJsonLdSerializerTest {
         assertThat(id, startsWith(IdentifierUtil.B_NODE_PREFIX));
     }
 
+    @SuppressWarnings("unused")
     @OWLClass(iri = Vocabulary.PERSON)
     private static class PersonWithoutIdentifier {
 
@@ -306,5 +314,15 @@ public class CompactedJsonLdSerializerTest {
 
         @OWLDataProperty(iri = Vocabulary.LAST_NAME)
         private String lastName;
+    }
+
+    @Test
+    public void serializationThrowsMissingIdentifierExceptionWhenNoIdentifierFieldIsFoundAndRequiredIdIsConfigured() {
+        serializer.configuration().set(ConfigParam.REQUIRE_ID, Boolean.TRUE.toString());
+        thrown.expect(MissingIdentifierException.class);
+        final PersonWithoutIdentifier person = new PersonWithoutIdentifier();
+        person.firstName = "Thomas";
+        person.lastName = "Lasky";
+        serializer.serialize(person);
     }
 }

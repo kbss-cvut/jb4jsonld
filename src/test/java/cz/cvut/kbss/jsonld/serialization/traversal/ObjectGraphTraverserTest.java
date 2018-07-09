@@ -20,9 +20,12 @@ import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
+import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -39,6 +42,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class ObjectGraphTraverserTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private InstanceVisitor visitor;
@@ -259,5 +265,14 @@ public class ObjectGraphTraverserTest {
         final InOrder inOrder = inOrder(visitor);
         inOrder.verify(visitor).openInstance(employee);
         inOrder.verify(visitor).visitTypes(new InstanceTypeResolver().resolveTypes(employee), employee);
+    }
+
+    @Test
+    public void traverseThrowsMissingIdentifierExceptionWhenIdentifierIsRequiredAndMissing() {
+        final Person person = Generator.generatePerson();
+        person.setUri(null);
+        thrown.expect(MissingIdentifierException.class);
+        traverser.setRequireId(true);
+        traverser.traverse(person);
     }
 }

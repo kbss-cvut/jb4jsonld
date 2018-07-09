@@ -94,6 +94,7 @@ public class InstanceTypeResolverTest {
         assertTrue(types.contains(Vocabulary.PERSON));
     }
 
+    @SuppressWarnings("unused")
     @OWLClass(iri = Vocabulary.PERSON)
     private static class UriTypes {
 
@@ -110,6 +111,7 @@ public class InstanceTypeResolverTest {
         resolver.resolveTypes(instance);
     }
 
+    @SuppressWarnings("unused")
     @OWLClass(iri = Vocabulary.PERSON)
     private static class InvalidTypes {
 

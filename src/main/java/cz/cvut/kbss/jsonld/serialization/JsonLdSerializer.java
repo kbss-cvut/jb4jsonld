@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.common.Configurable;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -60,6 +61,7 @@ public abstract class JsonLdSerializer implements Configurable {
      */
     public void serialize(Object root) {
         Objects.requireNonNull(root);
+        traverser.setRequireId(configuration.is(ConfigParam.REQUIRE_ID));
         final JsonNode jsonRoot = buildJsonTree(root);
         jsonRoot.write(jsonGenerator);
     }
