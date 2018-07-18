@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
@@ -30,7 +28,8 @@ public interface InstanceBuilder {
      * Creates new instance to fill filled mapped by the specified property.
      * <p>
      * The instance type is determined from the declared type of the mapped field, which is taken from the currently
-     * open object, and from the specified types. Therefore, another object has to be already open before this method can be called.
+     * open object, and from the specified types. Therefore, another object has to be already open before this method
+     * can be called.
      * <p>
      * The new instance also becomes the currently open object.
      * <p>
@@ -39,7 +38,7 @@ public interface InstanceBuilder {
      * <p>
      * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      *
-     * @param id Identifier of the object being open
+     * @param id       Identifier of the object being open
      * @param property Property identifier (IRI)
      * @param types    Types of the object being open
      * @throws IllegalStateException If there is no {@link OWLClass} instance open
@@ -56,7 +55,7 @@ public interface InstanceBuilder {
      * This method is intended for creating top level objects or adding objects to collections. Use {@link
      * #openObject(String, String, List)} for opening objects as values of attributes.
      *
-     * @param id Identifier of the object being open
+     * @param id  Identifier of the object being open
      * @param cls Java type of the object being open
      * @see #openObject(String, String, List)
      */
@@ -179,6 +178,15 @@ public interface InstanceBuilder {
     Class<?> getCurrentCollectionElementType();
 
     /**
+     * Checks whether the current collection context represents a {@link cz.cvut.kbss.jopa.model.annotations.Properties}
+     * attribute.
+     *
+     * @return {@code true} if the current context is a collection representing a {@link
+     * cz.cvut.kbss.jopa.model.annotations.Properties} field
+     */
+    boolean isCurrentCollectionProperties();
+
+    /**
      * Gets the Java type of the current object context.
      *
      * @return Java class of the instance currently being built
@@ -190,8 +198,8 @@ public interface InstanceBuilder {
      * <p>
      * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      * <p>
-     * Note that {@link Types} and {@link cz.cvut.kbss.jopa.model.annotations.Properties}
-     * fields are always treated as plural.
+     * Note that {@link Types} and {@link cz.cvut.kbss.jopa.model.annotations.Properties} fields are always treated as
+     * plural.
      *
      * @param property Property identifier (IRI)
      * @return Whether mapped field is collection-valued or not
@@ -202,8 +210,8 @@ public interface InstanceBuilder {
      * Checks whether the specified property is mapped by the class representing the current instance context.
      * <p>
      * Returns true also for the {@link cz.cvut.kbss.jsonld.JsonLd#TYPE} property, even though the target instance may
-     * not contain a {@link Types} field. The builder has to be able to handle types
-     * no matter whether a types field is present or not.
+     * not contain a {@link Types} field. The builder has to be able to handle types no matter whether a types field is
+     * present or not.
      *
      * @param property Property identifier (IRI)
      * @return Whether the property is mapped in the current instance context

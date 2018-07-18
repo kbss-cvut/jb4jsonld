@@ -1,26 +1,22 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
-import cz.cvut.kbss.jopa.model.annotations.Id;
-import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
-import cz.cvut.kbss.jopa.model.annotations.Properties;
+import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.deserialization.JsonLdDeserializer;
+import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
@@ -46,7 +42,6 @@ public class ExpandedJsonLdDeserializerTest {
 
     private static final Map<URI, User> USERS = initUsers();
 
-    private static final URI ORG_URI = URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC");
     private static final String ORG_NAME = "UNSC";
     private static final String[] ORG_BRANDS = {"Spartan-II", "Mjolnir IV"};
 
@@ -93,7 +88,7 @@ public class ExpandedJsonLdDeserializerTest {
     }
 
     private void verifyOrganizationAttributes(Organization result) {
-        assertEquals(ORG_URI, result.getUri());
+        assertEquals(TestUtil.UNSC_URI, result.getUri());
         assertEquals(ORG_NAME, result.getName());
         assertNotNull(result.getDateCreated());
         for (String brand : ORG_BRANDS) {
@@ -436,5 +431,39 @@ public class ExpandedJsonLdDeserializerTest {
         final Object input = readAndExpand("objectWithDefinitionSpreadOverMultipleReferences.json");
         final Employee result = deserializer.deserialize(input, Employee.class);
         verifyUserAttributes(USERS.get(HALSEY_URI), result);
+    }
+
+    @Test
+    public void deserializationPutsUnmappedObjectReferencesIntoProperties() throws Exception {
+        final Object input = readAndExpand("objectWithSingularReference.json");
+        final PersonWithoutSubclass result = deserializer.deserialize(input, PersonWithoutSubclass.class);
+        assertTrue(result.properties.containsKey(Vocabulary.IS_MEMBER_OF));
+        assertTrue(result.properties.get(Vocabulary.IS_MEMBER_OF).contains(TestUtil.UNSC_URI.toString()));
+        assertTrue(result.properties.containsKey(Vocabulary.USERNAME));
+        assertTrue(result.properties.get(Vocabulary.USERNAME).contains("halsey@unsc.org"));
+    }
+
+    @OWLClass(iri = Vocabulary.PERSON)
+    public static class PersonWithoutSubclass {
+
+        @Id
+        public URI uri;
+
+        @OWLDataProperty(iri = Vocabulary.FIRST_NAME)
+        private String firstName;
+
+        @OWLDataProperty(iri = Vocabulary.LAST_NAME)
+        private String lastName;
+
+        @Properties
+        private Map<String, Set<String>> properties;
+    }
+
+    @Test
+    public void deserializationPutsUnmappedObjectReferencesIntoTypedProperties() throws Exception {
+        final Object input = readAndExpand("objectWithSingularReference.json");
+        final ClassWithProperties result = deserializer.deserialize(input, ClassWithProperties.class);
+        assertTrue(result.properties.containsKey(URI.create(Vocabulary.IS_MEMBER_OF)));
+        assertTrue(result.properties.get(URI.create(Vocabulary.IS_MEMBER_OF)).contains(TestUtil.UNSC_URI));
     }
 }

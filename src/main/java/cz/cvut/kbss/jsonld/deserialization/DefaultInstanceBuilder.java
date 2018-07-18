@@ -238,7 +238,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public void addNodeReference(String nodeId) {
         final Class<?> targetType = getCurrentCollectionElementType();
-        if (BeanClassProcessor.isIdentifierType(targetType)) {
+        if (BeanClassProcessor.isIdentifierType(targetType) || targetType == null) {
             currentInstance.addItem(nodeId);
         } else {
             currentInstance.addItem(getKnownInstance(nodeId));
@@ -274,5 +274,10 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public Class<?> getCurrentContextType() {
         return currentInstance.getInstanceType();
+    }
+
+    @Override
+    public boolean isCurrentCollectionProperties() {
+        return currentInstance instanceof PropertiesInstanceContext;
     }
 }
