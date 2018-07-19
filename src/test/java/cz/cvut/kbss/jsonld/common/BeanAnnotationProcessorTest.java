@@ -12,9 +12,9 @@
  */
 package cz.cvut.kbss.jsonld.common;
 
-import cz.cvut.kbss.jopa.CommonVocabulary;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.environment.Generator;
@@ -121,7 +121,7 @@ public class BeanAnnotationProcessorTest {
     @Test
     public void getAttributeIdentifierReturnsIriOfOWLAnnotationProperty() throws Exception {
         final String id = BeanAnnotationProcessor.getAttributeIdentifier(Organization.class.getDeclaredField("name"));
-        assertEquals(CommonVocabulary.RDFS_LABEL, id);
+        assertEquals(RDFS.LABEL, id);
     }
 
     @Test
@@ -154,7 +154,7 @@ public class BeanAnnotationProcessorTest {
 
     @OWLClass(iri = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ClassWithoutIdentifier")
     private static class ClassWithoutIdentifier {
-        @OWLAnnotationProperty(iri = CommonVocabulary.RDFS_LABEL)
+        @OWLAnnotationProperty(iri = RDFS.LABEL)
         private String label;
     }
 
