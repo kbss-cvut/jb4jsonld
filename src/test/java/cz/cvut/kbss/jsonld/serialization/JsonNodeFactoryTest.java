@@ -17,10 +17,7 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -130,5 +127,13 @@ public class JsonNodeFactoryTest {
         assertTrue(node instanceof StringLiteralNode);
         assertTrue(node.isValueNode());
         assertEquals(value, node.getValue());
+    }
+
+    @Test
+    public void createLiteralNodeCreatesNumberNodeFromDateInstance() {
+        final Date value = new Date();
+        final LiteralNode node = JsonNodeFactory.createLiteralNode(value);
+        assertTrue(node instanceof NumericLiteralNode);
+        assertEquals(value.getTime(), node.getValue());
     }
 }

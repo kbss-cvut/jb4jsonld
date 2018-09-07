@@ -131,7 +131,7 @@ public class CompactedJsonLdSerializerTest {
 
     private void verifyOrganization(Organization org, Map<String, ?> json) {
         assertEquals(org.getUri().toString(), json.get(JsonLd.ID));
-        assertEquals(org.getDateCreated().toString(), json.get(Vocabulary.DATE_CREATED));
+        assertEquals(org.getDateCreated().getTime(), json.get(Vocabulary.DATE_CREATED));
         assertEquals(org.getBrands().size(), ((Collection<?>) json.get(Vocabulary.BRAND)).size());
         assertTrue(org.getBrands().containsAll((Collection<?>) json.get(Vocabulary.BRAND)));
         if (org.getAdmins() != null && !org.getAdmins().isEmpty()) {

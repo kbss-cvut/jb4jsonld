@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -18,6 +16,7 @@ import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +30,7 @@ public class JsonNodeFactory {
     }
 
     private enum LiteralType {
-        BOOLEAN, NUMBER, STRING
+        BOOLEAN, NUMBER, STRING, TEMPORAL
     }
 
     public static LiteralNode createLiteralNode(Object value) {
@@ -48,11 +47,14 @@ public class JsonNodeFactory {
                 break;
             case NUMBER:
                 node = name != null ? new NumericLiteralNode<>(name, (Number) value) :
-                        new NumericLiteralNode<>((Number) value);
+                       new NumericLiteralNode<>((Number) value);
                 break;
             case STRING:
                 node = name != null ? new StringLiteralNode(name, value.toString()) :
-                        new StringLiteralNode(value.toString());
+                       new StringLiteralNode(value.toString());
+                break;
+            case TEMPORAL:
+                node = TemporalNodeFactory.createLiteralNode(name, value);
                 break;
         }
         return node;
@@ -63,6 +65,8 @@ public class JsonNodeFactory {
             return LiteralType.BOOLEAN;
         } else if (value instanceof Number) {
             return LiteralType.NUMBER;
+        } else if (value instanceof Date) {
+            return LiteralType.TEMPORAL;
         }
         return LiteralType.STRING;
     }
