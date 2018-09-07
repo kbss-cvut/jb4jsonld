@@ -31,7 +31,7 @@
           "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Organization"
         ],
         "http://www.w3.org/2000/01/rdf-schema#label": "Princeton-Plainsboro Teaching Hospital",
-        "http://purl.org/dc/terms/created": "Mon Oct 10 17:34:04 CEST 2016",
+        "http://purl.org/dc/terms/created": 1536304147536,
         "@id": "http://krizik.felk.cvut.cz/ontologies/study-manager/Organization-PrincetonPlainsboro"
       },
       "@id": "http://krizik.felk.cvut.cz/ontologies/study-manager/Greg+House"

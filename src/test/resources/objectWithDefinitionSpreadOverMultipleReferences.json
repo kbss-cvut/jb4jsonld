@@ -28,7 +28,7 @@
         "accountName": "halsey@unsc.org"
       }
     ],
-    "http://purl.org/dc/terms/created": "Fri Jul 29 14:52:04 CEST 2016",
+    "http://purl.org/dc/terms/created": 1536304147536,
     "http://www.w3.org/2000/01/rdf-schema#label": "UNSC"
   },
   "firstName": "Catherine",

@@ -27,6 +27,6 @@
       "lastName": "Halsey"
     }
   ],
-  "http://purl.org/dc/terms/created": "Mon Aug 01 10:43:04 CEST 2016",
+  "http://purl.org/dc/terms/created": 1536304147536,
   "http://www.w3.org/2000/01/rdf-schema#label": "UNSC"
 }

@@ -13,6 +13,7 @@
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.deserialization.JsonLdDeserializer;
@@ -28,10 +29,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static cz.cvut.kbss.jsonld.environment.TestUtil.*;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -465,5 +463,13 @@ public class ExpandedJsonLdDeserializerTest {
         final ClassWithProperties result = deserializer.deserialize(input, ClassWithProperties.class);
         assertTrue(result.properties.containsKey(URI.create(Vocabulary.IS_MEMBER_OF)));
         assertTrue(result.properties.get(URI.create(Vocabulary.IS_MEMBER_OF)).contains(TestUtil.UNSC_URI));
+    }
+
+    @Test
+    public void deserializationParsesNumericTimestampForDateField() throws Exception {
+        final Object input = readAndExpand("objectWithPluralReference.json");
+        final Organization result = deserializer.deserialize(input, Organization.class);
+        assertNotNull(result.getDateCreated());
+        assertTrue(result.getDateCreated().before(new Date()));
     }
 }
