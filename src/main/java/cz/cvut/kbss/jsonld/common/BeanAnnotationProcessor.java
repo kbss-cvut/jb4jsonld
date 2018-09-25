@@ -212,6 +212,16 @@ public class BeanAnnotationProcessor {
     }
 
     /**
+     * Checks whether the specified class contains a {@link Types} field.
+     *
+     * @param cls The class to examine
+     * @return Whether the class has types field
+     */
+    public static boolean hasTypesField(Class<?> cls) {
+        return getTypesField(cls).isPresent();
+    }
+
+    /**
      * Checks whether the specified field is mapped to an OWL object property.
      *
      * @param field The field to examine

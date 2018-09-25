@@ -242,4 +242,26 @@ public class BeanAnnotationProcessorTest {
         final String[] result = BeanAnnotationProcessor.getAttributeOrder(Person.class);
         assertEquals(0, result.length);
     }
+
+    @Test
+    public void getTypesFieldReturnsTypesAttribute() {
+        final Optional<Field> result = BeanAnnotationProcessor.getTypesField(User.class);
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    public void getTypesFieldReturnsEmptyOptionalIfTypesAttributeIsMissing() {
+        final Optional<Field> result = BeanAnnotationProcessor.getTypesField(Person.class);
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void hasTypesFieldReturnsTrueWhenClassHasTypesAttribute() {
+        assertTrue(BeanAnnotationProcessor.hasTypesField(Employee.class));
+    }
+
+    @Test
+    public void hasTypesFieldReturnsFalseWhenClassDoesNotHaveTypesAttribute() {
+        assertFalse(BeanAnnotationProcessor.hasTypesField(Person.class));
+    }
 }
