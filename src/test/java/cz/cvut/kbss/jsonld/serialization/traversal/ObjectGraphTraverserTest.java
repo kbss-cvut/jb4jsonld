@@ -1,26 +1,27 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
+import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
+import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
+import cz.cvut.kbss.jsonld.exception.MissingTypeInfoException;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,6 +38,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -225,7 +227,7 @@ public class ObjectGraphTraverserTest {
 
     @Test
     public void traverseGeneratesBlankNodeIdentifierWhenPuttingInstanceWithoutIdentifierIntoKnownInstances() throws
-                                                                                                             Exception {
+            Exception {
         final Person person = Generator.generatePerson();
         person.setUri(null);
         traverser.traverse(person);
@@ -252,7 +254,8 @@ public class ObjectGraphTraverserTest {
         traverser.traverse(employee);
         final InOrder inOrder = inOrder(visitor);
         inOrder.verify(visitor).openInstance(employee);
-        inOrder.verify(visitor).visitField(EmployeeWithUriEmployer.class.getDeclaredField("employer"), employee.employer);
+        inOrder.verify(visitor)
+               .visitField(EmployeeWithUriEmployer.class.getDeclaredField("employer"), employee.employer);
         inOrder.verify(visitor).openInstance(employee.employer);
         inOrder.verify(visitor).visitIdentifier(employee.employer.toString(), employee.employer);
     }
@@ -274,5 +277,32 @@ public class ObjectGraphTraverserTest {
         thrown.expect(MissingIdentifierException.class);
         traverser.setRequireId(true);
         traverser.traverse(person);
+    }
+
+    @Test
+    public void traverseThrowsMissingTypeInfoExceptionWhenObjectHasNoTypesAndIsNotOwlClass() {
+        final NoType instance = new NoType();
+        instance.uri = Generator.generateUri();
+        thrown.expect(MissingTypeInfoException.class);
+        thrown.expectMessage(containsString("@OWLClass"));
+        thrown.expectMessage(containsString("@Types"));
+        traverser.traverse(instance);
+    }
+
+    @Test
+    public void traverseSupportsInstanceOfClassWithoutOWLClassAnnotationButWithNonEmptyTypes() {
+        final NoType instance = new NoType();
+        instance.uri = Generator.generateUri();
+        instance.types = Collections.singleton(Vocabulary.PERSON);
+        traverser.traverse(instance);
+        verify(visitor).visitTypes(instance.types, instance);
+    }
+
+    private static class NoType {
+        @Id
+        private URI uri;
+
+        @Types
+        private Set<String> types;
     }
 }
