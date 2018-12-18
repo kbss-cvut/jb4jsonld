@@ -21,24 +21,20 @@ import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class BeanAnnotationProcessorTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class BeanAnnotationProcessorTest {
 
     @Test
-    public void getOwlClassesExtractsClassIriFromObject() {
+    void getOwlClassesExtractsClassIriFromObject() {
         final Person p = new Person();
         final Set<String> result = BeanAnnotationProcessor.getOwlClasses(p);
         assertEquals(1, result.size());
@@ -46,13 +42,13 @@ public class BeanAnnotationProcessorTest {
     }
 
     @Test
-    public void getOwlClassesReturnsNullForNonOwlClass() {
+    void getOwlClassesReturnsNullForNonOwlClass() {
         final URI uri = URI.create("http://test");
         assertTrue(BeanAnnotationProcessor.getOwlClasses(uri).isEmpty());
     }
 
     @Test
-    public void getOwlClassesExtractsClassesFromAncestors() {
+    void getOwlClassesExtractsClassesFromAncestors() {
         final User u = new User();
         final Set<String> result = BeanAnnotationProcessor.getOwlClasses(u);
         assertTrue(result.contains(Vocabulary.USER));
@@ -60,7 +56,7 @@ public class BeanAnnotationProcessorTest {
     }
 
     @Test
-    public void getSerializableFieldsExtractsAllFieldsOfAnInstanceIncludingSuperclassOnes() throws Exception {
+    void getSerializableFieldsExtractsAllFieldsOfAnInstanceIncludingSuperclassOnes() throws Exception {
         final User u = new User();
         final List<Field> fields = BeanAnnotationProcessor.getSerializableFields(u);
         assertTrue(fields.contains(User.class.getDeclaredField("username")));
@@ -70,21 +66,21 @@ public class BeanAnnotationProcessorTest {
     }
 
     @Test
-    public void getSerializableFieldsSkipsStaticFields() throws Exception {
+    void getSerializableFieldsSkipsStaticFields() throws Exception {
         final Organization org = new Organization();
         final List<Field> fields = BeanAnnotationProcessor.getSerializableFields(org);
         assertFalse(fields.contains(Organization.class.getDeclaredField("DEFAULT_COUNTRY")));
     }
 
     @Test
-    public void getSerializableFieldsSkipsNonAnnotatedFields() throws Exception {
+    void getSerializableFieldsSkipsNonAnnotatedFields() throws Exception {
         final Organization org = new Organization();
         final List<Field> fields = BeanAnnotationProcessor.getSerializableFields(org);
         assertFalse(fields.contains(Organization.class.getDeclaredField("age")));
     }
 
     @Test
-    public void mapSerializableFieldsReturnsMapOfSerializableFieldsWithPropertyIriKeys() throws Exception {
+    void mapSerializableFieldsReturnsMapOfSerializableFieldsWithPropertyIriKeys() throws Exception {
         final Map<String, Field> result = BeanAnnotationProcessor.mapSerializableFields(Employee.class);
         assertEquals(Person.class.getDeclaredField("firstName"), result.get(Vocabulary.FIRST_NAME));
         assertEquals(Person.class.getDeclaredField("lastName"), result.get(Vocabulary.LAST_NAME));
@@ -94,58 +90,60 @@ public class BeanAnnotationProcessorTest {
     }
 
     @Test
-    public void mapSerializableFieldsResultContainsTypesFieldMappedToRdfType() throws Exception {
+    void mapSerializableFieldsResultContainsTypesFieldMappedToRdfType() throws Exception {
         final Map<String, Field> result = BeanAnnotationProcessor.mapSerializableFields(User.class);
         assertTrue(result.containsKey(JsonLd.TYPE));
         assertEquals(User.class.getDeclaredField("types"), result.get(JsonLd.TYPE));
     }
 
     @Test
-    public void getAttributeIdentifierReturnsIdForIdAttribute() throws Exception {
+    void getAttributeIdentifierReturnsIdForIdAttribute() throws Exception {
         final String id = BeanAnnotationProcessor.getAttributeIdentifier(Person.class.getDeclaredField("uri"));
         assertEquals(JsonLd.ID, id);
     }
 
     @Test
-    public void getAttributeIdentifierReturnsIriOfOWLDataProperty() throws Exception {
+    void getAttributeIdentifierReturnsIriOfOWLDataProperty() throws Exception {
         final String id = BeanAnnotationProcessor.getAttributeIdentifier(Person.class.getDeclaredField("firstName"));
         assertEquals(Vocabulary.FIRST_NAME, id);
     }
 
     @Test
-    public void getAttributeIdentifierReturnsIriOfOWLObjectProperty() throws Exception {
+    void getAttributeIdentifierReturnsIriOfOWLObjectProperty() throws Exception {
         final String id = BeanAnnotationProcessor.getAttributeIdentifier(Employee.class.getDeclaredField("employer"));
         assertEquals(Vocabulary.IS_MEMBER_OF, id);
     }
 
     @Test
-    public void getAttributeIdentifierReturnsIriOfOWLAnnotationProperty() throws Exception {
+    void getAttributeIdentifierReturnsIriOfOWLAnnotationProperty() throws Exception {
         final String id = BeanAnnotationProcessor.getAttributeIdentifier(Organization.class.getDeclaredField("name"));
         assertEquals(RDFS.LABEL, id);
     }
 
     @Test
-    public void getAttributeIdentifierThrowsIllegalArgumentWhenFieldIsNotJsonLdSerializable() throws Exception {
-        thrown.expect(JsonLdSerializationException.class);
-        thrown.expectMessage(
-                "Field " + Organization.class.getDeclaredField("DEFAULT_COUNTRY") + " is not JSON-LD serializable.");
-        BeanAnnotationProcessor.getAttributeIdentifier(Organization.class.getDeclaredField("DEFAULT_COUNTRY"));
+    void getAttributeIdentifierThrowsIllegalArgumentWhenFieldIsNotJsonLdSerializable() throws Exception {
+        final JsonLdSerializationException result = assertThrows(JsonLdSerializationException.class,
+                () -> BeanAnnotationProcessor
+                        .getAttributeIdentifier(Organization.class.getDeclaredField("DEFAULT_COUNTRY")));
+        assertEquals(
+                "Field " + Organization.class.getDeclaredField("DEFAULT_COUNTRY") + " is not JSON-LD serializable.",
+                result.getMessage());
     }
 
     @Test
-    public void getInstanceIdentifierExtractsIdFieldValue() {
+    void getInstanceIdentifierExtractsIdFieldValue() {
         final Organization org = Generator.generateOrganization();
         assertEquals(org.getUri(), BeanAnnotationProcessor.getInstanceIdentifier(org).get());
     }
 
     @Test
-    public void getInstanceIdentifierExtractsIdFieldFromAncestorClass() {
+    void getInstanceIdentifierExtractsIdFieldFromAncestorClass() {
         final Employee e = Generator.generateEmployee();
         assertEquals(e.getUri(), BeanAnnotationProcessor.getInstanceIdentifier(e).get());
     }
 
     @Test
-    public void getInstanceIdentifierReturnsEmptyOptionalWhenInstanceHasNoIdentifierField() {
+    void getInstanceIdentifierReturnsEmptyOptionalWhenInstanceHasNoIdentifierField() {
         final ClassWithoutIdentifier instance = new ClassWithoutIdentifier();
         final Optional<Object> result = BeanAnnotationProcessor.getInstanceIdentifier(instance);
         assertNotNull(result);
@@ -159,109 +157,109 @@ public class BeanAnnotationProcessorTest {
     }
 
     @Test
-    public void isOwlClassEntityReturnsTrueForClassAnnotatedWithOWLClass() {
+    void isOwlClassEntityReturnsTrueForClassAnnotatedWithOWLClass() {
         assertTrue(BeanAnnotationProcessor.isOwlClassEntity(User.class));
     }
 
     @Test
-    public void isOwlClassEntityReturnsFalseForClassWithoutOWLClassAnnotation() {
+    void isOwlClassEntityReturnsFalseForClassWithoutOWLClassAnnotation() {
         assertFalse(BeanAnnotationProcessor.isOwlClassEntity(String.class));
     }
 
     @Test
-    public void isOwlClassEntityReturnsFalseForNullArgument() {
+    void isOwlClassEntityReturnsFalseForNullArgument() {
         assertFalse(BeanAnnotationProcessor.isOwlClassEntity(null));
     }
 
     @Test
-    public void isInstanceIdentifierReturnsTrueForIdField() throws Exception {
+    void isInstanceIdentifierReturnsTrueForIdField() throws Exception {
         assertTrue(BeanAnnotationProcessor.isInstanceIdentifier(Person.class.getDeclaredField("uri")));
     }
 
     @Test
-    public void isInstanceIdentifierReturnsFalseForNonIdField() throws Exception {
+    void isInstanceIdentifierReturnsFalseForNonIdField() throws Exception {
         assertFalse(BeanAnnotationProcessor.isInstanceIdentifier(Person.class.getDeclaredField("firstName")));
     }
 
     @Test
-    public void getOwlClassExtractsClassIriFromJavaType() {
+    void getOwlClassExtractsClassIriFromJavaType() {
         assertEquals(Vocabulary.EMPLOYEE, BeanAnnotationProcessor.getOwlClass(Employee.class));
     }
 
     @Test
-    public void getOwlClassThrowsIllegalArgumentWhenNonOwlClassJavaTypeIsPassedAsArgument() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(Integer.class + " is not an OWL class entity.");
-        BeanAnnotationProcessor.getOwlClass(Integer.class);
+    void getOwlClassThrowsIllegalArgumentWhenNonOwlClassJavaTypeIsPassedAsArgument() {
+        final IllegalArgumentException result = assertThrows(IllegalArgumentException.class,
+                () -> BeanAnnotationProcessor.getOwlClass(Integer.class));
+        assertEquals(Integer.class + " is not an OWL class entity.", result.getMessage());
     }
 
     @Test
-    public void getSerializableFieldsReturnsPropertiesFieldAsWell() throws Exception {
+    void getSerializableFieldsReturnsPropertiesFieldAsWell() throws Exception {
         final List<Field> fields = BeanAnnotationProcessor.getSerializableFields(new Person());
         assertTrue(fields.contains(Person.class.getDeclaredField("properties")));
     }
 
     @Test
-    public void mapSerializableFieldsSkipsPropertiesField() throws Exception {
+    void mapSerializableFieldsSkipsPropertiesField() throws Exception {
         final Map<String, Field> fields = BeanAnnotationProcessor.mapSerializableFields(Person.class);
         assertFalse(fields.containsValue(Person.class.getDeclaredField("properties")));
     }
 
     @Test
-    public void hasPropertiesFieldReturnsFalseForClassWithoutProperties() {
+    void hasPropertiesFieldReturnsFalseForClassWithoutProperties() {
         assertFalse(BeanAnnotationProcessor.hasPropertiesField(Organization.class));
     }
 
     @Test
-    public void hasPropertiesFieldReturnsTrueForClassWithProperties() {
+    void hasPropertiesFieldReturnsTrueForClassWithProperties() {
         assertTrue(BeanAnnotationProcessor.hasPropertiesField(Person.class));
         assertTrue(BeanAnnotationProcessor.hasPropertiesField(User.class)); // Check also subclasses
     }
 
     @Test
-    public void getPropertiesFieldReturnsPropertiesFieldOfClass() throws Exception {
+    void getPropertiesFieldReturnsPropertiesFieldOfClass() throws Exception {
         final Field result = BeanAnnotationProcessor.getPropertiesField(Person.class);
         assertEquals(Person.class.getDeclaredField("properties"), result);
     }
 
     @Test
-    public void getPropertiesFieldThrowsIllegalArgumentForClassWithoutPropertiesField() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(containsString(Organization.class + " does not have a @Properties field."));
-        BeanAnnotationProcessor.getPropertiesField(Organization.class);
+    void getPropertiesFieldThrowsIllegalArgumentForClassWithoutPropertiesField() {
+        final IllegalArgumentException result = assertThrows(IllegalArgumentException.class,
+                () -> BeanAnnotationProcessor.getPropertiesField(Organization.class));
+        assertThat(result.getMessage(), containsString(Organization.class + " does not have a @Properties field."));
     }
 
     @Test
-    public void getAttributeOrderReturnsValueOfJsonLdAttributeOrderAnnotation() {
+    void getAttributeOrderReturnsValueOfJsonLdAttributeOrderAnnotation() {
         final String[] result = BeanAnnotationProcessor.getAttributeOrder(Study.class);
-        assertTrue(Arrays.equals(Study.class.getDeclaredAnnotation(JsonLdAttributeOrder.class).value(), result));
+        assertArrayEquals(Study.class.getDeclaredAnnotation(JsonLdAttributeOrder.class).value(), result);
     }
 
     @Test
-    public void getAttributeOrderReturnsEmptyArrayWhenOrderIsNotSpecifiedOnClass() {
+    void getAttributeOrderReturnsEmptyArrayWhenOrderIsNotSpecifiedOnClass() {
         final String[] result = BeanAnnotationProcessor.getAttributeOrder(Person.class);
         assertEquals(0, result.length);
     }
 
     @Test
-    public void getTypesFieldReturnsTypesAttribute() {
+    void getTypesFieldReturnsTypesAttribute() {
         final Optional<Field> result = BeanAnnotationProcessor.getTypesField(User.class);
         assertTrue(result.isPresent());
     }
 
     @Test
-    public void getTypesFieldReturnsEmptyOptionalIfTypesAttributeIsMissing() {
+    void getTypesFieldReturnsEmptyOptionalIfTypesAttributeIsMissing() {
         final Optional<Field> result = BeanAnnotationProcessor.getTypesField(Person.class);
         assertFalse(result.isPresent());
     }
 
     @Test
-    public void hasTypesFieldReturnsTrueWhenClassHasTypesAttribute() {
+    void hasTypesFieldReturnsTrueWhenClassHasTypesAttribute() {
         assertTrue(BeanAnnotationProcessor.hasTypesField(Employee.class));
     }
 
     @Test
-    public void hasTypesFieldReturnsFalseWhenClassDoesNotHaveTypesAttribute() {
+    void hasTypesFieldReturnsFalseWhenClassDoesNotHaveTypesAttribute() {
         assertFalse(BeanAnnotationProcessor.hasTypesField(Person.class));
     }
 }

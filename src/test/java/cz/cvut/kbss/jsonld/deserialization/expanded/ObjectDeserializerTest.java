@@ -28,10 +28,8 @@ import cz.cvut.kbss.jsonld.environment.model.Study;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.hamcrest.core.StringStartsWith;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -42,15 +40,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyCollection;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-public class ObjectDeserializerTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class ObjectDeserializerTest {
 
     @Mock
     private InstanceBuilder instanceBuilderMock;
@@ -60,15 +56,15 @@ public class ObjectDeserializerTest {
 
     private ObjectDeserializer deserializer;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void processValueProcessesAttributesInOrderSpecifiedByJsonLdAttributeOrder() throws Exception {
-        when(tcResolverMock.getTargetClass(eq(Study.class), anyCollection())).thenReturn(Study.class);
-        when(tcResolverMock.getTargetClass(eq(Employee.class), anyCollection())).thenReturn(Employee.class);
+    void processValueProcessesAttributesInOrderSpecifiedByJsonLdAttributeOrder() throws Exception {
+        doReturn(Study.class).when(tcResolverMock).getTargetClass(eq(Study.class), anyCollection());
+        doReturn(Employee.class).when(tcResolverMock).getTargetClass(eq(Employee.class), anyCollection());
         when(instanceBuilderMock.getCurrentRoot()).thenReturn(new Study());
         when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
         when(instanceBuilderMock.isPlural(Vocabulary.HAS_MEMBER)).thenReturn(true);
@@ -88,10 +84,10 @@ public class ObjectDeserializerTest {
     }
 
     @Test
-    public void processValueThrowsJsonLdDeserializationExceptionWhenUnknownFieldNameIsUsedInAttributeOrderSpecification()
+    void processValueThrowsJsonLdDeserializationExceptionWhenUnknownFieldNameIsUsedInAttributeOrderSpecification()
             throws
             Exception {
-        when(tcResolverMock.getTargetClass(eq(InvalidOrder.class), anyCollection())).thenReturn(InvalidOrder.class);
+        doReturn(InvalidOrder.class).when(tcResolverMock).getTargetClass(eq(InvalidOrder.class), anyCollection());
         when(instanceBuilderMock.getCurrentRoot()).thenReturn(new InvalidOrder());
         when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
         doAnswer(inv -> InvalidOrder.class).when(instanceBuilderMock).getCurrentContextType();
@@ -100,16 +96,16 @@ public class ObjectDeserializerTest {
                         InvalidOrder.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithPluralReferenceSharingObject.json");
 
-        thrown.expect(JsonLdDeserializationException.class);
-        thrown.expectMessage(
-                "Field called unknown declared in JsonLdAttributeOrder annotation not found in class " +
-                        InvalidOrder.class + " .");
-        deserializer.processValue((Map<?, ?>) input.get(0));
+        final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
+                () -> deserializer.processValue((Map<?, ?>) input.get(0)));
+        assertThat(result.getMessage(),
+                containsString("Field called unknown declared in JsonLdAttributeOrder annotation not found in class " +
+                        InvalidOrder.class));
     }
 
     @OWLClass(iri = Vocabulary.ORGANIZATION)
     @JsonLdAttributeOrder({"unknown", "name"})
-    public static class InvalidOrder {
+    private static class InvalidOrder {
 
         @Id
         private URI uri;
@@ -119,8 +115,8 @@ public class ObjectDeserializerTest {
     }
 
     @Test
-    public void processValueOpensObjectWithId() throws Exception {
-        when(tcResolverMock.getTargetClass(eq(User.class), anyCollection())).thenReturn(User.class);
+    void processValueOpensObjectWithId() throws Exception {
+        doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
         this.deserializer =
                 new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
@@ -131,8 +127,8 @@ public class ObjectDeserializerTest {
     }
 
     @Test
-    public void processValueOpensObjectAsAttributeValueWithId() throws Exception {
-        when(tcResolverMock.getTargetClass(eq(User.class), anyCollection())).thenReturn(User.class);
+    void processValueOpensObjectAsAttributeValueWithId() throws Exception {
+        doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
         this.deserializer =
                 new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
@@ -145,8 +141,8 @@ public class ObjectDeserializerTest {
     }
 
     @Test
-    public void processValueDoesNotAddIdToInstanceBuilder() throws Exception {
-        when(tcResolverMock.getTargetClass(eq(User.class), anyCollection())).thenReturn(User.class);
+    void processValueDoesNotAddIdToInstanceBuilder() throws Exception {
+        doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
         this.deserializer =
                 new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
@@ -158,8 +154,8 @@ public class ObjectDeserializerTest {
     }
 
     @Test
-    public void processValueGeneratesIdWhenIncomingObjectDoesNotContainIt() throws Exception {
-        when(tcResolverMock.getTargetClass(eq(User.class), anyCollection())).thenReturn(User.class);
+    void processValueGeneratesIdWhenIncomingObjectDoesNotContainIt() throws Exception {
+        doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
         this.deserializer =
                 new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),

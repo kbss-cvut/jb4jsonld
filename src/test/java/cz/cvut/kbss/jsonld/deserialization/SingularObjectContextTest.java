@@ -23,24 +23,21 @@ import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class SingularObjectContextTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class SingularObjectContextTest {
 
     @Test
-    public void setFieldValueSetsFieldValueOnInstance() throws Exception {
+    void setFieldValueSetsFieldValueOnInstance() throws Exception {
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
                 BeanAnnotationProcessor.mapSerializableFields(
                         Person.class), Collections.emptyMap());
@@ -50,19 +47,20 @@ public class SingularObjectContextTest {
     }
 
     @Test
-    public void setFieldValueThrowsDeserializationExceptionWhenInvalidTypeIsUsedAsFieldValue() throws Exception {
+    void setFieldValueThrowsDeserializationExceptionWhenInvalidTypeIsUsedAsFieldValue() throws Exception {
         final Integer invalidValue = 117;
-        thrown.expect(JsonLdDeserializationException.class);
-        thrown.expectMessage("Type mismatch. Cannot set value " + invalidValue + " of type " + invalidValue.getClass() +
-                " on field " + User.class.getDeclaredField("admin"));
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new User(),
                 BeanAnnotationProcessor.mapSerializableFields(
                         User.class), Collections.emptyMap());
-        ctx.setFieldValue(User.class.getDeclaredField("admin"), invalidValue);
+        JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
+                () -> ctx.setFieldValue(User.class.getDeclaredField("admin"), invalidValue));
+        assertThat(result.getMessage(), containsString(
+                "Type mismatch. Cannot set value " + invalidValue + " of type " + invalidValue.getClass() +
+                        " on field " + User.class.getDeclaredField("admin")));
     }
 
     @Test
-    public void setFieldValueSetsReferenceToAlreadyVisitedObjectWhenObjectIdIsPassedIn() throws Exception {
+    void setFieldValueSetsReferenceToAlreadyVisitedObjectWhenObjectIdIsPassedIn() throws Exception {
         final Organization org = Generator.generateOrganization();
         final Map<String, Object> knownInstances = Collections.singletonMap(org.getUri().toString(), org);
         final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
@@ -74,33 +72,36 @@ public class SingularObjectContextTest {
     }
 
     @Test
-    public void setFieldValueThrowsDeserializationExceptionWhenUnknownObjectIdIsPassedIn() throws Exception {
+    void setFieldValueThrowsDeserializationExceptionWhenUnknownObjectIdIsPassedIn() throws Exception {
         final Organization org = Generator.generateOrganization();
-        thrown.expect(JsonLdDeserializationException.class);
-        thrown.expectMessage("Type mismatch. Cannot set value " + org.getUri().toString() + " of type " + String.class +
-                " on field " + Employee.class.getDeclaredField("employer"));
         final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
                 BeanAnnotationProcessor.mapSerializableFields(Employee.class),
                 Collections.emptyMap());
-        ctx.setFieldValue(Employee.class.getDeclaredField("employer"), org.getUri().toString());
+        JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
+                () -> ctx.setFieldValue(Employee.class.getDeclaredField("employer"), org.getUri().toString()));
+        assertThat(result.getMessage(),
+                containsString(
+                        "Type mismatch. Cannot set value " + org.getUri().toString() + " of type " + String.class +
+                                " on field " + Employee.class.getDeclaredField("employer")));
     }
 
     @Test
-    public void setFieldValueThrowsDeserializationExceptionWhenIdOfInstanceWithInvalidTypeIsPassedIn()
+    void setFieldValueThrowsDeserializationExceptionWhenIdOfInstanceWithInvalidTypeIsPassedIn()
             throws Exception {
         final User u = Generator.generateUser();
         final Map<String, Object> knownInstances = Collections.singletonMap(u.getUri().toString(), u);
-        thrown.expect(JsonLdDeserializationException.class);
-        thrown.expectMessage("Type mismatch. Cannot set value " + u + " of type " + u.getClass() + " on field " +
-                Employee.class.getDeclaredField("employer"));
         final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
                 BeanAnnotationProcessor.mapSerializableFields(Employee.class),
                 knownInstances);
-        ctx.setFieldValue(Employee.class.getDeclaredField("employer"), u.getUri().toString());
+        JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
+                () -> ctx.setFieldValue(Employee.class.getDeclaredField("employer"), u.getUri().toString()));
+        assertThat(result.getMessage(),
+                containsString("Type mismatch. Cannot set value " + u + " of type " + u.getClass() + " on field " +
+                        Employee.class.getDeclaredField("employer")));
     }
 
     @Test
-    public void setFieldValueHandlesConversionFromStringToUri() throws Exception {
+    void setFieldValueHandlesConversionFromStringToUri() throws Exception {
         final URI id = Generator.generateUri();
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
                 BeanAnnotationProcessor.mapSerializableFields(
@@ -110,14 +111,14 @@ public class SingularObjectContextTest {
     }
 
     @Test
-    public void isPropertyMappedReturnsTrueForUnmappedPropertyWhenClassContainsPropertiesField() {
+    void isPropertyMappedReturnsTrueForUnmappedPropertyWhenClassContainsPropertiesField() {
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
                 BeanAnnotationProcessor.mapSerializableFields(Person.class), Collections.emptyMap());
         assertTrue(ctx.isPropertyMapped(Vocabulary.IS_ADMIN));
     }
 
     @Test
-    public void isPropertyMappedReturnsFalseForUnknownProperty() {
+    void isPropertyMappedReturnsFalseForUnknownProperty() {
         final SingularObjectContext<Organization> ctx = new SingularObjectContext<>(new Organization(),
                 BeanAnnotationProcessor.mapSerializableFields(
                         Organization.class), Collections.emptyMap());
@@ -125,7 +126,7 @@ public class SingularObjectContextTest {
     }
 
     @Test
-    public void setIdentifierValueSkipsBlankNodeWhenTargetTypeIsNotString() {
+    void setIdentifierValueSkipsBlankNodeWhenTargetTypeIsNotString() {
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
                 BeanAnnotationProcessor.mapSerializableFields(Person.class), Collections.emptyMap());
         final String bNode = "_:b1";
@@ -135,7 +136,7 @@ public class SingularObjectContextTest {
     }
 
     @Test
-    public void setIdentifierValueSetsBlankNodeIdentifierWhenTargetTypeIsString() {
+    void setIdentifierValueSetsBlankNodeIdentifierWhenTargetTypeIsString() {
         final SingularObjectContext<WithStringId> ctx = new SingularObjectContext<>(new WithStringId(),
                 BeanAnnotationProcessor.mapSerializableFields(WithStringId.class), new HashMap<>());
         final String bNode = "_:b1";
@@ -151,7 +152,7 @@ public class SingularObjectContextTest {
     }
 
     @Test
-    public void setFieldValueUsesKnownInstancesIdentifierToSetPlainIdentifierFieldValue() throws Exception {
+    void setFieldValueUsesKnownInstancesIdentifierToSetPlainIdentifierFieldValue() throws Exception {
         final Organization org = Generator.generateOrganization();
         final EmployeeWithPlainIdentifierField instance = new EmployeeWithPlainIdentifierField();
         final SingularObjectContext<EmployeeWithPlainIdentifierField> sut = new SingularObjectContext<>(instance,

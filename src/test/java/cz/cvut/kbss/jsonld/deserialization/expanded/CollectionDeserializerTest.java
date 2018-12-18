@@ -11,24 +11,21 @@ import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CollectionDeserializerTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class CollectionDeserializerTest {
 
     @Test
-    public void processValueAddsObjectIdentifiersIntoPropertiesMap() throws Exception {
+    void processValueAddsObjectIdentifiersIntoPropertiesMap() throws Exception {
         final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithPluralReference.json")).get(0);
         final List<?> collection = (List<?>) jsonLd.get(Vocabulary.HAS_MEMBER);
         final TargetClassResolver resolver = new TargetClassResolver(new TypeMap());
@@ -46,7 +43,7 @@ public class CollectionDeserializerTest {
     }
 
     @Test
-    public void processValueThrowsMissingIdentifierExceptionWhenInstanceToBeAddedIntoPropertiesHasNoIdentifier()
+    void processValueThrowsMissingIdentifierExceptionWhenInstanceToBeAddedIntoPropertiesHasNoIdentifier()
             throws Exception {
         final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithPluralReference.json")).get(0);
         final List<?> collection = (List<?>) jsonLd.get(Vocabulary.HAS_MEMBER);
@@ -58,8 +55,9 @@ public class CollectionDeserializerTest {
         final CollectionDeserializer deserializer = new CollectionDeserializer(instanceBuilder, config,
                 Vocabulary.HAS_MEMBER);
         instanceBuilder.openObject(Generator.generateUri().toString(), Person.class);
-        thrown.expect(MissingIdentifierException.class);
-        thrown.expectMessage(containsString("Cannot put an object without an identifier into @Properties. Object: "));
-        deserializer.processValue(collection);
+        final MissingIdentifierException result = assertThrows(MissingIdentifierException.class,
+                () -> deserializer.processValue(collection));
+        assertThat(result.getMessage(),
+                containsString("Cannot put an object without an identifier into @Properties. Object: "));
     }
 }
