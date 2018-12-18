@@ -16,9 +16,11 @@ package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
+import cz.cvut.kbss.jsonld.deserialization.util.DataTypeTransformer;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Optional;
 
 abstract class InstanceContext<T> {
 
@@ -104,6 +106,22 @@ abstract class InstanceContext<T> {
      */
     Class<?> getItemType() {
         throw new UnsupportedOperationException("Not supported by this type of instance context.");
+    }
+
+    Optional<Object> resolveAssignableValue(Class<?> targetType, Object value) {
+        if (!targetType.isAssignableFrom(value.getClass())) {
+            if (knownInstances.containsKey(value.toString())) {
+                final Object known = knownInstances.get(value.toString());
+                if (!targetType.isAssignableFrom(known.getClass())) {
+                    return Optional.ofNullable(DataTypeTransformer.transformValue(value, targetType));
+                } else {
+                    return Optional.of(known);
+                }
+            } else {
+                return Optional.ofNullable(DataTypeTransformer.transformValue(value, targetType));
+            }
+        }
+        return Optional.of(value);
     }
 
     /**
