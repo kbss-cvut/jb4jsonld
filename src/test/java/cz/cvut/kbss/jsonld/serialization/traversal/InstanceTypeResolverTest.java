@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
@@ -22,27 +20,22 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.BeanProcessingException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class InstanceTypeResolverTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class InstanceTypeResolverTest {
 
     private final InstanceTypeResolver resolver = new InstanceTypeResolver();
 
     @Test
-    public void resolveTypesGetsOWLClassAnnotationValue() {
+    void resolveTypesGetsOWLClassAnnotationValue() {
         final Person p = Generator.generatePerson();
         final Set<String> types = resolver.resolveTypes(p);
         assertEquals(1, types.size());
@@ -50,7 +43,7 @@ public class InstanceTypeResolverTest {
     }
 
     @Test
-    public void resolveTypesGetsOWLClassValuesFromAncestorsAsWell() {
+    void resolveTypesGetsOWLClassValuesFromAncestorsAsWell() {
         final User u = Generator.generateUser();
         final Set<String> types = resolver.resolveTypes(u);
         assertEquals(2, types.size());
@@ -59,7 +52,7 @@ public class InstanceTypeResolverTest {
     }
 
     @Test
-    public void resolveTypesExtractsValueOfTypesField() {
+    void resolveTypesExtractsValueOfTypesField() {
         final User u = Generator.generateUser();
         u.setTypes(Collections.singleton(Vocabulary.ORGANIZATION));
         final Set<String> types = resolver.resolveTypes(u);
@@ -67,7 +60,7 @@ public class InstanceTypeResolverTest {
     }
 
     @Test
-    public void resolveTypesExtractsTypesFieldValueFromSuperclass() {
+    void resolveTypesExtractsTypesFieldValueFromSuperclass() {
         final Employee employee = Generator.generateEmployee();
         employee.setTypes(Collections.singleton(Vocabulary.ORGANIZATION));
         final Set<String> types = resolver.resolveTypes(employee);
@@ -75,7 +68,7 @@ public class InstanceTypeResolverTest {
     }
 
     @Test
-    public void resolveTypesCombinesDeclaredTypesWithTypesFieldValue() {
+    void resolveTypesCombinesDeclaredTypesWithTypesFieldValue() {
         final Employee employee = Generator.generateEmployee();
         employee.setTypes(Collections.singleton(Vocabulary.ORGANIZATION));
         final Set<String> types = resolver.resolveTypes(employee);
@@ -86,7 +79,7 @@ public class InstanceTypeResolverTest {
     }
 
     @Test
-    public void resolveTypesHandlesNonStringTypesValue() {
+    void resolveTypesHandlesNonStringTypesValue() {
         final UriTypes u = new UriTypes();
         u.types = Collections.singleton(URI.create(Vocabulary.USER));
         final Set<String> types = resolver.resolveTypes(u);
@@ -103,12 +96,12 @@ public class InstanceTypeResolverTest {
     }
 
     @Test
-    public void throwsBeanProcessingExceptionWhenTypesFieldIsNotCollection() {
-        thrown.expect(BeanProcessingException.class);
-        thrown.expectMessage(containsString("@Types field"));
-        thrown.expectMessage(containsString("collection"));
+    void throwsBeanProcessingExceptionWhenTypesFieldIsNotCollection() {
         final InvalidTypes instance = new InvalidTypes();
-        resolver.resolveTypes(instance);
+        final BeanProcessingException result = assertThrows(BeanProcessingException.class,
+                () -> resolver.resolveTypes(instance));
+        assertThat(result.getMessage(), containsString("@Types field"));
+        assertThat(result.getMessage(), containsString("collection"));
     }
 
     @SuppressWarnings("unused")

@@ -21,28 +21,28 @@ import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.serialization.model.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class JsonLdTreeBuilderTest {
+class JsonLdTreeBuilderTest {
 
     private JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder();
 
     @Test
-    public void openInstanceCreatesNewObjectNode() {
+    void openInstanceCreatesNewObjectNode() {
         final User u = Generator.generateUser();
         treeBuilder.openInstance(u);
         assertTrue(treeBuilder.getTreeRoot() instanceof ObjectNode);
     }
 
     @Test
-    public void openInstancePushesOriginalCurrentToStack() throws Exception {
+    void openInstancePushesOriginalCurrentToStack() throws Exception {
         final Employee e = Generator.generateEmployee();
         final Organization org = Generator.generateOrganization();
         treeBuilder.openInstance(e);
@@ -59,7 +59,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void openInstanceDoesNotPushOriginalCurrentToStackWhenItIsAlreadyClosed() throws Exception {
+    void openInstanceDoesNotPushOriginalCurrentToStackWhenItIsAlreadyClosed() throws Exception {
         final Employee e = Generator.generateEmployee();
         final Organization org = Generator.generateOrganization();
         treeBuilder.openInstance(e);
@@ -70,7 +70,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitTypesAddsSingularTypeAttributeToNode() {
+    void visitTypesAddsSingularTypeAttributeToNode() {
         final Person p = new Person();
         treeBuilder.openInstance(p);
         assertNotNull(treeBuilder.getTreeRoot());
@@ -82,7 +82,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitTypesAddsArrayOfTypesToNode() throws Exception {
+    void visitTypesAddsArrayOfTypesToNode() throws Exception {
         final Employee employee = Generator.generateEmployee();
         treeBuilder.openInstance(employee);
         assertTrue(getNodeStack().isEmpty());
@@ -97,7 +97,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void openInstanceAddsAttributeValueToItsParentObject() throws Exception {
+    void openInstanceAddsAttributeValueToItsParentObject() throws Exception {
         final Employee employee = Generator.generateEmployee();
         treeBuilder.openInstance(employee);
         treeBuilder.visitField(Employee.class.getDeclaredField("employer"), employee.getEmployer());
@@ -118,7 +118,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void closeInstanceClosesNodeAndDoesNothingWhenStackIsEmpty() throws Exception {
+    void closeInstanceClosesNodeAndDoesNothingWhenStackIsEmpty() throws Exception {
         final User u = Generator.generateUser();
         treeBuilder.openInstance(u);
         assertTrue(getNodeStack().isEmpty());
@@ -129,7 +129,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void closeInstancePopsOriginalCurrentFromStack() throws Exception {
+    void closeInstancePopsOriginalCurrentFromStack() throws Exception {
         final Employee e = Generator.generateEmployee();
         final Organization org = Generator.generateOrganization();
         treeBuilder.openInstance(e);
@@ -142,7 +142,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void openCollectionCreatesCollectionNode() {
+    void openCollectionCreatesCollectionNode() {
         treeBuilder.openCollection(Collections.singleton(Generator.generateEmployee()));
         final CompositeNode root = treeBuilder.getTreeRoot();
         assertNotNull(root);
@@ -150,7 +150,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void openCollectionPushesCurrentNodeToStack() throws Exception {
+    void openCollectionPushesCurrentNodeToStack() throws Exception {
         final Organization org = Generator.generateOrganization();
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(org);
@@ -164,7 +164,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void closeCollectionPopsOriginalFromNodeFromStack() throws Exception {
+    void closeCollectionPopsOriginalFromNodeFromStack() throws Exception {
         final Organization org = Generator.generateOrganization();
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(org);
@@ -179,7 +179,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitFieldDoesNothingWhenFieldValueIsNull() throws Exception {
+    void visitFieldDoesNothingWhenFieldValueIsNull() throws Exception {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(null);
         treeBuilder.visitField(Employee.class.getDeclaredField("employer"), employee.getEmployer());
@@ -192,7 +192,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitFieldStoresFieldWhenItIsObjectProperty() throws Exception {
+    void visitFieldStoresFieldWhenItIsObjectProperty() throws Exception {
         final Employee employee = Generator.generateEmployee();
         treeBuilder.visitField(Employee.class.getDeclaredField("employer"), employee.getEmployer());
         final Field visitedFieldField = JsonLdTreeBuilder.class.getDeclaredField("visitedField");
@@ -203,7 +203,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitFieldExtractsValueOfDataPropertyAndAddsNodeToTheRoot() throws Exception {
+    void visitFieldExtractsValueOfDataPropertyAndAddsNodeToTheRoot() throws Exception {
         final User user = Generator.generateUser();
         treeBuilder.openInstance(user);
         assertNotNull(treeBuilder.getTreeRoot());
@@ -214,7 +214,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitFieldExtractsValueOfAnnotationPropertyAndAddsNodeToTheRoot() throws Exception {
+    void visitFieldExtractsValueOfAnnotationPropertyAndAddsNodeToTheRoot() throws Exception {
         final Organization org = Generator.generateOrganization();
         treeBuilder.openInstance(org);
         treeBuilder.visitField(Organization.class.getDeclaredField("name"), org.getName());
@@ -224,7 +224,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitFieldExtractsValueOfPluralDataPropertyAndAddsCollectionNodeWithValuesToTheRoot() throws Exception {
+    void visitFieldExtractsValueOfPluralDataPropertyAndAddsCollectionNodeWithValuesToTheRoot() throws Exception {
         final Organization org = Generator.generateOrganization();
         treeBuilder.openInstance(org);
         treeBuilder.visitField(Organization.class.getDeclaredField("brands"), org.getBrands());
@@ -238,7 +238,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitKnownInstanceAddsNodeWithObjectIdAttributeToTheParent() throws Exception {
+    void visitKnownInstanceAddsNodeWithObjectIdAttributeToTheParent() throws Exception {
         final Employee employee = Generator.generateEmployee();
         final Organization employer = employee.getEmployer();
         employer.setEmployees(Collections.singleton(employee));
@@ -257,7 +257,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitKnownInstanceAddsCollectionOfObjectsWithIdAttributeToTheParent() throws Exception {
+    void visitKnownInstanceAddsCollectionOfObjectsWithIdAttributeToTheParent() throws Exception {
         final Employee employee = Generator.generateEmployee();
         final Organization employer = employee.getEmployer();
         employer.setEmployees(Collections.singleton(employee));
@@ -278,7 +278,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void testAddCollectionItemAfterVisitKnownInstanceWasCalledInObject() throws Exception {
+    void testAddCollectionItemAfterVisitKnownInstanceWasCalledInObject() throws Exception {
         final Employee employee = Generator.generateEmployee();
         final Employee employeeTwo = Generator.generateEmployee();
         final Organization employer = employee.getEmployer();
@@ -297,7 +297,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void testBuildTreeWithRootCollection() {
+    void testBuildTreeWithRootCollection() {
         final Set<User> users = Generator.generateUsers();
         treeBuilder.openCollection(users);
         for (User u : users) {
@@ -316,7 +316,7 @@ public class JsonLdTreeBuilderTest {
     }
 
     @Test
-    public void visitIdentifierAddsIdNodeToCurrentObjectNode() throws Exception {
+    void visitIdentifierAddsIdNodeToCurrentObjectNode() throws Exception {
         final Person p = Generator.generatePerson();
         treeBuilder.openInstance(p);
         treeBuilder.visitIdentifier(p.getUri().toString(), p);

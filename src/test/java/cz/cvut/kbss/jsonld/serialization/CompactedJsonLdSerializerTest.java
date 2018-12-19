@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -29,29 +27,25 @@ import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.hamcrest.core.StringStartsWith;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class CompactedJsonLdSerializerTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class CompactedJsonLdSerializerTest {
 
     private BufferedJsonGenerator jsonWriter;
 
     private JsonLdSerializer serializer;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         this.jsonWriter = new BufferedJsonGenerator();
         this.serializer = new CompactedJsonLdSerializer(jsonWriter);
     }
@@ -59,7 +53,7 @@ public class CompactedJsonLdSerializerTest {
     // The following tests only verify validity of the output JSON-LD, no structure checks are performed
 
     @Test
-    public void testSerializeObjectWithDataProperties() throws Exception {
+    void testSerializeObjectWithDataProperties() throws Exception {
         final User user = Generator.generateUser();
         serializer.serialize(user);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
@@ -67,7 +61,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void testSerializeCollectionOfObjects() throws Exception {
+    void testSerializeCollectionOfObjects() throws Exception {
         final Set<User> users = Generator.generateUsers();
         serializer.serialize(users);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
@@ -75,7 +69,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void testSerializeObjectWithSingularReference() throws Exception {
+    void testSerializeObjectWithSingularReference() throws Exception {
         final Employee employee = Generator.generateEmployee();
         serializer.serialize(employee);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
@@ -85,7 +79,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void testSerializeObjectWithPluralReference() throws Exception {
+    void testSerializeObjectWithPluralReference() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, false);  // No backward references for this test
         serializer.serialize(org);
@@ -104,7 +98,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void testSerializeObjectWithBackwardReferences() throws Exception {
+    void testSerializeObjectWithBackwardReferences() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, true);
         serializer.serialize(org);
@@ -115,7 +109,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void testSerializeObjectWithPluralReferences() throws Exception {
+    void testSerializeObjectWithPluralReferences() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, true);
         org.getEmployees().stream().filter(emp -> Generator.randomBoolean()).forEach(org::addAdmin);
@@ -176,7 +170,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void serializationOfCollectionOfInstancesReferencingSameInstanceUsesReferenceNode() throws Exception {
+    void serializationOfCollectionOfInstancesReferencingSameInstanceUsesReferenceNode() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, true);
         final Set<Employee> employees = org.getEmployees();
@@ -195,7 +189,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void testSerializationOfObjectWithStringBasedUnmappedProperties() throws Exception {
+    void testSerializationOfObjectWithStringBasedUnmappedProperties() throws Exception {
         final Person person = Generator.generatePerson();
         serializer.serialize(person);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
@@ -216,7 +210,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void serializationPutsOwlClassAndTypesContentIntoOneTypeProperty() throws Exception {
+    void serializationPutsOwlClassAndTypesContentIntoOneTypeProperty() throws Exception {
         final User user = Generator.generateUser();
         final String type = Generator.URI_BASE + "TypeOne";
         user.setTypes(Collections.singleton(type));
@@ -229,7 +223,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void serializationSkipsNullDataPropertyValues() throws Exception {
+    void serializationSkipsNullDataPropertyValues() throws Exception {
         final User user = Generator.generateUser();
         user.setAdmin(null);
         serializer.serialize(user);
@@ -239,7 +233,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void serializationSkipsNullObjectPropertyValues() throws Exception {
+    void serializationSkipsNullObjectPropertyValues() throws Exception {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(null);
         serializer.serialize(employee);
@@ -249,7 +243,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void serializationSerializesPlainIdentifierObjectPropertyValue() throws Exception {
+    void serializationSerializesPlainIdentifierObjectPropertyValue() throws Exception {
         final Organization company = Generator.generateOrganization();
         company.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
         serializer.serialize(company);
@@ -263,7 +257,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void serializationGeneratesBlankNodeIfInstancesDoesNotHaveIdentifierValue() throws Exception {
+    void serializationGeneratesBlankNodeIfInstancesDoesNotHaveIdentifierValue() throws Exception {
         final Organization company = Generator.generateOrganization();
         company.setUri(null);
         serializer.serialize(company);
@@ -274,7 +268,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void serializationUsesGeneratedBlankNodeForObjectReference() throws Exception {
+    void serializationUsesGeneratedBlankNodeForObjectReference() throws Exception {
         final Organization company = Generator.generateOrganization();
         company.setUri(null);
         final Employee employee = Generator.generateEmployee();
@@ -293,7 +287,7 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void serializationGeneratesBlankNodeIdentifierForInstanceOfClassWithoutIdentifierField() throws Exception {
+    void serializationGeneratesBlankNodeIdentifierForInstanceOfClassWithoutIdentifierField() throws Exception {
         final PersonWithoutIdentifier person = new PersonWithoutIdentifier();
         person.firstName = "Thomas";
         person.lastName = "Lasky";
@@ -317,12 +311,11 @@ public class CompactedJsonLdSerializerTest {
     }
 
     @Test
-    public void serializationThrowsMissingIdentifierExceptionWhenNoIdentifierFieldIsFoundAndRequiredIdIsConfigured() {
+    void serializationThrowsMissingIdentifierExceptionWhenNoIdentifierFieldIsFoundAndRequiredIdIsConfigured() {
         serializer.configuration().set(ConfigParam.REQUIRE_ID, Boolean.TRUE.toString());
-        thrown.expect(MissingIdentifierException.class);
         final PersonWithoutIdentifier person = new PersonWithoutIdentifier();
         person.firstName = "Thomas";
         person.lastName = "Lasky";
-        serializer.serialize(person);
+        assertThrows(MissingIdentifierException.class, () -> serializer.serialize(person));
     }
 }

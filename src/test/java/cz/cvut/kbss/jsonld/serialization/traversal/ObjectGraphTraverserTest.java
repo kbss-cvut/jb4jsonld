@@ -23,10 +23,8 @@ import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import cz.cvut.kbss.jsonld.exception.MissingTypeInfoException;
 import org.hamcrest.core.StringStartsWith;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -38,30 +36,27 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class ObjectGraphTraverserTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class ObjectGraphTraverserTest {
 
     @Mock
     private InstanceVisitor visitor;
 
     private ObjectGraphTraverser traverser;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.initMocks(this);
         this.traverser = new ObjectGraphTraverser();
         traverser.addVisitor(visitor);
     }
 
     @Test
-    public void traverseVisitsSerializableFieldsOfInstanceWithDataPropertiesOnly() throws Exception {
+    void traverseVisitsSerializableFieldsOfInstanceWithDataPropertiesOnly() throws Exception {
         final User user = Generator.generateUser();
         traverser.traverse(user);
         final InOrder inOrder = inOrder(visitor);
@@ -81,7 +76,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseTraversesObjectReferences() throws Exception {
+    void traverseTraversesObjectReferences() throws Exception {
         final Employee employee = Generator.generateEmployee();
         traverser.traverse(employee);
         final InOrder inOrder = inOrder(visitor);
@@ -99,7 +94,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseTraversesObjectPropertyCollection() {
+    void traverseTraversesObjectPropertyCollection() {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org);
         traverser.traverse(org);
@@ -124,7 +119,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseRecognizesAlreadyVisitedInstances() throws Exception {
+    void traverseRecognizesAlreadyVisitedInstances() throws Exception {
         final Employee employee = Generator.generateEmployee();
         // Backward reference
         employee.getEmployer().setEmployees(Collections.singleton(employee));
@@ -139,7 +134,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseOnCollectionOpensCollectionAddsInstancesAndClosesCollection() {
+    void traverseOnCollectionOpensCollectionAddsInstancesAndClosesCollection() {
         final Set<User> users = Generator.generateUsers();
         traverser.traverse(users);
 
@@ -153,7 +148,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseDoesNotPutPlainIdentifierObjectPropertyValueIntoKnownInstances() throws Exception {
+    void traverseDoesNotPutPlainIdentifierObjectPropertyValueIntoKnownInstances() throws Exception {
         final EmployeeWithUriEmployer employee = new EmployeeWithUriEmployer();
         employee.setUri(Generator.generateUri());
         employee.employer = Generator.generateUri();
@@ -177,7 +172,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseUsesAttributePropertyOrderingInformationWhenSerializingObject() throws Exception {
+    void traverseUsesAttributePropertyOrderingInformationWhenSerializingObject() throws Exception {
         final Study study = generateStudy();
 
         traverser.traverse(study);
@@ -198,7 +193,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseUsesPartialAttributePropertyOrderingWhenSerializingObject() throws Exception {
+    void traverseUsesPartialAttributePropertyOrderingWhenSerializingObject() throws Exception {
         final PartiallyOrderedStudy ps = new PartiallyOrderedStudy();
         ps.setUri(Generator.generateUri());
         ps.setName("TestStudy");
@@ -217,7 +212,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traversePutsVisitedInstanceTogetherWithIdentifierIntoKnownInstancesOnOpeningObject() throws Exception {
+    void traversePutsVisitedInstanceTogetherWithIdentifierIntoKnownInstancesOnOpeningObject() throws Exception {
         final Person person = Generator.generatePerson();
         traverser.traverse(person);
         final Map<Object, String> knownInstances = getKnownInstances();
@@ -226,7 +221,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseGeneratesBlankNodeIdentifierWhenPuttingInstanceWithoutIdentifierIntoKnownInstances() throws
+    void traverseGeneratesBlankNodeIdentifierWhenPuttingInstanceWithoutIdentifierIntoKnownInstances() throws
             Exception {
         final Person person = Generator.generatePerson();
         person.setUri(null);
@@ -237,7 +232,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseInvokesVisitIdentifierWithInstanceIdentifier() {
+    void traverseInvokesVisitIdentifierWithInstanceIdentifier() {
         final Person person = Generator.generatePerson();
         traverser.traverse(person);
         final InOrder inOrder = inOrder(visitor);
@@ -246,7 +241,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseInvokesVisitWhenInstanceIsPlainIdentifierPropertyValue() throws Exception {
+    void traverseInvokesVisitWhenInstanceIsPlainIdentifierPropertyValue() throws Exception {
         final EmployeeWithUriEmployer employee = new EmployeeWithUriEmployer();
         employee.setUri(Generator.generateUri());
         employee.employer = Generator.generateUri();
@@ -261,7 +256,7 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseInvokesVisitTypesAfterOpeningInstance() {
+    void traverseInvokesVisitTypesAfterOpeningInstance() {
         final Employee employee = Generator.generateEmployee();
         traverser.traverse(employee);
 
@@ -271,26 +266,25 @@ public class ObjectGraphTraverserTest {
     }
 
     @Test
-    public void traverseThrowsMissingIdentifierExceptionWhenIdentifierIsRequiredAndMissing() {
+    void traverseThrowsMissingIdentifierExceptionWhenIdentifierIsRequiredAndMissing() {
         final Person person = Generator.generatePerson();
         person.setUri(null);
-        thrown.expect(MissingIdentifierException.class);
         traverser.setRequireId(true);
-        traverser.traverse(person);
+        assertThrows(MissingIdentifierException.class, () -> traverser.traverse(person));
     }
 
     @Test
-    public void traverseThrowsMissingTypeInfoExceptionWhenObjectHasNoTypesAndIsNotOwlClass() {
+    void traverseThrowsMissingTypeInfoExceptionWhenObjectHasNoTypesAndIsNotOwlClass() {
         final NoType instance = new NoType();
         instance.uri = Generator.generateUri();
-        thrown.expect(MissingTypeInfoException.class);
-        thrown.expectMessage(containsString("@OWLClass"));
-        thrown.expectMessage(containsString("@Types"));
-        traverser.traverse(instance);
+        final MissingTypeInfoException result = assertThrows(MissingTypeInfoException.class,
+                () -> traverser.traverse(instance));
+        assertThat(result.getMessage(), containsString("@OWLClass"));
+        assertThat(result.getMessage(), containsString("@Types"));
     }
 
     @Test
-    public void traverseSupportsInstanceOfClassWithoutOWLClassAnnotationButWithNonEmptyTypes() {
+    void traverseSupportsInstanceOfClassWithoutOWLClassAnnotationButWithNonEmptyTypes() {
         final NoType instance = new NoType();
         instance.uri = Generator.generateUri();
         instance.types = Collections.singleton(Vocabulary.PERSON);

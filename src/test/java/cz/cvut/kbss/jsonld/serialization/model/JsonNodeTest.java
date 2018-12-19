@@ -1,37 +1,36 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization.model;
 
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class JsonNodeTest extends AbstractNodeTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         super.setUp();
     }
 
     @Test
-    public void writeWritesFirstKeyAndThenValueOfTheNode() throws Exception {
+    void writeWritesFirstKeyAndThenValueOfTheNode() throws Exception {
         final String name = "test";
         final String value = "testValue";
         final JsonNode node = spy(new StringLiteralNode(name, value));
@@ -42,17 +41,17 @@ public class JsonNodeTest extends AbstractNodeTest {
         inOrder.verify(node).writeValue(serializerMock);
     }
 
-    @Test(expected = JsonLdSerializationException.class)
-    public void ioExceptionInJsonSerializationThrowsJsonLdSerializationException() throws Exception {
+    @Test
+    void ioExceptionInJsonSerializationThrowsJsonLdSerializationException() throws Exception {
         final String name = "test";
         final String value = "testValue";
         final JsonNode node = spy(new StringLiteralNode(name, value));
         doThrow(new IOException()).when(node).writeValue(serializerMock);
-        node.write(serializerMock);
+        assertThrows(JsonLdSerializationException.class, () -> node.write(serializerMock));
     }
 
     @Test
-    public void writeDoesNotWriteKeyWhenNodeIsNotAttribute() throws Exception {
+    void writeDoesNotWriteKeyWhenNodeIsNotAttribute() throws Exception {
         final String value = "testValue";
         final JsonNode node = spy(new StringLiteralNode(value));
         node.write(serializerMock);

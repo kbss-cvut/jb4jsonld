@@ -1,44 +1,42 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.serialization.model.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class PropertiesFieldSerializerTest {
+class PropertiesFieldSerializerTest {
 
     private Field field;
 
     private FieldSerializer serializer = new PropertiesFieldSerializer();
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         this.field = Person.class.getDeclaredField("properties");
     }
 
     @Test
-    public void serializeFieldReturnsListOfAttributeNodesWithArrayValuesForCollectionsOfValues() {
+    void serializeFieldReturnsListOfAttributeNodesWithArrayValuesForCollectionsOfValues() {
         final Map<String, Set<String>> properties = Generator.generateProperties(false);
         final List<JsonNode> result = serializer.serializeField(field, properties);
         assertEquals(properties.size(), result.size());
@@ -54,7 +52,7 @@ public class PropertiesFieldSerializerTest {
     }
 
     @Test
-    public void serializeFieldReturnsListOfLiteralAttributeNodesForSingletonCollectionPropertyValues() {
+    void serializeFieldReturnsListOfLiteralAttributeNodesForSingletonCollectionPropertyValues() {
         final Map<String, Set<String>> properties = Generator.generateProperties(true);
         final List<JsonNode> result = serializer.serializeField(field, properties);
         assertEquals(properties.size(), result.size());
@@ -66,7 +64,7 @@ public class PropertiesFieldSerializerTest {
     }
 
     @Test
-    public void serializeFieldSkipsEmptyPropertyValues() {
+    void serializeFieldSkipsEmptyPropertyValues() {
         final Map<String, Set<String>> properties = Generator.generateProperties(false);
         final String property = Generator.generateUri().toString();
         properties.put(property, Collections.emptySet());
@@ -77,7 +75,7 @@ public class PropertiesFieldSerializerTest {
     }
 
     @Test
-    public void serializeFieldSkipsNullValuesInCollections() {
+    void serializeFieldSkipsNullValuesInCollections() {
         final Map<String, Set<String>> properties = Generator.generateProperties(false);
         final String property = Generator.generateUri().toString();
         final Set<String> values = new HashSet<>();
@@ -96,7 +94,7 @@ public class PropertiesFieldSerializerTest {
     }
 
     @Test
-    public void serializeFieldSkipsNullPropertyValue() {
+    void serializeFieldSkipsNullPropertyValue() {
         final Map<String, Set<String>> properties = Generator.generateProperties(false);
         final String property = Generator.generateUri().toString();
         properties.put(property, null);
@@ -107,7 +105,7 @@ public class PropertiesFieldSerializerTest {
     }
 
     @Test
-    public void serializeFieldSerializesPropertiesWithNonCollectionValues() {
+    void serializeFieldSerializesPropertiesWithNonCollectionValues() {
         final Map<String, Set<String>> temp = Generator.generateProperties(true);
         final Map<String, String> properties = new HashMap<>();
         temp.forEach((key, value) -> properties.put(key, value.iterator().next()));
@@ -121,7 +119,7 @@ public class PropertiesFieldSerializerTest {
     }
 
     @Test
-    public void serializeFieldSerializesTypedPropertiesToCorrectTargetTypes() {
+    void serializeFieldSerializesTypedPropertiesToCorrectTargetTypes() {
         final Map<URI, Set<Object>> properties = new HashMap<>();
         final URI boolProperty = Generator.generateUri();
         properties.put(boolProperty, Collections.singleton(false));
