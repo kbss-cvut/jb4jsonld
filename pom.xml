@@ -22,7 +22,7 @@
 
         <org.junit.jupiter.version>5.2.0</org.junit.jupiter.version>
         <org.mockito.version>2.19.1</org.mockito.version>
-        <com.github.jsonld-java.version>0.11.1</com.github.jsonld-java.version>
+        <com.github.jsonld-java.version>0.12.3</com.github.jsonld-java.version>
     </properties>
 
     <dependencies>
