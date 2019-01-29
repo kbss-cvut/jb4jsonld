@@ -31,10 +31,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -298,5 +295,39 @@ class ObjectGraphTraverserTest {
 
         @Types
         private Set<String> types;
+    }
+
+    @Test
+    void traverseSkipsNullValuesInCollectionAttribute() {
+        final Organization org = Generator.generateOrganization();
+        generateEmployees(org);
+        org.getEmployees().add(null);
+        traverser.traverse(org);
+
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).openInstance(org);
+        inOrder.verify(visitor).openCollection(org.getEmployees());
+        inOrder.verify(visitor).closeCollection(org.getEmployees());
+        inOrder.verify(visitor).closeInstance(org);
+
+        verify(visitor).openInstance(org);
+        org.getEmployees().stream().filter(Objects::nonNull).forEach(e -> verify(visitor).openInstance(e));
+    }
+
+    @Test
+    void traverseSkipsNullValuesInCollection() {
+        final Set<User> users = Generator.generateUsers();
+        users.add(null);
+        traverser.traverse(users);
+
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).openCollection(users);
+        for (User u : users) {
+            if (u != null) {
+                inOrder.verify(visitor).openInstance(u);
+                inOrder.verify(visitor).closeInstance(u);
+            }
+        }
+        inOrder.verify(visitor).closeCollection(users);
     }
 }
