@@ -41,7 +41,7 @@ public class BeanAnnotationProcessor {
      *
      * @param resolver Resolver to set
      */
-    public void setPropertyAccessResolver(PropertyAccessResolver resolver) {
+    public static void setPropertyAccessResolver(PropertyAccessResolver resolver) {
         propertyAccessResolver = Objects.requireNonNull(resolver);
     }
 
