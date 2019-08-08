@@ -8,18 +8,18 @@ import java.lang.reflect.Field;
 public interface PropertyAccessResolver {
 
     /**
-     * Resolves whether value of the specified field should be serialized.
+     * Resolves whether value of the specified field is readable for serialization.
      *
      * @param field Field to check
-     * @return Whether the field should be serialized
+     * @return Whether the field is readable
      */
-    boolean shouldSerialize(Field field);
+    boolean isReadable(Field field);
 
     /**
-     * Resolves whether value of the specified field should be deserialized.
+     * Resolves whether the specified field is writeable by deserialization.
      *
      * @param field Field to check
-     * @return Whether the field should be deserialized
+     * @return Whether the field is writeable
      */
-    boolean shouldDeserialize(Field field);
+    boolean isWriteable(Field field);
 }

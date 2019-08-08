@@ -24,8 +24,8 @@ class JsonLdPropertyAccessResolverTest {
             "withWriteOnlyAccess, false,",
             "types,               true",
             "id,                  true"})
-    void shouldSerialize(String fieldName, boolean result) throws Exception {
-        assertEquals(result, sut.shouldSerialize(TestClass.class.getDeclaredField(fieldName)));
+    void isReadable(String fieldName, boolean result) throws Exception {
+        assertEquals(result, sut.isReadable(TestClass.class.getDeclaredField(fieldName)));
     }
 
     @ParameterizedTest
@@ -34,8 +34,8 @@ class JsonLdPropertyAccessResolverTest {
             "withReadWriteAccess, true",
             "withReadOnlyAccess,  false",
             "withWriteOnlyAccess, true"})
-    void shouldDeserialize(String fieldName, boolean result) throws Exception {
-        assertEquals(result, sut.shouldDeserialize(TestClass.class.getDeclaredField(fieldName)));
+    void isWriteable(String fieldName, boolean result) throws Exception {
+        assertEquals(result, sut.isWriteable(TestClass.class.getDeclaredField(fieldName)));
     }
 
     @SuppressWarnings("unused")

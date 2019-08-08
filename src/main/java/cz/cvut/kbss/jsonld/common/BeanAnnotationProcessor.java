@@ -134,7 +134,7 @@ public class BeanAnnotationProcessor {
     public static List<Field> getSerializableFields(Object object) {
         Objects.requireNonNull(object);
         final Class<?> cls = object.getClass();
-        return getMarshallableFields(cls, propertyAccessResolver::shouldSerialize);
+        return getMarshallableFields(cls, propertyAccessResolver::isReadable);
     }
 
     private static List<Field> getMarshallableFields(Class<?> cls, Predicate<Field> filter) {
@@ -297,7 +297,7 @@ public class BeanAnnotationProcessor {
      * @return Write access status
      */
     public static boolean isWriteable(Field field) {
-        return propertyAccessResolver.shouldDeserialize(field);
+        return propertyAccessResolver.isWriteable(field);
     }
 
     /**

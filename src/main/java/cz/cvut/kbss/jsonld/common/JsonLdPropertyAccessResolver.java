@@ -12,8 +12,9 @@ import static cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor.isTypesField;
  * Resolves property access based on the {@link cz.cvut.kbss.jsonld.annotation.JsonLdProperty} annotation value.
  */
 public class JsonLdPropertyAccessResolver implements PropertyAccessResolver {
+
     @Override
-    public boolean shouldSerialize(Field field) {
+    public boolean isReadable(Field field) {
         Objects.requireNonNull(field);
         final JsonLdProperty annotation = field.getAnnotation(JsonLdProperty.class);
         return annotation == null || annotation.access() != JsonLdProperty.Access.WRITE_ONLY ||
@@ -21,7 +22,7 @@ public class JsonLdPropertyAccessResolver implements PropertyAccessResolver {
     }
 
     @Override
-    public boolean shouldDeserialize(Field field) {
+    public boolean isWriteable(Field field) {
         Objects.requireNonNull(field);
         final JsonLdProperty annotation = field.getAnnotation(JsonLdProperty.class);
         return annotation == null || annotation.access() != JsonLdProperty.Access.READ_ONLY;
