@@ -42,7 +42,7 @@ class ExpandedJsonLdDeserializerTest {
     private static final String ORG_NAME = "UNSC";
     private static final String[] ORG_BRANDS = {"Spartan-II", "Mjolnir IV"};
 
-    private JsonLdDeserializer deserializer;
+    private JsonLdDeserializer sut;
 
     private static Map<URI, User> initUsers() {
         final Map<URI, User> map = new HashMap<>();
@@ -54,13 +54,13 @@ class ExpandedJsonLdDeserializerTest {
 
     @BeforeEach
     void setUp() {
-        this.deserializer = JsonLdDeserializer.createExpandedDeserializer();
+        this.sut = JsonLdDeserializer.createExpandedDeserializer();
     }
 
     @Test
     void testDeserializeInstanceWithDataProperties() throws Exception {
         final Object input = readAndExpand("objectWithDataProperties.json");
-        final User result = deserializer.deserialize(input, User.class);
+        final User result = sut.deserialize(input, User.class);
         verifyUserAttributes(USERS.get(HALSEY_URI), result);
     }
 
@@ -75,7 +75,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void testDeserializeInstanceWithSingularObjectProperty() throws Exception {
         final Object input = readAndExpand("objectWithSingularReference.json");
-        final Employee result = deserializer.deserialize(input, Employee.class);
+        final Employee result = sut.deserialize(input, Employee.class);
         verifyUserAttributes(USERS.get(HALSEY_URI), result);
         assertNotNull(result.getEmployer());
         verifyOrganizationAttributes(result.getEmployer());
@@ -93,7 +93,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void testDeserializeInstanceWithPluralObjectProperty() throws Exception {
         final Object input = readAndExpand("objectWithPluralReference.json");
-        final Organization result = deserializer.deserialize(input, Organization.class);
+        final Organization result = sut.deserialize(input, Organization.class);
         verifyOrganizationAttributes(result);
         assertEquals(3, result.getEmployees().size());
         for (Employee e : result.getEmployees()) {
@@ -106,7 +106,7 @@ class ExpandedJsonLdDeserializerTest {
     void testDeserializeInstanceWithPluralObjectPropertyWithBackwardReferencesToOriginalInstance()
             throws Exception {
         final Object input = readAndExpand("objectWithPluralObjectPropertyWithBackwardReferences.json");
-        final Organization result = deserializer.deserialize(input, Organization.class);
+        final Organization result = sut.deserialize(input, Organization.class);
         verifyOrganizationAttributes(result);
         assertEquals(3, result.getEmployees().size());
         for (Employee e : result.getEmployees()) {
@@ -120,7 +120,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void testDeserializeInstanceWithSingularObjectPropertyWithBackwardReference() throws Exception {
         final Object input = readAndExpand("objectWithSingularObjectPropertyWithBackwardReference.json");
-        final Employee result = deserializer.deserialize(input, Employee.class);
+        final Employee result = sut.deserialize(input, Employee.class);
         verifyUserAttributes(USERS.get(HALSEY_URI), result);
         final Organization org = result.getEmployer();
         assertNotNull(org);
@@ -132,7 +132,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationOfArrayWithOneInstanceReturnsProperCollection() throws Exception {
         final Object input = readAndExpand("objectWithPluralReferenceContainingOneValue.json");
-        final Organization result = deserializer.deserialize(input, Organization.class);
+        final Organization result = sut.deserialize(input, Organization.class);
         verifyOrganizationAttributes(result);
         assertEquals(1, result.getEmployees().size());
         final Employee e = result.getEmployees().iterator().next();
@@ -146,7 +146,7 @@ class ExpandedJsonLdDeserializerTest {
         final String property = "http://purl.org/dc/terms/description";
 
         final UnknownPropertyException result = assertThrows(UnknownPropertyException.class,
-                () -> deserializer.deserialize(input, Organization.class));
+                () -> sut.deserialize(input, Organization.class));
         assertEquals("No field matching property " + property + " was found in " + Organization.class +
                 " or its ancestors.", result.getMessage());
     }
@@ -154,15 +154,15 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void skipsUnknownPropertyWhenIgnoreIsConfiguredAndUnmappedPropertyIsEncountered() throws Exception {
         final Object input = readAndExpand("objectWithUnknownProperty.json");
-        deserializer.configuration().set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
-        final Organization result = deserializer.deserialize(input, Organization.class);
+        sut.configuration().set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
+        final Organization result = sut.deserialize(input, Organization.class);
         verifyOrganizationAttributes(result);
     }
 
     @Test
     void deserializationResolvesReferenceInPluralPropertyWrappedInAnotherObject() throws Exception {
         final Object input = readAndExpand("objectWithPluralReferenceSharingObject.json");
-        final Study result = deserializer.deserialize(input, Study.class);
+        final Study result = sut.deserialize(input, Study.class);
 
         assertNotNull(result.getName());
         Organization org = null;
@@ -183,7 +183,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationSetsValueOfTypesSpecification() throws Exception {
         final Object input = readAndExpand("objectWithDataProperties.json");
-        final User result = deserializer.deserialize(input, User.class);
+        final User result = sut.deserialize(input, User.class);
         assertTrue(result.getTypes().contains(Vocabulary.AGENT));
         assertFalse(result.getTypes().contains(Vocabulary.USER));   // Type of the class should not be in @Types
     }
@@ -192,7 +192,7 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationThrowsExceptionWhenTypesAttributeDoesNotContainTargetClassType() throws Exception {
         final Object input = readAndExpand("objectWithDataProperties.json");
         final TargetTypeException result = assertThrows(TargetTypeException.class,
-                () -> deserializer.deserialize(input, Employee.class));
+                () -> sut.deserialize(input, Employee.class));
         assertThat(result.getMessage(), containsString(
                 "Neither " + Employee.class + " nor any of its subclasses matches the types "));
     }
@@ -200,7 +200,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationPopulatesPropertiesFieldWithUnmappedPropertiesFoundInInput() throws Exception {
         final Object input = readAndExpand("objectWithUnmappedProperties.json");
-        final Person result = deserializer.deserialize(input, Person.class);
+        final Person result = sut.deserialize(input, Person.class);
         final User model = USERS.get(HALSEY_URI);
         assertEquals(model.getUri(), result.getUri());
         assertEquals(model.getFirstName(), result.getFirstName());
@@ -217,7 +217,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationPopulatesTypedProperties() throws Exception {
         final Object input = readAndExpand("objectWithUnmappedProperties.json");
-        final ClassWithProperties result = deserializer.deserialize(input, ClassWithProperties.class);
+        final ClassWithProperties result = sut.deserialize(input, ClassWithProperties.class);
         assertNotNull(result);
         final User model = USERS.get(HALSEY_URI);
         assertEquals(model.getUri(), result.uri);
@@ -242,7 +242,7 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationThrowsExceptionWhenMultipleValuesForSingularFieldAreEncountered() throws Exception {
         final Object input = readAndExpand("objectWithAttributeCardinalityViolation.json");
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> deserializer.deserialize(input, Person.class));
+                () -> sut.deserialize(input, Person.class));
         assertThat(result.getMessage(),
                 containsString("Encountered multiple values of property " + Vocabulary.FIRST_NAME));
     }
@@ -252,7 +252,7 @@ class ExpandedJsonLdDeserializerTest {
             throws Exception {
         final Object input = readAndExpand("objectWithAttributeCardinalityViolation.json");
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> deserializer.deserialize(input, ClassWithSingularProperties.class));
+                () -> sut.deserialize(input, ClassWithSingularProperties.class));
         assertThat(result.getMessage(),
                 containsString("Encountered multiple values of property " + Vocabulary.FIRST_NAME));
     }
@@ -272,7 +272,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationSupportsPlainIdentifierObjectPropertyValues() throws Exception {
         final Object input = readAndExpand("objectWithPlainIdentifierObjectPropertyValue.json");
-        final Organization result = deserializer.deserialize(input, Organization.class);
+        final Organization result = sut.deserialize(input, Organization.class);
         assertNotNull(result);
         assertEquals(URI.create("http://dbpedia.org/resource/Czech_Republic"), result.getCountry());
     }
@@ -280,7 +280,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationSupportsObjectsWithBlankNodeIds() throws Exception {
         final Object input = readAndExpand("objectWithBlankNodeIdentifier.json");
-        final User result = deserializer.deserialize(input, User.class);
+        final User result = sut.deserialize(input, User.class);
         assertNotNull(result);
         assertNull(result.getUri());
     }
@@ -289,9 +289,9 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationReturnsSubclassInstanceWhenTypesMatch() throws Exception {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
-        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final Object input = readAndExpand("objectWithDataProperties.json");
-        final Person result = deserializer.deserialize(input, Person.class);
+        final Person result = sut.deserialize(input, Person.class);
         assertTrue(result instanceof User);
     }
 
@@ -300,9 +300,9 @@ class ExpandedJsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
-        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final Object input = readAndExpand("objectWithPluralReference.json");
-        final PolymorphicOrganization result = deserializer.deserialize(input, PolymorphicOrganization.class);
+        final PolymorphicOrganization result = sut.deserialize(input, PolymorphicOrganization.class);
         assertNotNull(result.employees);
         assertEquals(3, result.employees.size());
         result.employees.forEach(e -> assertTrue(e instanceof Employee));
@@ -326,9 +326,9 @@ class ExpandedJsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
-        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final Object input = readAndExpand("objectWithSingularPolymorphicReference.json");
-        final PolymorphicPerson result = deserializer.deserialize(input, PolymorphicPerson.class);
+        final PolymorphicPerson result = sut.deserialize(input, PolymorphicPerson.class);
         assertTrue(result.friend instanceof Employee);
     }
 
@@ -348,10 +348,10 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationSupportsDeserializingObjectAsPlainIdentifier() throws Exception {
         final Configuration config = new Configuration();
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
-        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final Object input = readAndExpand("objectWithSingularPolymorphicReference.json");
         final PersonWithPlainIdentifierAttribute result =
-                deserializer.deserialize(input, PersonWithPlainIdentifierAttribute.class);
+                sut.deserialize(input, PersonWithPlainIdentifierAttribute.class);
         assertEquals(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Sarah+Palmer"), result.friend);
     }
 
@@ -371,10 +371,10 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationSupportsDeserializingObjectsAsPluralPlainIdentifiers() throws Exception {
         final Configuration config = new Configuration();
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
-        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final Object input = readAndExpand("objectWithPluralReference.json");
         final OrganizationWithPlainIdentifiers result =
-                deserializer.deserialize(input, OrganizationWithPlainIdentifiers.class);
+                sut.deserialize(input, OrganizationWithPlainIdentifiers.class);
         assertNotNull(result.members);
         assertTrue(result.members
                 .contains(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey")));
@@ -398,10 +398,10 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationHandlesJsonLdListOfValues() throws Exception {
         final Configuration config = new Configuration();
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
-        this.deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final Object input = readAndExpand("objectWithList.json");
         final OrganizationWithListOfMembers result =
-                deserializer.deserialize(input, OrganizationWithListOfMembers.class);
+                sut.deserialize(input, OrganizationWithListOfMembers.class);
         assertEquals(3, result.members.size());
         assertEquals(HALSEY_URI, result.members.get(0).getUri());
         assertEquals(LASKY_URI, result.members.get(1).getUri());
@@ -423,14 +423,14 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationReconstructsObjectFromMultiplePlaces() throws Exception {
         final Object input = readAndExpand("objectWithDefinitionSpreadOverMultipleReferences.json");
-        final Employee result = deserializer.deserialize(input, Employee.class);
+        final Employee result = sut.deserialize(input, Employee.class);
         verifyUserAttributes(USERS.get(HALSEY_URI), result);
     }
 
     @Test
     void deserializationPutsUnmappedObjectReferencesIntoProperties() throws Exception {
         final Object input = readAndExpand("objectWithSingularReference.json");
-        final PersonWithoutSubclass result = deserializer.deserialize(input, PersonWithoutSubclass.class);
+        final PersonWithoutSubclass result = sut.deserialize(input, PersonWithoutSubclass.class);
         assertTrue(result.properties.containsKey(Vocabulary.IS_MEMBER_OF));
         assertTrue(result.properties.get(Vocabulary.IS_MEMBER_OF).contains(TestUtil.UNSC_URI.toString()));
         assertTrue(result.properties.containsKey(Vocabulary.USERNAME));
@@ -456,7 +456,7 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationPutsUnmappedObjectReferencesIntoTypedProperties() throws Exception {
         final Object input = readAndExpand("objectWithSingularReference.json");
-        final ClassWithProperties result = deserializer.deserialize(input, ClassWithProperties.class);
+        final ClassWithProperties result = sut.deserialize(input, ClassWithProperties.class);
         assertTrue(result.properties.containsKey(URI.create(Vocabulary.IS_MEMBER_OF)));
         assertTrue(result.properties.get(URI.create(Vocabulary.IS_MEMBER_OF)).contains(TestUtil.UNSC_URI));
     }
@@ -464,8 +464,15 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationParsesNumericTimestampForDateField() throws Exception {
         final Object input = readAndExpand("objectWithPluralReference.json");
-        final Organization result = deserializer.deserialize(input, Organization.class);
+        final Organization result = sut.deserialize(input, Organization.class);
         assertNotNull(result.getDateCreated());
         assertTrue(result.getDateCreated().before(new Date()));
+    }
+
+    @Test
+    void deserializationIgnoresPropertyWithReadOnlyAccess() throws Exception {
+        final Object input = readAndExpand("objectWithReadOnlyPropertyValue.json");
+        final Study result = sut.deserialize(input, Study.class);
+        assertNull(result.getNoOfPeopleInvolved());
     }
 }

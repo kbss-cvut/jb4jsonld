@@ -34,7 +34,7 @@ class CollectionDeserializer extends Deserializer<List<?>> {
         if (value.size() == 1 && value.get(0) instanceof Map) {
             final Map<?, ?> map = (Map<?, ?>) value.get(0);
             if (!instanceBuilder.isPlural(property)) {
-                resolvePropertyValue(property, map);
+                resolvePropertyValue(map);
                 return;
             }
             if (map.size() == 1 && map.containsKey(JsonLd.LIST)) {
@@ -72,7 +72,7 @@ class CollectionDeserializer extends Deserializer<List<?>> {
         }
     }
 
-    private void resolvePropertyValue(String property, Map<?, ?> value) {
+    private void resolvePropertyValue(Map<?, ?> value) {
         if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
             instanceBuilder.addValue(property, value.get(JsonLd.VALUE));
         } else if (value.size() == 1 && value.containsKey(JsonLd.ID)) {

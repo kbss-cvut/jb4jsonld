@@ -37,6 +37,7 @@ public class Vocabulary {
     public static final String ORIGIN = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/origin";
     public static final String HAS_EVENT_TYPE = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/hasEventType";
     public static final String PASSWORD = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/password";
+    public static final String NUMBER_OF_PEOPLE_INVOLVED = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/numberOfPeopleInvolved";
 
     private Vocabulary() {
         throw new AssertionError();

@@ -21,10 +21,7 @@ import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.Employee;
-import cz.cvut.kbss.jsonld.environment.model.Organization;
-import cz.cvut.kbss.jsonld.environment.model.Person;
-import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import org.junit.jupiter.api.Test;
@@ -39,43 +36,43 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DefaultInstanceBuilderTest {
 
-    private InstanceBuilder deserializer =
+    private InstanceBuilder sut =
             new DefaultInstanceBuilder(new TargetClassResolver(TestUtil.getDefaultTypeMap()));
 
     @Test
     void getCurrentRootReturnsNullIfThereIsNoRoot() {
-        assertNull(deserializer.getCurrentRoot());
+        assertNull(sut.getCurrentRoot());
     }
 
     @Test
     void openObjectCreatesNewInstanceOfSpecifiedClass() {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
-        final Object res = deserializer.getCurrentRoot();
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        final Object res = sut.getCurrentRoot();
         assertNotNull(res);
         assertTrue(res instanceof Person);
     }
 
     @Test
     void openCollectionCreatesSet() {
-        deserializer.openCollection(CollectionType.SET);
-        assertTrue(deserializer.getCurrentRoot() instanceof Set);
+        sut.openCollection(CollectionType.SET);
+        assertTrue(sut.getCurrentRoot() instanceof Set);
     }
 
     @Test
     void openCollectionInCollectionPushesOriginalCollectionToStack() throws Exception {
-        deserializer.openCollection(CollectionType.SET);
-        deserializer.openCollection(CollectionType.SET);
-        assertTrue(deserializer.getCurrentRoot() instanceof Set);
+        sut.openCollection(CollectionType.SET);
+        sut.openCollection(CollectionType.SET);
+        assertTrue(sut.getCurrentRoot() instanceof Set);
         assertFalse(getOpenInstances().isEmpty());
         assertTrue(getOpenInstances().peek().getInstance() instanceof Set);
-        assertNotSame(deserializer.getCurrentRoot(), getOpenInstances().peek().getInstance());
+        assertNotSame(sut.getCurrentRoot(), getOpenInstances().peek().getInstance());
     }
 
     @Test
     void openObjectAddsObjectToCurrentlyOpenCollectionAndBecomesCurrentInstance() throws Exception {
-        deserializer.openCollection(CollectionType.SET);
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
-        final Object root = deserializer.getCurrentRoot();
+        sut.openCollection(CollectionType.SET);
+        sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        final Object root = sut.getCurrentRoot();
         assertTrue(root instanceof Employee);
         assertFalse(getOpenInstances().isEmpty());
         final Object stackTop = getOpenInstances().peek().getInstance();
@@ -89,35 +86,35 @@ class DefaultInstanceBuilderTest {
     private Stack<InstanceContext<?>> getOpenInstances() throws Exception {
         final Field stackField = DefaultInstanceBuilder.class.getDeclaredField("openInstances");
         stackField.setAccessible(true);
-        return (Stack<InstanceContext<?>>) stackField.get(deserializer);
+        return (Stack<InstanceContext<?>>) stackField.get(sut);
     }
 
     private InstanceContext<?> getCurrentInstance() throws Exception {
         final Field instField = DefaultInstanceBuilder.class.getDeclaredField("currentInstance");
         instField.setAccessible(true);
-        return (InstanceContext<?>) instField.get(deserializer);
+        return (InstanceContext<?>) instField.get(sut);
     }
 
     @Test
     void closeObjectPopsPreviousInstanceFromTheStack() throws Exception {
-        deserializer.openCollection(CollectionType.SET);
-        final Object originalRoot = deserializer.getCurrentRoot();
+        sut.openCollection(CollectionType.SET);
+        final Object originalRoot = sut.getCurrentRoot();
         assertTrue(originalRoot instanceof Set);
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         assertFalse(getOpenInstances().isEmpty());
-        deserializer.closeObject();
+        sut.closeObject();
         assertTrue(getOpenInstances().isEmpty());
-        assertSame(originalRoot, deserializer.getCurrentRoot());
+        assertSame(originalRoot, sut.getCurrentRoot());
     }
 
     @Test
     void closeObjectDoesNothingForRootObject() throws Exception {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         assertTrue(getOpenInstances().isEmpty());
-        final Object root = deserializer.getCurrentRoot();
-        deserializer.closeObject();
+        final Object root = sut.getCurrentRoot();
+        sut.closeObject();
         assertTrue(getOpenInstances().isEmpty());
-        assertSame(root, deserializer.getCurrentRoot());
+        assertSame(root, sut.getCurrentRoot());
     }
 
     @Test
@@ -126,10 +123,10 @@ class DefaultInstanceBuilderTest {
         for (int i = 0; i < Generator.randomCount(10); i++) {
             items.add(Generator.randomCount(Integer.MAX_VALUE));
         }
-        deserializer.openCollection(CollectionType.LIST);
-        items.forEach(item -> deserializer.addValue(item));
-        assertTrue(deserializer.getCurrentRoot() instanceof List);
-        final List<?> result = (List<?>) deserializer.getCurrentRoot();
+        sut.openCollection(CollectionType.LIST);
+        items.forEach(item -> sut.addValue(item));
+        assertTrue(sut.getCurrentRoot() instanceof List);
+        final List<?> result = (List<?>) sut.getCurrentRoot();
         for (int i = 0; i < items.size(); i++) {
             assertEquals(items.get(i), result.get(i));
         }
@@ -137,16 +134,16 @@ class DefaultInstanceBuilderTest {
 
     @Test
     void openObjectByPropertyCreatesObjectOfCorrectType() {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
-        deserializer.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
+        sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        sut.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
                 Collections.singletonList(Vocabulary.ORGANIZATION));
-        assertTrue(deserializer.getCurrentRoot() instanceof Organization);
+        assertTrue(sut.getCurrentRoot() instanceof Organization);
     }
 
     @Test
     void openObjectByPropertySetsNewInstanceAsFieldValueAndReplacesCurrentContext() throws Exception {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
-        deserializer.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
+        sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        sut.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
                 Collections.singletonList(Vocabulary.ORGANIZATION));
         assertFalse(getOpenInstances().isEmpty());
         final Object top = getOpenInstances().peek().getInstance();
@@ -156,13 +153,13 @@ class DefaultInstanceBuilderTest {
 
     @Test
     void addValueSetsPropertyValue() {
-        deserializer.openObject(TestUtil.HALSEY_URI.toString(), User.class);
+        sut.openObject(TestUtil.HALSEY_URI.toString(), User.class);
         final String firstName = "Catherine";
         final String lastName = "Halsey";
-        deserializer.addValue(Vocabulary.FIRST_NAME, firstName);
-        deserializer.addValue(Vocabulary.LAST_NAME, lastName);
-        deserializer.addValue(Vocabulary.IS_ADMIN, true);
-        final User res = (User) deserializer.getCurrentRoot();
+        sut.addValue(Vocabulary.FIRST_NAME, firstName);
+        sut.addValue(Vocabulary.LAST_NAME, lastName);
+        sut.addValue(Vocabulary.IS_ADMIN, true);
+        final User res = (User) sut.getCurrentRoot();
         assertEquals(firstName, res.getFirstName());
         assertEquals(lastName, res.getLastName());
         assertTrue(res.getAdmin());
@@ -170,54 +167,54 @@ class DefaultInstanceBuilderTest {
 
     @Test
     void openCollectionByPropertyCreatesCollectionOfCorrectType() throws Exception {
-        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
-        deserializer.openCollection(Vocabulary.HAS_MEMBER);
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
+        sut.openCollection(Vocabulary.HAS_MEMBER);
         assertFalse(getOpenInstances().isEmpty());
-        assertTrue(deserializer.getCurrentRoot() instanceof Set);
+        assertTrue(sut.getCurrentRoot() instanceof Set);
     }
 
     @Test
     void openCollectionByPropertySetsFieldValueAndPushesCurrentInstanceToStack() throws Exception {
-        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
-        deserializer.openCollection(Vocabulary.HAS_MEMBER);
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
+        sut.openCollection(Vocabulary.HAS_MEMBER);
         assertFalse(getOpenInstances().isEmpty());
         assertTrue(getOpenInstances().peek().getInstance() instanceof Organization);
         final Organization org = (Organization) getOpenInstances().peek().getInstance();
-        assertSame(deserializer.getCurrentRoot(), org.getEmployees());
+        assertSame(sut.getCurrentRoot(), org.getEmployees());
     }
 
     @Test
     void closeCollectionPopsLastInstanceFromStack() throws Exception {
-        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
-        final Object originalRoot = deserializer.getCurrentRoot();
-        deserializer.openCollection(Vocabulary.HAS_MEMBER);
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
+        final Object originalRoot = sut.getCurrentRoot();
+        sut.openCollection(Vocabulary.HAS_MEMBER);
         assertFalse(getOpenInstances().isEmpty());
-        deserializer.closeCollection();
+        sut.closeCollection();
         assertTrue(getOpenInstances().isEmpty());
-        assertSame(originalRoot, deserializer.getCurrentRoot());
+        assertSame(originalRoot, sut.getCurrentRoot());
     }
 
     @Test
     void closeCollectionDoesNothingWhenItIsTheTopElement() throws Exception {
-        deserializer.openCollection(CollectionType.SET);
+        sut.openCollection(CollectionType.SET);
         assertTrue(getOpenInstances().isEmpty());
-        final Object root = deserializer.getCurrentRoot();
-        deserializer.closeCollection();
+        final Object root = sut.getCurrentRoot();
+        sut.closeCollection();
         assertTrue(getOpenInstances().isEmpty());
-        assertSame(root, deserializer.getCurrentRoot());
+        assertSame(root, sut.getCurrentRoot());
     }
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getKnownInstances() throws Exception {
         final Field field = DefaultInstanceBuilder.class.getDeclaredField("knownInstances");
         field.setAccessible(true);
-        return (Map<String, Object>) field.get(deserializer);
+        return (Map<String, Object>) field.get(sut);
     }
 
     @Test
     void openCollectionCreatesTypesContextForTypesField() throws Exception {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), User.class);
-        deserializer.openCollection(JsonLd.TYPE);
+        sut.openObject(TestUtil.PALMER_URI.toString(), User.class);
+        sut.openCollection(JsonLd.TYPE);
         final InstanceContext<?> result = getCurrentInstance();
         assertTrue(result instanceof TypesContext);
         final TypesContext<?, ?> ctx = (TypesContext<?, ?>) result;
@@ -226,102 +223,102 @@ class DefaultInstanceBuilderTest {
 
     @Test
     void isPropertyMappedReturnsTrueForMappedProperty() {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
-        assertTrue(deserializer.isPropertyMapped(Vocabulary.FIRST_NAME));
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        assertTrue(sut.isPropertyMapped(Vocabulary.FIRST_NAME));
     }
 
     @Test
     void isPropertyMappedReturnsFalseForUnknownProperty() {
-        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
-        assertFalse(deserializer.isPropertyMapped(Vocabulary.IS_ADMIN));
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
+        assertFalse(sut.isPropertyMapped(Vocabulary.IS_ADMIN));
     }
 
     @Test
     void isPropertyMappedReturnsTrueForType() {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
-        assertTrue(deserializer.isPropertyMapped(JsonLd.TYPE));
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        assertTrue(sut.isPropertyMapped(JsonLd.TYPE));
     }
 
     @Test
     void isPluralReturnsTrueForType() {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
-        assertTrue(deserializer.isPlural(JsonLd.TYPE));
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        assertTrue(sut.isPlural(JsonLd.TYPE));
     }
 
     @Test
     void openCollectionOpensDummyCollectionContextForTypeInInstanceWithoutTypesField() throws Exception {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         assertTrue(getCurrentInstance() instanceof SingularObjectContext);
-        deserializer.openCollection(JsonLd.TYPE);
+        sut.openCollection(JsonLd.TYPE);
         assertTrue(getCurrentInstance() instanceof DummyCollectionInstanceContext);
-        deserializer.closeCollection();
+        sut.closeCollection();
         assertTrue(getCurrentInstance() instanceof SingularObjectContext);
     }
 
     @Test
     void addingTypesToInstanceWithoutTypesFieldDoesNothing() {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
-        deserializer.openCollection(JsonLd.TYPE);
-        deserializer.addValue(Vocabulary.EMPLOYEE);
-        deserializer.addValue(Vocabulary.USER);
-        deserializer.closeCollection();
-        assertNotNull(deserializer.getCurrentRoot());
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        sut.openCollection(JsonLd.TYPE);
+        sut.addValue(Vocabulary.EMPLOYEE);
+        sut.addValue(Vocabulary.USER);
+        sut.closeCollection();
+        assertNotNull(sut.getCurrentRoot());
     }
 
     @Test
     void addValueOpensCollectionAndAddsSingleItemToItWhenSingleValueForPluralAttributeIsSpecified() {
-        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
         final String value = "Mjolnir-IV";
-        deserializer.addValue(Vocabulary.BRAND, value);
-        final Organization object = (Organization) deserializer.getCurrentRoot();
+        sut.addValue(Vocabulary.BRAND, value);
+        final Organization object = (Organization) sut.getCurrentRoot();
         assertEquals(1, object.getBrands().size());
         assertTrue(object.getBrands().contains(value));
     }
 
     @Test
     void openCollectionCreatesPropertiesContextAndSetsNewPropertiesMapOnTargetInstanceWhenItDoesNotExist() {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
-        final Person instance = (Person) deserializer.getCurrentRoot();
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        final Person instance = (Person) sut.getCurrentRoot();
         assertNull(instance.getProperties());
-        deserializer.openCollection(Vocabulary.IS_ADMIN);
+        sut.openCollection(Vocabulary.IS_ADMIN);
         assertNotNull(instance.getProperties());
     }
 
     @Test
     void openCollectionReusesPropertiesInstanceWhenItAlreadyExistsOnTargetInstance() {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Person.class);
-        final Person instance = (Person) deserializer.getCurrentRoot();
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        final Person instance = (Person) sut.getCurrentRoot();
         assertNull(instance.getProperties());
-        deserializer.openCollection(Vocabulary.IS_ADMIN);
+        sut.openCollection(Vocabulary.IS_ADMIN);
         final Map<String, Set<String>> propsMap = instance.getProperties();
-        deserializer.closeCollection();
-        deserializer.openCollection(Vocabulary.USERNAME);
+        sut.closeCollection();
+        sut.openCollection(Vocabulary.USERNAME);
         assertSame(propsMap, instance.getProperties());
     }
 
     @Test
     void openObjectCreatesIdentifierContextWhenTargetTypeIsIdentifier() throws Exception {
-        deserializer.openObject(Generator.generateUri().toString(), Event.class);
-        deserializer.openCollection(Vocabulary.HAS_EVENT_TYPE);
-        deserializer.openObject(Generator.generateUri().toString(), URI.class);
+        sut.openObject(Generator.generateUri().toString(), Event.class);
+        sut.openCollection(Vocabulary.HAS_EVENT_TYPE);
+        sut.openObject(Generator.generateUri().toString(), URI.class);
         final InstanceContext<?> ctx = getCurrentInstance();
         assertTrue(ctx instanceof NodeReferenceContext);
     }
 
     @Test
     void openObjectCreatesIdentifierContextForPropertyWithPlainIdentifierTargetFieldType() throws Exception {
-        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
-        deserializer.openObject(Generator.generateUri().toString(), Vocabulary.ORIGIN, Collections.emptyList());
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
+        sut.openObject(Generator.generateUri().toString(), Vocabulary.ORIGIN, Collections.emptyList());
         final InstanceContext<?> ctx = getCurrentInstance();
         assertTrue(ctx instanceof NodeReferenceContext);
     }
 
     @Test
     void addNodeReferenceForPropertySetsPlainIdentifierObjectPropertyValue() {
-        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
         final String uri = Generator.generateUri().toString();
-        deserializer.addNodeReference(Vocabulary.ORIGIN, uri);
-        final Organization object = (Organization) deserializer.getCurrentRoot();
+        sut.addNodeReference(Vocabulary.ORIGIN, uri);
+        final Organization object = (Organization) sut.getCurrentRoot();
         assertEquals(uri, object.getCountry().toString());
     }
 
@@ -329,18 +326,18 @@ class DefaultInstanceBuilderTest {
     void addNodeReferenceForPropertySetsFieldValueToKnownInstance() throws Exception {
         final Organization org = Generator.generateOrganization();
         getKnownInstances().put(org.getUri().toString(), org);
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
-        deserializer.addNodeReference(Vocabulary.IS_MEMBER_OF, org.getUri().toString());
-        final Employee object = (Employee) deserializer.getCurrentRoot();
+        sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        sut.addNodeReference(Vocabulary.IS_MEMBER_OF, org.getUri().toString());
+        final Employee object = (Employee) sut.getCurrentRoot();
         assertEquals(org, object.getEmployer());
     }
 
     @Test
     void addNodeReferenceForPropertyThrowsDeserializationExceptionWhenNoKnownInstanceIsFound() {
         final String nodeId = Generator.generateUri().toString();
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> deserializer.addNodeReference(Vocabulary.IS_MEMBER_OF, nodeId));
+                () -> sut.addNodeReference(Vocabulary.IS_MEMBER_OF, nodeId));
         assertEquals("Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.",
                 result.getMessage());
     }
@@ -348,11 +345,11 @@ class DefaultInstanceBuilderTest {
     @Test
     void addNodeReferenceAddsPlainIdentifierObjectPropertyValueToCollection() {
         final URI nodeId = Generator.generateUri();
-        deserializer.openObject(Generator.generateUri().toString(), Event.class);
-        deserializer.openCollection(Vocabulary.HAS_EVENT_TYPE);
-        deserializer.addNodeReference(nodeId.toString());
-        deserializer.closeCollection();
-        final Event object = (Event) deserializer.getCurrentRoot();
+        sut.openObject(Generator.generateUri().toString(), Event.class);
+        sut.openCollection(Vocabulary.HAS_EVENT_TYPE);
+        sut.addNodeReference(nodeId.toString());
+        sut.closeCollection();
+        final Event object = (Event) sut.getCurrentRoot();
         assertTrue(object.eventTypes.contains(nodeId));
     }
 
@@ -369,44 +366,44 @@ class DefaultInstanceBuilderTest {
     void addNodeReferenceAddsKnownInstanceWithMatchingIdentifier() throws Exception {
         final Employee employee = Generator.generateEmployee();
         getKnownInstances().put(employee.getUri().toString(), employee);
-        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
-        deserializer.openCollection(Vocabulary.HAS_MEMBER);
-        deserializer.addNodeReference(employee.getUri().toString());
-        deserializer.closeCollection();
-        final Organization object = (Organization) deserializer.getCurrentRoot();
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
+        sut.openCollection(Vocabulary.HAS_MEMBER);
+        sut.addNodeReference(employee.getUri().toString());
+        sut.closeCollection();
+        final Organization object = (Organization) sut.getCurrentRoot();
         assertTrue(object.getEmployees().contains(employee));
     }
 
     @Test
     void addNodeReferenceThrowsDeserializationExceptionWhenNoKnownInstanceIsFound() {
         final String nodeId = Generator.generateUri().toString();
-        deserializer.openObject(Generator.generateUri().toString(), Organization.class);
-        deserializer.openCollection(Vocabulary.HAS_MEMBER);
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
+        sut.openCollection(Vocabulary.HAS_MEMBER);
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> deserializer.addNodeReference(nodeId));
+                () -> sut.addNodeReference(nodeId));
         assertEquals("Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.",
                 result.getMessage());
     }
 
     @Test
     void openObjectSetsInstanceIdentifier() {
-        deserializer.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
-        final Employee root = (Employee) deserializer.getCurrentRoot();
+        sut.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
+        final Employee root = (Employee) sut.getCurrentRoot();
         assertEquals(TestUtil.HALSEY_URI, root.getUri());
     }
 
     @Test
     void openObjectAsPropertyValueSetsInstanceIdentifier() {
-        deserializer.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
-        deserializer.openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
+        sut.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
+        sut.openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
                 Collections.singletonList(Vocabulary.ORGANIZATION));
-        final Organization root = (Organization) deserializer.getCurrentRoot();
+        final Organization root = (Organization) sut.getCurrentRoot();
         assertEquals(TestUtil.UNSC_URI, root.getUri());
     }
 
     @Test
     void objectIsStoredInKnownInstancesWhenItIsOpen() throws Exception {
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), User.class);
+        sut.openObject(TestUtil.PALMER_URI.toString(), User.class);
         assertTrue(getKnownInstances().containsKey(TestUtil.PALMER_URI.toString()));
         assertTrue(getKnownInstances().get(TestUtil.PALMER_URI.toString()) instanceof User);
     }
@@ -415,8 +412,8 @@ class DefaultInstanceBuilderTest {
     void openObjectReopensAlreadyKnownInstance() throws Exception {
         final Employee employee = Generator.generateEmployee();
         getKnownInstances().put(employee.getUri().toString(), employee);
-        deserializer.openObject(employee.getUri().toString(), Employee.class);
-        assertSame(employee, deserializer.getCurrentRoot());
+        sut.openObject(employee.getUri().toString(), Employee.class);
+        assertSame(employee, sut.getCurrentRoot());
     }
 
     @Test
@@ -425,7 +422,7 @@ class DefaultInstanceBuilderTest {
         employee.setUri(TestUtil.PALMER_URI);
         getKnownInstances().put(employee.getUri().toString(), employee);
         final TargetTypeException result = assertThrows(TargetTypeException.class,
-                () -> deserializer.openObject(employee.getUri().toString(), Organization.class));
+                () -> sut.openObject(employee.getUri().toString(), Organization.class));
         assertThat(result.getMessage(), containsString(
                 "instance with id " + TestUtil.PALMER_URI + " already exists, but its type " + Employee.class +
                         " is not compatible with target type " + Organization.class));
@@ -435,35 +432,53 @@ class DefaultInstanceBuilderTest {
     void openObjectForPropertyReopensAlreadyKnownInstance() throws Exception {
         final Organization org = Generator.generateOrganization();
         getKnownInstances().put(org.getUri().toString(), org);
-        deserializer.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
-        deserializer.openObject(org.getUri().toString(), Vocabulary.IS_MEMBER_OF,
+        sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
+        sut.openObject(org.getUri().toString(), Vocabulary.IS_MEMBER_OF,
                 Collections.singletonList(Vocabulary.ORGANIZATION));
-        assertSame(org, deserializer.getCurrentRoot());
+        assertSame(org, sut.getCurrentRoot());
     }
 
     @Test
     void openCollectionForPropertyReusesExistingCollectionIfItWasSetOnReopenObject() {
-        deserializer.openObject(TestUtil.UNSC_URI.toString(), Organization.class);
-        deserializer.openCollection(Vocabulary.HAS_MEMBER);
-        deserializer.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
-        deserializer.closeObject();
-        deserializer.closeCollection();
-        deserializer.openCollection(Vocabulary.HAS_MEMBER);
-        final Set<Employee> root = (Set<Employee>) deserializer.getCurrentRoot();
+        sut.openObject(TestUtil.UNSC_URI.toString(), Organization.class);
+        sut.openCollection(Vocabulary.HAS_MEMBER);
+        sut.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
+        sut.closeObject();
+        sut.closeCollection();
+        sut.openCollection(Vocabulary.HAS_MEMBER);
+        final Set<Employee> root = (Set<Employee>) sut.getCurrentRoot();
         assertFalse(root.isEmpty());
         assertEquals(TestUtil.HALSEY_URI, root.iterator().next().getUri());
     }
 
     @Test
     void openObjectThrowsDeserializationExceptionWhenTryingToSetSingularAttributeValueForSecondTime() {
-        deserializer.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
-        deserializer.openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
+        sut.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
+        sut.openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
                 Collections.singletonList(Vocabulary.ORGANIZATION));
-        deserializer.closeObject();
-        assertNotNull(((Employee) deserializer.getCurrentRoot()).getEmployer());
+        sut.closeObject();
+        assertNotNull(((Employee) sut.getCurrentRoot()).getEmployer());
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> deserializer.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
+                () -> sut.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
                         Collections.singletonList(Vocabulary.ORGANIZATION)));
         assertThat(result.getMessage(), containsString("Encountered multiple values of property"));
+    }
+
+    @Test
+    void isPropertyDeserializableReturnsTrueForMappedProperty() {
+        sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
+        assertTrue(sut.isPropertyDeserializable(Vocabulary.FIRST_NAME));
+    }
+
+    @Test
+    void isPropertyDeserializableReturnsFalseForUnknownProperty() {
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
+        assertFalse(sut.isPropertyDeserializable(Vocabulary.IS_ADMIN));
+    }
+
+    @Test
+    void isPropertyDeserializableReturnsFalseForReadOnlyProperty() {
+        sut.openObject(TestUtil.PALMER_URI.toString(), Study.class);
+        assertFalse(sut.isPropertyDeserializable(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
     }
 }

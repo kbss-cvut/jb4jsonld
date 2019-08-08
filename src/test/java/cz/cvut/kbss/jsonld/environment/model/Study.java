@@ -12,12 +12,10 @@
  */
 package cz.cvut.kbss.jsonld.environment.model;
 
-import cz.cvut.kbss.jopa.model.annotations.Id;
-import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
-import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
+import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
+import cz.cvut.kbss.jsonld.annotation.JsonLdProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
 import java.net.URI;
@@ -38,6 +36,10 @@ public class Study {
 
     @OWLObjectProperty(iri = Vocabulary.HAS_PARTICIPANT)
     private Set<Employee> participants;
+
+    @JsonLdProperty(access = JsonLdProperty.Access.READ_ONLY)
+    @OWLDataProperty(iri = Vocabulary.NUMBER_OF_PEOPLE_INVOLVED)
+    private Integer noOfPeopleInvolved;
 
     public URI getUri() {
         return uri;
@@ -61,6 +63,7 @@ public class Study {
 
     public void setMembers(Set<Employee> members) {
         this.members = members;
+        calculatePeopleInvolvedCount();
     }
 
     public Set<Employee> getParticipants() {
@@ -69,5 +72,19 @@ public class Study {
 
     public void setParticipants(Set<Employee> participants) {
         this.participants = participants;
+        calculatePeopleInvolvedCount();
+    }
+
+    private void calculatePeopleInvolvedCount() {
+        this.noOfPeopleInvolved =
+                (members != null ? members.size() : 0) + (participants != null ? participants.size() : 0);
+    }
+
+    public Integer getNoOfPeopleInvolved() {
+        return noOfPeopleInvolved;
+    }
+
+    public void setNoOfPeopleInvolved(Integer noOfPeopleInvolved) {
+        this.noOfPeopleInvolved = noOfPeopleInvolved;
     }
 }

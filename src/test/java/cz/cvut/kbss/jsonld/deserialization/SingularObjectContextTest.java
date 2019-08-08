@@ -18,10 +18,7 @@ import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.Employee;
-import cz.cvut.kbss.jsonld.environment.model.Organization;
-import cz.cvut.kbss.jsonld.environment.model.Person;
-import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +36,7 @@ class SingularObjectContextTest {
     @Test
     void setFieldValueSetsFieldValueOnInstance() throws Exception {
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
-                BeanAnnotationProcessor.mapSerializableFields(
+                BeanAnnotationProcessor.mapFieldsForDeserialization(
                         Person.class), Collections.emptyMap());
         final String testFirstName = "John";
         ctx.setFieldValue(Person.class.getDeclaredField("firstName"), testFirstName);
@@ -50,7 +47,7 @@ class SingularObjectContextTest {
     void setFieldValueThrowsDeserializationExceptionWhenInvalidTypeIsUsedAsFieldValue() throws Exception {
         final Integer invalidValue = 117;
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new User(),
-                BeanAnnotationProcessor.mapSerializableFields(
+                BeanAnnotationProcessor.mapFieldsForDeserialization(
                         User.class), Collections.emptyMap());
         JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
                 () -> ctx.setFieldValue(User.class.getDeclaredField("admin"), invalidValue));
@@ -64,7 +61,7 @@ class SingularObjectContextTest {
         final Organization org = Generator.generateOrganization();
         final Map<String, Object> knownInstances = Collections.singletonMap(org.getUri().toString(), org);
         final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
-                BeanAnnotationProcessor.mapSerializableFields(Employee.class),
+                BeanAnnotationProcessor.mapFieldsForDeserialization(Employee.class),
                 knownInstances);
         ctx.setFieldValue(Employee.class.getDeclaredField("employer"), org.getUri().toString());
         assertNotNull(ctx.getInstance().getEmployer());
@@ -75,7 +72,7 @@ class SingularObjectContextTest {
     void setFieldValueThrowsDeserializationExceptionWhenUnknownObjectIdIsPassedIn() throws Exception {
         final Organization org = Generator.generateOrganization();
         final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
-                BeanAnnotationProcessor.mapSerializableFields(Employee.class),
+                BeanAnnotationProcessor.mapFieldsForDeserialization(Employee.class),
                 Collections.emptyMap());
         JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
                 () -> ctx.setFieldValue(Employee.class.getDeclaredField("employer"), org.getUri().toString()));
@@ -91,7 +88,7 @@ class SingularObjectContextTest {
         final User u = Generator.generateUser();
         final Map<String, Object> knownInstances = Collections.singletonMap(u.getUri().toString(), u);
         final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
-                BeanAnnotationProcessor.mapSerializableFields(Employee.class),
+                BeanAnnotationProcessor.mapFieldsForDeserialization(Employee.class),
                 knownInstances);
         JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
                 () -> ctx.setFieldValue(Employee.class.getDeclaredField("employer"), u.getUri().toString()));
@@ -104,7 +101,7 @@ class SingularObjectContextTest {
     void setFieldValueHandlesConversionFromStringToUri() throws Exception {
         final URI id = Generator.generateUri();
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
-                BeanAnnotationProcessor.mapSerializableFields(
+                BeanAnnotationProcessor.mapFieldsForDeserialization(
                         Person.class), Collections.emptyMap());
         ctx.setFieldValue(Person.class.getDeclaredField("uri"), id.toString());
         assertEquals(id, ctx.getInstance().getUri());
@@ -113,14 +110,14 @@ class SingularObjectContextTest {
     @Test
     void isPropertyMappedReturnsTrueForUnmappedPropertyWhenClassContainsPropertiesField() {
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
-                BeanAnnotationProcessor.mapSerializableFields(Person.class), Collections.emptyMap());
+                BeanAnnotationProcessor.mapFieldsForDeserialization(Person.class), Collections.emptyMap());
         assertTrue(ctx.isPropertyMapped(Vocabulary.IS_ADMIN));
     }
 
     @Test
     void isPropertyMappedReturnsFalseForUnknownProperty() {
         final SingularObjectContext<Organization> ctx = new SingularObjectContext<>(new Organization(),
-                BeanAnnotationProcessor.mapSerializableFields(
+                BeanAnnotationProcessor.mapFieldsForDeserialization(
                         Organization.class), Collections.emptyMap());
         assertFalse(ctx.isPropertyMapped(Vocabulary.IS_ADMIN));
     }
@@ -128,7 +125,7 @@ class SingularObjectContextTest {
     @Test
     void setIdentifierValueSkipsBlankNodeWhenTargetTypeIsNotString() {
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new Person(),
-                BeanAnnotationProcessor.mapSerializableFields(Person.class), Collections.emptyMap());
+                BeanAnnotationProcessor.mapFieldsForDeserialization(Person.class), Collections.emptyMap());
         final String bNode = "_:b1";
         assertNull(ctx.instance.getUri());
         ctx.setIdentifierValue(bNode);
@@ -138,7 +135,7 @@ class SingularObjectContextTest {
     @Test
     void setIdentifierValueSetsBlankNodeIdentifierWhenTargetTypeIsString() {
         final SingularObjectContext<WithStringId> ctx = new SingularObjectContext<>(new WithStringId(),
-                BeanAnnotationProcessor.mapSerializableFields(WithStringId.class), new HashMap<>());
+                BeanAnnotationProcessor.mapFieldsForDeserialization(WithStringId.class), new HashMap<>());
         final String bNode = "_:b1";
         ctx.setIdentifierValue(bNode);
         assertEquals(bNode, ctx.instance.id);
@@ -156,7 +153,7 @@ class SingularObjectContextTest {
         final Organization org = Generator.generateOrganization();
         final EmployeeWithPlainIdentifierField instance = new EmployeeWithPlainIdentifierField();
         final SingularObjectContext<EmployeeWithPlainIdentifierField> sut = new SingularObjectContext<>(instance,
-                BeanAnnotationProcessor.mapSerializableFields(EmployeeWithPlainIdentifierField.class),
+                BeanAnnotationProcessor.mapFieldsForDeserialization(EmployeeWithPlainIdentifierField.class),
                 Collections.singletonMap(org.getUri().toString(), org));
         sut.setFieldValue(EmployeeWithPlainIdentifierField.class.getDeclaredField("organization"),
                 org.getUri().toString());
@@ -171,5 +168,19 @@ class SingularObjectContextTest {
 
         @OWLObjectProperty(iri = Vocabulary.IS_MEMBER_OF)
         private URI organization;
+    }
+
+    @Test
+    void supportsReturnsTrueForMappedField() {
+        final SingularObjectContext<Organization> ctx = new SingularObjectContext<>(new Organization(),
+                BeanAnnotationProcessor.mapFieldsForDeserialization(Organization.class), Collections.emptyMap());
+        assertTrue(ctx.supports(Vocabulary.DATE_CREATED));
+    }
+
+    @Test
+    void supportsReturnsFalseForPropertyWithReadOnlyAccess() {
+        final SingularObjectContext<Study> ctx = new SingularObjectContext<>(new Study(),
+                BeanAnnotationProcessor.mapFieldsForDeserialization(Study.class), Collections.emptyMap());
+        assertFalse(ctx.supports(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
     }
 }

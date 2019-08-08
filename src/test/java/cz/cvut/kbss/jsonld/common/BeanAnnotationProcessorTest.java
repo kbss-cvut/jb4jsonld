@@ -104,7 +104,7 @@ class BeanAnnotationProcessorTest {
 
     @Test
     void mapSerializableFieldsReturnsMapOfSerializableFieldsWithPropertyIriKeys() throws Exception {
-        final Map<String, Field> result = BeanAnnotationProcessor.mapSerializableFields(Employee.class);
+        final Map<String, Field> result = BeanAnnotationProcessor.mapFieldsForDeserialization(Employee.class);
         assertEquals(Person.class.getDeclaredField("firstName"), result.get(Vocabulary.FIRST_NAME));
         assertEquals(Person.class.getDeclaredField("lastName"), result.get(Vocabulary.LAST_NAME));
         assertEquals(User.class.getDeclaredField("username"), result.get(Vocabulary.USERNAME));
@@ -114,7 +114,7 @@ class BeanAnnotationProcessorTest {
 
     @Test
     void mapSerializableFieldsResultContainsTypesFieldMappedToRdfType() throws Exception {
-        final Map<String, Field> result = BeanAnnotationProcessor.mapSerializableFields(User.class);
+        final Map<String, Field> result = BeanAnnotationProcessor.mapFieldsForDeserialization(User.class);
         assertTrue(result.containsKey(JsonLd.TYPE));
         assertEquals(User.class.getDeclaredField("types"), result.get(JsonLd.TYPE));
     }
@@ -224,7 +224,7 @@ class BeanAnnotationProcessorTest {
 
     @Test
     void mapSerializableFieldsSkipsPropertiesField() throws Exception {
-        final Map<String, Field> fields = BeanAnnotationProcessor.mapSerializableFields(Person.class);
+        final Map<String, Field> fields = BeanAnnotationProcessor.mapFieldsForDeserialization(Person.class);
         assertFalse(fields.containsValue(Person.class.getDeclaredField("properties")));
     }
 

@@ -217,4 +217,16 @@ public interface InstanceBuilder {
      * @return Whether the property is mapped in the current instance context
      */
     boolean isPropertyMapped(String property);
+
+    /**
+     * Checks whether the specified property can be deserialized.
+     * <p>
+     * A property cannot be deserialized if it is not mapped or if the mapped field's access is read-only.
+     *
+     * @param property Property identifier (IRI)
+     * @return Whether property can be deserialized
+     * @see #isPropertyMapped(String)
+     * @see cz.cvut.kbss.jsonld.annotation.JsonLdProperty.Access#READ_ONLY
+     */
+    boolean isPropertyDeserializable(String property);
 }

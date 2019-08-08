@@ -12,6 +12,7 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 
@@ -54,5 +55,13 @@ class SingularObjectContext<T> extends InstanceContext<T> {
     @Override
     boolean isPropertyMapped(String property) {
         return fieldMap.containsKey(property) || hasPropertiesField();
+    }
+
+    @Override
+    boolean supports(String property) {
+        if (!isPropertyMapped(property)) {
+            return false;
+        }
+        return !fieldMap.containsKey(property) || BeanAnnotationProcessor.isWriteable(fieldMap.get(property));
     }
 }

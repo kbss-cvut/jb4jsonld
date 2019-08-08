@@ -64,7 +64,6 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         }
         openInstances.push(currentInstance);
         this.currentInstance = ctx;
-
     }
 
     private InstanceContext<?> openObjectForProperty(String id, List<String> types, Field targetField) {
@@ -76,7 +75,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         } else {
             final Object instance = BeanClassProcessor.createInstance(targetClass);
             final InstanceContext<?> ctx = new SingularObjectContext<>(instance,
-                    BeanAnnotationProcessor.mapSerializableFields(targetClass), knownInstances);
+                    BeanAnnotationProcessor.mapFieldsForDeserialization(targetClass), knownInstances);
             ctx.setIdentifierValue(id);
             return ctx;
         }
@@ -89,7 +88,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
                     .getClass() + " is not compatible with target type " + cls + ".");
         }
         return new SingularObjectContext<>(cls.cast(instance),
-                BeanAnnotationProcessor.mapSerializableFields(cls), knownInstances);
+                BeanAnnotationProcessor.mapFieldsForDeserialization(cls), knownInstances);
     }
 
     @Override
@@ -107,7 +106,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             } else {
                 final T instance = BeanClassProcessor.createInstance(cls);
                 final InstanceContext<T> context = new SingularObjectContext<>(instance,
-                        BeanAnnotationProcessor.mapSerializableFields(cls), knownInstances);
+                        BeanAnnotationProcessor.mapFieldsForDeserialization(cls), knownInstances);
                 replaceCurrentContext(instance, context);
                 currentInstance.setIdentifierValue(id);
             }
@@ -269,6 +268,11 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public boolean isPropertyMapped(String property) {
         return currentInstance.isPropertyMapped(property) || JsonLd.TYPE.equals(property);
+    }
+
+    @Override
+    public boolean isPropertyDeserializable(String property) {
+        return currentInstance.supports(property) || JsonLd.TYPE.equals(property);
     }
 
     @Override

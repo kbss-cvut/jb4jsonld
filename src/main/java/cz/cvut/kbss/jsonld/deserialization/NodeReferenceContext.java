@@ -67,6 +67,11 @@ class NodeReferenceContext<T> extends InstanceContext<T> {
     }
 
     @Override
+    boolean supports(String property) {
+        return isPropertyMapped(property);
+    }
+
+    @Override
     Class<T> getInstanceType() {
         return null;
     }

@@ -20,10 +20,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.Employee;
-import cz.cvut.kbss.jsonld.environment.model.Organization;
-import cz.cvut.kbss.jsonld.environment.model.Person;
-import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.hamcrest.core.StringStartsWith;
@@ -327,5 +324,19 @@ class CompactedJsonLdSerializerTest {
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         assertFalse(json.containsKey(Vocabulary.PASSWORD));
+    }
+
+    @Test
+    void serializationSerializesPropertyWithReadOnlyAccess() throws Exception {
+        final Study study = new Study();
+        study.setUri(Generator.generateUri());
+        study.setName("Test study");
+        study.setParticipants(Collections.singleton(Generator.generateEmployee()));
+        study.setMembers(Collections.singleton(Generator.generateEmployee()));
+        sut.serialize(study);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertTrue(json.containsKey(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
+        assertEquals(study.getNoOfPeopleInvolved(), json.get(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
     }
 }

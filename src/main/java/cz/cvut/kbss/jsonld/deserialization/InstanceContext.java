@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
@@ -134,12 +132,29 @@ abstract class InstanceContext<T> {
      * @return {@code true} if a field mapping the property exists in this context, {@code false} otherwise
      */
     boolean isPropertyMapped(String property) {
-        // Default behaviour
+        // Default behavior
         return false;
     }
 
     /**
-     * Checks whether the class represented by this context contains a {@link cz.cvut.kbss.jopa.model.annotations.Properties} field.
+     * Checks whether the specified property is supported by this context.
+     * <p>
+     * A property is supported by a context for deserialization if it is mapped and the mapped field does not have
+     * read-only access.
+     *
+     * @param property The property to check
+     * @return Whether property is supported by this context
+     * @see #isPropertyMapped(String)
+     * @see cz.cvut.kbss.jsonld.annotation.JsonLdProperty.Access#READ_ONLY
+     */
+    boolean supports(String property) {
+        // Default behavior
+        return false;
+    }
+
+    /**
+     * Checks whether the class represented by this context contains a {@link cz.cvut.kbss.jopa.model.annotations.Properties}
+     * field.
      *
      * @return Whether the represented class has properties field
      */

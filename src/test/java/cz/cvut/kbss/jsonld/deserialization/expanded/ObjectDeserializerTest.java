@@ -54,7 +54,7 @@ class ObjectDeserializerTest {
     @Mock
     private TargetClassResolver tcResolverMock;
 
-    private ObjectDeserializer deserializer;
+    private ObjectDeserializer sut;
 
     @BeforeEach
     void setUp() {
@@ -66,16 +66,16 @@ class ObjectDeserializerTest {
         doReturn(Study.class).when(tcResolverMock).getTargetClass(eq(Study.class), anyCollection());
         doReturn(Employee.class).when(tcResolverMock).getTargetClass(eq(Employee.class), anyCollection());
         when(instanceBuilderMock.getCurrentRoot()).thenReturn(new Study());
-        when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         when(instanceBuilderMock.isPlural(Vocabulary.HAS_MEMBER)).thenReturn(true);
         when(instanceBuilderMock.isPlural(Vocabulary.HAS_PARTICIPANT)).thenReturn(true);
         doAnswer(inv -> Study.class).when(instanceBuilderMock).getCurrentContextType();
         doAnswer(inv -> Employee.class).when(instanceBuilderMock).getCurrentCollectionElementType();
-        this.deserializer =
+        this.sut =
                 new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
                         Study.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithPluralReferenceSharingObject.json");
-        deserializer.processValue((Map<?, ?>) input.get(0));
+        sut.processValue((Map<?, ?>) input.get(0));
 
         final InOrder inOrder = inOrder(instanceBuilderMock);
         inOrder.verify(instanceBuilderMock).addValue(eq(RDFS.LABEL), any());
@@ -89,15 +89,15 @@ class ObjectDeserializerTest {
             Exception {
         doReturn(InvalidOrder.class).when(tcResolverMock).getTargetClass(eq(InvalidOrder.class), anyCollection());
         when(instanceBuilderMock.getCurrentRoot()).thenReturn(new InvalidOrder());
-        when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         doAnswer(inv -> InvalidOrder.class).when(instanceBuilderMock).getCurrentContextType();
-        this.deserializer =
+        this.sut =
                 new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
                         InvalidOrder.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithPluralReferenceSharingObject.json");
 
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> deserializer.processValue((Map<?, ?>) input.get(0)));
+                () -> sut.processValue((Map<?, ?>) input.get(0)));
         assertThat(result.getMessage(),
                 containsString("Field called unknown declared in JsonLdAttributeOrder annotation not found in class " +
                         InvalidOrder.class));
@@ -117,24 +117,24 @@ class ObjectDeserializerTest {
     @Test
     void processValueOpensObjectWithId() throws Exception {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
-        when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
-        this.deserializer =
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
+        this.sut =
                 new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
                         User.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
-        deserializer.processValue((Map<?, ?>) input.get(0));
+        sut.processValue((Map<?, ?>) input.get(0));
         verify(instanceBuilderMock).openObject(TestUtil.HALSEY_URI.toString(), User.class);
     }
 
     @Test
     void processValueOpensObjectAsAttributeValueWithId() throws Exception {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
-        when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
-        this.deserializer =
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
+        this.sut =
                 new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
                         User.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithSingularReference.json");
-        deserializer.processValue((Map<?, ?>) input.get(0));
+        sut.processValue((Map<?, ?>) input.get(0));
         verify(instanceBuilderMock).openObject(TestUtil.HALSEY_URI.toString(), User.class);
         verify(instanceBuilderMock).openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
                 Collections.singletonList(Vocabulary.ORGANIZATION));
@@ -143,12 +143,12 @@ class ObjectDeserializerTest {
     @Test
     void processValueDoesNotAddIdToInstanceBuilder() throws Exception {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
-        when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
-        this.deserializer =
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
+        this.sut =
                 new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
                         User.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
-        deserializer.processValue((Map<?, ?>) input.get(0));
+        sut.processValue((Map<?, ?>) input.get(0));
         verify(instanceBuilderMock).openObject(TestUtil.HALSEY_URI.toString(), User.class);
         verify(instanceBuilderMock, never()).addValue(eq(JsonLd.ID), any());
     }
@@ -156,16 +156,30 @@ class ObjectDeserializerTest {
     @Test
     void processValueGeneratesIdWhenIncomingObjectDoesNotContainIt() throws Exception {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
-        when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
-        this.deserializer =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
-                        User.class);
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
+        this.sut = new ObjectDeserializer(instanceBuilderMock,
+                new DeserializerConfig(new Configuration(), tcResolverMock), User.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
         ((Map<?, ?>) input.get(0)).remove(JsonLd.ID);
-        deserializer.processValue((Map<?, ?>) input.get(0));
+        sut.processValue((Map<?, ?>) input.get(0));
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(instanceBuilderMock).openObject(captor.capture(), eq(User.class));
         assertNotNull(captor.getValue());
         assertThat(captor.getValue(), StringStartsWith.startsWith("_:"));
+    }
+
+    @Test
+    void processValueSkipsPropertyMappedToFieldWithReadOnlyAccess() throws Exception {
+        doReturn(Study.class).when(tcResolverMock).getTargetClass(eq(Study.class), anyCollection());
+        when(instanceBuilderMock.isPropertyMapped(any())).thenReturn(true);
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
+        when(instanceBuilderMock.isPropertyDeserializable(eq(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED))).thenReturn(false);
+        this.sut = new ObjectDeserializer(instanceBuilderMock,
+                new DeserializerConfig(new Configuration(), tcResolverMock), Study.class);
+        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithReadOnlyPropertyValue.json");
+        ((Map<?, ?>) input.get(0)).remove(Vocabulary.HAS_MEMBER);
+        ((Map<?, ?>) input.get(0)).remove(Vocabulary.HAS_PARTICIPANT);
+        sut.processValue((Map<?, ?>) input.get(0));
+        verify(instanceBuilderMock, never()).addValue(eq(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED), any());
     }
 }

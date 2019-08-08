@@ -94,4 +94,14 @@ class NodeReferenceContextTest {
         assertTrue(ctx.isPropertyMapped(JsonLd.ID));
         assertFalse(ctx.isPropertyMapped(Vocabulary.USERNAME));
     }
+
+    @Test
+    void supportsReturnsIsPropertyMappedResult() throws Exception {
+        final Field field = Organization.class.getDeclaredField("country");
+        final InstanceContext<?> ctx = new NodeReferenceContext<>(ownerMock, field, Collections.emptyMap());
+        assertTrue(ctx.isPropertyMapped(JsonLd.ID));
+        assertTrue(ctx.supports(JsonLd.ID));
+        assertFalse(ctx.isPropertyMapped(Vocabulary.USERNAME));
+        assertFalse(ctx.supports(Vocabulary.USERNAME));
+    }
 }

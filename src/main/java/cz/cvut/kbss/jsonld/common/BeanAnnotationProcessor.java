@@ -21,12 +21,14 @@ import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class BeanAnnotationProcessor {
 
     private static final String[] EMPTY_ARRAY = new String[0];
-    private static final Predicate<Field> ALLWAYS_TRUE = field -> true;
+    private static final Predicate<Field> ALWAYS_TRUE = field -> true;
 
     private static PropertyAccessResolver propertyAccessResolver = new JsonLdPropertyAccessResolver();
 
@@ -122,6 +124,7 @@ public class BeanAnnotationProcessor {
      *         <li>Non-static</li>
      *         <li>Annotated with one of the following annotations: {@link Id}, {@link OWLAnnotationProperty}, {@link
      * OWLDataProperty}, {@link OWLObjectProperty}</li>
+     * <li>Not configured with {@link cz.cvut.kbss.jsonld.annotation.JsonLdProperty.Access#WRITE_ONLY} access</li>
      *     </ul>
      * </pre>
      *
@@ -148,6 +151,27 @@ public class BeanAnnotationProcessor {
     }
 
     /**
+     * Gets all fields which can be serialized or deserialized from the specified class (or its supertypes).
+     * <p>
+     * This does not take into account property access configuration, just the fact that a field is:
+     *
+     * <pre>
+     *   <ul>
+     *      <li>Non-static</li>
+     *      <li>Annotated with one of the following annotations: {@link Id}, {@link OWLAnnotationProperty}, {@link
+     *      OWLDataProperty}, {@link OWLObjectProperty}</li>
+     *   </ul>
+     * </pre>
+     *
+     * @param cls Class to check
+     * @return List of marshallable fields
+     */
+    public static List<Field> getMarshallableFields(Class<?> cls) {
+        Objects.requireNonNull(cls);
+        return getMarshallableFields(cls, ALWAYS_TRUE);
+    }
+
+    /**
      * Creates a map of JSON-LD serializable fields, where the keys are IRIs of properties mapped by the fields.
      * <p>
      * Identifier field is mapped to the {@link JsonLd#ID} property identifier. Ancestors of the specified class are
@@ -156,12 +180,11 @@ public class BeanAnnotationProcessor {
      * @param cls Class for which the mapping should be determined
      * @return Mapping of OWL properties to fields
      */
-    public static Map<String, Field> mapSerializableFields(Class<?> cls) {
+    public static Map<String, Field> mapFieldsForDeserialization(Class<?> cls) {
         Objects.requireNonNull(cls);
-        final List<Field> fields = getMarshallableFields(cls, ALLWAYS_TRUE);
-        final Map<String, Field> fieldMap = new HashMap<>(fields.size());
-        fields.stream().filter(f -> !isPropertiesField(f)).forEach(f -> fieldMap.put(getAttributeIdentifier(f), f));
-        return fieldMap;
+        final List<Field> fields = getMarshallableFields(cls);
+        return fields.stream().filter(f -> !isPropertiesField(f)).collect(Collectors.toMap(
+                BeanAnnotationProcessor::getAttributeIdentifier, Function.identity()));
     }
 
     private static boolean isFieldTransient(Field field) {
@@ -192,7 +215,7 @@ public class BeanAnnotationProcessor {
      */
     public static boolean hasPropertiesField(Class<?> cls) {
         Objects.requireNonNull(cls);
-        final List<Field> fields = getMarshallableFields(cls, ALLWAYS_TRUE);
+        final List<Field> fields = getMarshallableFields(cls);
         final Optional<Field> propertiesField = fields.stream().filter(BeanAnnotationProcessor::isPropertiesField)
                                                       .findAny();
         return propertiesField.isPresent();
@@ -206,7 +229,7 @@ public class BeanAnnotationProcessor {
      * @throws IllegalArgumentException When the specified class does not have a {@link Properties} field
      */
     public static Field getPropertiesField(Class<?> cls) {
-        final List<Field> fields = getMarshallableFields(cls, ALLWAYS_TRUE);
+        final List<Field> fields = getMarshallableFields(cls);
         final Optional<Field> propsField = fields.stream().filter(BeanAnnotationProcessor::isPropertiesField).findAny();
         return propsField.orElseThrow(() -> new IllegalArgumentException(cls + " does not have a @Properties field."));
     }
@@ -220,7 +243,7 @@ public class BeanAnnotationProcessor {
      * @return Types field
      */
     public static Optional<Field> getTypesField(Class<?> cls) {
-        final List<Field> fields = getMarshallableFields(cls, ALLWAYS_TRUE);
+        final List<Field> fields = getMarshallableFields(cls);
         return fields.stream().filter(BeanAnnotationProcessor::isTypesField).findFirst();
     }
 
@@ -265,6 +288,16 @@ public class BeanAnnotationProcessor {
     public static boolean isTypesField(Field field) {
         Objects.requireNonNull(field);
         return field.getDeclaredAnnotation(Types.class) != null;
+    }
+
+    /**
+     * Checks whether deserialization can write into the specified field.
+     *
+     * @param field The field to examine
+     * @return Write access status
+     */
+    public static boolean isWriteable(Field field) {
+        return propertyAccessResolver.shouldDeserialize(field);
     }
 
     /**
