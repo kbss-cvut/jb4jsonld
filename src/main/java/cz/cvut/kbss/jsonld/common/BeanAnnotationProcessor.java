@@ -12,8 +12,8 @@
  */
 package cz.cvut.kbss.jsonld.common;
 
-import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
+import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
@@ -21,13 +21,26 @@ import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class BeanAnnotationProcessor {
 
     private static final String[] EMPTY_ARRAY = new String[0];
+    private static final Predicate<Field> ALLWAYS_TRUE = field -> true;
+
+    private static PropertyAccessResolver propertyAccessResolver = new JsonLdPropertyAccessResolver();
 
     private BeanAnnotationProcessor() {
         throw new AssertionError();
+    }
+
+    /**
+     * Sets property access resolver, overriding the default one.
+     *
+     * @param resolver Resolver to set
+     */
+    public void setPropertyAccessResolver(PropertyAccessResolver resolver) {
+        propertyAccessResolver = Objects.requireNonNull(resolver);
     }
 
     /**
@@ -118,15 +131,15 @@ public class BeanAnnotationProcessor {
     public static List<Field> getSerializableFields(Object object) {
         Objects.requireNonNull(object);
         final Class<?> cls = object.getClass();
-        return getSerializableFields(cls);
+        return getMarshallableFields(cls, propertyAccessResolver::shouldSerialize);
     }
 
-    private static List<Field> getSerializableFields(Class<?> cls) {
+    private static List<Field> getMarshallableFields(Class<?> cls, Predicate<Field> filter) {
         final List<Class<?>> classes = getAncestors(cls);
         final Set<Field> fields = new HashSet<>();
         for (Class<?> c : classes) {
             for (Field f : c.getDeclaredFields()) {
-                if (!isFieldTransient(f)) {
+                if (!isFieldTransient(f) && filter.test(f)) {
                     fields.add(f);
                 }
             }
@@ -145,7 +158,7 @@ public class BeanAnnotationProcessor {
      */
     public static Map<String, Field> mapSerializableFields(Class<?> cls) {
         Objects.requireNonNull(cls);
-        final List<Field> fields = getSerializableFields(cls);
+        final List<Field> fields = getMarshallableFields(cls, ALLWAYS_TRUE);
         final Map<String, Field> fieldMap = new HashMap<>(fields.size());
         fields.stream().filter(f -> !isPropertiesField(f)).forEach(f -> fieldMap.put(getAttributeIdentifier(f), f));
         return fieldMap;
@@ -179,7 +192,7 @@ public class BeanAnnotationProcessor {
      */
     public static boolean hasPropertiesField(Class<?> cls) {
         Objects.requireNonNull(cls);
-        final List<Field> fields = getSerializableFields(cls);
+        final List<Field> fields = getMarshallableFields(cls, ALLWAYS_TRUE);
         final Optional<Field> propertiesField = fields.stream().filter(BeanAnnotationProcessor::isPropertiesField)
                                                       .findAny();
         return propertiesField.isPresent();
@@ -193,7 +206,7 @@ public class BeanAnnotationProcessor {
      * @throws IllegalArgumentException When the specified class does not have a {@link Properties} field
      */
     public static Field getPropertiesField(Class<?> cls) {
-        final List<Field> fields = getSerializableFields(cls);
+        final List<Field> fields = getMarshallableFields(cls, ALLWAYS_TRUE);
         final Optional<Field> propsField = fields.stream().filter(BeanAnnotationProcessor::isPropertiesField).findAny();
         return propsField.orElseThrow(() -> new IllegalArgumentException(cls + " does not have a @Properties field."));
     }
@@ -207,7 +220,7 @@ public class BeanAnnotationProcessor {
      * @return Types field
      */
     public static Optional<Field> getTypesField(Class<?> cls) {
-        final List<Field> fields = getSerializableFields(cls);
+        final List<Field> fields = getMarshallableFields(cls, ALLWAYS_TRUE);
         return fields.stream().filter(BeanAnnotationProcessor::isTypesField).findFirst();
     }
 
@@ -236,13 +249,19 @@ public class BeanAnnotationProcessor {
      * Checks whether the specified field is an identifier field.
      *
      * @param field The field to examine
-     * @return Whether the field as a {@link Id} annotation
+     * @return Whether the field has a {@link Id} annotation
      */
     public static boolean isInstanceIdentifier(Field field) {
         Objects.requireNonNull(field);
         return field.getDeclaredAnnotation(Id.class) != null;
     }
 
+    /**
+     * Checks whether the specified field is a {@link Types} field.
+     *
+     * @param field The field to examine
+     * @return Whether the field has a {@link Types} annotation
+     */
     public static boolean isTypesField(Field field) {
         Objects.requireNonNull(field);
         return field.getDeclaredAnnotation(Types.class) != null;

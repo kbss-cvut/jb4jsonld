@@ -12,11 +12,14 @@
  */
 package cz.cvut.kbss.jsonld.common;
 
+import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
+import cz.cvut.kbss.jsonld.annotation.JsonLdProperty;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
@@ -31,6 +34,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("unused")
 class BeanAnnotationProcessorTest {
 
     @Test
@@ -77,6 +81,25 @@ class BeanAnnotationProcessorTest {
         final Organization org = new Organization();
         final List<Field> fields = BeanAnnotationProcessor.getSerializableFields(org);
         assertFalse(fields.contains(Organization.class.getDeclaredField("age")));
+    }
+
+    @Test
+    void getSerializableFieldsSkipsFieldsWithWriteOnlyAccess() throws Exception {
+        final SerializableWithWriteOnly instance = new SerializableWithWriteOnly();
+        final List<Field> result = BeanAnnotationProcessor.getSerializableFields(instance);
+        assertFalse(result.contains(SerializableWithWriteOnly.class.getDeclaredField("writeOnly")));
+    }
+
+    private static class SerializableWithWriteOnly {
+        @Id
+        private URI uri;
+
+        @OWLDataProperty(iri = "http://serializable")
+        private String serializableField;
+
+        @JsonLdProperty(access = JsonLdProperty.Access.WRITE_ONLY)
+        @OWLDataProperty(iri = "http://writeOnly")
+        private String writeOnly;
     }
 
     @Test

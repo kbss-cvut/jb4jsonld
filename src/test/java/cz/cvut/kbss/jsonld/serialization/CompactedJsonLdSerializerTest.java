@@ -42,12 +42,12 @@ class CompactedJsonLdSerializerTest {
 
     private BufferedJsonGenerator jsonWriter;
 
-    private JsonLdSerializer serializer;
+    private JsonLdSerializer sut;
 
     @BeforeEach
     void setUp() {
         this.jsonWriter = new BufferedJsonGenerator();
-        this.serializer = new CompactedJsonLdSerializer(jsonWriter);
+        this.sut = new CompactedJsonLdSerializer(jsonWriter);
     }
 
     // The following tests only verify validity of the output JSON-LD, no structure checks are performed
@@ -55,7 +55,7 @@ class CompactedJsonLdSerializerTest {
     @Test
     void testSerializeObjectWithDataProperties() throws Exception {
         final User user = Generator.generateUser();
-        serializer.serialize(user);
+        sut.serialize(user);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
     }
@@ -63,7 +63,7 @@ class CompactedJsonLdSerializerTest {
     @Test
     void testSerializeCollectionOfObjects() throws Exception {
         final Set<User> users = Generator.generateUsers();
-        serializer.serialize(users);
+        sut.serialize(users);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
     }
@@ -71,7 +71,7 @@ class CompactedJsonLdSerializerTest {
     @Test
     void testSerializeObjectWithSingularReference() throws Exception {
         final Employee employee = Generator.generateEmployee();
-        serializer.serialize(employee);
+        sut.serialize(employee);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
         final Map<String, ?> map = (Map<String, ?>) jsonObject;
@@ -82,7 +82,7 @@ class CompactedJsonLdSerializerTest {
     void testSerializeObjectWithPluralReference() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, false);  // No backward references for this test
-        serializer.serialize(org);
+        sut.serialize(org);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
         final Map<String, ?> map = (Map<String, ?>) jsonObject;
@@ -101,7 +101,7 @@ class CompactedJsonLdSerializerTest {
     void testSerializeObjectWithBackwardReferences() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, true);
-        serializer.serialize(org);
+        sut.serialize(org);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
         final Map<String, ?> map = (Map<String, ?>) jsonObject;
@@ -116,7 +116,7 @@ class CompactedJsonLdSerializerTest {
         if (org.getAdmins() == null || org.getAdmins().isEmpty()) {
             org.setAdmins(new HashSet<>(Collections.singletonList(org.getEmployees().iterator().next())));
         }
-        serializer.serialize(org);
+        sut.serialize(org);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
         final Map<String, ?> map = (Map<String, ?>) jsonObject;
@@ -175,7 +175,7 @@ class CompactedJsonLdSerializerTest {
         generateEmployees(org, true);
         final Set<Employee> employees = org.getEmployees();
         org.setEmployees(null);
-        serializer.serialize(employees);
+        sut.serialize(employees);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
         final List<?> jsonList = (List<?>) jsonObject;
@@ -191,7 +191,7 @@ class CompactedJsonLdSerializerTest {
     @Test
     void testSerializationOfObjectWithStringBasedUnmappedProperties() throws Exception {
         final Person person = Generator.generatePerson();
-        serializer.serialize(person);
+        sut.serialize(person);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         assertEquals(person.getUri().toString(), json.get(JsonLd.ID));
@@ -214,7 +214,7 @@ class CompactedJsonLdSerializerTest {
         final User user = Generator.generateUser();
         final String type = Generator.URI_BASE + "TypeOne";
         user.setTypes(Collections.singleton(type));
-        serializer.serialize(user);
+        sut.serialize(user);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         final List<?> types = (List<?>) json.get(JsonLd.TYPE);
@@ -226,7 +226,7 @@ class CompactedJsonLdSerializerTest {
     void serializationSkipsNullDataPropertyValues() throws Exception {
         final User user = Generator.generateUser();
         user.setAdmin(null);
-        serializer.serialize(user);
+        sut.serialize(user);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         assertFalse(json.containsKey(Vocabulary.IS_ADMIN));
@@ -236,7 +236,7 @@ class CompactedJsonLdSerializerTest {
     void serializationSkipsNullObjectPropertyValues() throws Exception {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(null);
-        serializer.serialize(employee);
+        sut.serialize(employee);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         assertFalse(json.containsKey(Vocabulary.IS_MEMBER_OF));
@@ -246,7 +246,7 @@ class CompactedJsonLdSerializerTest {
     void serializationSerializesPlainIdentifierObjectPropertyValue() throws Exception {
         final Organization company = Generator.generateOrganization();
         company.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
-        serializer.serialize(company);
+        sut.serialize(company);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         final Object value = json.get(Vocabulary.ORIGIN);
@@ -260,7 +260,7 @@ class CompactedJsonLdSerializerTest {
     void serializationGeneratesBlankNodeIfInstancesDoesNotHaveIdentifierValue() throws Exception {
         final Organization company = Generator.generateOrganization();
         company.setUri(null);
-        serializer.serialize(company);
+        sut.serialize(company);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         assertTrue(json.containsKey(JsonLd.ID));
@@ -274,7 +274,7 @@ class CompactedJsonLdSerializerTest {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(company);
         company.addEmployee(employee);
-        serializer.serialize(company);
+        sut.serialize(company);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         final String id = (String) json.get(JsonLd.ID);
@@ -291,7 +291,7 @@ class CompactedJsonLdSerializerTest {
         final PersonWithoutIdentifier person = new PersonWithoutIdentifier();
         person.firstName = "Thomas";
         person.lastName = "Lasky";
-        serializer.serialize(person);
+        sut.serialize(person);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         final String id = (String) json.get(JsonLd.ID);
@@ -312,10 +312,20 @@ class CompactedJsonLdSerializerTest {
 
     @Test
     void serializationThrowsMissingIdentifierExceptionWhenNoIdentifierFieldIsFoundAndRequiredIdIsConfigured() {
-        serializer.configuration().set(ConfigParam.REQUIRE_ID, Boolean.TRUE.toString());
+        sut.configuration().set(ConfigParam.REQUIRE_ID, Boolean.TRUE.toString());
         final PersonWithoutIdentifier person = new PersonWithoutIdentifier();
         person.firstName = "Thomas";
         person.lastName = "Lasky";
-        assertThrows(MissingIdentifierException.class, () -> serializer.serialize(person));
+        assertThrows(MissingIdentifierException.class, () -> sut.serialize(person));
+    }
+
+    @Test
+    void serializationSkipsPropertiesWithWriteOnlyAccess() throws Exception {
+        final User user = Generator.generateUser();
+        user.setPassword("test-117");
+        sut.serialize(user);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertFalse(json.containsKey(Vocabulary.PASSWORD));
     }
 }

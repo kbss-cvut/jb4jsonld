@@ -18,6 +18,7 @@ import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.Types;
+import cz.cvut.kbss.jsonld.annotation.JsonLdProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
 import java.net.URI;
@@ -31,6 +32,10 @@ public class User extends Person {
 
     @OWLAnnotationProperty(iri = Vocabulary.IS_ADMIN)
     private Boolean admin;
+
+    @JsonLdProperty(access = JsonLdProperty.Access.WRITE_ONLY)
+    @OWLDataProperty(iri = Vocabulary.PASSWORD)
+    private String password;
 
     @Types
     private Set<String> types;
@@ -60,6 +65,14 @@ public class User extends Person {
 
     public void setAdmin(Boolean admin) {
         this.admin = admin;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Set<String> getTypes() {
