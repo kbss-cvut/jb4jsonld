@@ -13,6 +13,7 @@
 package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jopa.model.annotations.Id;
+import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.JsonLd;
@@ -480,5 +481,38 @@ class DefaultInstanceBuilderTest {
     void isPropertyDeserializableReturnsFalseForReadOnlyProperty() {
         sut.openObject(TestUtil.PALMER_URI.toString(), Study.class);
         assertFalse(sut.isPropertyDeserializable(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
+    }
+
+    @Test
+    void addNodeReferenceAddsItemToAnnotationPropertyCollectionWithObjectElements() {
+        final URI nodeId = Generator.generateUri();
+        sut.openObject(Generator.generateUri().toString(), ObjectWithAnnotationProperties.class);
+        sut.openCollection(Vocabulary.ORIGIN);
+        sut.addNodeReference(nodeId.toString());
+        sut.closeCollection();
+        final ObjectWithAnnotationProperties object = (ObjectWithAnnotationProperties) sut.getCurrentRoot();
+        assertTrue(object.getOrigins().contains(nodeId));
+    }
+
+    @Test
+    void addNodeReferenceAddsItemToAnnotationPropertyWithTypeObject() {
+        final URI nodeId = Generator.generateUri();
+        sut.openObject(Generator.generateUri().toString(), ObjectWithAnnotationProperty.class);
+        sut.addNodeReference(Vocabulary.CHANGED_VALUE, nodeId.toString());
+        final ObjectWithAnnotationProperty result = (ObjectWithAnnotationProperty) sut.getCurrentRoot();
+        assertEquals(nodeId, result.value);
+    }
+
+    @OWLClass(iri = Vocabulary.OBJECT_WITH_ANNOTATIONS)
+    public static class ObjectWithAnnotationProperty {
+
+        @Id
+        private URI uri;
+
+        @OWLAnnotationProperty(iri = Vocabulary.CHANGED_VALUE)
+        private Object value;
+
+        public ObjectWithAnnotationProperty() {
+        }
     }
 }

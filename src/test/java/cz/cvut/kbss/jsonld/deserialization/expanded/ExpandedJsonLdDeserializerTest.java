@@ -12,6 +12,8 @@
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
+import com.github.jsonldjava.core.JsonLdProcessor;
+import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.ConfigParam;
@@ -31,6 +33,7 @@ import java.util.*;
 
 import static cz.cvut.kbss.jsonld.environment.TestUtil.*;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -474,5 +477,37 @@ class ExpandedJsonLdDeserializerTest {
         final Object input = readAndExpand("objectWithReadOnlyPropertyValue.json");
         final Study result = sut.deserialize(input, Study.class);
         assertNull(result.getNoOfPeopleInvolved());
+    }
+
+    @Test
+    void deserializationHandlesAnnotationPropertyValuesWhichMixLiteralAndReferenceValues() throws Exception {
+        final Object input = readAndExpand("objectWithAnnotationPropertyReferenceValues.json");
+        final ObjectWithAnnotationProperties result = sut.deserialize(input, ObjectWithAnnotationProperties.class);
+        assertNotNull(result);
+        assertThat(result.getOrigins(), hasItems(URI.create("http://dbpedia.org/resource/Czech_Republic"), "TermIt"));
+    }
+
+    @Test
+    void deserializationHandlesSingularAnnotationPropertyWithReferenceValue() throws Exception {
+        final Object jsonLd = JsonUtils.fromString("{" +
+                "  \"@id\": \"http://krizik.felk.cvut.cz/ontologies/jb4jsonld#ChangeRecord01\"," +
+                "  \"@type\": \"http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ObjectWithAnnotations\"," +
+                "  \"http://krizik.felk.cvut.cz/ontologies/jb4jsonld/origin\": {" +
+                "      \"@id\": \"http://dbpedia.org/resource/Czech_Republic\"" +
+                "    }}");
+        final Object expanded = JsonLdProcessor.expand(jsonLd);
+
+        final ObjectWithAnnotationProperty result = sut.deserialize(expanded, ObjectWithAnnotationProperty.class);
+        assertNotNull(result);
+        assertEquals(URI.create("http://dbpedia.org/resource/Czech_Republic"), result.origin);
+    }
+
+    @OWLClass(iri = Vocabulary.OBJECT_WITH_ANNOTATIONS)
+    public static class ObjectWithAnnotationProperty {
+        @Id
+        private URI uri;
+
+        @OWLAnnotationProperty(iri = Vocabulary.ORIGIN)
+        private Object origin;
     }
 }

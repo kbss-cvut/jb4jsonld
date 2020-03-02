@@ -1,0 +1,10 @@
+{
+  "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#ChangeRecord01",
+  "@type": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ObjectWithAnnotations",
+  "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/origin": [
+    {
+      "@id": "http://dbpedia.org/resource/Czech_Republic"
+    },
+    "TermIt"
+  ]
+}
