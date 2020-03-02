@@ -18,11 +18,11 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <cz.cvut.kbss.jopa.version>0.13.1</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jopa.version>0.13.5</cz.cvut.kbss.jopa.version>
 
-        <org.junit.jupiter.version>5.5.1</org.junit.jupiter.version>
+        <org.junit.jupiter.version>5.6.0</org.junit.jupiter.version>
         <org.mockito.version>2.28.2</org.mockito.version>
-        <com.github.jsonld-java.version>0.12.5</com.github.jsonld-java.version>
+        <com.github.jsonld-java.version>0.13.0</com.github.jsonld-java.version>
     </properties>
 
     <dependencies>
@@ -91,7 +91,7 @@
                     </plugin>
                     <plugin>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.3</version>
+                        <version>3.1.1</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
