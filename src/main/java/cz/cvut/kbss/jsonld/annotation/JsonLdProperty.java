@@ -17,6 +17,8 @@ public @interface JsonLdProperty {
      * <p>
      * By default, the property is both serialized and deserialized. This can be restricted by making the property
      * read-only or write-only.
+     *
+     * @return Type of access to annotated property
      */
     Access access() default Access.READ_WRITE;
 

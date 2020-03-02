@@ -119,14 +119,12 @@ public class BeanAnnotationProcessor {
      * JSON-LD.
      * <p>
      * For a field to be serializable, it has to be:
-     * <pre>
      *     <ul>
      *         <li>Non-static</li>
      *         <li>Annotated with one of the following annotations: {@link Id}, {@link OWLAnnotationProperty}, {@link
      * OWLDataProperty}, {@link OWLObjectProperty}</li>
      * <li>Not configured with {@link cz.cvut.kbss.jsonld.annotation.JsonLdProperty.Access#WRITE_ONLY} access</li>
      *     </ul>
-     * </pre>
      *
      * @param object Object whose fields should be discovered
      * @return List of discovered fields
@@ -153,15 +151,13 @@ public class BeanAnnotationProcessor {
     /**
      * Gets all fields which can be serialized or deserialized from the specified class (or its supertypes).
      * <p>
-     * This does not take into account property access configuration, just the fact that a field is:
+     * is does not take into account property access configuration, just the fact that a field is:
      *
-     * <pre>
-     *   <ul>
-     *      <li>Non-static</li>
-     *      <li>Annotated with one of the following annotations: {@link Id}, {@link OWLAnnotationProperty}, {@link
-     *      OWLDataProperty}, {@link OWLObjectProperty}</li>
-     *   </ul>
-     * </pre>
+     * <ul>
+     *    <li>Non-static</li>
+     *    <li>Annotated with one of the following annotations: {@link Id}, {@link OWLAnnotationProperty}, {@link
+     *    OWLDataProperty}, {@link OWLObjectProperty}</li>
+     * </ul>
      *
      * @param cls Class to check
      * @return List of marshallable fields
