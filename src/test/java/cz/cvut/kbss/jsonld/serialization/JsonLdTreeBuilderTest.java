@@ -12,6 +12,8 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.environment.Generator;
@@ -24,8 +26,13 @@ import cz.cvut.kbss.jsonld.serialization.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -329,5 +336,88 @@ class JsonLdTreeBuilderTest {
         JsonGenerator generator = mock(JsonGenerator.class);
         node.write(generator);
         verify(generator).writeString(p.getUri().toString());
+    }
+
+    @Test
+    void visitFieldSerializesSingularAnnotationPropertyFieldValueWhichIsIdentifierAsObjectWithIdentifier()
+            throws Exception {
+        final WithAnnotation instance = new WithAnnotation();
+        instance.value = Generator.generateUri();
+        treeBuilder.openInstance(instance);
+        treeBuilder.visitField(WithAnnotation.class.getDeclaredField("value"), instance.value);
+        final CompositeNode root = treeBuilder.getTreeRoot();
+        assertEquals(1, root.getItems().size());
+        final JsonNode valueNode = root.getItems().iterator().next();
+        assertEquals(Vocabulary.CHANGED_VALUE, valueNode.getName());
+        verifyObjectIdNode(valueNode);
+    }
+
+    @OWLClass(iri = Vocabulary.OBJECT_WITH_ANNOTATIONS)
+    private static class WithAnnotation {
+        @OWLAnnotationProperty(iri = Vocabulary.CHANGED_VALUE)
+        private Object value;
+    }
+
+    @Test
+    void visitFieldSerializesPluralAnnotationPropertyFieldValuesWhichAreIdentifiersAsObjectsWithIdentifier()
+            throws Exception {
+        final WithAnnotations instance = new WithAnnotations();
+        instance.values = IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet());
+        treeBuilder.openInstance(instance);
+        treeBuilder.visitField(WithAnnotations.class.getDeclaredField("values"), instance.values);
+        final CompositeNode root = treeBuilder.getTreeRoot();
+        assertEquals(1, root.getItems().size());
+        final JsonNode valueNode = root.getItems().iterator().next();
+        assertEquals(Vocabulary.CHANGED_VALUE, valueNode.getName());
+        assertThat(valueNode, instanceOf(CollectionNode.class));
+        final CollectionNode colNode = (CollectionNode) valueNode;
+        assertEquals(instance.values.size(), colNode.getItems().size());
+        colNode.getItems().forEach(this::verifyObjectIdNode);
+    }
+
+    private void verifyObjectIdNode(JsonNode vn) {
+        assertThat(vn, instanceOf(ObjectNode.class));
+        final ObjectNode on = (ObjectNode) vn;
+        assertEquals(1, on.getItems().size());
+        assertEquals(JsonLd.ID, on.getItems().iterator().next().getName());
+    }
+
+    @OWLClass(iri = Vocabulary.OBJECT_WITH_ANNOTATIONS)
+    private static class WithAnnotations {
+        @OWLAnnotationProperty(iri = Vocabulary.CHANGED_VALUE)
+        private Set<Object> values;
+    }
+
+    @Test
+    void visitFieldCorrectlySerializesPluralAnnotationPropertyFieldValuesWithMixedIdentifiersAndLiteralValues()
+            throws Exception {
+        final WithAnnotations instance = new WithAnnotations();
+        instance.values = IntStream.range(0, 5).mapToObj(i -> {
+            if (i % 2 == 0) {
+                return Generator.generateUri();
+            }
+            return i;
+        }).collect(Collectors.toSet());
+        treeBuilder.openInstance(instance);
+        treeBuilder.visitField(WithAnnotations.class.getDeclaredField("values"), instance.values);
+        final CompositeNode root = treeBuilder.getTreeRoot();
+        assertEquals(1, root.getItems().size());
+        final JsonNode valueNode = root.getItems().iterator().next();
+        assertEquals(Vocabulary.CHANGED_VALUE, valueNode.getName());
+        assertThat(valueNode, instanceOf(CollectionNode.class));
+        final CollectionNode colNode = (CollectionNode) valueNode;
+        assertEquals(instance.values.size(), colNode.getItems().size());
+        final Iterator<Object> valuesIt = instance.values.iterator();
+        final Iterator<JsonNode> nodeIt = colNode.getItems().iterator();
+        while (valuesIt.hasNext() && nodeIt.hasNext()) {
+            final JsonNode node = nodeIt.next();
+            final Object value = valuesIt.next();
+            if (value instanceof URI) {
+                verifyObjectIdNode(node);
+            } else {
+                assertThat(node, instanceOf(LiteralNode.class));
+                assertEquals(value, ((LiteralNode<?>) node).getValue());
+            }
+        }
     }
 }

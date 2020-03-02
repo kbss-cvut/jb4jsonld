@@ -285,4 +285,10 @@ class BeanAnnotationProcessorTest {
     void hasTypesFieldReturnsFalseWhenClassDoesNotHaveTypesAttribute() {
         assertFalse(BeanAnnotationProcessor.hasTypesField(Person.class));
     }
+
+    @Test
+    void isAnnotationPropertyReturnsTrueForAnnotationPropertyField() throws Exception {
+        assertTrue(BeanAnnotationProcessor.isAnnotationProperty(ObjectWithAnnotationProperties.class.getDeclaredField("changedValue")));
+        assertFalse(BeanAnnotationProcessor.isAnnotationProperty(Person.class.getDeclaredField("firstName")));
+    }
 }

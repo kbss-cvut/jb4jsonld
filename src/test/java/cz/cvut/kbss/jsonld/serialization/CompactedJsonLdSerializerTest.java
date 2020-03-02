@@ -30,11 +30,14 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("unchecked")
 class CompactedJsonLdSerializerTest {
 
     private BufferedJsonGenerator jsonWriter;
@@ -338,5 +341,39 @@ class CompactedJsonLdSerializerTest {
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         assertTrue(json.containsKey(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
         assertEquals(study.getNoOfPeopleInvolved(), json.get(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
+    }
+
+    @Test
+    void serializationSerializesAnnotationPropertyStringValueAsString() throws Exception {
+        final ObjectWithAnnotationProperties toSerialize = new ObjectWithAnnotationProperties(Generator.generateUri());
+        toSerialize.setChangedValue(Generator.generateUri().toString());
+
+        sut.serialize(toSerialize);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertTrue(json.containsKey(Vocabulary.CHANGED_VALUE));
+        assertEquals(toSerialize.getChangedValue(), json.get(Vocabulary.CHANGED_VALUE));
+    }
+
+    @Test
+    void serializationSerializesUrisOfAnnotationPropertyAttributeAsObjectsWithId() throws Exception {
+        final ObjectWithAnnotationProperties toSerialize = new ObjectWithAnnotationProperties(Generator.generateUri());
+        toSerialize
+                .setOrigins(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
+
+        sut.serialize(toSerialize);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertTrue(json.containsKey(Vocabulary.ORIGIN));
+        final Object origins = json.get(Vocabulary.ORIGIN);
+        assertThat(origins, instanceOf(List.class));
+        final List<?> originList = (List<?>) origins;
+        assertEquals(toSerialize.getOrigins().size(), originList.size());
+        final Set<?> result = originList.stream().map(item -> {
+            assertThat(item, instanceOf(Map.class));
+            assertTrue(((Map<?, ?>) item).containsKey(JsonLd.ID));
+            return ((Map<?, ?>) item).get(JsonLd.ID);
+        }).collect(Collectors.toSet());
+        assertEquals(toSerialize.getOrigins().stream().map(Object::toString).collect(Collectors.toSet()), result);
     }
 }

@@ -22,6 +22,7 @@ public class Vocabulary {
     public static final String ORGANIZATION = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Organization";
     public static final String STUDY = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Study";
     public static final String AGENT = "http://onto.fel.cvut.cz/ontologies/ufo/Agent";
+    public static final String OBJECT_WITH_ANNOTATIONS = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ObjectWithAnnotations";
 
     public static final String FIRST_NAME = "http://xmlns.com/foaf/0.1/firstName";
     public static final String LAST_NAME = "http://xmlns.com/foaf/0.1/lastName";
@@ -38,6 +39,8 @@ public class Vocabulary {
     public static final String HAS_EVENT_TYPE = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/hasEventType";
     public static final String PASSWORD = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/password";
     public static final String NUMBER_OF_PEOPLE_INVOLVED = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/numberOfPeopleInvolved";
+
+    public static final String CHANGED_VALUE = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/changedValue";
 
     private Vocabulary() {
         throw new AssertionError();
