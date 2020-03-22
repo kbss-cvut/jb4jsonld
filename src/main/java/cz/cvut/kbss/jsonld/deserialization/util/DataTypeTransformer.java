@@ -80,12 +80,19 @@ public class DataTypeTransformer {
         if (targetClass.isAssignableFrom(sourceClass)) {
             return targetClass.cast(value);
         }
+        if (targetClass.isEnum()) {
+            return (T) transformToEnumConstant(value, (Class<? extends Enum>) targetClass);
+        }
         if (targetClass.equals(String.class)) {
             return targetClass.cast(value.toString());
         }
         final TransformationRuleIdentifier<?, ?> identifier = new TransformationRuleIdentifier<>(sourceClass,
                 targetClass);
         return rules.containsKey(identifier) ? (T) rules.get(identifier).apply(value) : null;
+    }
+
+    private static <T extends Enum<T>> T transformToEnumConstant(Object value, Class<T> targetClass) {
+        return Enum.valueOf(targetClass, value.toString());
     }
 
     public static class TransformationRuleIdentifier<S, T> {

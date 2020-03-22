@@ -37,6 +37,9 @@ public class User extends Person {
     @OWLDataProperty(iri = Vocabulary.PASSWORD)
     private String password;
 
+    @OWLDataProperty(iri = Vocabulary.ROLE)
+    private Role role;
+
     @Types
     private Set<String> types;
 
@@ -73,6 +76,14 @@ public class User extends Person {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public Set<String> getTypes() {

@@ -510,4 +510,12 @@ class ExpandedJsonLdDeserializerTest {
         @OWLAnnotationProperty(iri = Vocabulary.ORIGIN)
         private Object origin;
     }
+
+    @Test
+    void deserializationUnmarshallsDataPropertyValueIntoEnumConstant() throws Exception {
+        final Object input = readAndExpand("objectWithEnumDataPropertyValue.json");
+        final User result = sut.deserialize(input, User.class);
+        assertNotNull(result);
+        assertEquals(Role.USER, result.getRole());
+    }
 }

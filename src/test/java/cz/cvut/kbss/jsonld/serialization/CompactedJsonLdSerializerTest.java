@@ -376,4 +376,15 @@ class CompactedJsonLdSerializerTest {
         }).collect(Collectors.toSet());
         assertEquals(toSerialize.getOrigins().stream().map(Object::toString).collect(Collectors.toSet()), result);
     }
+
+    @Test
+    void serializationSerializesEnumDataPropertyAsStringValueOfEnumConstant() throws Exception {
+        final User user = Generator.generateUser();
+        user.setRole(Role.ADMIN);
+        sut.serialize(user);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertTrue(json.containsKey(Vocabulary.ROLE));
+        assertEquals(Role.ADMIN.toString(), json.get(Vocabulary.ROLE));
+    }
 }

@@ -14,6 +14,7 @@ package cz.cvut.kbss.jsonld.deserialization.util;
 
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.Role;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -85,5 +86,10 @@ class DataTypeTransformerTest {
         assertEquals(Boolean.TRUE.toString(), DataTypeTransformer.transformValue(true, String.class));
         assertEquals(Integer.toString(117), DataTypeTransformer.transformValue(117, String.class));
         assertEquals(Float.toString(3.141792F), DataTypeTransformer.transformValue(3.141792F, String.class));
+    }
+
+    @Test
+    void transformationTransformsStringValueToEnumConstant() {
+        assertEquals(Role.GUEST, DataTypeTransformer.transformValue(Role.GUEST.toString(), Role.class));
     }
 }
