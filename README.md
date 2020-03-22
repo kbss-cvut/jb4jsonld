@@ -42,6 +42,9 @@ public class User {
     @OWLDataProperty(iri = "http://xmlns.com/foaf/0.1/accountName")
     private String username;
 
+    @OWLDataProperty(iri = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/role")
+    private Role role;  // Role is an enum
+
     @Properties
     private Map<String, Set<String>> properties;
     
@@ -57,7 +60,8 @@ public class User {
     "firstName": "http://xmlns.com/foaf/0.1/firstName",
     "lastName": "http://xmlns.com/foaf/0.1/lastName",
     "accountName": "http://xmlns.com/foaf/0.1/accountName",
-    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin"
+    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin",
+    "role": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/role"
   },
   "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
   "@type": [
@@ -68,7 +72,8 @@ public class User {
   "isAdmin": true,
   "accountName": "halsey@unsc.org",
   "firstName": "Catherine",
-  "lastName": "Halsey"
+  "lastName": "Halsey",
+  "role": "USER"
 }
 ```
 
