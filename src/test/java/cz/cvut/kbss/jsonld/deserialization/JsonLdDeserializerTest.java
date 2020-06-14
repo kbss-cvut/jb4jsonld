@@ -19,12 +19,14 @@ import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Study;
+import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static cz.cvut.kbss.jsonld.environment.TestUtil.readAndExpand;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JsonLdDeserializerTest {
 
@@ -52,5 +54,12 @@ class JsonLdDeserializerTest {
 
     @OWLClass(iri = Vocabulary.AGENT)
     private static class TestClass {
+    }
+
+    @Test
+    void deserializationThrowsJsonLdDeserializationExceptionWhenInputIsNotValidJsonLd() throws Exception {
+        final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer();
+        final Object input = readAndExpand("invalidJsonLd.json");
+        assertThrows(JsonLdDeserializationException.class, () -> deserializer.deserialize(input, User.class));
     }
 }

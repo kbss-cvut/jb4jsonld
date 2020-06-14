@@ -1,0 +1,12 @@
+{
+  "id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
+  "types": [
+    "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User",
+    "http://onto.fel.cvut.cz/ontologies/ufo/Agent"
+  ],
+  "isAdmin": true,
+  "accountName": "halsey@unsc.org",
+  "firstName": "Catherine",
+  "lastName": "Halsey"
+}

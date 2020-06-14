@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -39,7 +39,10 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
                     "Expanded JSON-LD deserializer requires a JSON-LD array as input.");
         }
         final List<?> input = (List<?>) jsonLd;
-        assert input.size() == 1;
+        if (input.size() != 1) {
+            throw new JsonLdDeserializationException(
+                    "Input is not expanded JSON-LD. The input does not contain exactly one root element.");
+        }
         final Map<?, ?> root = (Map<?, ?>) input.get(0);
         final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(classResolver);
         new ObjectDeserializer(instanceBuilder, new DeserializerConfig(configuration(), classResolver), resultClass)

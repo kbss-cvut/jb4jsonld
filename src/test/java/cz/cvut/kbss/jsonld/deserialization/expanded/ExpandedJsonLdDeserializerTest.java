@@ -518,4 +518,10 @@ class ExpandedJsonLdDeserializerTest {
         assertNotNull(result);
         assertEquals(Role.USER, result.getRole());
     }
+
+    @Test
+    void deserializationThrowsJsonLdDeserializationExceptionWhenInputIsNotExpandedJsonLd() {
+        final Object input = Collections.emptyList();
+        assertThrows(JsonLdDeserializationException.class, () -> sut.deserialize(input, User.class));
+    }
 }
