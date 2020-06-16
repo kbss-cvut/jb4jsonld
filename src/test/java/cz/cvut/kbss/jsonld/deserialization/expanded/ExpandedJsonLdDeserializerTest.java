@@ -524,4 +524,11 @@ class ExpandedJsonLdDeserializerTest {
         final Object input = Collections.emptyList();
         assertThrows(JsonLdDeserializationException.class, () -> sut.deserialize(input, User.class));
     }
+
+    @Test
+    void deserializationHandlesTypedDataPropertyValues() throws Exception {
+        final Object input = readAndExpand("objectWithTypedDataProperties.json");
+        final User result = sut.deserialize(input, User.class);
+        assertTrue(result.getAdmin());
+    }
 }

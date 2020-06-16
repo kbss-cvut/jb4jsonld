@@ -14,6 +14,7 @@ package cz.cvut.kbss.jsonld.deserialization.expanded;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
+import cz.cvut.kbss.jsonld.deserialization.util.XSDTypeCoercer;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 
 import java.net.URI;
@@ -73,12 +74,21 @@ class CollectionDeserializer extends Deserializer<List<?>> {
     }
 
     private void resolvePropertyValue(Map<?, ?> value) {
-        if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
-            instanceBuilder.addValue(property, value.get(JsonLd.VALUE));
+        if (value.containsKey(JsonLd.VALUE)) {
+            extractLiteralValue(value);
         } else if (value.size() == 1 && value.containsKey(JsonLd.ID)) {
             instanceBuilder.addNodeReference(property, value.get(JsonLd.ID).toString());
         } else {
             new ObjectDeserializer(instanceBuilder, config, property).processValue(value);
+        }
+    }
+
+    private void extractLiteralValue(Map<?, ?> value) {
+        final Object val = value.get(JsonLd.VALUE);
+        if (val instanceof String && value.containsKey(JsonLd.TYPE)) {
+            instanceBuilder.addValue(property, XSDTypeCoercer.coerceType(val.toString(), value.get(JsonLd.TYPE).toString()));
+        } else {
+            instanceBuilder.addValue(property, val);
         }
     }
 }

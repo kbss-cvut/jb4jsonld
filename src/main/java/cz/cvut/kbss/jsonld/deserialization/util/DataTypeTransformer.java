@@ -25,7 +25,7 @@ import java.util.function.Function;
  */
 public class DataTypeTransformer {
 
-    private static Map<TransformationRuleIdentifier<?, ?>, Function> rules = new HashMap<>();
+    private static final Map<TransformationRuleIdentifier<?, ?>, Function> rules = new HashMap<>();
 
     static {
         rules.put(new TransformationRuleIdentifier<>(String.class, URI.class), (src) -> URI.create(src.toString()));
