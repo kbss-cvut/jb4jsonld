@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
@@ -34,8 +36,9 @@ class DataTypeTransformerTest {
         DataTypeTransformer.registerTransformationRule(Integer.class, Double.class, rule);
         final Field rulesField = DataTypeTransformer.class.getDeclaredField("rules");
         rulesField.setAccessible(true);
-        final Map<DataTypeTransformer.TransformationRuleIdentifier<?, ?>, Function<?, ?>> rules = (Map<DataTypeTransformer.TransformationRuleIdentifier<?, ?>, Function<?, ?>>) rulesField
-                .get(null);
+        final Map<DataTypeTransformer.TransformationRuleIdentifier<?, ?>, Function<?, ?>> rules =
+                (Map<DataTypeTransformer.TransformationRuleIdentifier<?, ?>, Function<?, ?>>) rulesField
+                        .get(null);
         assertTrue(
                 rules.containsKey(new DataTypeTransformer.TransformationRuleIdentifier<>(Integer.class, Double.class)));
     }
@@ -62,7 +65,7 @@ class DataTypeTransformerTest {
 
     @Test
     void transformationPerformsTypeWideningConversionFromInteger() {
-        final Integer value = 117;
+        final int value = 117;
         assertEquals(Long.valueOf(value), DataTypeTransformer.transformValue(value, Long.class));
         assertEquals(Float.valueOf(value), DataTypeTransformer.transformValue(value, Float.class));
         assertEquals(Double.valueOf(value), DataTypeTransformer.transformValue(value, Double.class));
@@ -70,7 +73,7 @@ class DataTypeTransformerTest {
 
     @Test
     void transformationPerformsTypeWideningConversionFromLong() {
-        final Long value = System.currentTimeMillis();
+        final long value = System.currentTimeMillis();
         assertEquals(Float.valueOf(value), DataTypeTransformer.transformValue(value, Float.class));
         assertEquals(Double.valueOf(value), DataTypeTransformer.transformValue(value, Double.class));
     }
@@ -91,5 +94,11 @@ class DataTypeTransformerTest {
     @Test
     void transformationTransformsStringValueToEnumConstant() {
         assertEquals(Role.GUEST, DataTypeTransformer.transformValue(Role.GUEST.toString(), Role.class));
+    }
+
+    @Test
+    void transformationTransformsZonedDateTimeToLocalDateTime() {
+        final ZonedDateTime value = ZonedDateTime.now();
+        assertEquals(value.toLocalDateTime(), DataTypeTransformer.transformValue(value, LocalDateTime.class));
     }
 }

@@ -85,7 +85,7 @@ class CollectionDeserializer extends Deserializer<List<?>> {
 
     private void extractLiteralValue(Map<?, ?> value) {
         final Object val = value.get(JsonLd.VALUE);
-        if (val instanceof String && value.containsKey(JsonLd.TYPE)) {
+        if (value.containsKey(JsonLd.TYPE)) {
             instanceBuilder.addValue(property, XSDTypeCoercer.coerceType(val.toString(), value.get(JsonLd.TYPE).toString()));
         } else {
             instanceBuilder.addValue(property, val);

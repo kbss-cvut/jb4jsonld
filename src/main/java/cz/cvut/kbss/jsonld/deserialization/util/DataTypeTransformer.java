@@ -17,6 +17,8 @@ import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Function;
 
@@ -52,6 +54,8 @@ public class DataTypeTransformer {
         rules.put(new TransformationRuleIdentifier<>(Long.class, Float.class), (src) -> ((Long) src).floatValue());
         rules.put(new TransformationRuleIdentifier<>(Long.class, Double.class), (src) -> ((Long) src).doubleValue());
         rules.put(new TransformationRuleIdentifier<>(Long.class, Date.class), (src) -> new Date((Long) src));
+        rules.put(new TransformationRuleIdentifier<>(ZonedDateTime.class, LocalDateTime.class),
+                src -> ((ZonedDateTime) src).toLocalDateTime());
     }
 
     /**
