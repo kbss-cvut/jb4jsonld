@@ -55,7 +55,8 @@ class InstanceTypeResolver {
         });
         if (declaredTypes.isEmpty()) {
             throw new MissingTypeInfoException("No type info found on instance " + instance +
-                    ". Either annotate the class with @OWLClass or provide a non-empty @Types field.");
+                    ". Either annotate the class with @OWLClass or provide a non-empty @Types field. " +
+                    "If it is a literal, make sure that the property referencing is not an @OWLObjectProperty");
         }
         return declaredTypes;
     }

@@ -15,8 +15,12 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JsonNodeFactoryTest {
@@ -133,5 +137,21 @@ class JsonNodeFactoryTest {
         final LiteralNode node = JsonNodeFactory.createLiteralNode(value);
         assertTrue(node instanceof NumericLiteralNode);
         assertEquals(value.getTime(), node.getValue());
+    }
+
+    @Test
+    void createLiteralNodeCreatesStringNodeContainingIsoFormattedValueForLocalDateTime() {
+        final LocalDateTime value = LocalDateTime.now();
+        final LiteralNode result = JsonNodeFactory.createLiteralNode(value);
+        assertThat(result, instanceOf(StringLiteralNode.class));
+        assertEquals(value.toString(), result.getValue());
+    }
+
+    @Test
+    void createLiteralNodeCreatesStringNodeContainingIsoFormattedValueForZonedDateTime() {
+        final ZonedDateTime value = ZonedDateTime.now();
+        final LiteralNode result = JsonNodeFactory.createLiteralNode(value);
+        assertThat(result, instanceOf(StringLiteralNode.class));
+        assertEquals(value.toString(), result.getValue());
     }
 }
