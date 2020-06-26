@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import java.time.Duration;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class XSDTypeCoercer {
 
@@ -50,11 +50,22 @@ public class XSDTypeCoercer {
                 return Double.parseDouble(value);
             case XSD.DATE:
             case XSD.DATETIME:
-                return ZonedDateTime.from(DateTimeFormatter.ISO_DATE_TIME.parse(value));
+                return parseDateTime(value);
+            case XSD.TIME:
+                return DateTimeFormatter.ISO_TIME.parse(value, LocalTime::from);
             case XSD.DURATION:
                 return DATATYPE_FACTORY != null ? DATATYPE_FACTORY.newDuration(value) : Duration.parse(value);
             default:
                 throw new IllegalArgumentException("Unsupported type for XSD type coercion: " + type);
+        }
+    }
+
+    private static Object parseDateTime(String value) {
+        try {
+            return DateTimeFormatter.ISO_DATE_TIME.parse(value, ZonedDateTime::from);
+        } catch (DateTimeParseException e) {
+            // If it's not zoned date time, let's try local date time
+            return DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse(value, LocalDateTime::from);
         }
     }
 }

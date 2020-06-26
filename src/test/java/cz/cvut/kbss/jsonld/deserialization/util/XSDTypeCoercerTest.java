@@ -6,6 +6,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.xml.datatype.DatatypeFactory;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
@@ -29,7 +31,10 @@ class XSDTypeCoercerTest {
                 Arguments.arguments("3.14", XSD.FLOAT, 3.14f),
                 Arguments.arguments("3.14", XSD.DOUBLE, 3.14),
                 Arguments.arguments("2020-06-16T08:27:25Z", XSD.DATETIME,
-                        ZonedDateTime.from(ISO_DATE_TIME.parse("2020-06-16T08:27:25Z"))),
+                        ISO_DATE_TIME.parse("2020-06-16T08:27:25Z", ZonedDateTime::from)),
+                Arguments.arguments("2020-06-16T08:27:25", XSD.DATETIME,
+                        ISO_DATE_TIME.parse("2020-06-16T08:27:25", LocalDateTime::from)),
+                Arguments.arguments("13:47:30", XSD.TIME, LocalTime.of(13, 47, 30)),
                 Arguments.arguments("PT17S", XSD.DURATION, DatatypeFactory.newInstance().newDuration(17000))
         );
     }
