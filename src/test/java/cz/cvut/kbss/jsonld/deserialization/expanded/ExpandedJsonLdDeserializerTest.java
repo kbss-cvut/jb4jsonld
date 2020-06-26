@@ -32,8 +32,7 @@ import java.net.URI;
 import java.util.*;
 
 import static cz.cvut.kbss.jsonld.environment.TestUtil.*;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -530,5 +529,18 @@ class ExpandedJsonLdDeserializerTest {
         final Object input = readAndExpand("objectWithTypedDataProperties.json");
         final User result = sut.deserialize(input, User.class);
         assertTrue(result.getAdmin());
+    }
+
+    @Test
+    void deserializationHandlesObjectPropertyFieldOfTypeObject() throws Exception {
+        final Object input = readAndExpand("objectWithSingularReference.json");
+        final GenericObject result = sut.deserialize(input, GenericObject.class);
+        assertNotNull(result.getMemberOf());
+        assertThat(result.getMemberOf(), instanceOf(Organization.class));
+        final Organization org = (Organization) result.getMemberOf();
+        assertNotNull(org.getUri());
+        assertNotNull(org.getBrands());
+        assertNotNull(org.getDateCreated());
+        assertEquals("UNSC", org.getName());
     }
 }

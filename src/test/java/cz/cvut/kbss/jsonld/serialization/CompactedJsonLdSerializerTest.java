@@ -33,8 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unchecked")
@@ -386,5 +385,21 @@ class CompactedJsonLdSerializerTest {
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         assertTrue(json.containsKey(Vocabulary.ROLE));
         assertEquals(Role.ADMIN.toString(), json.get(Vocabulary.ROLE));
+    }
+
+    @Test
+    void serializationSerializesConcreteValueOfFieldOfTypeObject() throws Exception {
+        final GenericObject instance = new GenericObject();
+        instance.setUri(Generator.generateUri());
+        instance.setMemberOf(Generator.generateOrganization());
+
+        sut.serialize(instance);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertTrue(json.containsKey(Vocabulary.IS_MEMBER_OF));
+        final Map<?, ?> org = (Map<?, ?>) json.get(Vocabulary.IS_MEMBER_OF);
+        assertFalse(org.isEmpty());
+        final List<String> types = (List<String>) org.get(JsonLd.TYPE);
+        assertThat(types, hasItem(Vocabulary.ORGANIZATION));
     }
 }
