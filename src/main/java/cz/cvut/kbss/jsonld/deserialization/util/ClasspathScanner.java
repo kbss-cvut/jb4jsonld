@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization.util;
 
@@ -52,7 +50,8 @@ public class ClasspathScanner {
      * All available classes are passed to the registered consumer.
      * <p>
      * The {@code scanPath} parameter means that only the specified package (and it subpackages) should be searched.
-     * This parameter is optional, but it is highly recommended to specify it, as it can speed up the process dramatically.
+     * This parameter is optional, but it is highly recommended to specify it, as it can speed up the process
+     * dramatically.
      * <p>
      * Inspired by https://github.com/ddopson/java-class-enumerator
      *
@@ -110,8 +109,13 @@ public class ClasspathScanner {
                 final JarEntry entry = entries.nextElement();
                 final String entryName = entry.getName();
                 String className = null;
+                if (shouldSkipEntry(entryName)) {
+                    continue;
+                }
                 if (entryName.endsWith(CLASS_FILE_SUFFIX) && entryName.startsWith(relPath)) {
-                    className = entryName.replace('/', '.').replace('\\', '.');
+                    // Remove prefix from multi-release JAR class names
+                    className = entryName.replaceFirst("META-INF/versions/[1-9][0-9]*/", "");
+                    className = className.replace('/', '.').replace('\\', '.');
                     className = className.substring(0, className.length() - CLASS_FILE_SUFFIX.length());
                 }
                 if (className != null) {
@@ -121,6 +125,11 @@ public class ClasspathScanner {
         } catch (IOException e) {
             LOG.error("Unable to scan classes in JAR file " + jarPath, e);
         }
+    }
+
+    private static boolean shouldSkipEntry(String entryName) {
+        // Skip module-info.class files
+        return entryName.endsWith("module-info" + CLASS_FILE_SUFFIX);
     }
 
     private void processClass(String className) {
