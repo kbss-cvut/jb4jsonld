@@ -18,7 +18,10 @@ import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.*;
+import cz.cvut.kbss.jsonld.environment.model.Employee;
+import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +39,7 @@ import static org.mockito.Mockito.verify;
 
 class JsonLdTreeBuilderTest {
 
-    private JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder();
+    private final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder();
 
     @Test
     void openInstanceCreatesNewObjectNode() {
@@ -416,25 +419,5 @@ class JsonLdTreeBuilderTest {
                 assertEquals(value, ((LiteralNode<?>) node).getValue());
             }
         }
-    }
-
-    @Test
-    void visitFieldSerializesConcreteValueOfFieldOfTypeObject() throws Exception {
-        final GenericObject instance = new GenericObject();
-        instance.setUri(Generator.generateUri());
-        instance.setMemberOf(Generator.generateOrganization());
-
-        treeBuilder.openInstance(instance);
-        treeBuilder.visitField(GenericObject.class.getDeclaredField("memberOf"), instance.getMemberOf());
-        treeBuilder.openInstance(instance.getMemberOf());
-
-        treeBuilder.closeInstance(instance.getMemberOf());
-        final CompositeNode root = treeBuilder.getTreeRoot();
-        assertEquals(1, root.getItems().size());
-        final JsonNode valueNode = root.getItems().iterator().next();
-        assertEquals(Vocabulary.IS_MEMBER_OF, valueNode.getName());
-        assertThat(valueNode, instanceOf(ObjectNode.class));
-        final ObjectNode objectNode = (ObjectNode) valueNode;
-        assertFalse(objectNode.getItems().isEmpty());
     }
 }

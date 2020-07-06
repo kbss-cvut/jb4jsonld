@@ -162,7 +162,7 @@ class ObjectGraphTraverserTest {
     }
 
     @OWLClass(iri = Vocabulary.EMPLOYEE)
-    private class EmployeeWithUriEmployer extends User {
+    private static class EmployeeWithUriEmployer extends User {
 
         @OWLObjectProperty(iri = Vocabulary.IS_MEMBER_OF)
         private URI employer;

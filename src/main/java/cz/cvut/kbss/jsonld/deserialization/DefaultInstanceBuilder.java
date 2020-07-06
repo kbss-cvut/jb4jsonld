@@ -56,12 +56,12 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         } else {
             ctx = openObjectForProperty(id, types, targetField);
             final Object newPropertyObject = ctx.getInstance();
-            if (!isPlural(property)) { 
-            	final Object oldPropertyObject = BeanClassProcessor
-                    .getFieldValue(targetField, currentInstance.getInstance());
-            	if (oldPropertyObject!=null && !oldPropertyObject.equals(newPropertyObject))
-	                // Value already set on singular attribute of a reopen instance
-	                throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, targetField);
+            if (!isPlural(property)) {
+                final Object oldPropertyObject = BeanClassProcessor
+                        .getFieldValue(targetField, currentInstance.getInstance());
+                if (oldPropertyObject != null && !oldPropertyObject.equals(newPropertyObject))
+                    // Value already set on singular attribute of a reopen instance
+                    throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, targetField);
             }
             currentInstance.setFieldValue(targetField, newPropertyObject);
         }
@@ -179,7 +179,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             return existing;
         }
         return BeanAnnotationProcessor.isPropertiesField(targetField) ? new HashMap<>() :
-               BeanClassProcessor.createCollection(targetField);
+                BeanClassProcessor.createCollection(targetField);
     }
 
     @Override
