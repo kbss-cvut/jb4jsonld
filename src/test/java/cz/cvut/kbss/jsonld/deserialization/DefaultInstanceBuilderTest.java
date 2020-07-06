@@ -466,6 +466,17 @@ class DefaultInstanceBuilderTest {
     }
 
     @Test
+    void openObjectDoesNotThrowDeserializationExceptionWhenTryingToSetSingularAttributeValueForSecondTimeButWithTheSameValue() {
+        sut.openObject(TestUtil.HALSEY_URI.toString(), Employee.class);
+        sut.openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
+                Collections.singletonList(Vocabulary.ORGANIZATION));
+        sut.closeObject();
+        sut.openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
+                Collections.singletonList(Vocabulary.ORGANIZATION));
+        sut.closeObject();
+    }
+
+    @Test
     void isPropertyDeserializableReturnsTrueForMappedProperty() {
         sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         assertTrue(sut.isPropertyDeserializable(Vocabulary.FIRST_NAME));

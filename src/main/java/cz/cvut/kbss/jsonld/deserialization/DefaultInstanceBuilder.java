@@ -55,12 +55,15 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             ctx.setIdentifierValue(id);
         } else {
             ctx = openObjectForProperty(id, types, targetField);
-            if (!isPlural(property) && BeanClassProcessor
-                    .getFieldValue(targetField, currentInstance.getInstance()) != null) {
-                // Value already set on singular attribute of a reopen instance
-                throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, targetField);
+            final Object newPropertyObject = ctx.getInstance();
+            if (!isPlural(property)) { 
+            	final Object oldPropertyObject = BeanClassProcessor
+                    .getFieldValue(targetField, currentInstance.getInstance());
+            	if (oldPropertyObject!=null && !oldPropertyObject.equals(newPropertyObject))
+	                // Value already set on singular attribute of a reopen instance
+	                throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, targetField);
             }
-            currentInstance.setFieldValue(targetField, ctx.getInstance());
+            currentInstance.setFieldValue(targetField, newPropertyObject);
         }
         openInstances.push(currentInstance);
         this.currentInstance = ctx;
