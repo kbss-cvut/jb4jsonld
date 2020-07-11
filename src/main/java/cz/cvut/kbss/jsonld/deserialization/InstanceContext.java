@@ -60,7 +60,7 @@ abstract class InstanceContext<T> {
         knownInstances.put(value.toString(), instance);
     }
 
-    private boolean isBlankNodeIdentifier(String identifier) {
+    private static boolean isBlankNodeIdentifier(String identifier) {
         return identifier.startsWith(BLANK_NODE_ID_START);
     }
 
