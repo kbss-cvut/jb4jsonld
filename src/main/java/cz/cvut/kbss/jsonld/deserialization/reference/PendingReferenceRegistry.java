@@ -1,12 +1,11 @@
 package cz.cvut.kbss.jsonld.deserialization.reference;
 
+import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
+import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import cz.cvut.kbss.jsonld.exception.UnresolvedReferenceException;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Registry of pending references.
@@ -40,8 +39,30 @@ public class PendingReferenceRegistry {
      * @throws cz.cvut.kbss.jsonld.exception.TargetTypeException If the {@code referencedObject} cannot be assigned to a target field due to type mismatch
      */
     public void resolveReferences(String identifier, Object referencedObject) {
-        // TODO
-        // TODO Do not forget that the target field may represent a collection
+        assert identifier != null;
+        assert referencedObject != null;
+        final Set<PendingReference> refs = pendingReferences.remove(identifier);
+        if (refs != null) {
+            refs.forEach(pr -> resolveReference(pr, referencedObject));
+        }
+    }
+
+    private void resolveReference(PendingReference pendingReference, Object referencedObject) {
+        final Field targetField = pendingReference.getTargetField();
+        if (BeanClassProcessor.isCollection(targetField)) {
+            final Collection col =
+                    (Collection<?>) BeanClassProcessor.getFieldValue(targetField, pendingReference.getTargetObject());
+            assert col != null;
+            col.add(referencedObject);
+            return;
+        }
+        if (!targetField.getType().isAssignableFrom(referencedObject.getClass())) {
+            throw new TargetTypeException(
+                    "Cannot assign referenced object " + referencedObject + " of type " + referencedObject
+                            .getClass() + " to field " + targetField);
+        }
+        BeanClassProcessor
+                .setFieldValue(targetField, pendingReference.getTargetObject(), referencedObject);
     }
 
     /**
