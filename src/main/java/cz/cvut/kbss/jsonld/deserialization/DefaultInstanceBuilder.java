@@ -16,6 +16,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.CollectionType;
+import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
 import cz.cvut.kbss.jsonld.deserialization.util.DataTypeTransformer;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
@@ -37,10 +38,14 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
 
     private final TargetClassResolver classResolver;
 
+    private final PendingReferenceRegistry pendingReferenceRegistry;
+
     private InstanceContext currentInstance;
 
-    public DefaultInstanceBuilder(TargetClassResolver classResolver) {
+    public DefaultInstanceBuilder(TargetClassResolver classResolver,
+                                  PendingReferenceRegistry pendingReferenceRegistry) {
         this.classResolver = classResolver;
+        this.pendingReferenceRegistry = pendingReferenceRegistry;
     }
 
     @Override
@@ -179,7 +184,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             return existing;
         }
         return BeanAnnotationProcessor.isPropertiesField(targetField) ? new HashMap<>() :
-                BeanClassProcessor.createCollection(targetField);
+               BeanClassProcessor.createCollection(targetField);
     }
 
     @Override
@@ -225,16 +230,12 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         if (BeanClassProcessor.isIdentifierType(type) || Object.class.equals(type)) {
             currentInstance.setFieldValue(field, DataTypeTransformer.transformValue(URI.create(nodeId), type));
         } else {
-            currentInstance.setFieldValue(field, getKnownInstance(nodeId));
+            if (knownInstances.containsKey(nodeId)) {
+                currentInstance.setFieldValue(field, knownInstances.get(nodeId));
+            } else {
+                pendingReferenceRegistry.addPendingReference(nodeId, currentInstance.getInstance(), field);
+            }
         }
-    }
-
-    private Object getKnownInstance(String nodeId) {
-        if (!knownInstances.containsKey(nodeId)) {
-            throw new JsonLdDeserializationException(
-                    "Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.");
-        }
-        return knownInstances.get(nodeId);
     }
 
     @Override
@@ -243,7 +244,12 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         if (canDirectlyAddNodeReference(targetType)) {
             currentInstance.addItem(DataTypeTransformer.transformValue(URI.create(nodeId), targetType));
         } else {
-            currentInstance.addItem(getKnownInstance(nodeId));
+            if (knownInstances.containsKey(nodeId)) {
+                currentInstance.addItem(knownInstances.get(nodeId));
+            } else {
+                // TODO
+                pendingReferenceRegistry.addPendingReference(nodeId, currentInstance.getInstance(), null);
+            }
         }
     }
 

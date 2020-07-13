@@ -18,6 +18,7 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.CollectionType;
+import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
@@ -25,6 +26,8 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -34,11 +37,21 @@ import java.util.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 class DefaultInstanceBuilderTest {
 
-    private InstanceBuilder sut =
-            new DefaultInstanceBuilder(new TargetClassResolver(TestUtil.getDefaultTypeMap()));
+    private PendingReferenceRegistry pendingReferenceRegistry;
+
+    private InstanceBuilder sut;
+
+    @BeforeEach
+    void setUp() {
+        this.pendingReferenceRegistry = spy(new PendingReferenceRegistry());
+        this.sut = new DefaultInstanceBuilder(new TargetClassResolver(TestUtil.getDefaultTypeMap()),
+                pendingReferenceRegistry);
+    }
 
     @Test
     void getCurrentRootReturnsNullIfThereIsNoRoot() {
@@ -334,13 +347,12 @@ class DefaultInstanceBuilderTest {
     }
 
     @Test
-    void addNodeReferenceForPropertyThrowsDeserializationExceptionWhenNoKnownInstanceIsFound() {
+    void addNodeReferenceForPropertyRegistersPendingReferenceWhenNoKnownInstanceIsFound() throws Exception {
         final String nodeId = Generator.generateUri().toString();
         sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
-        final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> sut.addNodeReference(Vocabulary.IS_MEMBER_OF, nodeId));
-        assertEquals("Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.",
-                result.getMessage());
+        sut.addNodeReference(Vocabulary.IS_MEMBER_OF, nodeId);
+        verify(pendingReferenceRegistry)
+                .addPendingReference(nodeId, sut.getCurrentRoot(), Employee.class.getDeclaredField("employer"));
     }
 
     @Test
@@ -354,6 +366,7 @@ class DefaultInstanceBuilderTest {
         assertTrue(object.eventTypes.contains(nodeId));
     }
 
+    @SuppressWarnings("unused")
     @OWLClass(iri = Generator.URI_BASE + "Event")
     public static class Event {
         @Id
@@ -375,15 +388,15 @@ class DefaultInstanceBuilderTest {
         assertTrue(object.getEmployees().contains(employee));
     }
 
+    @Disabled
     @Test
-    void addNodeReferenceThrowsDeserializationExceptionWhenNoKnownInstanceIsFound() {
+    void addNodeReferenceRegistersPendingReferenceWhenNoKnownInstanceIsFound() throws Exception {
         final String nodeId = Generator.generateUri().toString();
         sut.openObject(Generator.generateUri().toString(), Organization.class);
         sut.openCollection(Vocabulary.HAS_MEMBER);
-        final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> sut.addNodeReference(nodeId));
-        assertEquals("Node with IRI " + nodeId + " cannot be referenced, because it has not been encountered yet.",
-                result.getMessage());
+        sut.addNodeReference(nodeId);
+        verify(pendingReferenceRegistry)
+                .addPendingReference(nodeId, sut.getCurrentRoot(), Organization.class.getDeclaredField("employees"));
     }
 
     @Test

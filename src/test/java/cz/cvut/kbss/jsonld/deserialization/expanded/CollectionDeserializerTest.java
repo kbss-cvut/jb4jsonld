@@ -4,6 +4,7 @@ import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.deserialization.DefaultInstanceBuilder;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
+import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 import cz.cvut.kbss.jsonld.environment.Generator;
@@ -29,7 +30,7 @@ class CollectionDeserializerTest {
         final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithPluralReference.json")).get(0);
         final List<?> collection = (List<?>) jsonLd.get(Vocabulary.HAS_MEMBER);
         final TargetClassResolver resolver = new TargetClassResolver(new TypeMap());
-        final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(resolver);
+        final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(resolver, new PendingReferenceRegistry());
         final DeserializerConfig config = new DeserializerConfig(new Configuration(), resolver);
         final CollectionDeserializer deserializer = new CollectionDeserializer(instanceBuilder, config,
                 Vocabulary.HAS_MEMBER);
@@ -50,7 +51,7 @@ class CollectionDeserializerTest {
         final Map<?, ?> item = (Map<?, ?>) collection.get(0);
         item.remove(JsonLd.ID);
         final TargetClassResolver resolver = new TargetClassResolver(new TypeMap());
-        final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(resolver);
+        final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(resolver, new PendingReferenceRegistry());
         final DeserializerConfig config = new DeserializerConfig(new Configuration(), resolver);
         final CollectionDeserializer deserializer = new CollectionDeserializer(instanceBuilder, config,
                 Vocabulary.HAS_MEMBER);
