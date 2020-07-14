@@ -595,4 +595,15 @@ class ExpandedJsonLdDeserializerTest {
         assertThat(result, instanceOf(User.class));
         verifyUserAttributes(USERS.get(HALSEY_URI), (User) result);
     }
+
+    @Test
+    void deserializationUsesProvidedTargetTypeWhenNoTypeIsSpecifiedAndTypeAssumingIsEnabled() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.ASSUME_TARGET_TYPE, Boolean.TRUE.toString());
+        this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithoutTypes.json");
+        final User result = sut.deserialize(input, User.class);
+        assertNotNull(result);
+        verifyUserAttributes(USERS.get(HALSEY_URI), result);
+    }
 }

@@ -36,24 +36,24 @@ class TargetClassResolverTest {
 
     private TypeMap typeMap;
 
-    private TargetClassResolver resolver;
+    private TargetClassResolver sut;
 
     @BeforeEach
     void setUp() {
         this.typeMap = TestUtil.getDefaultTypeMap();
-        this.resolver = new TargetClassResolver(typeMap);
+        this.sut = new TargetClassResolver(typeMap);
     }
 
     @Test
     void getTargetClassReturnsExpectedClassWhenSingleTypeMatchesOneClass() {
         assertEquals(Employee.class,
-                resolver.getTargetClass(Employee.class, Collections.singletonList(Vocabulary.EMPLOYEE)));
+                sut.getTargetClass(Employee.class, Collections.singletonList(Vocabulary.EMPLOYEE)));
     }
 
     @Test
     void getTargetClassFiltersOutNonSubtypesOfExpectedClass() {
         typeMap.register(Vocabulary.PERSON, Organization.class);
-        final Class<?> result = resolver.getTargetClass(Person.class, Collections.singletonList(Vocabulary.PERSON));
+        final Class<?> result = sut.getTargetClass(Person.class, Collections.singletonList(Vocabulary.PERSON));
         assertEquals(Person.class, result);
     }
 
@@ -61,14 +61,14 @@ class TargetClassResolverTest {
     void getTargetClassThrowsTargetTypeExceptionWhenMatchingTargetCandidateIsNotFound() {
         final List<String> types = Collections.singletonList(Vocabulary.ORGANIZATION);
         final TargetTypeException result = assertThrows(TargetTypeException.class,
-                () -> resolver.getTargetClass(Person.class, types));
+                () -> sut.getTargetClass(Person.class, types));
         assertThat(result.getMessage(),
                 containsString("Neither " + Person.class + " nor any of its subclasses matches the types " + types));
     }
 
     @Test
     void getTargetClassReturnsExpectedClassWhenTypeMatchesAndItIsNotInTypeMap() {
-        final Class<?> result = resolver
+        final Class<?> result = sut
                 .getTargetClass(NonMappedPerson.class, Collections.singletonList(Vocabulary.PERSON));
         assertEquals(NonMappedPerson.class, result);
     }
@@ -79,7 +79,7 @@ class TargetClassResolverTest {
 
     @Test
     void getTargetClassResolvesMostSpecificMatchingSubClass() {
-        final Class<?> result = resolver
+        final Class<?> result = sut
                 .getTargetClass(Person.class, Arrays.asList(Vocabulary.PERSON, Vocabulary.EMPLOYEE, Vocabulary.USER));
         assertEquals(Employee.class, result);
     }
@@ -89,12 +89,19 @@ class TargetClassResolverTest {
         typeMap.register(Vocabulary.AGENT, MostSpecific.class);
         final List<String> types = Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.AGENT);
         final AmbiguousTargetTypeException result = assertThrows(AmbiguousTargetTypeException.class,
-                () -> resolver.getTargetClass(Person.class, types));
+                () -> sut.getTargetClass(Person.class, types));
         assertThat(result.getMessage(),
                 containsString("Object with types " + types + " matches multiple equivalent target classes: "));
     }
 
     @OWLClass(iri = Vocabulary.AGENT)
     private static class MostSpecific extends Person {
+    }
+
+    @Test
+    void getTargetClassReturnsProvidedJavaTypeWhenNoTypesAreSpecifiedAndAssumingTargetTypeIsEnabled() {
+        this.sut = new TargetClassResolver(typeMap, true);
+        final Class<?> result = sut.getTargetClass(Person.class, Collections.emptySet());
+        assertEquals(Person.class, result);
     }
 }

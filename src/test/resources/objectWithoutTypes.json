@@ -1,0 +1,13 @@
+{
+  "@context": {
+    "firstName": "http://xmlns.com/foaf/0.1/firstName",
+    "lastName": "http://xmlns.com/foaf/0.1/lastName",
+    "accountName": "http://xmlns.com/foaf/0.1/accountName",
+    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin"
+  },
+  "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
+  "isAdmin": true,
+  "accountName": "halsey@unsc.org",
+  "firstName": "Catherine",
+  "lastName": "Halsey"
+}

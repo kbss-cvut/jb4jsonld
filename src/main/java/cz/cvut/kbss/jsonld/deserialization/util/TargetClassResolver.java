@@ -1,22 +1,22 @@
 /**
  * Copyright (C) 2017 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization.util;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.exception.AmbiguousTargetTypeException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,10 +27,20 @@ import java.util.stream.Collectors;
  */
 public class TargetClassResolver {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TargetClassResolver.class);
+
     private final TypeMap typeMap;
+
+    private final boolean allowAssumingTargetType;
 
     public TargetClassResolver(TypeMap typeMap) {
         this.typeMap = typeMap;
+        this.allowAssumingTargetType = false;
+    }
+
+    public TargetClassResolver(TypeMap typeMap, boolean allowAssumingTargetType) {
+        this.typeMap = typeMap;
+        this.allowAssumingTargetType = allowAssumingTargetType;
     }
 
     /**
@@ -42,6 +52,10 @@ public class TargetClassResolver {
      * @throws TargetTypeException If the resulting candidate is not assignable to the expected class
      */
     public <T> Class<? extends T> getTargetClass(Class<T> expectedClass, Collection<String> types) {
+        if (types.isEmpty() && allowAssumingTargetType) {
+            LOG.trace("Assuming target type to be " + expectedClass);
+            return expectedClass;
+        }
         final List<Class<?>> candidates = getTargetClassCandidates(types);
         final Class<?> targetCandidate;
         reduceTargetClassCandidates(expectedClass, candidates);
