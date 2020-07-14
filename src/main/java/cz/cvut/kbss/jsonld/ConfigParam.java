@@ -12,6 +12,9 @@
  */
 package cz.cvut.kbss.jsonld;
 
+/**
+ * Configuration parameters.
+ */
 public enum ConfigParam {
 
     /**
@@ -35,7 +38,17 @@ public enum ConfigParam {
      * null}), an exception will be thrown. If configured to {@code false}, a blank node identifier is generated if no
      * id is present.
      */
-    REQUIRE_ID("requireId");
+    REQUIRE_ID("requireId"),
+
+    /**
+     * Allows assuming target type from the provided Java type when no types are specified in JSON-LD.
+     * <p>
+     * If set to {@code true}, JB4JSON-LD will attempt to use the provided Java type as the target type when
+     * deserializing a JSON-LD object which has no types declared.
+     * <p>
+     * Defaults to {@code false}, in which case an exception is thrown for a typeless JSON-LD object.
+     */
+    ASSUME_TARGET_TYPE("assumeTargetType");
 
     private final String name;
 
