@@ -1,7 +1,5 @@
 package cz.cvut.kbss.jsonld.deserialization.reference;
 
-import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
-import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import cz.cvut.kbss.jsonld.exception.UnresolvedReferenceException;
 
 import java.lang.reflect.Field;
@@ -25,44 +23,44 @@ public class PendingReferenceRegistry {
         assert identifier != null;
         assert targetObject != null;
         assert targetField != null;
+        addReference(identifier, new SingularPendingReference(targetObject, targetField));
+    }
+
+    private void addReference(String identifier, PendingReference reference) {
         final Set<PendingReference> refs = pendingReferences.computeIfAbsent(identifier, (id) -> new HashSet<>());
-        refs.add(new PendingReference(targetObject, targetField));
+        refs.add(reference);
+    }
+
+    /**
+     * Registers a pending reference with the specified identifier.
+     *
+     * @param identifier   Reference identifier
+     * @param targetObject Collection referencing the object
+     */
+    public void addPendingReference(String identifier, Collection targetObject) {
+        assert identifier != null;
+        assert targetObject != null;
+        addReference(identifier, new CollectionPendingReference(targetObject));
     }
 
     /**
      * Resolves the pending references by replacing them with the specified full object.
      * <p>
-     * This method goes through the pending references and sets the specified {@code referencedObject} on the corresponding target objects.
+     * This method goes through the pending references and sets the specified {@code referencedObject} on the
+     * corresponding target objects.
      *
      * @param identifier       Identifier of the referenced object
      * @param referencedObject The referenced object
-     * @throws cz.cvut.kbss.jsonld.exception.TargetTypeException If the {@code referencedObject} cannot be assigned to a target field due to type mismatch
+     * @throws cz.cvut.kbss.jsonld.exception.TargetTypeException If the {@code referencedObject} cannot be assigned to a
+     *                                                           target field due to type mismatch
      */
     public void resolveReferences(String identifier, Object referencedObject) {
         assert identifier != null;
         assert referencedObject != null;
         final Set<PendingReference> refs = pendingReferences.remove(identifier);
         if (refs != null) {
-            refs.forEach(pr -> resolveReference(pr, referencedObject));
+            refs.forEach(pr -> pr.apply(referencedObject));
         }
-    }
-
-    private void resolveReference(PendingReference pendingReference, Object referencedObject) {
-        final Field targetField = pendingReference.getTargetField();
-        if (BeanClassProcessor.isCollection(targetField)) {
-            final Collection col =
-                    (Collection<?>) BeanClassProcessor.getFieldValue(targetField, pendingReference.getTargetObject());
-            assert col != null;
-            col.add(referencedObject);
-            return;
-        }
-        if (!targetField.getType().isAssignableFrom(referencedObject.getClass())) {
-            throw new TargetTypeException(
-                    "Cannot assign referenced object " + referencedObject + " of type " + referencedObject
-                            .getClass() + " to field " + targetField);
-        }
-        BeanClassProcessor
-                .setFieldValue(targetField, pendingReference.getTargetObject(), referencedObject);
     }
 
     /**

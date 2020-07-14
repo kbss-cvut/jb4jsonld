@@ -247,8 +247,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             if (knownInstances.containsKey(nodeId)) {
                 currentInstance.addItem(knownInstances.get(nodeId));
             } else {
-                // TODO
-                pendingReferenceRegistry.addPendingReference(nodeId, currentInstance.getInstance(), null);
+                pendingReferenceRegistry.addPendingReference(nodeId, (Collection) currentInstance.getInstance());
             }
         }
     }

@@ -29,7 +29,7 @@ class PendingReferenceRegistryTest {
         sut.addPendingReference(iri, targetObject, targetField);
         final Map<String, Set<PendingReference>> result = getPendingReferences();
         assertTrue(result.containsKey(iri));
-        assertThat(result.get(iri), hasItem(new PendingReference(targetObject, targetField)));
+        assertThat(result.get(iri), hasItem(new SingularPendingReference(targetObject, targetField)));
     }
 
     private Map<String, Set<PendingReference>> getPendingReferences() throws Exception {
@@ -40,7 +40,7 @@ class PendingReferenceRegistryTest {
 
     @Test
     void addPendingReferenceRegistersMultiplePendingReferencesForRepeatedInvocationWithSameIdentifier() throws
-                                                                                                        Exception {
+            Exception {
         final String iri = Generator.generateUri().toString();
         final Object targetObjectOne = new Employee();
         final Field targetFieldOne = Employee.class.getDeclaredField("employer");
@@ -56,12 +56,12 @@ class PendingReferenceRegistryTest {
 
     @Test
     void verifyNoUnresolvedReferencesExistThrowsUnresolvedReferenceExceptionWhenThereExistPendingReferences() throws
-                                                                                                              Exception {
+            Exception {
         final Map<String, Set<PendingReference>> pendingReferences = getPendingReferences();
         final String iri = Generator.generateUri().toString();
         final Object targetObject = new Employee();
         final Field targetField = Employee.class.getDeclaredField("employer");
-        pendingReferences.put(iri, Collections.singleton(new PendingReference(targetObject, targetField)));
+        pendingReferences.put(iri, Collections.singleton(new SingularPendingReference(targetObject, targetField)));
         assertThrows(UnresolvedReferenceException.class, sut::verifyNoUnresolvedReferencesExist);
     }
 
@@ -77,7 +77,7 @@ class PendingReferenceRegistryTest {
         final String iri = referencedObject.getUri().toString();
         final Employee targetObject = new Employee();
         final Field targetField = Employee.class.getDeclaredField("employer");
-        pendingReferences.put(iri, Collections.singleton(new PendingReference(targetObject, targetField)));
+        pendingReferences.put(iri, Collections.singleton(new SingularPendingReference(targetObject, targetField)));
 
         sut.resolveReferences(iri, referencedObject);
         assertEquals(referencedObject, targetObject.getEmployer());
@@ -90,7 +90,7 @@ class PendingReferenceRegistryTest {
         final String iri = referencedObject.getUri().toString();
         final Employee targetObject = new Employee();
         final Field targetField = Employee.class.getDeclaredField("employer");
-        pendingReferences.put(iri, Collections.singleton(new PendingReference(targetObject, targetField)));
+        pendingReferences.put(iri, Collections.singleton(new SingularPendingReference(targetObject, targetField)));
 
         sut.resolveReferences(iri, referencedObject);
         assertFalse(pendingReferences.containsKey(iri));
@@ -98,13 +98,13 @@ class PendingReferenceRegistryTest {
 
     @Test
     void resolveReferencesThrowsTargetTypeExceptionWhenSpecifiedObjectCannotBeSetOnTargetFieldDueToTypeMismatch() throws
-                                                                                                                  Exception {
+            Exception {
         final Map<String, Set<PendingReference>> pendingReferences = getPendingReferences();
         final User referencedObject = Generator.generateUser();
         final String iri = referencedObject.getUri().toString();
         final Employee targetObject = new Employee();
         final Field targetField = Employee.class.getDeclaredField("employer");
-        pendingReferences.put(iri, Collections.singleton(new PendingReference(targetObject, targetField)));
+        pendingReferences.put(iri, Collections.singleton(new SingularPendingReference(targetObject, targetField)));
 
         assertThrows(TargetTypeException.class, () -> sut.resolveReferences(iri, referencedObject));
     }
@@ -118,8 +118,8 @@ class PendingReferenceRegistryTest {
         final Field targetField = Employee.class.getDeclaredField("employer");
         final Employee targetTwo = new Employee();
         pendingReferences.put(iri, new HashSet<>(Arrays.asList(
-                new PendingReference(targetObject, targetField),
-                new PendingReference(targetTwo, targetField))));
+                new SingularPendingReference(targetObject, targetField),
+                new SingularPendingReference(targetTwo, targetField))));
 
         sut.resolveReferences(iri, referencedObject);
         assertEquals(referencedObject, targetObject.getEmployer());
@@ -133,8 +133,7 @@ class PendingReferenceRegistryTest {
         final String iri = referencedObject.getUri().toString();
         final Organization targetObject = new Organization();
         targetObject.setEmployees(new HashSet<>());
-        final Field targetField = Organization.class.getDeclaredField("employees");
-        pendingReferences.put(iri, Collections.singleton(new PendingReference(targetObject, targetField)));
+        pendingReferences.put(iri, Collections.singleton(new CollectionPendingReference(targetObject.getEmployees())));
 
         sut.resolveReferences(iri, referencedObject);
         assertThat(targetObject.getEmployees(), hasItem(referencedObject));
