@@ -84,6 +84,7 @@ Parameter | Default value | Explanation
 `ignoreUnknownProperties` | `false` | Whether to ignore unknown properties when deserializing JSON-LD. Default behavior throws an exception.
 `scanPackage` | `""` | Package in which the library should look for mapped classes. The scan is important for support for polymorphism in object deserialization.  It is highly recommended to specify this value, otherwise the library will attempt to load and scan all classes on the classpath.
 `requireId` | `false` | Whether to require an identifier when serializing an object. If set to `true` and no identifier is found (either there is no `@Id` field or its value is `null`), an exception will be thrown. By default a blank node identifier is generated if no id is present.
+`assumeTargetType` | `false` | Whether to allow assuming target type in case the JSON-LD object does not contain types (`@type`). If set to `true`, the provided Java type (deserialization invocation argument, field type) will be used as target type.
 
 See `cz.cvut.kbss.jsonld.ConfigParam`.
 
