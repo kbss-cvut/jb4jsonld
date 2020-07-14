@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.environment.model;
 
+import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
@@ -9,6 +10,7 @@ import java.net.URI;
 @OWLClass(iri = Vocabulary.PERSON)
 public class GenericObject {
 
+    @Id
     private URI uri;
 
     @OWLObjectProperty(iri = Vocabulary.IS_MEMBER_OF)

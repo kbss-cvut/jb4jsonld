@@ -27,7 +27,6 @@ import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 import cz.cvut.kbss.jsonld.exception.UnresolvedReferenceException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -533,11 +532,14 @@ class ExpandedJsonLdDeserializerTest {
         assertTrue(result.getAdmin());
     }
 
-    // TODO
-    @Disabled
     @Test
     void deserializationHandlesObjectPropertyFieldOfTypeObject() throws Exception {
         final Object input = readAndExpand("objectWithSingularReference.json");
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
+        // This will prevent problems with multiple classes matching the same type (Organization)
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final GenericObject result = sut.deserialize(input, GenericObject.class);
         assertNotNull(result.getMemberOf());
         assertThat(result.getMemberOf(), instanceOf(Organization.class));
