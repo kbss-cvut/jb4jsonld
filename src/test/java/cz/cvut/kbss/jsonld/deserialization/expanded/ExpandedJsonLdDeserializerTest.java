@@ -546,4 +546,18 @@ class ExpandedJsonLdDeserializerTest {
         assertNotNull(org.getDateCreated());
         assertEquals("UNSC", org.getName());
     }
+
+    @Test
+    void deserializationUsesDeferredReferenceResolutionToHandleReferencePrecedingObjectDeclaration() throws Exception {
+        final Object input = readAndExpand("objectWithReferencePrecedingFullObject.json");
+        final Study result = sut.deserialize(input, Study.class);
+        assertEquals(1, result.getMembers().size());
+        final Organization memberOrg = result.getMembers().iterator().next().getEmployer();
+        assertNotNull(memberOrg);
+        assertEquals(1, result.getParticipants().size());
+        final Organization participantOrg = result.getParticipants().iterator().next().getEmployer();
+        assertNotNull(participantOrg);
+        assertEquals(memberOrg.getUri(), participantOrg.getUri());
+        assertEquals(memberOrg.getName(), participantOrg.getName());
+    }
 }
