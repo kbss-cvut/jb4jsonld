@@ -7,8 +7,8 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
 import java.net.URI;
 
-@OWLClass(iri = Vocabulary.PERSON)
-public class GenericObject {
+@OWLClass(iri = Vocabulary.GENERIC_MEMBER)
+public class GenericMember {
 
     @Id
     private URI uri;

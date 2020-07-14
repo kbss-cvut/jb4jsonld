@@ -389,7 +389,7 @@ class CompactedJsonLdSerializerTest {
 
     @Test
     void serializationSerializesConcreteValueOfFieldOfTypeObject() throws Exception {
-        final GenericObject instance = new GenericObject();
+        final GenericMember instance = new GenericMember();
         instance.setUri(Generator.generateUri());
         instance.setMemberOf(Generator.generateOrganization());
 

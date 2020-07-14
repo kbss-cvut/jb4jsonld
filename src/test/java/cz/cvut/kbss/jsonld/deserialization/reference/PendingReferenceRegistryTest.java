@@ -2,7 +2,7 @@ package cz.cvut.kbss.jsonld.deserialization.reference;
 
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
-import cz.cvut.kbss.jsonld.environment.model.GenericObject;
+import cz.cvut.kbss.jsonld.environment.model.GenericMember;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
@@ -44,8 +44,8 @@ class PendingReferenceRegistryTest {
         final String iri = Generator.generateUri().toString();
         final Object targetObjectOne = new Employee();
         final Field targetFieldOne = Employee.class.getDeclaredField("employer");
-        final Object targetObjectTwo = new GenericObject();
-        final Field targetFieldTwo = GenericObject.class.getDeclaredField("memberOf");
+        final Object targetObjectTwo = new GenericMember();
+        final Field targetFieldTwo = GenericMember.class.getDeclaredField("memberOf");
 
         sut.addPendingReference(iri, targetObjectOne, targetFieldOne);
         sut.addPendingReference(iri, targetObjectTwo, targetFieldTwo);

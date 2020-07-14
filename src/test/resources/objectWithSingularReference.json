@@ -9,7 +9,8 @@
   "@type": [
     "http://onto.fel.cvut.cz/ontologies/ufo/Person",
     "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee",
-    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/GenericMember"
   ],
   "isAdmin": true,
   "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": {

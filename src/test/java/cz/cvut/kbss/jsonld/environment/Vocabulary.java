@@ -23,6 +23,7 @@ public class Vocabulary {
     public static final String STUDY = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Study";
     public static final String AGENT = "http://onto.fel.cvut.cz/ontologies/ufo/Agent";
     public static final String OBJECT_WITH_ANNOTATIONS = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ObjectWithAnnotations";
+    public static final String GENERIC_MEMBER = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/GenericMember";
 
     public static final String FIRST_NAME = "http://xmlns.com/foaf/0.1/firstName";
     public static final String LAST_NAME = "http://xmlns.com/foaf/0.1/lastName";

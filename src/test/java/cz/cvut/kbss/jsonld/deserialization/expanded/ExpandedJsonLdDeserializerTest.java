@@ -540,7 +540,7 @@ class ExpandedJsonLdDeserializerTest {
         // This will prevent problems with multiple classes matching the same type (Organization)
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
-        final GenericObject result = sut.deserialize(input, GenericObject.class);
+        final GenericMember result = sut.deserialize(input, GenericMember.class);
         assertNotNull(result.getMemberOf());
         assertThat(result.getMemberOf(), instanceOf(Organization.class));
         final Organization org = (Organization) result.getMemberOf();
@@ -581,5 +581,18 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationThrowsUnresolvedReferenceExceptionWhenUnresolvedReferenceIsFound() throws Exception {
         final Object input = readAndExpand("objectWithUnresolvedReference.json");
         assertThrows(UnresolvedReferenceException.class, () -> sut.deserialize(input, Study.class));
+    }
+
+    @Test
+    void deserializationSupportsPlainObjectReturnType() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
+        // This will prevent problems with multiple classes matching the same type (Organization)
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithDataProperties.json");
+        final Object result = sut.deserialize(input, Object.class);
+        assertThat(result, instanceOf(User.class));
+        verifyUserAttributes(USERS.get(HALSEY_URI), (User) result);
     }
 }
