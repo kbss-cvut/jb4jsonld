@@ -30,7 +30,6 @@ import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -393,15 +392,13 @@ class DefaultInstanceBuilderTest {
         assertTrue(object.getEmployees().contains(employee));
     }
 
-    @Disabled
     @Test
-    void addNodeReferenceRegistersPendingReferenceWhenNoKnownInstanceIsFound() throws Exception {
+    void addNodeReferenceRegistersPendingReferenceWhenNoKnownInstanceIsFound() {
         final String nodeId = Generator.generateUri().toString();
         sut.openObject(Generator.generateUri().toString(), Organization.class);
         sut.openCollection(Vocabulary.HAS_MEMBER);
         sut.addNodeReference(nodeId);
-        verify(pendingReferenceRegistry)
-                .addPendingReference(nodeId, sut.getCurrentRoot(), Organization.class.getDeclaredField("employees"));
+        verify(pendingReferenceRegistry).addPendingReference(nodeId, (Collection) sut.getCurrentRoot());
     }
 
     @Test
