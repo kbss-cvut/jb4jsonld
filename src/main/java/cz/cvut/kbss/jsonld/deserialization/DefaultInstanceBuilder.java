@@ -132,6 +132,9 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public void closeObject() {
         currentInstance.close();
+        if (currentInstance.getIdentifier() != null) {
+            pendingReferenceRegistry.resolveReferences(currentInstance.getIdentifier(), currentInstance.getInstance());
+        }
         if (!openInstances.isEmpty()) {
             this.currentInstance = openInstances.pop();
         }

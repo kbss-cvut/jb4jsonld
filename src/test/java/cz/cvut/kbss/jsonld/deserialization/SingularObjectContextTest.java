@@ -183,4 +183,13 @@ class SingularObjectContextTest {
                 BeanAnnotationProcessor.mapFieldsForDeserialization(Study.class), Collections.emptyMap());
         assertFalse(ctx.supports(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
     }
+
+    @Test
+    void setIdentifierValueStoresIdentifierToBeAccessibleByGetter() {
+        final SingularObjectContext<Person> sut = new SingularObjectContext<>(new Person(),
+                BeanAnnotationProcessor.mapFieldsForDeserialization(Person.class), new HashMap<>());
+        final String identifier = Generator.generateUri().toString();
+        sut.setIdentifierValue(identifier);
+        assertEquals(identifier, sut.getIdentifier());
+    }
 }

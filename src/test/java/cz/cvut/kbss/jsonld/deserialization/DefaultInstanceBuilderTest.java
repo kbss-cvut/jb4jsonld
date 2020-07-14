@@ -16,6 +16,7 @@ import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
+import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
@@ -37,6 +38,8 @@ import java.util.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -538,5 +541,17 @@ class DefaultInstanceBuilderTest {
 
         public ObjectWithAnnotationProperty() {
         }
+    }
+
+    @Test
+    void closeObjectAttemptsResolvingPendingReferencesReferencingIt() throws Exception {
+        final Employee targetObject = Generator.generateEmployee();
+        targetObject.setEmployer(null);
+        final String orgId = Generator.generateUri().toString();
+        pendingReferenceRegistry.addPendingReference(orgId, targetObject, Employee.class.getDeclaredField("employer"));
+        sut.openObject(orgId, Organization.class);
+        sut.addValue(RDFS.LABEL, "Test company");
+        sut.closeObject();
+        verify(pendingReferenceRegistry).resolveReferences(eq(orgId), any(Organization.class));
     }
 }

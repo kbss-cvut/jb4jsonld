@@ -29,6 +29,8 @@ abstract class InstanceContext<T> {
 
     T instance;
 
+    private String identifier;
+
     final Map<String, Object> knownInstances;
 
     InstanceContext(T instance, Map<String, Object> knownInstances) {
@@ -50,18 +52,32 @@ abstract class InstanceContext<T> {
      *
      * @param value Identifier value
      */
-    void setIdentifierValue(Object value) {
+    void setIdentifierValue(String value) {
         final Field idField = getFieldForProperty(JsonLd.ID);
         assert idField != null;
-        if (isBlankNodeIdentifier(value.toString()) && !idField.getType().equals(String.class)) {
+        if (isBlankNodeIdentifier(value) && !idField.getType().equals(String.class)) {
             return;
         }
         setFieldValue(idField, value);
-        knownInstances.put(value.toString(), instance);
+        this.identifier = value;
+        knownInstances.put(value, instance);
     }
 
     private static boolean isBlankNodeIdentifier(String identifier) {
         return identifier.startsWith(BLANK_NODE_ID_START);
+    }
+
+    /**
+     * Gets the instance identifier.
+     * <p>
+     * Note that the identifier may not be available.
+     *
+     * @return Identifier value, or {@code null} if it is not available (it has not been set or is not applicable in
+     * this context)
+     * @see #setIdentifierValue(String)
+     */
+    String getIdentifier() {
+        return identifier;
     }
 
     // These methods are intended for overriding, because the behaviour is supported only by some context implementations
