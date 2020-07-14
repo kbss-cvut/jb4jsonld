@@ -25,6 +25,7 @@ import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
+import cz.cvut.kbss.jsonld.exception.UnresolvedReferenceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -559,5 +560,24 @@ class ExpandedJsonLdDeserializerTest {
         assertNotNull(participantOrg);
         assertEquals(memberOrg.getUri(), participantOrg.getUri());
         assertEquals(memberOrg.getName(), participantOrg.getName());
+    }
+
+    @Test
+    void deserializationUsesDeferredReferenceResolutionToHandleReferencePrecedingObjectDeclarationInCollection()
+            throws Exception {
+        final Object input = readAndExpand("objectWithReferencePrecedingFullObjectInCollection.json");
+        final Study result = sut.deserialize(input, Study.class);
+        assertEquals(1, result.getMembers().size());
+        assertEquals(1, result.getParticipants().size());
+        final Employee member = result.getMembers().iterator().next();
+        final Employee participant = result.getParticipants().iterator().next();
+        assertEquals(member.getUri(), participant.getUri());
+        assertSame(member, participant);
+    }
+
+    @Test
+    void deserializationThrowsUnresolvedReferenceExceptionWhenUnresolvedReferenceIsFound() throws Exception {
+        final Object input = readAndExpand("objectWithUnresolvedReference.json");
+        assertThrows(UnresolvedReferenceException.class, () -> sut.deserialize(input, Study.class));
     }
 }
