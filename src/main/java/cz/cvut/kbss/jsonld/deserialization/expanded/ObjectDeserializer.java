@@ -60,13 +60,19 @@ class ObjectDeserializer extends Deserializer<Map<?, ?>> {
     }
 
     private void openObject(Map<?, ?> value) {
-        if (property != null) {
-            instanceBuilder.openObject(getId(value), property, getObjectTypes(value));
-        } else {
-            assert targetClass != null;
-            final Class<?> cls = resolveTargetClass(value, targetClass);
-            assert targetClass.isAssignableFrom(cls);
-            instanceBuilder.openObject(getId(value), cls);
+        try {
+            if (property != null) {
+                instanceBuilder.openObject(getId(value), property, getObjectTypes(value));
+            } else {
+                assert targetClass != null;
+                final Class<?> cls = resolveTargetClass(value, targetClass);
+                assert targetClass.isAssignableFrom(cls);
+                instanceBuilder.openObject(getId(value), cls);
+            }
+        } catch (UnknownPropertyException e) {
+            if (!configuration().is(ConfigParam.IGNORE_UNKNOWN_PROPERTIES)) {
+                throw e;
+            }
         }
     }
 

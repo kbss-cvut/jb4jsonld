@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
@@ -18,6 +16,7 @@ import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
@@ -29,6 +28,7 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Study;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,8 +44,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ObjectDeserializerTest {
@@ -60,7 +59,7 @@ class ObjectDeserializerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -183,5 +182,34 @@ class ObjectDeserializerTest {
         ((Map<?, ?>) input.get(0)).remove(Vocabulary.HAS_PARTICIPANT);
         sut.processValue((Map<?, ?>) input.get(0));
         verify(instanceBuilderMock, never()).addValue(eq(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED), any());
+    }
+
+    @Test
+    void processValueIgnoresMissingIdFieldWhenIgnoreUnknownPropertiesIsConfigured() throws Exception {
+        doReturn(Object.class).when(tcResolverMock).getTargetClass(eq(Object.class), anyCollection());
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(false);
+        doThrow(UnknownPropertyException.class).when(instanceBuilderMock).openObject(anyString(), any(Class.class));
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(false);
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
+        this.sut = new ObjectDeserializer(instanceBuilderMock,
+                new DeserializerConfig(config, tcResolverMock), Object.class);
+        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
+        sut.processValue((Map<?, ?>) input.get(0));
+    }
+
+    @Test
+    void processValueThrowsUnknownPropertyExceptionWhenObjectIsMissingIdField() throws Exception {
+        doReturn(Object.class).when(tcResolverMock).getTargetClass(eq(Object.class), anyCollection());
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(false);
+        final UnknownPropertyException ex = UnknownPropertyException.create(JsonLd.ID, Object.class);
+        doThrow(ex).when(instanceBuilderMock).openObject(anyString(), any(Class.class));
+        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(false);
+        this.sut = new ObjectDeserializer(instanceBuilderMock,
+                new DeserializerConfig(new Configuration(), tcResolverMock), Object.class);
+        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
+        final UnknownPropertyException result = assertThrows(UnknownPropertyException.class,
+                () -> sut.processValue((Map<?, ?>) input.get(0)));
+        assertEquals(ex, result);
     }
 }
