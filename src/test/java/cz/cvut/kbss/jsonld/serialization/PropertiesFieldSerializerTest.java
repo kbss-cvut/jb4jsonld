@@ -30,7 +30,7 @@ class PropertiesFieldSerializerTest {
 
     private Field field;
 
-    private FieldSerializer serializer = new PropertiesFieldSerializer();
+    private final FieldSerializer serializer = new PropertiesFieldSerializer();
 
     @BeforeEach
     void setUp() throws Exception {

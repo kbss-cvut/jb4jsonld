@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class JsonLdPropertyAccessResolverTest {
 
-    private JsonLdPropertyAccessResolver sut = new JsonLdPropertyAccessResolver();
+    private final JsonLdPropertyAccessResolver sut = new JsonLdPropertyAccessResolver();
 
     @ParameterizedTest
     @CsvSource({

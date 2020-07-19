@@ -49,7 +49,7 @@ class ObjectGraphTraverserTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         this.traverser = new ObjectGraphTraverser();
         traverser.addVisitor(visitor);
     }

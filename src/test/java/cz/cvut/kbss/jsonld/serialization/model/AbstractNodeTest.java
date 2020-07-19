@@ -24,6 +24,6 @@ public abstract class AbstractNodeTest {
     JsonGenerator serializerMock;
 
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 }

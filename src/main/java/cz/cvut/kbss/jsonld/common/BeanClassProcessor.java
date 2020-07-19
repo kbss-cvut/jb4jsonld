@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -18,6 +18,7 @@ import cz.cvut.kbss.jsonld.exception.BeanProcessingException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -77,8 +78,8 @@ public class BeanClassProcessor {
      */
     public static <T> T createInstance(Class<T> cls) {
         try {
-            return cls.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            return cls.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IllegalAccessException e) {
             throw new BeanProcessingException("Class " + cls + " is missing a public no-arg constructor.", e);
         }
     }
@@ -210,7 +211,7 @@ public class BeanClassProcessor {
                 final Type actualType = valueType.getActualTypeArguments()[0];
                 if (Class.class.isAssignableFrom(actualType.getClass())) {
                     // For Map<?, Collection<String>>
-                    return Class.class.cast(actualType);
+                    return (Class) actualType;
                 }
                 // For Map<?, Collection<?>>
                 return null;

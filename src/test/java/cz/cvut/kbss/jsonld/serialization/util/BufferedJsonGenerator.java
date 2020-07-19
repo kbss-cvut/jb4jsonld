@@ -20,7 +20,7 @@ import java.util.Stack;
 
 public class BufferedJsonGenerator implements JsonGenerator {
 
-    private StringBuilder buffer = new StringBuilder();
+    private final StringBuilder buffer = new StringBuilder();
 
     private boolean firstElement = true;
     private boolean firstAttribute = true;
