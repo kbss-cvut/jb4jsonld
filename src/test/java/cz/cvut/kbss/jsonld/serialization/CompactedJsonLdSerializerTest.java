@@ -1,22 +1,22 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
 import com.github.jsonldjava.utils.JsonUtils;
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
@@ -403,5 +403,24 @@ class CompactedJsonLdSerializerTest {
         assertFalse(org.isEmpty());
         final List<String> types = (List<String>) org.get(JsonLd.TYPE);
         assertThat(types, hasItem(Vocabulary.ORGANIZATION));
+    }
+
+    @Test
+    void serializationSerializesMultilingualStringWithValues() throws Exception {
+        final ObjectWithMultilingualString instance = new ObjectWithMultilingualString(Generator.generateUri());
+        final MultilingualString name = new MultilingualString();
+        name.set("en", "Leveraging Semantic Web Technologies in Domain-specific Information Systems");
+        name.set("cs", "Využití technologií sémantického webu v doménových informačních systémech");
+        instance.setLabel(name);
+
+        sut.serialize(instance);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertTrue(json.containsKey(RDFS.LABEL));
+        final Map<?, ?> label = (Map<?, ?>) json.get(RDFS.LABEL);
+        assertTrue(label.containsKey("en"));
+        assertEquals(name.get("en"), label.get("en"));
+        assertTrue(label.containsKey("cs"));
+        assertEquals(name.get("cs"), label.get("cs"));
     }
 }
