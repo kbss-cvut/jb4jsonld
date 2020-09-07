@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -33,7 +31,7 @@ class JsonNodeFactoryTest {
     void createCollectionCreatesListNodeFromListWithoutName() {
         final List<String> list = new ArrayList<>();
         final CollectionNode node = JsonNodeFactory.createCollectionNode(list);
-        assertTrue(node instanceof ListNode);
+        assertThat(node, instanceOf(ListNode.class));
         assertTrue(node.isValueNode());
     }
 
@@ -41,7 +39,7 @@ class JsonNodeFactoryTest {
     void createCollectionCreatesListNodeFromListWithName() {
         final List<String> list = new ArrayList<>();
         final CollectionNode node = JsonNodeFactory.createCollectionNode(NAME, list);
-        assertTrue(node instanceof ListNode);
+        assertThat(node, instanceOf(ListNode.class));
         assertEquals(NAME, node.getName());
         assertFalse(node.isValueNode());
     }
@@ -50,7 +48,7 @@ class JsonNodeFactoryTest {
     void createCollectionCreatesSetNodeFromSetWithoutName() {
         final Set<String> set = new HashSet<>();
         final CollectionNode node = JsonNodeFactory.createCollectionNode(set);
-        assertTrue(node instanceof SetNode);
+        assertThat(node, instanceOf(SetNode.class));
         assertTrue(node.isValueNode());
     }
 
@@ -58,7 +56,7 @@ class JsonNodeFactoryTest {
     void createCollectionCreatesSetNodeFromSetWithName() {
         final Set<String> set = new HashSet<>();
         final CollectionNode node = JsonNodeFactory.createCollectionNode(NAME, set);
-        assertTrue(node instanceof SetNode);
+        assertThat(node, instanceOf(SetNode.class));
         assertEquals(NAME, node.getName());
         assertFalse(node.isValueNode());
     }
@@ -66,7 +64,7 @@ class JsonNodeFactoryTest {
     @Test
     void createCollectionFromArrayCreatesSetNodeWithName() {
         final CollectionNode node = JsonNodeFactory.createCollectionNodeFromArray(NAME);
-        assertTrue(node instanceof SetNode);
+        assertThat(node, instanceOf(SetNode.class));
         assertEquals(NAME, node.getName());
         assertFalse(node.isValueNode());
     }
@@ -74,7 +72,7 @@ class JsonNodeFactoryTest {
     @Test
     void createCollectionFromArrayCreatesSetNodeWithoutName() {
         final CollectionNode node = JsonNodeFactory.createCollectionNodeFromArray();
-        assertTrue(node instanceof SetNode);
+        assertThat(node, instanceOf(SetNode.class));
         assertNull(node.getName());
         assertTrue(node.isValueNode());
     }
@@ -82,7 +80,7 @@ class JsonNodeFactoryTest {
     @Test
     void createLiteralNodeCreatesBooleanNodeFromBooleanValueWithName() {
         final LiteralNode node = JsonNodeFactory.createLiteralNode(NAME, false);
-        assertTrue(node instanceof BooleanLiteralNode);
+        assertThat(node, instanceOf(BooleanLiteralNode.class));
         assertFalse(node.isValueNode());
         assertEquals(NAME, node.getName());
         assertFalse((Boolean) node.getValue());
@@ -91,7 +89,7 @@ class JsonNodeFactoryTest {
     @Test
     void createLiteralNodeCreatesBooleanNodeFromBooleanValueWithoutName() {
         final LiteralNode node = JsonNodeFactory.createLiteralNode(true);
-        assertTrue(node instanceof BooleanLiteralNode);
+        assertThat(node, instanceOf(BooleanLiteralNode.class));
         assertTrue(node.isValueNode());
         assertTrue((Boolean) node.getValue());
     }
@@ -100,7 +98,7 @@ class JsonNodeFactoryTest {
     void createLiteralNodeCreatesNumericNodeFromNumberValueWithName() {
         final long value = System.currentTimeMillis();
         final LiteralNode node = JsonNodeFactory.createLiteralNode(NAME, value);
-        assertTrue(node instanceof NumericLiteralNode);
+        assertThat(node, instanceOf(NumericLiteralNode.class));
         assertFalse(node.isValueNode());
         assertEquals(value, node.getValue());
     }
@@ -109,7 +107,7 @@ class JsonNodeFactoryTest {
     void createLiteralNodeCreatesNumericNodeFromNumberValueWithoutName() {
         final double value = Double.MIN_VALUE;
         final LiteralNode node = JsonNodeFactory.createLiteralNode(value);
-        assertTrue(node instanceof NumericLiteralNode);
+        assertThat(node, instanceOf(NumericLiteralNode.class));
         assertTrue(node.isValueNode());
         assertEquals(value, node.getValue());
     }
@@ -118,7 +116,7 @@ class JsonNodeFactoryTest {
     void createLiteralNodeCreatesStringNodeFromStringWithName() {
         final String value = "test";
         final LiteralNode node = JsonNodeFactory.createLiteralNode(NAME, value);
-        assertTrue(node instanceof StringLiteralNode);
+        assertThat(node, instanceOf(StringLiteralNode.class));
         assertFalse(node.isValueNode());
         assertEquals(NAME, node.getName());
         assertEquals(value, node.getValue());
@@ -128,7 +126,7 @@ class JsonNodeFactoryTest {
     void createLiteralNodeCreatesStringNodeFromStringWithoutName() {
         final String value = "test2";
         final LiteralNode node = JsonNodeFactory.createLiteralNode(value);
-        assertTrue(node instanceof StringLiteralNode);
+        assertThat(node, instanceOf(StringLiteralNode.class));
         assertTrue(node.isValueNode());
         assertEquals(value, node.getValue());
     }
@@ -137,7 +135,7 @@ class JsonNodeFactoryTest {
     void createLiteralNodeCreatesNumberNodeFromDateInstance() {
         final Date value = new Date();
         final LiteralNode node = JsonNodeFactory.createLiteralNode(value);
-        assertTrue(node instanceof NumericLiteralNode);
+        assertThat(node, instanceOf(NumericLiteralNode.class));
         assertEquals(value.getTime(), node.getValue());
     }
 
@@ -155,5 +153,13 @@ class JsonNodeFactoryTest {
         final LiteralNode result = JsonNodeFactory.createLiteralNode(value);
         assertThat(result, instanceOf(StringLiteralNode.class));
         assertEquals(value.toString(), result.getValue());
+    }
+
+    @Test
+    void createLangStringNodeCreatesNodeFromSpecifiedValueAndLanguage() {
+        final String value = "test";
+        final String language = "en";
+        final LangStringNode result = JsonNodeFactory.createLangStringNode(value, language);
+        assertEquals(2, result.getItems().size());
     }
 }

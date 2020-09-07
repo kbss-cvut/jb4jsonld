@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -71,6 +69,32 @@ public class JsonNodeFactory {
             return LiteralType.TEMPORAL;
         }
         return LiteralType.STRING;
+    }
+
+    /**
+     * Creates a node for representing a single translation of a string value.
+     *
+     * @param value    String value
+     * @param language Language tag for the value
+     * @return A node representing the language tagged value
+     */
+    public static LangStringNode createLangStringNode(String value, String language) {
+        return new LangStringNode(value, language);
+    }
+
+    /**
+     * Creates a node for representing a single translation of a string value.
+     * <p>
+     * Usually, multiple translations are expected which are put into a collection. But if there is only one translation
+     * in the multilingual string, this method may be used to directly serialize the attribute.
+     *
+     * @param name     Attribute name
+     * @param value    String value
+     * @param language Language tag for the value
+     * @return A node representing the language tagged value
+     */
+    public static LangStringNode createLangStringNode(String name, String value, String language) {
+        return new LangStringNode(name, value, language);
     }
 
     /**

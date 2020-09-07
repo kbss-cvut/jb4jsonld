@@ -23,9 +23,6 @@ import java.io.IOException;
  */
 public class StringLiteralNode extends LiteralNode<String> {
 
-    // TODO add support for strings with language tag
-
-
     public StringLiteralNode(String text) {
         super(text);
     }
