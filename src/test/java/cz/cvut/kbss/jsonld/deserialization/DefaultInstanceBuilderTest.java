@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
@@ -22,6 +23,7 @@ import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
+import cz.cvut.kbss.jsonld.deserialization.util.LangString;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
@@ -44,6 +46,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("unused")
 class DefaultInstanceBuilderTest {
 
     private PendingReferenceRegistry pendingReferenceRegistry;
@@ -552,5 +555,22 @@ class DefaultInstanceBuilderTest {
         sut.addValue(RDFS.LABEL, "Test company");
         sut.closeObject();
         verify(pendingReferenceRegistry).resolveReferences(eq(orgId), any(Organization.class));
+    }
+
+    @Test
+    void openCollectionOpensMultilingualStringContextWhenTargetFieldHasMultilingualStringType() {
+        sut.openObject(Generator.generateUri().toString(), ObjectWithMultilingualString.class);
+        sut.openCollection(RDFS.LABEL);
+        assertEquals(MultilingualString.class, sut.getCurrentContextType());
+    }
+
+    @Test
+    void addValueAddsLangStringToMultilingualStringContext() {
+        final String value = "building";
+        final String lang = "en";
+        sut.openObject(Generator.generateUri().toString(), ObjectWithMultilingualString.class);
+        sut.openCollection(RDFS.LABEL);
+        sut.addValue(new LangString(value, lang));
+        assertEquals(value, ((MultilingualString) sut.getCurrentRoot()).get(lang));
     }
 }

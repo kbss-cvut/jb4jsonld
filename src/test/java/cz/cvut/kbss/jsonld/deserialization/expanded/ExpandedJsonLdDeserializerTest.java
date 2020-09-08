@@ -608,4 +608,14 @@ class ExpandedJsonLdDeserializerTest {
         assertNotNull(result);
         verifyUserAttributes(USERS.get(HALSEY_URI), result);
     }
+
+    @Test
+    void deserializationSupportsMultilingualStringAttributes() throws Exception {
+        final Object input = readAndExpand("objectWithMultilingualString.json");
+        final ObjectWithMultilingualString result = sut.deserialize(input, ObjectWithMultilingualString.class);
+        assertNotNull(result);
+        assertNotNull(result.getLabel());
+        assertEquals("Leveraging Semantic Web Technologies in Domain-specific Information Systems", result.getLabel().get("en"));
+        assertEquals("Využití technologií sémantického webu v doménových informačních systémech", result.getLabel().get("cs"));
+    }
 }

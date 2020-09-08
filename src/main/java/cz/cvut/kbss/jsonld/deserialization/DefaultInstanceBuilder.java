@@ -1,19 +1,18 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
@@ -154,16 +153,20 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
                 ctx = new DummyCollectionInstanceContext(knownInstances);
             }
         } else {
-            verifyPluralAttribute(property, targetField);
-            final Collection<?> instance = (Collection<?>) getCollectionForField(targetField);
-            if (JsonLd.TYPE.equals(property)) {
-                ctx = new TypesContext(instance, knownInstances,
-                        BeanClassProcessor.getCollectionItemType(targetField), currentInstance.getInstanceType());
+            if (MultilingualString.class.equals(targetField.getType())) {
+                ctx = new MultilingualStringContext(new MultilingualString(), knownInstances);
             } else {
-                ctx = new CollectionInstanceContext<>(instance, BeanClassProcessor.getCollectionItemType(targetField),
-                        knownInstances);
+                verifyPluralAttribute(property, targetField);
+                final Collection<?> instance = (Collection<?>) getCollectionForField(targetField);
+                if (JsonLd.TYPE.equals(property)) {
+                    ctx = new TypesContext(instance, knownInstances,
+                            BeanClassProcessor.getCollectionItemType(targetField), currentInstance.getInstanceType());
+                } else {
+                    ctx = new CollectionInstanceContext<>(instance,
+                            BeanClassProcessor.getCollectionItemType(targetField), knownInstances);
+                }
             }
-            currentInstance.setFieldValue(targetField, instance);
+            currentInstance.setFieldValue(targetField, ctx.instance);
         }
         openInstances.push(currentInstance);
         this.currentInstance = ctx;
