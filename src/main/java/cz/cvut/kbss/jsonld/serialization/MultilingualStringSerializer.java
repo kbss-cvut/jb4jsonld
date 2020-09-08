@@ -18,9 +18,13 @@ class MultilingualStringSerializer {
             return JsonNodeFactory.createLangStringNode(attName, entry.getValue(), entry.getKey());
         }
         final CollectionNode collectionNode = JsonNodeFactory.createCollectionNodeFromArray(attName);
-        value.getValue()
-             .forEach((lang, val) -> collectionNode.addItem(JsonNodeFactory.createLangStringNode(val, lang)));
+        addTranslationsToCollectionNode(value, collectionNode);
         return collectionNode;
+    }
+
+    private void addTranslationsToCollectionNode(MultilingualString str, CollectionNode target) {
+        str.getValue()
+           .forEach((lang, val) -> target.addItem(JsonNodeFactory.createLangStringNode(val, lang)));
     }
 
     JsonNode serialize(MultilingualString value) {
@@ -30,8 +34,7 @@ class MultilingualStringSerializer {
             return JsonNodeFactory.createLangStringNode(entry.getValue(), entry.getKey());
         }
         final CollectionNode collectionNode = JsonNodeFactory.createCollectionNodeFromArray();
-        value.getValue()
-             .forEach((lang, val) -> collectionNode.addItem(JsonNodeFactory.createLangStringNode(val, lang)));
+        addTranslationsToCollectionNode(value, collectionNode);
         return collectionNode;
     }
 }

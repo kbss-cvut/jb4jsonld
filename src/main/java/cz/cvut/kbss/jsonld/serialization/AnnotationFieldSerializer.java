@@ -1,19 +1,18 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
@@ -28,6 +27,13 @@ import java.util.List;
 
 class AnnotationFieldSerializer implements FieldSerializer {
 
+    private final MultilingualStringSerializer multilingualStringSerializer;
+
+    AnnotationFieldSerializer(
+            MultilingualStringSerializer multilingualStringSerializer) {
+        this.multilingualStringSerializer = multilingualStringSerializer;
+    }
+
     @Override
     public List<JsonNode> serializeField(Field field, Object value) {
         final String attName = BeanAnnotationProcessor.getAttributeIdentifier(field);
@@ -39,6 +45,8 @@ class AnnotationFieldSerializer implements FieldSerializer {
                     final ObjectNode n = JsonNodeFactory.createObjectNode();
                     n.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, item));
                     node.addItem(n);
+                } else if (item instanceof MultilingualString) {
+                    node.addItem(multilingualStringSerializer.serialize((MultilingualString) item));
                 } else {
                     node.addItem(JsonNodeFactory.createLiteralNode(item));
                 }
@@ -47,6 +55,9 @@ class AnnotationFieldSerializer implements FieldSerializer {
         } else {
             if (isReference(value)) {
                 return serializeReference(attName, value);
+            } else if (value instanceof MultilingualString) {
+                return Collections.singletonList(multilingualStringSerializer.serialize(attName,
+                        (MultilingualString) value));
             }
             return Collections.singletonList(JsonNodeFactory.createLiteralNode(attName, value));
         }

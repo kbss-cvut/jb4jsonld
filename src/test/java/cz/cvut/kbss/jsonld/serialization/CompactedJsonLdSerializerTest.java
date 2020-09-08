@@ -417,10 +417,15 @@ class CompactedJsonLdSerializerTest {
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         final Map<String, ?> json = (Map<String, ?>) jsonObject;
         assertTrue(json.containsKey(RDFS.LABEL));
-        final Map<?, ?> label = (Map<?, ?>) json.get(RDFS.LABEL);
-        assertTrue(label.containsKey("en"));
-        assertEquals(name.get("en"), label.get("en"));
-        assertTrue(label.containsKey("cs"));
-        assertEquals(name.get("cs"), label.get("cs"));
+        final List<?> label = (List<?>) json.get(RDFS.LABEL);
+        assertEquals(name.getValue().size(), label.size());
+        for (Object item : label) {
+            assertThat(item, instanceOf(Map.class));
+            final Map<?, ?> m = (Map<?, ?>) item;
+            assertTrue(m.containsKey(JsonLd.LANGUAGE));
+            assertTrue(m.containsKey(JsonLd.VALUE));
+            assertTrue(name.contains(m.get(JsonLd.LANGUAGE).toString()));
+            assertEquals(name.get(m.get(JsonLd.LANGUAGE).toString()), m.get(JsonLd.VALUE));
+        }
     }
 }

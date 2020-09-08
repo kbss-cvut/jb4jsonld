@@ -1,23 +1,23 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
@@ -431,6 +431,10 @@ class JsonLdTreeBuilderTest {
         instance.getLabel().set("cs", csValue);
         treeBuilder.openInstance(instance);
         treeBuilder.visitField(ObjectWithMultilingualString.class.getDeclaredField("label"), instance.getLabel());
+        verifyMultilingualStringSerialization();
+    }
+
+    private void verifyMultilingualStringSerialization() {
         final CompositeNode root = treeBuilder.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
@@ -439,5 +443,84 @@ class JsonLdTreeBuilderTest {
         final CollectionNode colNode = (CollectionNode) valueNode;
         assertEquals(2, colNode.getItems().size());
         colNode.getItems().forEach(item -> assertThat(item, instanceOf(LangStringNode.class)));
+    }
+
+    @Test
+    void visitFieldSerializesAnnotationPropertyMultilingualStringIntoArrayOfLangStringObjects() throws Exception {
+        final ObjectWithMultilingualStringAnnotation instance = new ObjectWithMultilingualStringAnnotation();
+        final String enValue = "building";
+        final String csValue = "budova";
+        instance.label = new MultilingualString();
+        instance.label.set("en", enValue);
+        instance.label.set("cs", csValue);
+        treeBuilder.openInstance(instance);
+        treeBuilder.visitField(ObjectWithMultilingualStringAnnotation.class.getDeclaredField("label"), instance.label);
+        verifyMultilingualStringSerialization();
+    }
+
+    @OWLClass(iri = Vocabulary.STUDY)
+    public static class ObjectWithMultilingualStringAnnotation {
+
+        @OWLAnnotationProperty(iri = RDFS.LABEL)
+        private MultilingualString label;
+    }
+
+    @Test
+    void visitFieldSerializesPluralMultilingualStringIntoArrayOfArraysOfLangStringObjects() throws Exception {
+        final ObjectWithPluralMultilingualStrings instance = initInstanceWithPluralMultilingualStrings();
+        treeBuilder.openInstance(instance);
+        treeBuilder.visitField(ObjectWithPluralMultilingualStrings.class.getDeclaredField("labels"), instance.labels);
+
+        verifyPluralMultilingualStringsSerialization(RDFS.LABEL);
+    }
+
+    private void verifyPluralMultilingualStringsSerialization(String property) {
+        final CompositeNode root = treeBuilder.getTreeRoot();
+        assertEquals(1, root.getItems().size());
+        final JsonNode valueNode = root.getItems().iterator().next();
+        assertEquals(property, valueNode.getName());
+        assertThat(valueNode, instanceOf(CollectionNode.class));
+        final CollectionNode colNode = (CollectionNode) valueNode;
+        assertEquals(2, colNode.getItems().size());
+        colNode.getItems().forEach(item -> {
+            assertThat(item, instanceOf(CollectionNode.class));
+            final CollectionNode itemCol = (CollectionNode) item;
+            assertEquals(2, itemCol.getItems().size());
+            itemCol.getItems().forEach(elem -> assertThat(elem, instanceOf(LangStringNode.class)));
+        });
+    }
+
+    private ObjectWithPluralMultilingualStrings initInstanceWithPluralMultilingualStrings() {
+        final ObjectWithPluralMultilingualStrings instance = new ObjectWithPluralMultilingualStrings();
+        final MultilingualString one = new MultilingualString();
+        one.set("en", "building");
+        one.set("cs", "budova");
+        final MultilingualString two = new MultilingualString();
+        two.set("en", "construction");
+        two.set("cs", "stavba");
+        instance.labels = new HashSet<>(Arrays.asList(one, two));
+        instance.altLabels = new HashSet<>(Arrays.asList(one, two));
+        return instance;
+    }
+
+    @OWLClass(iri = Vocabulary.STUDY)
+    public static class ObjectWithPluralMultilingualStrings {
+
+        @OWLDataProperty(iri = RDFS.LABEL)
+        private Set<MultilingualString> labels;
+
+        @OWLAnnotationProperty(iri = SKOS.ALT_LABEL)
+        private Set<MultilingualString> altLabels;
+    }
+
+    @Test
+    void visitFieldSerializesPluralAnnotationPropertyMultilingualStringIntoArrayOfArraysOfLangStringObjects()
+            throws Exception {
+        final ObjectWithPluralMultilingualStrings instance = initInstanceWithPluralMultilingualStrings();
+        treeBuilder.openInstance(instance);
+        treeBuilder.visitField(ObjectWithPluralMultilingualStrings.class.getDeclaredField("altLabels"),
+                instance.altLabels);
+
+        verifyPluralMultilingualStringsSerialization(SKOS.ALT_LABEL);
     }
 }
