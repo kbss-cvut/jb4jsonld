@@ -60,6 +60,11 @@ public class BufferedJsonGenerator implements JsonGenerator {
 
     @Override
     public void writeArrayStart() {
+        if (!nodes.isEmpty() && nodes.peek() == NodeType.ARRAY) {
+            if (!firstElement) {
+                buffer.append(',');
+            }
+        }
         buffer.append('[');
         this.firstElement = true;
         nodes.push(NodeType.ARRAY);

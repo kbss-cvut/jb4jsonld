@@ -648,4 +648,19 @@ class ExpandedJsonLdDeserializerTest {
         assertTrue(result.getLabel().containsSimple());
         assertEquals("LupusStudy", result.getLabel().get());
     }
+
+    @Test
+    void deserializationSupportsPluralMultilingualAttributes() throws Exception {
+        final Object input = readAndExpand("objectWithPluralMultilingualString.json");
+        final ObjectWithPluralMultilingualString result = sut
+                .deserialize(input, ObjectWithPluralMultilingualString.class);
+        assertNotNull(result);
+        assertNotNull(result.getAltLabel());
+        assertFalse(result.getAltLabel().isEmpty());
+        assertTrue(
+                result.getAltLabel().stream().anyMatch(ms -> ms.contains("en") && ms.get("en").equals("Construction")));
+        assertTrue(result.getAltLabel().stream().anyMatch(ms -> ms.contains("en") && ms.get("en").equals("Building")));
+        assertTrue(result.getAltLabel().stream().anyMatch(ms -> ms.contains("cs") && ms.get("cs").equals("Stavba")));
+        assertTrue(result.getAltLabel().stream().anyMatch(ms -> ms.contains("cs") && ms.get("cs").equals("Budova")));
+    }
 }

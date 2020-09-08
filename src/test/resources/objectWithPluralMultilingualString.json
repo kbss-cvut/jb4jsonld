@@ -1,0 +1,19 @@
+{
+  "@type": [
+    "http://www.w3.org/2004/02/skos/core#Concept"
+  ],
+  "http://www.w3.org/2004/02/skos/core#altLabel": [{
+    "@language": "en",
+    "@value": "Construction"
+  }, {
+    "@language": "cs",
+    "@value": "Stavba"
+  }, {
+    "@language": "en",
+    "@value": "Building"
+  }, {
+    "@language": "cs",
+    "@value": "Budova"
+  }],
+  "@id": "http://onto.fel.cvut.cz/ontologies/jb4json-ld/concept#instance-117711"
+}

@@ -12,6 +12,8 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import com.github.jsonldjava.core.JsonLdProcessor;
+import com.github.jsonldjava.core.JsonLdUtils;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
@@ -21,6 +23,7 @@ import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
+import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
@@ -427,5 +430,23 @@ class CompactedJsonLdSerializerTest {
             assertTrue(name.contains(m.get(JsonLd.LANGUAGE).toString()));
             assertEquals(name.get(m.get(JsonLd.LANGUAGE).toString()), m.get(JsonLd.VALUE));
         }
+    }
+
+    @Test
+    void serializationSerializesPluralMultilingualString() throws Exception {
+        final ObjectWithPluralMultilingualString instance = new ObjectWithPluralMultilingualString(
+                URI.create("http://onto.fel.cvut.cz/ontologies/jb4json-ld/concept#instance-117711"));
+        final MultilingualString one = new MultilingualString();
+        one.set("en", "Building");
+        one.set("cs", "Budova");
+        final MultilingualString two = new MultilingualString();
+        two.set("en", "Construction");
+        two.set("cs", "Stavba");
+        instance.setAltLabel(new HashSet<>(Arrays.asList(one, two)));
+
+        sut.serialize(instance);
+        final Object resultExpanded = JsonLdProcessor.expand(JsonUtils.fromString(jsonWriter.getResult()));
+        final Object expectedExpanded = TestUtil.readAndExpand("objectWithPluralMultilingualString.json");
+        assertTrue(JsonLdUtils.deepCompare(expectedExpanded, resultExpanded));
     }
 }
