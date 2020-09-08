@@ -42,9 +42,7 @@ class AnnotationFieldSerializer implements FieldSerializer {
             final CollectionNode node = JsonNodeFactory.createCollectionNode(attName, col);
             col.forEach(item -> {
                 if (isReference(item)) {
-                    final ObjectNode n = JsonNodeFactory.createObjectNode();
-                    n.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, item));
-                    node.addItem(n);
+                    node.addItem(serializeReference(null, item));
                 } else if (item instanceof MultilingualString) {
                     node.addItem(multilingualStringSerializer.serialize((MultilingualString) item));
                 } else {
@@ -54,7 +52,7 @@ class AnnotationFieldSerializer implements FieldSerializer {
             return Collections.singletonList(node);
         } else {
             if (isReference(value)) {
-                return serializeReference(attName, value);
+                return Collections.singletonList(serializeReference(attName, value));
             } else if (value instanceof MultilingualString) {
                 return Collections.singletonList(multilingualStringSerializer.serialize(attName,
                         (MultilingualString) value));
@@ -67,9 +65,10 @@ class AnnotationFieldSerializer implements FieldSerializer {
         return BeanClassProcessor.isIdentifierType(value.getClass()) && !(value instanceof String);
     }
 
-    private List<JsonNode> serializeReference(String attId, Object value) {
-        final ObjectNode node = JsonNodeFactory.createObjectNode(attId);
+    private JsonNode serializeReference(String attId, Object value) {
+        final ObjectNode node =
+                attId != null ? JsonNodeFactory.createObjectNode(attId) : JsonNodeFactory.createObjectNode();
         node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, value));
-        return Collections.singletonList(node);
+        return node;
     }
 }
