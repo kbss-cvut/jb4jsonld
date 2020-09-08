@@ -29,7 +29,6 @@ import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 
 import java.util.List;
@@ -38,7 +37,8 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 class CollectionDeserializerTest {
@@ -94,5 +94,17 @@ class CollectionDeserializerTest {
         builderSpy.openObject(Generator.generateUri().toString(), ObjectWithMultilingualString.class);
         sut.processValue(labels);
         verify(builderSpy, times(2)).addValue(ArgumentMatchers.any(LangString.class));
+    }
+
+    @Test
+    void processValueAddsLangStringWhenAttributeValueIsSingleObjectWithLanguageTag() throws Exception {
+        final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithSingleLangStringValue.json"))
+                .get(0);
+        final List<?> labels = (List<?>) jsonLd.get(RDFS.LABEL);
+        final InstanceBuilder builderSpy = spy(instanceBuilder);
+        final CollectionDeserializer sut = new CollectionDeserializer(builderSpy, deserializerConfig, RDFS.LABEL);
+        builderSpy.openObject(Generator.generateUri().toString(), ObjectWithMultilingualString.class);
+        sut.processValue(labels);
+        verify(builderSpy).addValue(eq(RDFS.LABEL), ArgumentMatchers.any(LangString.class));
     }
 }

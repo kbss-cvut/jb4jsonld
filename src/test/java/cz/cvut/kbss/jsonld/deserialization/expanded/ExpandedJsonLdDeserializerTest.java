@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
@@ -615,7 +613,39 @@ class ExpandedJsonLdDeserializerTest {
         final ObjectWithMultilingualString result = sut.deserialize(input, ObjectWithMultilingualString.class);
         assertNotNull(result);
         assertNotNull(result.getLabel());
-        assertEquals("Leveraging Semantic Web Technologies in Domain-specific Information Systems", result.getLabel().get("en"));
-        assertEquals("Využití technologií sémantického webu v doménových informačních systémech", result.getLabel().get("cs"));
+        assertEquals("Leveraging Semantic Web Technologies in Domain-specific Information Systems",
+                result.getLabel().get("en"));
+        assertEquals("Využití technologií sémantického webu v doménových informačních systémech",
+                result.getLabel().get("cs"));
+    }
+
+    @Test
+    void deserializationSupportsDeserializingSingleValueIntoMultilingualStringAttribute() throws Exception {
+        final Object input = readAndExpand("objectWithSingleLangStringValue.json");
+        final ObjectWithMultilingualString result = sut.deserialize(input, ObjectWithMultilingualString.class);
+        assertNotNull(result);
+        assertNotNull(result.getLabel());
+        assertEquals("Leveraging Semantic Web Technologies in Domain-specific Information Systems",
+                result.getLabel().get("en"));
+    }
+
+    @Test
+    void deserializationSupportsDeserializingSingleLanguageTaggedValueIntoPlainStringAttribute() throws Exception {
+        final Object input = readAndExpand("objectWithSingleLangStringValue.json");
+        final Study result = sut.deserialize(input, Study.class);
+        assertNotNull(result);
+        assertNotNull(result.getName());
+        assertEquals("Leveraging Semantic Web Technologies in Domain-specific Information Systems", result.getName());
+    }
+
+    @Test
+    void deserializationSupportsDeserializingPlainStringToMultilingualStringAttribute() throws Exception {
+        sut.configuration().set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
+        final Object input = readAndExpand("objectWithPluralReferenceSharingObject.json");
+        final ObjectWithMultilingualString result = sut.deserialize(input, ObjectWithMultilingualString.class);
+        assertNotNull(result);
+        assertNotNull(result.getLabel());
+        assertTrue(result.getLabel().containsSimple());
+        assertEquals("LupusStudy", result.getLabel().get());
     }
 }

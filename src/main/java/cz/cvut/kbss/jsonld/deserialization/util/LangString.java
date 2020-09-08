@@ -40,4 +40,10 @@ public class LangString implements Serializable {
     public int hashCode() {
         return Objects.hash(value, language);
     }
+
+    @Override
+    public String toString() {
+        // This implementation returns only value to allow its usage in DataTypeTransformer
+        return value;
+    }
 }

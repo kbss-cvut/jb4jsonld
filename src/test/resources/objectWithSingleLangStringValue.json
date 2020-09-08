@@ -1,0 +1,10 @@
+{
+  "@type": [
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Study"
+  ],
+  "http://www.w3.org/2000/01/rdf-schema#label": {
+    "@language": "en",
+    "@value": "Leveraging Semantic Web Technologies in Domain-specific Information Systems"
+  },
+  "@id": "http://krizik.felk.cvut.cz/ontologies/study-manager/study#instance-1587729056"
+}

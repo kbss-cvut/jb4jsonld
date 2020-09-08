@@ -93,6 +93,8 @@ class CollectionDeserializer extends Deserializer<List<?>> {
         if (value.containsKey(JsonLd.TYPE)) {
             instanceBuilder
                     .addValue(property, XSDTypeCoercer.coerceType(val.toString(), value.get(JsonLd.TYPE).toString()));
+        } else if (value.containsKey(JsonLd.LANGUAGE)) {
+            instanceBuilder.addValue(property, new LangString(val.toString(), value.get(JsonLd.LANGUAGE).toString()));
         } else {
             instanceBuilder.addValue(property, val);
         }
