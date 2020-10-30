@@ -33,13 +33,13 @@ public class JsonNodeFactory {
         BOOLEAN, NUMBER, STRING, TEMPORAL
     }
 
-    public static LiteralNode createLiteralNode(Object value) {
+    public static LiteralNode<?> createLiteralNode(Object value) {
         return createLiteralNode(null, value);
     }
 
-    public static LiteralNode createLiteralNode(String name, Object value) {
+    public static LiteralNode<?> createLiteralNode(String name, Object value) {
         final LiteralType type = determineLiteralType(value);
-        LiteralNode node = null;
+        LiteralNode<?> node = null;
         switch (type) {
             case BOOLEAN:
                 node = name != null ? new BooleanLiteralNode(name, (Boolean) value) : new BooleanLiteralNode(

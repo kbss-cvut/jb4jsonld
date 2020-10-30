@@ -210,7 +210,7 @@ public class BeanClassProcessor {
                 final Type actualType = valueType.getActualTypeArguments()[0];
                 if (Class.class.isAssignableFrom(actualType.getClass())) {
                     // For Map<?, Collection<String>>
-                    return (Class) actualType;
+                    return (Class<?>) actualType;
                 }
                 // For Map<?, Collection<?>>
                 return null;

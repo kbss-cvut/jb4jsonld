@@ -53,7 +53,7 @@ class BeanClassProcessorTest {
     }
 
     private static class ClassWithoutPublicCtor {
-        private String name;
+        private final String name;
 
         public ClassWithoutPublicCtor(String name) {
             this.name = name;

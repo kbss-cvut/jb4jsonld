@@ -665,6 +665,7 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationSupportsOptimisticTargetTypeResolution() throws Exception {
         final Configuration config = sut.configuration();
         config.set(ConfigParam.ENABLE_OPTIMISTIC_TARGET_TYPE_RESOLUTION, Boolean.toString(true));
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final Object input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
         final StudyOnPersons result = sut.deserialize(input, StudyOnPersons.class);

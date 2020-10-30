@@ -15,6 +15,7 @@
 package cz.cvut.kbss.jsonld.serialization.model;
 
 import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -23,6 +24,7 @@ public abstract class AbstractNodeTest {
     @Mock
     JsonGenerator serializerMock;
 
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }

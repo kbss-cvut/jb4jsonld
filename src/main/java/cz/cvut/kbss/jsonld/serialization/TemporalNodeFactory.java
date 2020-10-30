@@ -26,7 +26,7 @@ class TemporalNodeFactory {
         throw new AssertionError();
     }
 
-    static LiteralNode createLiteralNode(String name, Object value) {
+    static LiteralNode<Long> createLiteralNode(String name, Object value) {
         assert value != null;
         if (value instanceof Date) {
             final Date date = (Date) value;

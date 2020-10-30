@@ -79,7 +79,7 @@ class JsonNodeFactoryTest {
 
     @Test
     void createLiteralNodeCreatesBooleanNodeFromBooleanValueWithName() {
-        final LiteralNode node = JsonNodeFactory.createLiteralNode(NAME, false);
+        final LiteralNode<?> node = JsonNodeFactory.createLiteralNode(NAME, false);
         assertThat(node, instanceOf(BooleanLiteralNode.class));
         assertFalse(node.isValueNode());
         assertEquals(NAME, node.getName());
@@ -88,7 +88,7 @@ class JsonNodeFactoryTest {
 
     @Test
     void createLiteralNodeCreatesBooleanNodeFromBooleanValueWithoutName() {
-        final LiteralNode node = JsonNodeFactory.createLiteralNode(true);
+        final LiteralNode<?> node = JsonNodeFactory.createLiteralNode(true);
         assertThat(node, instanceOf(BooleanLiteralNode.class));
         assertTrue(node.isValueNode());
         assertTrue((Boolean) node.getValue());
@@ -97,7 +97,7 @@ class JsonNodeFactoryTest {
     @Test
     void createLiteralNodeCreatesNumericNodeFromNumberValueWithName() {
         final long value = System.currentTimeMillis();
-        final LiteralNode node = JsonNodeFactory.createLiteralNode(NAME, value);
+        final LiteralNode<?> node = JsonNodeFactory.createLiteralNode(NAME, value);
         assertThat(node, instanceOf(NumericLiteralNode.class));
         assertFalse(node.isValueNode());
         assertEquals(value, node.getValue());
@@ -106,7 +106,7 @@ class JsonNodeFactoryTest {
     @Test
     void createLiteralNodeCreatesNumericNodeFromNumberValueWithoutName() {
         final double value = Double.MIN_VALUE;
-        final LiteralNode node = JsonNodeFactory.createLiteralNode(value);
+        final LiteralNode<?> node = JsonNodeFactory.createLiteralNode(value);
         assertThat(node, instanceOf(NumericLiteralNode.class));
         assertTrue(node.isValueNode());
         assertEquals(value, node.getValue());
@@ -115,7 +115,7 @@ class JsonNodeFactoryTest {
     @Test
     void createLiteralNodeCreatesStringNodeFromStringWithName() {
         final String value = "test";
-        final LiteralNode node = JsonNodeFactory.createLiteralNode(NAME, value);
+        final LiteralNode<?> node = JsonNodeFactory.createLiteralNode(NAME, value);
         assertThat(node, instanceOf(StringLiteralNode.class));
         assertFalse(node.isValueNode());
         assertEquals(NAME, node.getName());
@@ -125,7 +125,7 @@ class JsonNodeFactoryTest {
     @Test
     void createLiteralNodeCreatesStringNodeFromStringWithoutName() {
         final String value = "test2";
-        final LiteralNode node = JsonNodeFactory.createLiteralNode(value);
+        final LiteralNode<?> node = JsonNodeFactory.createLiteralNode(value);
         assertThat(node, instanceOf(StringLiteralNode.class));
         assertTrue(node.isValueNode());
         assertEquals(value, node.getValue());
@@ -134,7 +134,7 @@ class JsonNodeFactoryTest {
     @Test
     void createLiteralNodeCreatesNumberNodeFromDateInstance() {
         final Date value = new Date();
-        final LiteralNode node = JsonNodeFactory.createLiteralNode(value);
+        final LiteralNode<?> node = JsonNodeFactory.createLiteralNode(value);
         assertThat(node, instanceOf(NumericLiteralNode.class));
         assertEquals(value.getTime(), node.getValue());
     }
@@ -142,7 +142,7 @@ class JsonNodeFactoryTest {
     @Test
     void createLiteralNodeCreatesStringNodeContainingIsoFormattedValueForLocalDateTime() {
         final LocalDateTime value = LocalDateTime.now();
-        final LiteralNode result = JsonNodeFactory.createLiteralNode(value);
+        final LiteralNode<?> result = JsonNodeFactory.createLiteralNode(value);
         assertThat(result, instanceOf(StringLiteralNode.class));
         assertEquals(value.toString(), result.getValue());
     }
@@ -150,7 +150,7 @@ class JsonNodeFactoryTest {
     @Test
     void createLiteralNodeCreatesStringNodeContainingIsoFormattedValueForZonedDateTime() {
         final ZonedDateTime value = ZonedDateTime.now();
-        final LiteralNode result = JsonNodeFactory.createLiteralNode(value);
+        final LiteralNode<?> result = JsonNodeFactory.createLiteralNode(value);
         assertThat(result, instanceOf(StringLiteralNode.class));
         assertEquals(value.toString(), result.getValue());
     }

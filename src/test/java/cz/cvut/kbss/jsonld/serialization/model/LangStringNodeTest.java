@@ -1,17 +1,11 @@
 package cz.cvut.kbss.jsonld.serialization.model;
 
 import cz.cvut.kbss.jsonld.JsonLd;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 class LangStringNodeTest extends AbstractNodeTest {
-
-    @BeforeEach
-    public void setUp() {
-        super.setUp();
-    }
 
     @Test
     void writeValueWritesValueAndLanguageAsStrings() throws Exception {
