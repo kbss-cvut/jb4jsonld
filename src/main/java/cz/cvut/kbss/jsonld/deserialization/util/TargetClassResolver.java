@@ -13,6 +13,7 @@
 package cz.cvut.kbss.jsonld.deserialization.util;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.exception.AmbiguousTargetTypeException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import org.slf4j.Logger;
@@ -95,21 +96,27 @@ public class TargetClassResolver {
                                             Collection<String> types) {
         assert mostSpecificCandidates.size() > 0;
         if (mostSpecificCandidates.size() > 1) {
-            if (!config.isOptimisticTypeResolution()) {
+            if (!config.isOptimisticTypeResolutionEnabled()) {
                 throw ambiguousTargetType(types, mostSpecificCandidates);
             }
             if (config.shouldPreferSuperclass()) {
                 return selectTargetClassWithSuperclassPreference(mostSpecificCandidates, candidates);
             }
         }
-        return mostSpecificCandidates.get(0);
+        return pickOne(mostSpecificCandidates);
+    }
+
+    private static Class<?> pickOne(List<Class<?>> candidates) {
+        return candidates.size() == 1 ? candidates.get(0) :
+               candidates.stream().filter(BeanAnnotationProcessor::hasPropertiesField).findFirst()
+                         .orElse(candidates.get(0));
     }
 
     private Class<?> selectTargetClassWithSuperclassPreference(List<Class<?>> mostSpecificCandidates,
                                                                List<Class<?>> candidates) {
         candidates.removeAll(mostSpecificCandidates);
         reduceToMostGeneralSuperclasses(candidates);
-        return candidates.get(0);
+        return pickOne(candidates);
     }
 
     private void reduceToMostGeneralSuperclasses(List<Class<?>> candidates) {

@@ -50,7 +50,7 @@ class JsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.deserialization");
         final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
-        assertTrue(typeMap(deserializer).get(Vocabulary.STUDY).isEmpty());
+        assertTrue(typeMap(deserializer).get(Vocabulary.GENERIC_MEMBER).isEmpty());
         assertTrue(typeMap(deserializer).get(Vocabulary.AGENT).contains(TestClass.class));
     }
 

@@ -12,21 +12,19 @@
  */
 package cz.cvut.kbss.jsonld.deserialization.util;
 
+import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.Employee;
-import cz.cvut.kbss.jsonld.environment.model.Organization;
-import cz.cvut.kbss.jsonld.environment.model.Person;
-import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.AmbiguousTargetTypeException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.net.URI;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -135,5 +133,25 @@ class TargetClassResolverTest {
 
     @OWLClass(iri = Vocabulary.AGENT)
     private static abstract class AbstractClass extends Person {
+    }
+
+    @Test
+    void getTargetClassReturnsClassWithPropertiesWhenOptimisticTargetTypeResolutionIsEnabled() {
+        typeMap.register(Vocabulary.STUDY, StudyWithProperties.class);
+        final List<String> types = Collections.singletonList(Vocabulary.STUDY);
+        this.sut = new TargetClassResolver(typeMap, new TargetClassResolverConfig(false, true, false));
+        final Class<?> result = sut.getTargetClass(Object.class, types);
+        assertEquals(StudyWithProperties.class, result);
+    }
+
+    @SuppressWarnings("unused")
+    @OWLClass(iri = Vocabulary.STUDY)
+    private static class StudyWithProperties {
+
+        @Id
+        private URI id;
+
+        @Properties
+        private Map<String, Set<String>> properties;
     }
 }
