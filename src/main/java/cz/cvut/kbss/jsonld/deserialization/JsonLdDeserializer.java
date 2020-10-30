@@ -19,6 +19,7 @@ import cz.cvut.kbss.jsonld.common.Configurable;
 import cz.cvut.kbss.jsonld.deserialization.expanded.ExpandedJsonLdDeserializer;
 import cz.cvut.kbss.jsonld.deserialization.util.ClasspathScanner;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
+import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolverConfig;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 
 import java.util.Objects;
@@ -51,7 +52,8 @@ public abstract class JsonLdDeserializer implements Configurable {
                 typeMap.register(ann.iri(), c);
             }
         }).processClasses(scanPath);
-        return new TargetClassResolver(typeMap, configuration.is(ConfigParam.ASSUME_TARGET_TYPE));
+        // TODO
+        return new TargetClassResolver(typeMap, new TargetClassResolverConfig(configuration.is(ConfigParam.ASSUME_TARGET_TYPE), false, false));
     }
 
     @Override

@@ -31,16 +31,16 @@ public class TargetClassResolver {
 
     private final TypeMap typeMap;
 
-    private final boolean allowAssumingTargetType;
+    private final TargetClassResolverConfig config;
 
     public TargetClassResolver(TypeMap typeMap) {
         this.typeMap = typeMap;
-        this.allowAssumingTargetType = false;
+        this.config = new TargetClassResolverConfig();
     }
 
-    public TargetClassResolver(TypeMap typeMap, boolean allowAssumingTargetType) {
+    public TargetClassResolver(TypeMap typeMap, TargetClassResolverConfig config) {
         this.typeMap = typeMap;
-        this.allowAssumingTargetType = allowAssumingTargetType;
+        this.config = config;
     }
 
     /**
@@ -53,7 +53,7 @@ public class TargetClassResolver {
      * @throws TargetTypeException If the resulting candidate is not assignable to the expected class
      */
     public <T> Class<? extends T> getTargetClass(Class<T> expectedClass, Collection<String> types) {
-        if (types.isEmpty() && allowAssumingTargetType) {
+        if (types.isEmpty() && config.shouldAllowAssumingTargetType()) {
             LOG.trace("Assuming target type to be " + expectedClass);
             return expectedClass;
         }

@@ -84,6 +84,8 @@ Parameter | Default value | Explanation
 `scanPackage` | `""` | Package in which the library should look for mapped classes. The scan is important for support for polymorphism in object deserialization.  It is highly recommended to specify this value, otherwise the library will attempt to load and scan all classes on the classpath.
 `requireId` | `false` | Whether to require an identifier when serializing an object. If set to `true` and no identifier is found (either there is no `@Id` field or its value is `null`), an exception will be thrown. By default a blank node identifier is generated if no id is present.
 `assumeTargetType` | `false` | Whether to allow assuming target type in case the JSON-LD object does not contain types (`@type`). If set to `true`, the provided Java type (deserialization invocation argument, field type) will be used as target type.
+`enableOptimisticTargetTypeResolution` | `false` | Whether to enable optimistic target type resolution. If enabled, this allows to pick a target type even if there are multiple matching classes (which would normally end with an `AmbiguousTargetTypeException`).
+`preferSuperclass` | `false` | Allows to further specify optimistic target type resolution. By default, any of the target classes may be selected. Setting this to `true` will make the resolver attempt to select a superclass of the matching classes (if it is also in the target set). 
 
 See `cz.cvut.kbss.jsonld.ConfigParam`.
 
