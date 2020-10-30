@@ -1,0 +1,51 @@
+{
+  "@context": {
+    "firstName": "http://xmlns.com/foaf/0.1/firstName",
+    "lastName": "http://xmlns.com/foaf/0.1/lastName",
+    "accountName": "http://xmlns.com/foaf/0.1/accountName",
+    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin",
+    "participants": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/hasParticipant",
+    "name": "http://www.w3.org/2000/01/rdf-schema#label"
+  },
+  "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Covid19Study",
+  "@type": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Study",
+  "name": "COVID-19",
+  "participants": [
+    {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
+      "@type": [
+        "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+        "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee",
+        "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
+      ],
+      "isAdmin": true,
+      "accountName": "halsey@unsc.org",
+      "firstName": "Catherine",
+      "lastName": "Halsey"
+    },
+    {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Thomas+Lasky",
+      "@type": [
+        "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+        "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee",
+        "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
+      ],
+      "isAdmin": false,
+      "accountName": "lasky@unsc.org",
+      "firstName": "Thomas",
+      "lastName": "Lasky"
+    },
+    {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Sarah+Palmer",
+      "@type": [
+        "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+        "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee",
+        "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
+      ],
+      "isAdmin": false,
+      "accountName": "palmer@unsc.org",
+      "firstName": "Sarah",
+      "lastName": "Palmer"
+    }
+  ]
+}

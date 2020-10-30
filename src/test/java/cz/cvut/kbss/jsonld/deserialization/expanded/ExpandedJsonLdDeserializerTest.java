@@ -22,10 +22,7 @@ import cz.cvut.kbss.jsonld.deserialization.JsonLdDeserializer;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
-import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
-import cz.cvut.kbss.jsonld.exception.TargetTypeException;
-import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
-import cz.cvut.kbss.jsonld.exception.UnresolvedReferenceException;
+import cz.cvut.kbss.jsonld.exception.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -662,5 +659,36 @@ class ExpandedJsonLdDeserializerTest {
         assertTrue(result.getAltLabel().stream().anyMatch(ms -> ms.contains("en") && ms.get("en").equals("Building")));
         assertTrue(result.getAltLabel().stream().anyMatch(ms -> ms.contains("cs") && ms.get("cs").equals("Stavba")));
         assertTrue(result.getAltLabel().stream().anyMatch(ms -> ms.contains("cs") && ms.get("cs").equals("Budova")));
+    }
+
+    @Test
+    void deserializationSupportsOptimisticTargetTypeResolution() throws Exception {
+        final Configuration config = sut.configuration();
+        config.set(ConfigParam.ENABLE_OPTIMISTIC_TARGET_TYPE_RESOLUTION, Boolean.toString(true));
+        this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
+        final StudyOnPersons result = sut.deserialize(input, StudyOnPersons.class);
+        assertFalse(result.getParticipants().isEmpty());
+        result.getParticipants().forEach(p -> assertThat(p, anyOf(instanceOf(User.class), instanceOf(Employee.class))));
+    }
+
+    @Test
+    void deserializationSupportsOptimisticTargetTypeResolutionWithSuperclassPreference() throws Exception {
+        final Configuration config = sut.configuration();
+        config.set(ConfigParam.ENABLE_OPTIMISTIC_TARGET_TYPE_RESOLUTION, Boolean.toString(true));
+        config.set(ConfigParam.PREFER_SUPERCLASS, Boolean.toString(true));
+        config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
+        final Object input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
+        final StudyOnPersons result = sut.deserialize(input, StudyOnPersons.class);
+        assertFalse(result.getParticipants().isEmpty());
+        result.getParticipants().forEach(p -> assertThat(p, instanceOf(Person.class)));
+    }
+
+    @Test
+    void deserializationThrowsAmbiguousTargetTypeExceptionForAmbiguousTargetTypeWithDisabledOptimisticTargetTypeResolution()
+            throws Exception {
+        final Object input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
+        assertThrows(AmbiguousTargetTypeException.class, () -> sut.deserialize(input, StudyOnPersons.class));
     }
 }
