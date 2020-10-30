@@ -104,3 +104,8 @@ There are two ways to get JB4JSON-LD:
 ```
 
 Note that you will most likely need an integration with a JSON-serialization library like [JB4JSON-LD-Jackson](https://github.com/kbss-cvut/jb4jsonld-jackson).
+
+
+## License
+
+LGPLv3
