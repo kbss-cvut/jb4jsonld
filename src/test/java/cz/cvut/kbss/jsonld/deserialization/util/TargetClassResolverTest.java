@@ -18,6 +18,7 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.AmbiguousTargetTypeException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,10 +28,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TargetClassResolverTest {
 
@@ -103,5 +103,37 @@ class TargetClassResolverTest {
         this.sut = new TargetClassResolver(typeMap, new TargetClassResolverConfig(true, false, false));
         final Class<?> result = sut.getTargetClass(Person.class, Collections.emptySet());
         assertEquals(Person.class, result);
+    }
+
+    @Test
+    void getTargetClassReturnsOneOfMostSpecificTypesWhenOptimisticTargetTypeResolutionIsEnabled() {
+        typeMap.register(Vocabulary.AGENT, MostSpecific.class);
+        final List<String> types = Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.AGENT);
+        this.sut = new TargetClassResolver(typeMap, new TargetClassResolverConfig(false, true, false));
+        final Class<?> result = sut.getTargetClass(Person.class, types);
+        assertThat(result, anyOf(equalTo(MostSpecific.class), equalTo(User.class)));
+        assertTrue(Person.class.isAssignableFrom(result));
+    }
+
+    @Test
+    void getTargetClassReturnsMatchingParentClassWhenSuperclassIsPreferredWithOptimisticTypeResolution() {
+        typeMap.register(Vocabulary.AGENT, MostSpecific.class);
+        final List<String> types = Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.AGENT);
+        this.sut = new TargetClassResolver(typeMap, new TargetClassResolverConfig(false, true, true));
+        final Class<?> result = sut.getTargetClass(Person.class, types);
+        assertEquals(Person.class, result);
+    }
+
+    @Test
+    void getTargetClassSkipsAbstractClasses() {
+        typeMap.register(Vocabulary.AGENT, AbstractClass.class);
+        final List<String> types = Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.AGENT);
+        this.sut = new TargetClassResolver(typeMap, new TargetClassResolverConfig(false, false, false));
+        final Class<?> result = sut.getTargetClass(Person.class, types);
+        assertEquals(User.class, result);
+    }
+
+    @OWLClass(iri = Vocabulary.AGENT)
+    private static abstract class AbstractClass extends Person {
     }
 }

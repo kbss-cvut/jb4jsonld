@@ -52,8 +52,11 @@ public abstract class JsonLdDeserializer implements Configurable {
                 typeMap.register(ann.iri(), c);
             }
         }).processClasses(scanPath);
-        // TODO
-        return new TargetClassResolver(typeMap, new TargetClassResolverConfig(configuration.is(ConfigParam.ASSUME_TARGET_TYPE), false, false));
+        return new TargetClassResolver(typeMap,
+                new TargetClassResolverConfig(
+                        configuration.is(ConfigParam.ASSUME_TARGET_TYPE),
+                        configuration().is(ConfigParam.ENABLE_OPTIMISTIC_TARGET_TYPE_RESOLUTION),
+                        configuration().is(ConfigParam.PREFER_SUPERCLASS)));
     }
 
     @Override

@@ -18,6 +18,8 @@ import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +52,8 @@ public class TargetClassResolver {
      * @param expectedClass Expected class as specified by deserialization return type of field type
      * @param types         Types of the JSON-LD object to deserialize
      * @return Resolved target class. It has to be a subtype of the {@code expectedClass}
-     * @throws TargetTypeException If the resulting candidate is not assignable to the expected class
+     * @throws TargetTypeException If the resulting candidate is not assignable to the expected class or it cannot be
+     *                             determined
      */
     public <T> Class<? extends T> getTargetClass(Class<T> expectedClass, Collection<String> types) {
         if (types.isEmpty() && config.shouldAllowAssumingTargetType()) {
@@ -60,7 +63,8 @@ public class TargetClassResolver {
         final List<Class<?>> candidates = getTargetClassCandidates(types);
         final Class<?> targetCandidate;
         reduceTargetClassCandidates(expectedClass, candidates);
-        ensureSingleCandidateClassRemains(types, candidates);
+        final List<Class<?>> reducedCandidates = new ArrayList<>(candidates);
+        reduceToMostSpecificSubclasses(candidates);
         if (candidates.isEmpty()) {
             if (doesExpectedClassMatchesTypes(expectedClass, types)) {
                 targetCandidate = expectedClass;
@@ -69,7 +73,7 @@ public class TargetClassResolver {
                         "Neither " + expectedClass + " nor any of its subclasses matches the types " + types + ".");
             }
         } else {
-            targetCandidate = candidates.get(0);
+            targetCandidate = selectFinalTargetClass(candidates, reducedCandidates, types);
         }
         assert expectedClass.isAssignableFrom(targetCandidate);
         return (Class<? extends T>) targetCandidate;
@@ -80,22 +84,42 @@ public class TargetClassResolver {
     }
 
     private void reduceTargetClassCandidates(Class<?> expectedClass, List<Class<?>> candidates) {
-        candidates.removeIf(c -> !expectedClass.isAssignableFrom(c));
-        if (candidates.size() == 1) {
-            return;
-        }
-        reduceToMostSpecificSubclasses(candidates);
+        candidates.removeIf(c -> !expectedClass.isAssignableFrom(c) || Modifier.isAbstract(c.getModifiers()));
     }
 
     private void reduceToMostSpecificSubclasses(List<Class<?>> candidates) {
         candidates.removeIf(cls -> candidates.stream().anyMatch(c -> !cls.equals(c) && cls.isAssignableFrom(c)));
     }
 
-    private void ensureSingleCandidateClassRemains(Collection<String> types, List<Class<?>> candidates) {
-        if (candidates.size() > 1) {
-            throw new AmbiguousTargetTypeException(
-                    "Object with types " + types + " matches multiple equivalent target classes: " + candidates);
+    private Class<?> selectFinalTargetClass(List<Class<?>> mostSpecificCandidates, List<Class<?>> candidates,
+                                            Collection<String> types) {
+        assert mostSpecificCandidates.size() > 0;
+        if (mostSpecificCandidates.size() > 1) {
+            if (!config.isOptimisticTypeResolution()) {
+                throw ambiguousTargetType(types, mostSpecificCandidates);
+            }
+            if (config.shouldPreferSuperclass()) {
+                return selectTargetClassWithSuperclassPreference(mostSpecificCandidates, candidates);
+            }
         }
+        return mostSpecificCandidates.get(0);
+    }
+
+    private Class<?> selectTargetClassWithSuperclassPreference(List<Class<?>> mostSpecificCandidates,
+                                                               List<Class<?>> candidates) {
+        candidates.removeAll(mostSpecificCandidates);
+        reduceToMostGeneralSuperclasses(candidates);
+        return candidates.get(0);
+    }
+
+    private void reduceToMostGeneralSuperclasses(List<Class<?>> candidates) {
+        candidates.removeIf(cls -> candidates.stream().anyMatch(c -> !cls.equals(c) && c.isAssignableFrom(cls)));
+    }
+
+    private static AmbiguousTargetTypeException ambiguousTargetType(Collection<String> types,
+                                                                    List<Class<?>> candidates) {
+        return new AmbiguousTargetTypeException(
+                "Object with types " + types + " matches multiple equivalent target classes: " + candidates);
     }
 
     private boolean doesExpectedClassMatchesTypes(Class<?> expectedClass, Collection<String> types) {
