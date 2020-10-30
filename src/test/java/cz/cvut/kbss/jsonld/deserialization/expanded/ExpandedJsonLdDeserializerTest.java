@@ -678,6 +678,7 @@ class ExpandedJsonLdDeserializerTest {
         config.set(ConfigParam.ENABLE_OPTIMISTIC_TARGET_TYPE_RESOLUTION, Boolean.toString(true));
         config.set(ConfigParam.PREFER_SUPERCLASS, Boolean.toString(true));
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final Object input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
         final StudyOnPersons result = sut.deserialize(input, StudyOnPersons.class);
