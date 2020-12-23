@@ -17,7 +17,9 @@ package cz.cvut.kbss.jsonld.environment.model;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
+import org.mockito.internal.matchers.Or;
 
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashSet;
@@ -143,5 +145,9 @@ public class Organization {
                 ", age=" + age +
                 ", employees=" + employees +
                 '}';
+    }
+
+    public static Field getEmployeesField() throws NoSuchFieldException {
+        return Organization.class.getDeclaredField("employees");
     }
 }

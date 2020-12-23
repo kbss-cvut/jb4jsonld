@@ -21,6 +21,7 @@ import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.jsonld.annotation.JsonLdProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Set;
 
@@ -92,5 +93,9 @@ public class User extends Person {
 
     public void setTypes(Set<String> types) {
         this.types = types;
+    }
+
+    public static Field getUsernameField() throws NoSuchFieldException {
+        return User.class.getDeclaredField("username");
     }
 }

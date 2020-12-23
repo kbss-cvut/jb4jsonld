@@ -10,7 +10,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 
-@OWLClass(iri = Vocabulary.PERSON)
+@OWLClass(iri = Vocabulary.EMPLOYEE)
 public class PersonWithTypedProperties {
 
     @Id

@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -23,7 +23,7 @@ import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import java.lang.reflect.Field;
 import java.util.*;
 
-public class ObjectGraphTraverser implements InstanceVisitor {
+public class ObjectGraphTraverser {
 
     private final Set<InstanceVisitor> visitors = new HashSet<>(4);
 
@@ -51,38 +51,36 @@ public class ObjectGraphTraverser implements InstanceVisitor {
         resetKnownInstances();
         try {
             if (instance instanceof Collection) {
-                traverseCollection((Collection<?>) instance);
+                traverseCollection(new SerializationContext<>(null, null, (Collection<?>) instance));
             } else {
-                traverseImpl(instance);
+                traverseSingular(new SerializationContext<>(null, null, instance));
             }
         } catch (IllegalAccessException e) {
             throw new JsonLdSerializationException("Unable to extract field value.", e);
         }
     }
 
-    private void traverseCollection(Collection<?> col) throws IllegalAccessException {
-        openCollection(col);
-        for (Object item : col) {
-            traverseImpl(item);
+    private void traverseCollection(SerializationContext<? extends Collection<?>> ctx) throws IllegalAccessException {
+        openCollection(ctx);
+        for (Object item : ctx.value) {
+            traverseSingular(new SerializationContext<>(null, null, item));
         }
-        closeCollection(col);
+        closeCollection(ctx);
     }
 
-    private void traverseImpl(Object instance) throws IllegalAccessException {
-        if (instance == null) {
+    private void traverseSingular(SerializationContext<?> ctx) throws IllegalAccessException {
+        if (ctx.value == null) {
             return;
         }
-        if (knownInstances.containsKey(instance)) {
-            visitKnownInstance(knownInstances.get(instance), instance);
-            return;
+        final boolean firstEncounter = !knownInstances.containsKey(ctx.value);
+        openInstance(ctx);
+        visitIdentifier(ctx.value);
+        if (!BeanClassProcessor.isIdentifierType(ctx.value.getClass()) && firstEncounter) {
+            visitTypes(ctx.value);
+            serializeFields(ctx.value);
+            serializePropertiesField(ctx.value);
         }
-        openInstance(instance);
-        visitIdentifier(null, instance);
-        if (!BeanClassProcessor.isIdentifierType(instance.getClass())) {
-            visitTypes(null, instance);
-            serializeFields(instance);
-        }
-        closeInstance(instance);
+        closeInstance(ctx);
     }
 
     private void serializeFields(Object instance) throws IllegalAccessException {
@@ -90,13 +88,16 @@ public class ObjectGraphTraverser implements InstanceVisitor {
                 orderAttributesForSerialization(BeanAnnotationProcessor.getSerializableFields(instance),
                         BeanAnnotationProcessor.getAttributeOrder(instance.getClass()));
         for (Field f : fieldsToSerialize) {
-            if (BeanAnnotationProcessor.isInstanceIdentifier(f)) {
+            if (BeanAnnotationProcessor.isInstanceIdentifier(f) || BeanAnnotationProcessor
+                    .isPropertiesField(f) || BeanAnnotationProcessor.isTypesField(f)) {
                 continue;
             }
             Object value = BeanClassProcessor.getFieldValue(f, instance);
-            visitField(f, value);
+            final SerializationContext<?> ctx =
+                    new SerializationContext<>(BeanAnnotationProcessor.getAttributeIdentifier(f), f, value);
+            visitAttribute(ctx);
             if (value != null && BeanAnnotationProcessor.isObjectProperty(f)) {
-                traverseObjectPropertyValue(value);
+                traverseObjectPropertyValue(ctx);
             }
         }
     }
@@ -118,76 +119,86 @@ public class ObjectGraphTraverser implements InstanceVisitor {
         return result;
     }
 
-    private void traverseObjectPropertyValue(Object value) throws IllegalAccessException {
-        if (value instanceof Collection) {
-            final Collection<?> col = (Collection<?>) value;
-            openCollection(col);
-            for (Object elem : col) {
-                traverseImpl(elem);
+    private void traverseObjectPropertyValue(SerializationContext<?> ctx) throws IllegalAccessException {
+        if (ctx.value instanceof Collection) {
+            final SerializationContext<Collection<?>> colContext = (SerializationContext<Collection<?>>) ctx;
+            openCollection(colContext);
+            for (Object elem : colContext.value) {
+                traverseSingular(new SerializationContext<>(null, null, elem));
             }
-            closeCollection(col);
-        } else if (value.getClass().isArray()) {
+            closeCollection(colContext);
+        } else if (ctx.value.getClass().isArray()) {
             throw new JsonLdSerializationException("Arrays are not supported, yet.");
         } else {
-            traverseImpl(value);
+            traverseSingular(ctx);
         }
     }
 
-    @Override
-    public void openInstance(Object instance) {
-        if (!BeanClassProcessor.isIdentifierType(instance.getClass())) {
-            final Optional<Object> identifier = BeanAnnotationProcessor.getInstanceIdentifier(instance);
-            knownInstances.put(instance, identifier.orElse(IdentifierUtil.generateBlankNodeId()).toString());
+    private void serializePropertiesField(Object instance) {
+        if (!BeanAnnotationProcessor.hasPropertiesField(instance.getClass())) {
+            return;
         }
-        visitors.forEach(v -> v.openInstance(instance));
+        final Field propertiesField = BeanAnnotationProcessor.getPropertiesField(instance.getClass());
+        final Object value = BeanClassProcessor.getFieldValue(propertiesField, instance);
+        if (value == null) {
+            return;
+        }
+        assert value instanceof Map;
+        new PropertiesTraverser(this)
+                .traverseProperties(new SerializationContext<>(null, propertiesField, (Map<?, ?>) value));
     }
 
-    @Override
-    public void closeInstance(Object instance) {
-        visitors.forEach(v -> v.closeInstance(instance));
+    public void openInstance(SerializationContext<?> ctx) {
+        if (!BeanClassProcessor.isIdentifierType(ctx.value.getClass())) {
+            final String identifier = resolveIdentifier(ctx.value);
+            knownInstances.put(ctx.value, identifier);
+        }
+        visitors.forEach(v -> v.openObject(ctx));
     }
 
-    @Override
-    public void visitKnownInstance(String id, Object instance) {
-        visitors.forEach(v -> v.visitKnownInstance(id, instance));
+    private String resolveIdentifier(Object instance) {
+        final Optional<Object> extractedId = BeanAnnotationProcessor.getInstanceIdentifier(instance);
+        if (!extractedId.isPresent() && requireId) {
+            throw MissingIdentifierException.create(instance);
+        }
+        return extractedId.orElseGet(() -> knownInstances.containsKey(instance) ? knownInstances.get(instance) :
+                IdentifierUtil.generateBlankNodeId()).toString();
     }
 
-    @Override
-    public void visitIdentifier(String identifier, Object instance) {
+    public void closeInstance(SerializationContext<?> ctx) {
+        visitors.forEach(v -> v.closeObject(ctx));
+    }
+
+    public void visitIdentifier(Object instance) {
         final String id;
         if (BeanClassProcessor.isIdentifierType(instance.getClass())) {
             id = instance.toString();
         } else {
-            final Optional<Object> extractedId = BeanAnnotationProcessor.getInstanceIdentifier(instance);
-            if (!extractedId.isPresent() && requireId) {
-                throw MissingIdentifierException.create(instance);
-            }
-            id = extractedId.orElse(IdentifierUtil.generateBlankNodeId()).toString();
+            id = resolveIdentifier(instance);
             knownInstances.put(instance, id);
         }
-        visitors.forEach(v -> v.visitIdentifier(id, instance));
+        final SerializationContext<String> idContext = new SerializationContext<>(null, null, id);
+        visitors.forEach(v -> v.visitIdentifier(idContext));
     }
 
-    @Override
-    public void visitTypes(Collection<String> types, Object instance) {
+    public void visitTypes(Object instance) {
         final Set<String> resolvedTypes = typeResolver.resolveTypes(instance);
         assert !resolvedTypes.isEmpty();
-        visitors.forEach(v -> v.visitTypes(resolvedTypes, instance));
+        final SerializationContext<Collection<String>> typesContext =
+                new SerializationContext<>(null, null, resolvedTypes);
+        visitors.forEach(v -> v.visitTypes(typesContext));
     }
 
-    @Override
-    public void visitField(Field field, Object value) {
-        visitors.forEach(v -> v.visitField(field, value));
+    public void visitAttribute(SerializationContext<?> ctx) {
+        visitors.forEach(v -> v.visitAttribute(ctx));
     }
 
-    @Override
-    public void openCollection(Collection<?> collection) {
-        visitors.forEach(v -> v.openCollection(collection));
+    public void openCollection(SerializationContext<? extends Collection<?>> ctx) {
+        visitors.forEach(v -> v.openCollection(ctx));
     }
 
-    @Override
-    public void closeCollection(Collection<?> collection) {
-        visitors.forEach(v -> v.closeCollection(collection));
+    public void closeCollection(SerializationContext<?> ctx) {
+        visitors.forEach(v -> v.closeCollection(ctx));
     }
 
     public void setRequireId(boolean requireId) {
