@@ -14,6 +14,10 @@
  */
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
+import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
+import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -48,7 +52,23 @@ class PropertiesTraverser {
     }
 
     private void visitSingleValue(String property, Object value) {
-        parent.visitAttribute(new SerializationContext<>(property, null, value));
+        assert value != null;
+        if (isTraversable(value)) {
+            try {
+                parent.traverseSingular(new SerializationContext<>(property, null, value));
+            } catch (IllegalAccessException e) {
+                throw new JsonLdSerializationException("Unable to process property value.", e);
+            }
+        } else {
+            parent.visitAttribute(new SerializationContext<>(property, null, value));
+        }
+    }
+
+    private static boolean isTraversable(Object value) {
+        final Class<?> cls = value.getClass();
+        return (BeanClassProcessor.isIdentifierType(value.getClass()) && !String.class.equals(cls)) ||
+                BeanAnnotationProcessor.isOwlClassEntity(value.getClass()) ||
+                BeanAnnotationProcessor.hasTypesField(cls);
     }
 
     private void serializePropertyValues(String property, Collection<?> values) {
@@ -57,11 +77,13 @@ class PropertiesTraverser {
         }
         if (values.size() == 1) {
             final Object val = values.iterator().next();
-            visitSingleValue(property, val);
+            if (val != null) {
+                visitSingleValue(property, val);
+            }
         } else {
             final SerializationContext<Collection<?>> colContext = new SerializationContext<>(property, null, values);
             parent.openCollection(colContext);
-            values.stream().filter(Objects::nonNull).forEach(v -> visitSingleValue(property, v));
+            values.stream().filter(Objects::nonNull).forEach(v -> visitSingleValue(null, v));
             parent.closeCollection(colContext);
         }
     }

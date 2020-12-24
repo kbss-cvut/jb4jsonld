@@ -68,7 +68,7 @@ public class ObjectGraphTraverser {
         closeCollection(ctx);
     }
 
-    private void traverseSingular(SerializationContext<?> ctx) throws IllegalAccessException {
+    void traverseSingular(SerializationContext<?> ctx) throws IllegalAccessException {
         if (ctx.value == null) {
             return;
         }

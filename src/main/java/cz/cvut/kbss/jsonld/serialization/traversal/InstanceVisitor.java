@@ -1,6 +1,5 @@
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 
 public interface InstanceVisitor {
@@ -22,6 +21,15 @@ public interface InstanceVisitor {
      */
     void closeObject(SerializationContext<?> ctx);
 
+    /**
+     * Called when an attribute is processed by the object graph traverser.
+     * <p>
+     * Note that identifiers ({@link cz.cvut.kbss.jopa.model.annotations.Id}) and types ({@link cz.cvut.kbss.jopa.model.annotations.Types})
+     * are processed separately and are not visited as attributes. Also, when processing {@link cz.cvut.kbss.jopa.model.annotations.Properties}, this method
+     * is invoked for each property in the map.
+     *
+     * @param ctx Current serialization context
+     */
     void visitAttribute(SerializationContext<?> ctx);
 
     /**
@@ -53,6 +61,7 @@ public interface InstanceVisitor {
      * Called after the last collection item is processed.
      *
      * @param ctx Current serialization context
+     * @see #openCollection(SerializationContext)
      */
     void closeCollection(SerializationContext<?> ctx);
 }
