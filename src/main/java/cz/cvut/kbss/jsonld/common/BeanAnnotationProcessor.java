@@ -262,8 +262,7 @@ public class BeanAnnotationProcessor {
      * @return Whether field has a {@link OWLObjectProperty} annotation
      */
     public static boolean isObjectProperty(Field field) {
-        Objects.requireNonNull(field);
-        return field.getDeclaredAnnotation(OWLObjectProperty.class) != null;
+        return field != null && field.getDeclaredAnnotation(OWLObjectProperty.class) != null;
     }
 
     /**
@@ -273,8 +272,7 @@ public class BeanAnnotationProcessor {
      * @return Whether field has a {@link OWLAnnotationProperty} annotation
      */
     public static boolean isAnnotationProperty(Field field) {
-        Objects.requireNonNull(field);
-        return field.getDeclaredAnnotation(OWLAnnotationProperty.class) != null;
+        return field != null && field.getDeclaredAnnotation(OWLAnnotationProperty.class) != null;
     }
 
     /**
@@ -284,8 +282,7 @@ public class BeanAnnotationProcessor {
      * @return Whether the field has a {@link Id} annotation
      */
     public static boolean isInstanceIdentifier(Field field) {
-        Objects.requireNonNull(field);
-        return field.getDeclaredAnnotation(Id.class) != null;
+        return field != null && field.getDeclaredAnnotation(Id.class) != null;
     }
 
     /**
@@ -295,8 +292,7 @@ public class BeanAnnotationProcessor {
      * @return Whether the field has a {@link Types} annotation
      */
     public static boolean isTypesField(Field field) {
-        Objects.requireNonNull(field);
-        return field.getDeclaredAnnotation(Types.class) != null;
+        return field != null && field.getDeclaredAnnotation(Types.class) != null;
     }
 
     /**

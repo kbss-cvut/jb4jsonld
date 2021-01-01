@@ -13,30 +13,27 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
-import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-class LiteralFieldSerializer implements FieldSerializer {
+class LiteralValueSerializer implements ValueSerializer {
 
     private final MultilingualStringSerializer multilingualStringSerializer;
 
-    LiteralFieldSerializer(MultilingualStringSerializer multilingualStringSerializer) {
+    LiteralValueSerializer(MultilingualStringSerializer multilingualStringSerializer) {
         this.multilingualStringSerializer = multilingualStringSerializer;
     }
 
     @Override
-    public List<JsonNode> serializeField(Field field, Object value) {
-        final String attName = BeanAnnotationProcessor.getAttributeIdentifier(field);
+    public List<JsonNode> serialize(String attId, Object value) {
         final JsonNode result;
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
-            final CollectionNode node = JsonNodeFactory.createCollectionNode(attName, col);
+            final CollectionNode node = JsonNodeFactory.createCollectionNode(attId, col);
             col.forEach(obj -> {
                 final JsonNode serObj = obj instanceof MultilingualString ? multilingualStringSerializer.serialize(
                         (MultilingualString) obj) : JsonNodeFactory.createLiteralNode(obj);
@@ -44,9 +41,9 @@ class LiteralFieldSerializer implements FieldSerializer {
             });
             result = node;
         } else if (value instanceof MultilingualString) {
-            result = multilingualStringSerializer.serialize(attName, (MultilingualString) value);
+            result = multilingualStringSerializer.serialize(attId, (MultilingualString) value);
         } else {
-            result = JsonNodeFactory.createLiteralNode(attName, value);
+            result = JsonNodeFactory.createLiteralNode(attId, value);
         }
         return Collections.singletonList(result);
     }

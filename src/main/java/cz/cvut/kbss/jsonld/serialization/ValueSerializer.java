@@ -20,9 +20,9 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 /**
- * Serializes field value.
+ * Serializes value.
  */
-interface FieldSerializer {
+interface ValueSerializer {
 
     /**
      * Serializes the specified field, returning a list of JSON-LD nodes representing it.
@@ -30,9 +30,9 @@ interface FieldSerializer {
      * The result is a list because maps (e.g. {@link cz.cvut.kbss.jopa.model.annotations.Properties}) cannot be
      * serialized as a single attribute.
      *
-     * @param field The field to serialize
-     * @param value Value of the field
+     * @param attId Attribute identifier
+     * @param value Value to serialize
      * @return Serialization result
      */
-    List<JsonNode> serializeField(Field field, Object value);
+    List<JsonNode> serialize(String attId, Object value);
 }

@@ -18,6 +18,8 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
+import java.lang.reflect.Field;
+
 @OWLClass(iri = Vocabulary.EMPLOYEE)
 public class Employee extends User {
 
@@ -30,5 +32,9 @@ public class Employee extends User {
 
     public void setEmployer(Organization employer) {
         this.employer = employer;
+    }
+
+    public static Field getEmployerField() throws NoSuchFieldException {
+        return Employee.class.getDeclaredField("employer");
     }
 }

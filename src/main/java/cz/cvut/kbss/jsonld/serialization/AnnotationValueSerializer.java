@@ -14,32 +14,28 @@ package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-class AnnotationFieldSerializer implements FieldSerializer {
+class AnnotationValueSerializer implements ValueSerializer {
 
     private final MultilingualStringSerializer multilingualStringSerializer;
 
-    AnnotationFieldSerializer(
-            MultilingualStringSerializer multilingualStringSerializer) {
+    AnnotationValueSerializer(MultilingualStringSerializer multilingualStringSerializer) {
         this.multilingualStringSerializer = multilingualStringSerializer;
     }
 
     @Override
-    public List<JsonNode> serializeField(Field field, Object value) {
-        final String attName = BeanAnnotationProcessor.getAttributeIdentifier(field);
+    public List<JsonNode> serialize(String attId, Object value) {
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
-            final CollectionNode node = JsonNodeFactory.createCollectionNode(attName, col);
+            final CollectionNode node = JsonNodeFactory.createCollectionNode(attId, col);
             col.forEach(item -> {
                 if (isReference(item)) {
                     node.addItem(serializeReference(null, item));
@@ -52,12 +48,12 @@ class AnnotationFieldSerializer implements FieldSerializer {
             return Collections.singletonList(node);
         } else {
             if (isReference(value)) {
-                return Collections.singletonList(serializeReference(attName, value));
+                return Collections.singletonList(serializeReference(attId, value));
             } else if (value instanceof MultilingualString) {
-                return Collections.singletonList(multilingualStringSerializer.serialize(attName,
+                return Collections.singletonList(multilingualStringSerializer.serialize(attId,
                         (MultilingualString) value));
             }
-            return Collections.singletonList(JsonNodeFactory.createLiteralNode(attName, value));
+            return Collections.singletonList(JsonNodeFactory.createLiteralNode(attId, value));
         }
     }
 

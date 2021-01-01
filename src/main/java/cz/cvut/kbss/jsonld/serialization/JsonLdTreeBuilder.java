@@ -18,8 +18,8 @@ import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.InstanceVisitor;
+import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Stack;
@@ -32,28 +32,22 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     private final Stack<CompositeNode> nodeStack = new Stack<>();
     private CompositeNode currentNode;
-    private Field visitedField;
 
-    private final FieldSerializer literalSerializer;
-    private final FieldSerializer annotationSerializer;
-    private final FieldSerializer propertiesSerializer = new PropertiesFieldSerializer();
+    private final ValueSerializer literalSerializer;
+    private final ValueSerializer annotationSerializer;
 
     public JsonLdTreeBuilder() {
         final MultilingualStringSerializer msSerializer = new MultilingualStringSerializer();
-        this.literalSerializer = new LiteralFieldSerializer(msSerializer);
-        this.annotationSerializer = new AnnotationFieldSerializer(msSerializer);
+        this.literalSerializer = new LiteralValueSerializer(msSerializer);
+        this.annotationSerializer = new AnnotationValueSerializer(msSerializer);
     }
 
     @Override
-    public void openInstance(Object instance) {
-        final CompositeNode newCurrent = visitedField != null ? JsonNodeFactory.createObjectNode(attId(visitedField)) :
-                                         JsonNodeFactory.createObjectNode();
+    public void openObject(SerializationContext<?> ctx) {
+        final CompositeNode newCurrent =
+                ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) :
+                        JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
-        this.visitedField = null;
-    }
-
-    private String attId(Field field) {
-        return BeanAnnotationProcessor.getAttributeIdentifier(field);
     }
 
     private void openNewNode(CompositeNode newNode) {
@@ -67,7 +61,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     }
 
     @Override
-    public void closeInstance(Object instance) {
+    public void closeObject(SerializationContext<?> ctx) {
         currentNode.close();
         if (!nodeStack.empty()) {
             this.currentNode = nodeStack.pop();
@@ -75,65 +69,45 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     }
 
     @Override
-    public void visitIdentifier(String identifier, Object instance) {
+    public void visitIdentifier(SerializationContext<String> idCtx) {
         assert currentNode.isOpen();
-        currentNode.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, identifier));
+        currentNode.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, idCtx.getValue()));
     }
 
     @Override
-    public void visitTypes(Collection<String> types, Object instance) {
-        final CollectionNode typesNode = JsonNodeFactory.createCollectionNode(JsonLd.TYPE, types);
-        types.forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
+    public void visitTypes(SerializationContext<Collection<String>> typesCtx) {
+        final CollectionNode typesNode = JsonNodeFactory.createCollectionNode(JsonLd.TYPE, typesCtx.getValue());
+        typesCtx.getValue().forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
         currentNode.addItem(typesNode);
     }
 
     @Override
-    public void visitKnownInstance(String id, Object instance) {
-        if (visitedField != null) {
-            openNewNode(JsonNodeFactory.createObjectNode(attId(visitedField)));
-        } else {
-            openNewNode(JsonNodeFactory.createObjectNode());
-        }
-        currentNode.addItem(JsonNodeFactory.createLiteralNode(JsonLd.ID, id));
-        closeInstance(instance);
-        this.visitedField = null;
-    }
-
-    @Override
-    public void visitField(Field field, Object value) {
-        if (value == null || BeanAnnotationProcessor.isTypesField(field)) {
-            return;
-        }
-        if (BeanAnnotationProcessor.isObjectProperty(field)) {
-            this.visitedField = field;
-        } else {
+    public void visitAttribute(SerializationContext<?> ctx) {
+        if (ctx.getValue() != null && !BeanAnnotationProcessor.isObjectProperty(ctx.getField())) {
             assert currentNode != null;
             final List<JsonNode> nodes;
-            if (BeanAnnotationProcessor.isAnnotationProperty(field)) {
-                nodes = annotationSerializer.serializeField(field, value);
-            } else if (BeanAnnotationProcessor.isPropertiesField(field)) {
-                // A problem could be when the properties contain a property mapped by the model as well
-                nodes = propertiesSerializer.serializeField(field, value);
+            if (BeanAnnotationProcessor.isAnnotationProperty(ctx.getField())) {
+                nodes = annotationSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
             } else {
-                nodes = literalSerializer.serializeField(field, value);
+                nodes = literalSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
             }
             nodes.forEach(node -> currentNode.addItem(node));
         }
     }
 
     @Override
-    public void openCollection(Collection<?> collection) {
+    public void openCollection(SerializationContext<? extends Collection<?>> ctx) {
         final CollectionNode newCurrent =
-                visitedField != null ? JsonNodeFactory.createCollectionNode(attId(visitedField), collection) :
-                JsonNodeFactory.createCollectionNode(collection);
+                ctx.getAttributeId() != null ? JsonNodeFactory.createCollectionNode(ctx.getAttributeId(),
+                        ctx.getValue()) :
+                        JsonNodeFactory.createCollectionNode(ctx.getValue());
         openNewNode(newCurrent);
-        this.visitedField = null;
     }
 
     @Override
-    public void closeCollection(Collection<?> collection) {
+    public void closeCollection(SerializationContext<?> ctx) {
         assert currentNode instanceof CollectionNode;
-        closeInstance(collection);
+        closeObject(ctx);
     }
 
     public CompositeNode getTreeRoot() {

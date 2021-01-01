@@ -20,6 +20,7 @@ import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Map;
 import java.util.Set;
@@ -69,5 +70,13 @@ public class Person {
 
     public void setProperties(Map<String, Set<String>> properties) {
         this.properties = properties;
+    }
+
+    public static Field getFirstNameField() throws NoSuchFieldException {
+        return Person.class.getDeclaredField("firstName");
+    }
+
+    public static Field getLastNameField() throws NoSuchFieldException {
+        return Person.class.getDeclaredField("lastName");
     }
 }
