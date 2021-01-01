@@ -51,9 +51,9 @@ public class ObjectGraphTraverser {
         resetKnownInstances();
         try {
             if (instance instanceof Collection) {
-                traverseCollection(new SerializationContext<>(null, null, (Collection<?>) instance));
+                traverseCollection(new SerializationContext<>((Collection<?>) instance));
             } else {
-                traverseSingular(new SerializationContext<>(null, null, instance));
+                traverseSingular(new SerializationContext<>(instance));
             }
         } catch (IllegalAccessException e) {
             throw new JsonLdSerializationException("Unable to extract field value.", e);
@@ -62,23 +62,23 @@ public class ObjectGraphTraverser {
 
     private void traverseCollection(SerializationContext<? extends Collection<?>> ctx) throws IllegalAccessException {
         openCollection(ctx);
-        for (Object item : ctx.value) {
-            traverseSingular(new SerializationContext<>(null, null, item));
+        for (Object item : ctx.getValue()) {
+            traverseSingular(new SerializationContext<>(item));
         }
         closeCollection(ctx);
     }
 
     void traverseSingular(SerializationContext<?> ctx) throws IllegalAccessException {
-        if (ctx.value == null) {
+        if (ctx.getValue() == null) {
             return;
         }
-        final boolean firstEncounter = !knownInstances.containsKey(ctx.value);
+        final boolean firstEncounter = !knownInstances.containsKey(ctx.getValue());
         openInstance(ctx);
-        visitIdentifier(ctx.value);
-        if (!BeanClassProcessor.isIdentifierType(ctx.value.getClass()) && firstEncounter) {
-            visitTypes(ctx.value);
-            serializeFields(ctx.value);
-            serializePropertiesField(ctx.value);
+        visitIdentifier(ctx.getValue());
+        if (!BeanClassProcessor.isIdentifierType(ctx.getValue().getClass()) && firstEncounter) {
+            visitTypes(ctx.getValue());
+            serializeFields(ctx.getValue());
+            serializePropertiesField(ctx.getValue());
         }
         closeInstance(ctx);
     }
@@ -120,14 +120,14 @@ public class ObjectGraphTraverser {
     }
 
     private void traverseObjectPropertyValue(SerializationContext<?> ctx) throws IllegalAccessException {
-        if (ctx.value instanceof Collection) {
+        if (ctx.getValue() instanceof Collection) {
             final SerializationContext<Collection<?>> colContext = (SerializationContext<Collection<?>>) ctx;
             openCollection(colContext);
-            for (Object elem : colContext.value) {
-                traverseSingular(new SerializationContext<>(null, null, elem));
+            for (Object elem : colContext.getValue()) {
+                traverseSingular(new SerializationContext<>(elem));
             }
             closeCollection(colContext);
-        } else if (ctx.value.getClass().isArray()) {
+        } else if (ctx.getValue().getClass().isArray()) {
             throw new JsonLdSerializationException("Arrays are not supported, yet.");
         } else {
             traverseSingular(ctx);
@@ -145,13 +145,13 @@ public class ObjectGraphTraverser {
         }
         assert value instanceof Map;
         new PropertiesTraverser(this)
-                .traverseProperties(new SerializationContext<>(null, propertiesField, (Map<?, ?>) value));
+                .traverseProperties(new SerializationContext<>(propertiesField, (Map<?, ?>) value));
     }
 
     public void openInstance(SerializationContext<?> ctx) {
-        if (!BeanClassProcessor.isIdentifierType(ctx.value.getClass())) {
-            final String identifier = resolveIdentifier(ctx.value);
-            knownInstances.put(ctx.value, identifier);
+        if (!BeanClassProcessor.isIdentifierType(ctx.getValue().getClass())) {
+            final String identifier = resolveIdentifier(ctx.getValue());
+            knownInstances.put(ctx.getValue(), identifier);
         }
         visitors.forEach(v -> v.openObject(ctx));
     }
@@ -177,15 +177,14 @@ public class ObjectGraphTraverser {
             id = resolveIdentifier(instance);
             knownInstances.put(instance, id);
         }
-        final SerializationContext<String> idContext = new SerializationContext<>(null, null, id);
+        final SerializationContext<String> idContext = new SerializationContext<>(id);
         visitors.forEach(v -> v.visitIdentifier(idContext));
     }
 
     public void visitTypes(Object instance) {
         final Set<String> resolvedTypes = typeResolver.resolveTypes(instance);
         assert !resolvedTypes.isEmpty();
-        final SerializationContext<Collection<String>> typesContext =
-                new SerializationContext<>(null, null, resolvedTypes);
+        final SerializationContext<Collection<String>> typesContext = new SerializationContext<>(resolvedTypes);
         visitors.forEach(v -> v.visitTypes(typesContext));
     }
 

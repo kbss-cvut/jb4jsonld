@@ -44,8 +44,9 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void openObject(SerializationContext<?> ctx) {
-        final CompositeNode newCurrent = ctx.attributeId != null ? JsonNodeFactory.createObjectNode(ctx.attributeId) :
-                JsonNodeFactory.createObjectNode();
+        final CompositeNode newCurrent =
+                ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) :
+                        JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
     }
 
@@ -70,25 +71,25 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void visitIdentifier(SerializationContext<String> idCtx) {
         assert currentNode.isOpen();
-        currentNode.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, idCtx.value));
+        currentNode.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, idCtx.getValue()));
     }
 
     @Override
     public void visitTypes(SerializationContext<Collection<String>> typesCtx) {
-        final CollectionNode typesNode = JsonNodeFactory.createCollectionNode(JsonLd.TYPE, typesCtx.value);
-        typesCtx.value.forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
+        final CollectionNode typesNode = JsonNodeFactory.createCollectionNode(JsonLd.TYPE, typesCtx.getValue());
+        typesCtx.getValue().forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
         currentNode.addItem(typesNode);
     }
 
     @Override
     public void visitAttribute(SerializationContext<?> ctx) {
-        if (ctx.value != null && !BeanAnnotationProcessor.isObjectProperty(ctx.field)) {
+        if (ctx.getValue() != null && !BeanAnnotationProcessor.isObjectProperty(ctx.getField())) {
             assert currentNode != null;
             final List<JsonNode> nodes;
-            if (BeanAnnotationProcessor.isAnnotationProperty(ctx.field)) {
-                nodes = annotationSerializer.serialize(ctx.attributeId, ctx.value);
+            if (BeanAnnotationProcessor.isAnnotationProperty(ctx.getField())) {
+                nodes = annotationSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
             } else {
-                nodes = literalSerializer.serialize(ctx.attributeId, ctx.value);
+                nodes = literalSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
             }
             nodes.forEach(node -> currentNode.addItem(node));
         }
@@ -97,8 +98,9 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void openCollection(SerializationContext<? extends Collection<?>> ctx) {
         final CollectionNode newCurrent =
-                ctx.attributeId != null ? JsonNodeFactory.createCollectionNode(ctx.attributeId, ctx.value) :
-                        JsonNodeFactory.createCollectionNode(ctx.value);
+                ctx.getAttributeId() != null ? JsonNodeFactory.createCollectionNode(ctx.getAttributeId(),
+                        ctx.getValue()) :
+                        JsonNodeFactory.createCollectionNode(ctx.getValue());
         openNewNode(newCurrent);
     }
 

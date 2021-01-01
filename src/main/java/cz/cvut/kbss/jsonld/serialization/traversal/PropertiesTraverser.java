@@ -37,7 +37,7 @@ class PropertiesTraverser {
     }
 
     public void traverseProperties(SerializationContext<Map<?, ?>> ctx) {
-        for (Map.Entry<?, ?> e : ctx.value.entrySet()) {
+        for (Map.Entry<?, ?> e : ctx.getValue().entrySet()) {
             final String property = e.getKey().toString();
             if (e.getValue() == null) {
                 continue;
@@ -55,12 +55,12 @@ class PropertiesTraverser {
         assert value != null;
         if (isTraversable(value)) {
             try {
-                parent.traverseSingular(new SerializationContext<>(property, null, value));
+                parent.traverseSingular(new SerializationContext<>(property, value));
             } catch (IllegalAccessException e) {
                 throw new JsonLdSerializationException("Unable to process property value.", e);
             }
         } else {
-            parent.visitAttribute(new SerializationContext<>(property, null, value));
+            parent.visitAttribute(new SerializationContext<>(property, value));
         }
     }
 
@@ -81,7 +81,7 @@ class PropertiesTraverser {
                 visitSingleValue(property, val);
             }
         } else {
-            final SerializationContext<Collection<?>> colContext = new SerializationContext<>(property, null, values);
+            final SerializationContext<Collection<?>> colContext = new SerializationContext<>(property, values);
             parent.openCollection(colContext);
             values.stream().filter(Objects::nonNull).forEach(v -> visitSingleValue(null, v));
             parent.closeCollection(colContext);

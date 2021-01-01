@@ -105,7 +105,7 @@ class PropertiesTraverserTest {
         final ArgumentCaptor<SerializationContext<?>> captor = ArgumentCaptor.forClass(SerializationContext.class);
         verify(traverser, atLeastOnce()).visitAttribute(captor.capture());
         assertEquals(values.stream().filter(Objects::nonNull).count(),
-                captor.getAllValues().stream().filter(sc -> values.contains(sc.value)).count());
+                captor.getAllValues().stream().filter(sc -> values.contains(sc.getValue())).count());
     }
 
     @Test
