@@ -497,4 +497,29 @@ class CompactedJsonLdSerializerTest {
         final Map<String, ?> friendJson = (Map<String, ?>) friendObject;
         assertEquals(friendId.toString(), friendJson.get(JsonLd.ID));
     }
+
+    @Test
+    void serializationSerializesMultilingualStringInTypedUnmappedProperties() throws Exception {
+        final PersonWithTypedProperties instance = new PersonWithTypedProperties();
+        instance.setUri(Generator.generateUri());
+        final MultilingualString ms = MultilingualString.create("en", "Falcon");
+        ms.set("cs", "Sokol");
+        final URI property = URI.create("http://xmlns.com/foaf/0.1/nick");
+        instance.setProperties(Collections.singletonMap(property, Collections.singleton(ms)));
+
+        sut.serialize(instance);
+        final Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertTrue(json.containsKey(property.toString()));
+        final List<?> nick = (List<?>) json.get(property.toString());
+        assertEquals(ms.getValue().size(), nick.size());
+        for (Object item : nick) {
+            assertThat(item, instanceOf(Map.class));
+            final Map<?, ?> m = (Map<?, ?>) item;
+            assertTrue(m.containsKey(JsonLd.LANGUAGE));
+            assertTrue(m.containsKey(JsonLd.VALUE));
+            assertTrue(ms.contains(m.get(JsonLd.LANGUAGE).toString()));
+            assertEquals(ms.get(m.get(JsonLd.LANGUAGE).toString()), m.get(JsonLd.VALUE));
+        }
+    }
 }
