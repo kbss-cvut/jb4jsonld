@@ -693,4 +693,12 @@ class ExpandedJsonLdDeserializerTest {
         final Object input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
         assertThrows(AmbiguousTargetTypeException.class, () -> sut.deserialize(input, StudyOnPersons.class));
     }
+
+    @Test
+    void deserializationEnsuresEqualityAndHashCodeBasedCollectionsArePopulatedCorrectly() throws Exception {
+        final Object input = readAndExpand("objectWithPluralReference.json");
+        final Organization result = sut.deserialize(input, Organization.class);
+        assertFalse(result.getEmployees().isEmpty());
+        result.getEmployees().forEach(e -> assertFalse(result.getEmployees().add(e)));
+    }
 }

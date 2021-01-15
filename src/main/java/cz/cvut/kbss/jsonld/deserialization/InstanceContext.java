@@ -109,7 +109,7 @@ abstract class InstanceContext<T> {
      * @param value The value to set
      */
     void setFieldValue(Field field, Object value) {
-        throw new UnsupportedOperationException("Not supported by this type of instance context.");
+        // Do nothing
     }
 
     /**
@@ -118,7 +118,7 @@ abstract class InstanceContext<T> {
      * @param item Item to add
      */
     void addItem(Object item) {
-        throw new UnsupportedOperationException("Not supported by this type of instance context.");
+        // Do nothing
     }
 
     /**

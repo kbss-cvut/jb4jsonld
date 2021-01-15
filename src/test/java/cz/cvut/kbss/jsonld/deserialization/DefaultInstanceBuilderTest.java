@@ -39,6 +39,7 @@ import java.net.URI;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -90,7 +91,7 @@ class DefaultInstanceBuilderTest {
     }
 
     @Test
-    void openObjectAddsObjectToCurrentlyOpenCollectionAndBecomesCurrentInstance() throws Exception {
+    void closeObjectAddsObjectToCurrentlyOpenCollectionAndBecomesCurrentInstance() throws Exception {
         sut.openCollection(CollectionType.SET);
         sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         final Object root = sut.getCurrentRoot();
@@ -99,7 +100,12 @@ class DefaultInstanceBuilderTest {
         final Object stackTop = getOpenInstances().peek().getInstance();
         assertTrue(stackTop instanceof Set);
         final Set<?> set = (Set<?>) stackTop;
-        assertEquals(1, set.size());
+        assertTrue(((Set<?>) stackTop).isEmpty());
+        sut.closeObject();
+        final Object newRoot = sut.getCurrentRoot();
+        assertThat(newRoot, instanceOf(Set.class));
+        final Set<?> newSet = (Set<?>) newRoot;
+        assertEquals(1, newSet.size());
         assertSame(root, set.iterator().next());
     }
 

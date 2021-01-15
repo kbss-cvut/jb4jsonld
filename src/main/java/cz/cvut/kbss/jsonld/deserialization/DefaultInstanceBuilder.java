@@ -111,20 +111,19 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         } else {
             if (knownInstances.containsKey(id)) {
                 final InstanceContext<T> context = reopenExistingInstance(id, cls);
-                replaceCurrentContext(context.getInstance(), context);
+                replaceCurrentContext(context);
             } else {
                 final T instance = BeanClassProcessor.createInstance(cls);
                 final InstanceContext<T> context = new SingularObjectContext<>(instance,
                         BeanAnnotationProcessor.mapFieldsForDeserialization(cls), knownInstances);
-                replaceCurrentContext(instance, context);
+                replaceCurrentContext(context);
                 currentInstance.setIdentifierValue(id);
             }
         }
     }
 
-    private <T> void replaceCurrentContext(T instance, InstanceContext<?> ctx) {
+    private void replaceCurrentContext(InstanceContext<?> ctx) {
         if (currentInstance != null) {
-            currentInstance.addItem(instance);
             openInstances.push(currentInstance);
         }
         this.currentInstance = ctx;
@@ -137,7 +136,10 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             pendingReferenceRegistry.resolveReferences(currentInstance.getIdentifier(), currentInstance.getInstance());
         }
         if (!openInstances.isEmpty()) {
+            final InstanceContext<?> closing = this.currentInstance;
             this.currentInstance = openInstances.pop();
+            // Add the item to the instance after closing it, so that all its fields have been initialized already (if they are needed by equals/hashCode)
+            currentInstance.addItem(closing.getInstance());
         }
     }
 
@@ -199,7 +201,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     public void openCollection(CollectionType collectionType) {
         final Collection<?> collection = BeanClassProcessor.createCollection(collectionType);
         final InstanceContext<?> context = new CollectionInstanceContext<>(collection, knownInstances);
-        replaceCurrentContext(collection, context);
+        replaceCurrentContext(context);
     }
 
     @Override
