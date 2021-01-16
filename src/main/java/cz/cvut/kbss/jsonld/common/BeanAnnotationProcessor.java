@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -65,12 +65,46 @@ public class BeanAnnotationProcessor {
      * @throws IllegalArgumentException If the specified class is not mapped by {@link OWLClass}
      */
     public static String getOwlClass(Class<?> cls) {
+        // TODO Namespaces
         Objects.requireNonNull(cls);
         final OWLClass owlClass = cls.getDeclaredAnnotation(OWLClass.class);
         if (owlClass == null) {
             throw new IllegalArgumentException(cls + " is not an OWL class entity.");
         }
-        return owlClass.iri();
+        final String iri = owlClass.iri();
+        return IdentifierUtil.isCompactIri(iri) ? expandIri(iri, cls).orElse(iri) : iri;
+    }
+
+    /**
+     * Attempts to expand the specified compact IRI by finding a corresponding {@link Namespace} annotation in the specified class's ancestor hierarchy.
+     * <p>
+     * That is, it tries to find a {@link Namespace} annotation with matching prefix on the specified class or any of its ancestors. If such an annotation
+     * is found, its namespace is concatenated with the suffix from the specified {@code iri} to produce the expanded version of the IRI.
+     * <p>
+     * If no matching {@link Namespace} annotation is found, the original {@code iri} argument is returned.
+     *
+     * @param iri            Compact IRI to expand
+     * @param declaringClass Class in which the IRI was declared. Used to start search for namespace declaration
+     * @return Expanded IRI if a matching namespace declaration is found, the original argument if not
+     */
+    private static Optional<String> expandIri(String iri, Class<?> declaringClass) {
+        assert IdentifierUtil.isCompactIri(iri);
+
+        final int colonIndex = iri.indexOf(':');
+        final String prefix = iri.substring(0, colonIndex);
+        final String suffix = iri.substring(colonIndex + 1);
+        Namespace ns = declaringClass.getDeclaredAnnotation(Namespace.class);
+        if (ns != null && ns.prefix().equals(prefix)) {
+            return Optional.of(ns.namespace() + suffix);
+        }
+        Namespaces namespaces = declaringClass.getDeclaredAnnotation(Namespaces.class);
+        if (namespaces != null) {
+            final Optional<Namespace> namespace =
+                    Arrays.stream(namespaces.value()).filter(n -> n.prefix().equals(prefix)).findAny();
+            return namespace.map(value -> value.namespace() + suffix);
+        }
+        return declaringClass.getSuperclass() != null ? expandIri(iri, declaringClass.getSuperclass()) :
+                Optional.empty();
     }
 
     /**
@@ -100,7 +134,8 @@ public class BeanAnnotationProcessor {
         getAncestors(cls).forEach(c -> {
             final OWLClass owlClass = c.getDeclaredAnnotation(OWLClass.class);
             if (owlClass != null) {
-                classes.add(owlClass.iri());
+                final String iri = owlClass.iri();
+                classes.add(IdentifierUtil.isCompactIri(iri) ? expandIri(iri, c).orElse(iri) : iri);
             }
         });
         return classes;
@@ -314,6 +349,7 @@ public class BeanAnnotationProcessor {
      * @return JSON-LD attribute identifier
      */
     public static String getAttributeIdentifier(Field field) {
+        // TODO Namespaces
         if (field.getDeclaredAnnotation(Id.class) != null) {
             return JsonLd.ID;
         }

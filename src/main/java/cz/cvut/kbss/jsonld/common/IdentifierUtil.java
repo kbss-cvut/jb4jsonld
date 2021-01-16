@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.common;
 
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -39,5 +40,23 @@ public class IdentifierUtil {
      */
     public static String generateBlankNodeId() {
         return B_NODE_PREFIX + RANDOM.nextInt(Integer.MAX_VALUE);
+    }
+
+    /**
+     * Checks whether the specified value is a <i>compact IRI</i>, as defined by the JSON-LD specification
+     * <a href="https://w3c.github.io/json-ld-syntax/#compact-iris">par. 4.1.5</a>.
+     *
+     * @param value The value to examine
+     * @return {@code true} if the specified value is a compact IRI, {@code false} otherwise
+     */
+    public static boolean isCompactIri(String value) {
+        Objects.requireNonNull(value);
+        final int colonIndex = value.indexOf(':');
+        if (colonIndex >= 0) {
+            final String prefixWithColon = value.substring(0, colonIndex + 1);
+            final String suffix = value.substring(colonIndex + 1);
+            return !B_NODE_PREFIX.equals(prefixWithColon) && !suffix.startsWith("//");
+        }
+        return false;
     }
 }

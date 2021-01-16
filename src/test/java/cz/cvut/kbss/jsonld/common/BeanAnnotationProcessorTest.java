@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -14,11 +14,11 @@
  */
 package cz.cvut.kbss.jsonld.common;
 
-import cz.cvut.kbss.jopa.model.annotations.Id;
-import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
-import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jopa.vocabulary.DC;
+import cz.cvut.kbss.jopa.vocabulary.RDF;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.annotation.JsonLdProperty;
@@ -33,6 +33,7 @@ import java.net.URI;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -219,6 +220,43 @@ class BeanAnnotationProcessorTest {
     }
 
     @Test
+    void getOwlClassExpandsIriIfItUsesNamespacePrefix() {
+        assertEquals(DC.Terms.AGENT, BeanAnnotationProcessor.getOwlClass(ClassWithNamespace.class));
+    }
+
+    @Namespace(prefix = "dc", namespace = DC.Terms.NAMESPACE)
+    @OWLClass(iri = "dc:Agent")
+    private static class ClassWithNamespace {
+    }
+
+    @Test
+    void getOWLClassExpandsIriBasedOnNamespacesDeclarationIfItUsesPrefix() {
+        assertEquals(SKOS.CONCEPT, BeanAnnotationProcessor.getOwlClass(ClassWithNamespaces.class));
+    }
+
+    @Namespaces({@Namespace(prefix = "rdf", namespace = RDF.NAMESPACE),
+                 @Namespace(prefix = "skos", namespace = SKOS.NAMESPACE)})
+    @OWLClass(iri = "skos:Concept")
+    private static class ClassWithNamespaces {
+
+    }
+
+    @Test
+    void getOWLClassExpandsIriBasedOnNamespaceDeclaredInAncestorIfItUsesPrefix() {
+        assertEquals(SKOS.CONCEPT_SCHEME, BeanAnnotationProcessor.getOwlClass(ClassWithParentNamespaces.class));
+    }
+
+    @OWLClass(iri = "skos:ConceptScheme")
+    private static class ClassWithParentNamespaces extends ClassWithNamespaces {
+    }
+
+    @Test
+    void getOwlClassesExpandsCompactIrisBasedOnNamespaces() {
+        final Set<String> result = BeanAnnotationProcessor.getOwlClasses(ClassWithParentNamespaces.class);
+        assertThat(result, hasItems(SKOS.CONCEPT_SCHEME, SKOS.CONCEPT));
+    }
+
+    @Test
     void getSerializableFieldsReturnsPropertiesFieldAsWell() throws Exception {
         final List<Field> fields = BeanAnnotationProcessor.getSerializableFields(new Person());
         assertTrue(fields.contains(Person.class.getDeclaredField("properties")));
@@ -290,7 +328,8 @@ class BeanAnnotationProcessorTest {
 
     @Test
     void isAnnotationPropertyReturnsTrueForAnnotationPropertyField() throws Exception {
-        assertTrue(BeanAnnotationProcessor.isAnnotationProperty(ObjectWithAnnotationProperties.class.getDeclaredField("changedValue")));
+        assertTrue(BeanAnnotationProcessor
+                .isAnnotationProperty(ObjectWithAnnotationProperties.class.getDeclaredField("changedValue")));
         assertFalse(BeanAnnotationProcessor.isAnnotationProperty(Person.class.getDeclaredField("firstName")));
     }
 }
