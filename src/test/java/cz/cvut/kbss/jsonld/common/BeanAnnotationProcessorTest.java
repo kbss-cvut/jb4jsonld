@@ -239,6 +239,11 @@ class BeanAnnotationProcessorTest {
     @OWLClass(iri = "skos:Concept")
     private static class ClassWithNamespaces {
 
+        @OWLDataProperty(iri = "skos:prefLabel")
+        private String prefLabel;
+
+        @OWLObjectProperty(iri = "rdfs:range")
+        private URI range;
     }
 
     @Test
@@ -331,5 +336,17 @@ class BeanAnnotationProcessorTest {
         assertTrue(BeanAnnotationProcessor
                 .isAnnotationProperty(ObjectWithAnnotationProperties.class.getDeclaredField("changedValue")));
         assertFalse(BeanAnnotationProcessor.isAnnotationProperty(Person.class.getDeclaredField("firstName")));
+    }
+
+    @Test
+    void getAttributeIdentifierExpandsCompactedIriBasedOnNamespaceDeclaration() throws Exception {
+        assertEquals(SKOS.PREF_LABEL, BeanAnnotationProcessor
+                .getAttributeIdentifier(ClassWithNamespaces.class.getDeclaredField("prefLabel")));
+    }
+
+    @Test
+    void getAttributeIdentifierExpandsCompactedIriBasedOnPackageLevelNamespaceDeclaration() throws Exception {
+        assertEquals(RDFS.RANGE,
+                BeanAnnotationProcessor.getAttributeIdentifier(ClassWithNamespaces.class.getDeclaredField("range")));
     }
 }
