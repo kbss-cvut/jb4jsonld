@@ -522,4 +522,19 @@ class CompactedJsonLdSerializerTest {
             assertEquals(ms.get(m.get(JsonLd.LANGUAGE).toString()), m.get(JsonLd.VALUE));
         }
     }
+
+    @Test
+    void serializationSupportsCompactedIrisBasedOnJOPANamespaces() throws Exception {
+        final Study study = new Study();
+        study.setUri(Generator.generateUri());
+        study.setName("Test study");
+        study.setParticipants(Collections.singleton(Generator.generateEmployee()));
+        study.setMembers(Collections.singleton(Generator.generateEmployee()));
+        sut.serialize(study);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        assertThat(json, hasKey(RDFS.LABEL));
+        assertThat(json, hasKey(Vocabulary.HAS_PARTICIPANT));
+        assertThat(json, hasKey(Vocabulary.HAS_MEMBER));
+    }
 }

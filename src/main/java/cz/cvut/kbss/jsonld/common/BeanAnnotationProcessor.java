@@ -74,7 +74,20 @@ public class BeanAnnotationProcessor {
         return expandIriIfNecessary(owlClass.iri(), cls);
     }
 
-    private static String expandIriIfNecessary(String iri, Class<?> declaringClass) {
+    /**
+     * Attempts to expand the specified IRI in case it is compacted (see {@link IdentifierUtil#isCompactIri(String)}) using JOPA namespace declarations.
+     * <p>
+     * If the IRI is not compact or no matching namespace is found, the original IRI is returned.
+     *
+     * @param iri            IRI to expand (if necessary and possible)
+     * @param declaringClass Class in/on which the IRI is declared. It is used as base for namespace search
+     * @return Expanded IRI if it was possible to expand it, original argument if not
+     * @see IdentifierUtil#isCompactIri(String)
+     * @see Namespaces
+     * @see Namespace
+     */
+    public static String expandIriIfNecessary(String iri, Class<?> declaringClass) {
+        Objects.requireNonNull(declaringClass);
         return IdentifierUtil.isCompactIri(iri) ? expandIri(iri, declaringClass).orElse(iri) : iri;
     }
 
