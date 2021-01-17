@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -20,6 +20,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -70,7 +71,72 @@ public class BeanAnnotationProcessor {
         if (owlClass == null) {
             throw new IllegalArgumentException(cls + " is not an OWL class entity.");
         }
-        return owlClass.iri();
+        return expandIriIfNecessary(owlClass.iri(), cls);
+    }
+
+    /**
+     * Attempts to expand the specified IRI in case it is compacted (see {@link IdentifierUtil#isCompactIri(String)}) using JOPA namespace declarations.
+     * <p>
+     * If the IRI is not compact or no matching namespace is found, the original IRI is returned.
+     *
+     * @param iri            IRI to expand (if necessary and possible)
+     * @param declaringClass Class in/on which the IRI is declared. It is used as base for namespace search
+     * @return Expanded IRI if it was possible to expand it, original argument if not
+     * @see IdentifierUtil#isCompactIri(String)
+     * @see Namespaces
+     * @see Namespace
+     */
+    public static String expandIriIfNecessary(String iri, Class<?> declaringClass) {
+        Objects.requireNonNull(declaringClass);
+        return IdentifierUtil.isCompactIri(iri) ? expandIri(iri, declaringClass).orElse(iri) : iri;
+    }
+
+    /**
+     * Attempts to expand the specified compact IRI by finding a corresponding {@link Namespace} annotation in the specified class's ancestor hierarchy.
+     * <p>
+     * That is, it tries to find a {@link Namespace} annotation with matching prefix on the specified class or any of its ancestors. If such an annotation
+     * is found, its namespace is concatenated with the suffix from the specified {@code iri} to produce the expanded version of the IRI.
+     * <p>
+     * If no matching {@link Namespace} annotation is found, an empty {@link Optional} is returned.
+     *
+     * @param iri            Compact IRI to expand
+     * @param declaringClass Class in which the IRI was declared. Used to start search for namespace declaration
+     * @return Expanded IRI if a matching namespace declaration is found, empty {@code Optional} if not
+     */
+    private static Optional<String> expandIri(String iri, Class<?> declaringClass) {
+        assert IdentifierUtil.isCompactIri(iri);
+
+        final int colonIndex = iri.indexOf(':');
+        final String prefix = iri.substring(0, colonIndex);
+        final String suffix = iri.substring(colonIndex + 1);
+        Optional<String> ns = resolveNamespace(declaringClass, prefix);
+        if (ns.isPresent()) {
+            return ns.map(v -> v + suffix);
+        }
+        if (declaringClass.getPackage() != null) {
+            ns = resolveNamespace(declaringClass.getPackage(), prefix);
+            if (ns.isPresent()) {
+                return ns.map(v -> v + suffix);
+            }
+        }
+        return declaringClass.getSuperclass() != null ? expandIri(iri, declaringClass.getSuperclass()) :
+                Optional.empty();
+    }
+
+    private static Optional<String> resolveNamespace(AnnotatedElement annotated, String prefix) {
+        Namespace ns = annotated.getDeclaredAnnotation(Namespace.class);
+        if (ns != null && ns.prefix().equals(prefix)) {
+            return Optional.of(ns.namespace());
+        }
+        Namespaces namespaces = annotated.getDeclaredAnnotation(Namespaces.class);
+        if (namespaces != null) {
+            final Optional<Namespace> namespace =
+                    Arrays.stream(namespaces.value()).filter(n -> n.prefix().equals(prefix)).findAny();
+            if (namespace.isPresent()) {
+                return namespace.map(Namespace::namespace);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -100,7 +166,7 @@ public class BeanAnnotationProcessor {
         getAncestors(cls).forEach(c -> {
             final OWLClass owlClass = c.getDeclaredAnnotation(OWLClass.class);
             if (owlClass != null) {
-                classes.add(owlClass.iri());
+                classes.add(expandIriIfNecessary(owlClass.iri(), c));
             }
         });
         return classes;
@@ -319,15 +385,15 @@ public class BeanAnnotationProcessor {
         }
         final OWLDataProperty dp = field.getDeclaredAnnotation(OWLDataProperty.class);
         if (dp != null) {
-            return dp.iri();
+            return expandIriIfNecessary(dp.iri(), field.getDeclaringClass());
         }
         final OWLObjectProperty op = field.getDeclaredAnnotation(OWLObjectProperty.class);
         if (op != null) {
-            return op.iri();
+            return expandIriIfNecessary(op.iri(), field.getDeclaringClass());
         }
         final OWLAnnotationProperty ap = field.getDeclaredAnnotation(OWLAnnotationProperty.class);
         if (ap != null) {
-            return ap.iri();
+            return expandIriIfNecessary(ap.iri(), field.getDeclaringClass());
         }
         if (field.getDeclaredAnnotation(Types.class) != null) {
             return JsonLd.TYPE;

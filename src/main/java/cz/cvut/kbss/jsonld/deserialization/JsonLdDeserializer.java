@@ -15,6 +15,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.Configurable;
 import cz.cvut.kbss.jsonld.deserialization.expanded.ExpandedJsonLdDeserializer;
 import cz.cvut.kbss.jsonld.deserialization.util.ClasspathScanner;
@@ -49,7 +50,7 @@ public abstract class JsonLdDeserializer implements Configurable {
         new ClasspathScanner(c -> {
             final OWLClass ann = c.getDeclaredAnnotation(OWLClass.class);
             if (ann != null) {
-                typeMap.register(ann.iri(), c);
+                typeMap.register(BeanAnnotationProcessor.expandIriIfNecessary(ann.iri(), c), c);
             }
         }).processClasses(scanPath);
         return new TargetClassResolver(typeMap,

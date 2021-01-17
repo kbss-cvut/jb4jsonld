@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -21,6 +21,7 @@ import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Study;
+import cz.cvut.kbss.jsonld.environment.model.StudyWithNamespaces;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 
 import static cz.cvut.kbss.jsonld.environment.TestUtil.readAndExpand;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JsonLdDeserializerTest {
@@ -63,5 +66,14 @@ class JsonLdDeserializerTest {
         final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer();
         final Object input = readAndExpand("invalidJsonLd.json");
         assertThrows(JsonLdDeserializationException.class, () -> deserializer.deserialize(input, User.class));
+    }
+
+    @Test
+    void constructionExpandsCompactIrisWhenBuildingTypeMap() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        assertFalse(typeMap(deserializer).get(Vocabulary.STUDY).isEmpty());
+        assertThat(typeMap(deserializer).get(Vocabulary.STUDY), hasItem(StudyWithNamespaces.class));
     }
 }

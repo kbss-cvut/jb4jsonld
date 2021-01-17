@@ -129,8 +129,10 @@ class PendingReferenceRegistryTest {
         final Organization referencedObject = Generator.generateOrganization();
         final String iri = referencedObject.getUri().toString();
         final Employee targetObject = new Employee();
+        targetObject.setUri(Generator.generateUri());
         final Field targetField = Employee.class.getDeclaredField("employer");
         final Employee targetTwo = new Employee();
+        targetTwo.setUri(Generator.generateUri());
         pendingReferences.put(iri, new HashSet<>(Arrays.asList(
                 new SingularPendingReference(targetObject, targetField),
                 new SingularPendingReference(targetTwo, targetField))));
