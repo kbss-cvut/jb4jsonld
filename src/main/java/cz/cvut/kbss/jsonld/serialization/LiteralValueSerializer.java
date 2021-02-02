@@ -17,8 +17,6 @@ import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 class LiteralValueSerializer implements ValueSerializer {
 
@@ -29,7 +27,7 @@ class LiteralValueSerializer implements ValueSerializer {
     }
 
     @Override
-    public List<JsonNode> serialize(String attId, Object value) {
+    public JsonNode serialize(String attId, Object value) {
         final JsonNode result;
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
@@ -45,6 +43,6 @@ class LiteralValueSerializer implements ValueSerializer {
         } else {
             result = JsonNodeFactory.createLiteralNode(attId, value);
         }
-        return Collections.singletonList(result);
+        return result;
     }
 }

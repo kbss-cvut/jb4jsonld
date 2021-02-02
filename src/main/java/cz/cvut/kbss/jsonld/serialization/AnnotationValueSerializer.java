@@ -20,8 +20,6 @@ import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 class AnnotationValueSerializer implements ValueSerializer {
 
@@ -32,7 +30,7 @@ class AnnotationValueSerializer implements ValueSerializer {
     }
 
     @Override
-    public List<JsonNode> serialize(String attId, Object value) {
+    public JsonNode serialize(String attId, Object value) {
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
             final CollectionNode node = JsonNodeFactory.createCollectionNode(attId, col);
@@ -45,15 +43,14 @@ class AnnotationValueSerializer implements ValueSerializer {
                     node.addItem(JsonNodeFactory.createLiteralNode(item));
                 }
             });
-            return Collections.singletonList(node);
+            return node;
         } else {
             if (isReference(value)) {
-                return Collections.singletonList(serializeReference(attId, value));
+                return serializeReference(attId, value);
             } else if (value instanceof MultilingualString) {
-                return Collections.singletonList(multilingualStringSerializer.serialize(attId,
-                        (MultilingualString) value));
+                return multilingualStringSerializer.serialize(attId, (MultilingualString) value);
             }
-            return Collections.singletonList(JsonNodeFactory.createLiteralNode(attId, value));
+            return JsonNodeFactory.createLiteralNode(attId, value);
         }
     }
 

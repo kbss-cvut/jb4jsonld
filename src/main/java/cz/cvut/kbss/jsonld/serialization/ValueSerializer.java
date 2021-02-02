@@ -25,14 +25,11 @@ import java.util.List;
 interface ValueSerializer {
 
     /**
-     * Serializes the specified field, returning a list of JSON-LD nodes representing it.
-     * <p>
-     * The result is a list because maps (e.g. {@link cz.cvut.kbss.jopa.model.annotations.Properties}) cannot be
-     * serialized as a single attribute.
+     * Serializes the specified value, returning a JSON-LD node representing it.
      *
      * @param attId Attribute identifier
      * @param value Value to serialize
      * @return Serialization result
      */
-    List<JsonNode> serialize(String attId, Object value);
+    JsonNode serialize(String attId, Object value);
 }

@@ -21,7 +21,6 @@ import cz.cvut.kbss.jsonld.serialization.traversal.InstanceVisitor;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Stack;
 
 /**
@@ -85,13 +84,13 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     public void visitAttribute(SerializationContext<?> ctx) {
         if (ctx.getValue() != null && !BeanAnnotationProcessor.isObjectProperty(ctx.getField())) {
             assert currentNode != null;
-            final List<JsonNode> nodes;
+            final JsonNode node;
             if (BeanAnnotationProcessor.isAnnotationProperty(ctx.getField())) {
-                nodes = annotationSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
+                node = annotationSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
             } else {
-                nodes = literalSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
+                node = literalSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
             }
-            nodes.forEach(node -> currentNode.addItem(node));
+            currentNode.addItem(node);
         }
     }
 
