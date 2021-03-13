@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
 
 class JsonLdTreeBuilderTest {
 
-    private final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder();
+    private final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(new ValueSerializers());
 
     @Test
     void openInstanceCreatesNewObjectNode() {
@@ -119,7 +119,7 @@ class JsonLdTreeBuilderTest {
         assertNotNull(employerNode);
     }
 
-    private JsonNode getNode(CompositeNode parent, String name) {
+    static JsonNode getNode(CompositeNode parent, String name) {
         for (JsonNode n : parent.getItems()) {
             if (n.getName().equals(name)) {
                 return n;

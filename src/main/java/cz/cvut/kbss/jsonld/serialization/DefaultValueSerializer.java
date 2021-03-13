@@ -1,41 +1,42 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License along with this program. If not, see
- * <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Collection;
 
-class AnnotationValueSerializer implements ValueSerializer {
+class DefaultValueSerializer implements ValueSerializer {
 
     private final MultilingualStringSerializer multilingualStringSerializer;
 
-    AnnotationValueSerializer(MultilingualStringSerializer multilingualStringSerializer) {
+    DefaultValueSerializer(MultilingualStringSerializer multilingualStringSerializer) {
         this.multilingualStringSerializer = multilingualStringSerializer;
     }
 
     @Override
-    public JsonNode serialize(String attId, Object value) {
+    public JsonNode serialize(Object value, SerializationContext ctx) {
+        final boolean annotationProperty = BeanAnnotationProcessor.isAnnotationProperty(ctx.getField());
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
-            final CollectionNode node = JsonNodeFactory.createCollectionNode(attId, col);
+            final CollectionNode node = JsonNodeFactory.createCollectionNode(ctx.getAttributeId(), col);
             col.forEach(item -> {
-                if (isReference(item)) {
+                if (annotationProperty && isReference(item)) {
                     node.addItem(serializeReference(null, item));
                 } else if (item instanceof MultilingualString) {
                     node.addItem(multilingualStringSerializer.serialize((MultilingualString) item));
@@ -45,12 +46,12 @@ class AnnotationValueSerializer implements ValueSerializer {
             });
             return node;
         } else {
-            if (isReference(value)) {
-                return serializeReference(attId, value);
+            if (annotationProperty && isReference(value)) {
+                return serializeReference(ctx.getAttributeId(), value);
             } else if (value instanceof MultilingualString) {
-                return multilingualStringSerializer.serialize(attId, (MultilingualString) value);
+                return multilingualStringSerializer.serialize(ctx.getAttributeId(), (MultilingualString) value);
             }
-            return JsonNodeFactory.createLiteralNode(attId, value);
+            return JsonNodeFactory.createLiteralNode(ctx.getAttributeId(), value);
         }
     }
 
