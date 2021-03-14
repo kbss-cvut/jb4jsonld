@@ -30,7 +30,7 @@ public class CompactedJsonLdSerializer extends JsonLdSerializer {
 
     @Override
     JsonNode buildJsonTree(Object root) {
-        final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(new ValueSerializers());
+        final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(serializers);
         traverser.addVisitor(treeBuilder);
         traverser.traverse(root);
         traverser.removeVisitor(treeBuilder);
