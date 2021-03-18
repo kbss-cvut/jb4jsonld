@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
@@ -47,11 +46,8 @@ class ClasspathScannerTest {
 
     void processClassesSupportsJarFiles(String jarFile, String pkg)
         throws IOException {
-        // Empty consumer
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         URL url = loader.getResources("./bug-31/" + jarFile).nextElement();
-        ClassLoader classLoader = new URLClassLoader(new URL[] {url});
-        Thread.currentThread().setContextClassLoader(classLoader);
         AtomicBoolean a = new AtomicBoolean(false);
         final ClasspathScanner sut = new ClasspathScanner(cls -> {
             a.set(true);
