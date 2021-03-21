@@ -1,14 +1,12 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License along with this program. If not, see
- * <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -16,6 +14,7 @@ import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.core.JsonLdUtils;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.MultilingualString;
+import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
@@ -32,7 +31,9 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -154,7 +155,7 @@ class CompactedJsonLdSerializerTest {
             final URI memberUri = URI.create(memberMap.get(JsonLd.ID).toString());
             assertTrue(memberUris.contains(memberUri));
             final Optional<Employee> e = members.stream().filter(emp -> emp.getUri().equals(memberUri))
-                                                .findFirst();
+                    .findFirst();
             assert e.isPresent();
             verifyEmployee(e.get(), memberMap);
         }
@@ -195,9 +196,7 @@ class CompactedJsonLdSerializerTest {
     @Test
     void testSerializationOfObjectWithStringBasedUnmappedProperties() throws Exception {
         final Person person = Generator.generatePerson();
-        sut.serialize(person);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(person);
         assertEquals(person.getUri().toString(), json.get(JsonLd.ID));
         final List<?> types = (List<?>) json.get(JsonLd.TYPE);
         assertEquals(1, types.size());
@@ -213,14 +212,19 @@ class CompactedJsonLdSerializerTest {
         }
     }
 
+    private Map<String, ?> serializeAndRead(Object value) throws IOException {
+        sut.serialize(value);
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        assertThat(jsonObject, instanceOf(Map.class));
+        return (Map<String, ?>) jsonObject;
+    }
+
     @Test
     void serializationPutsOwlClassAndTypesContentIntoOneTypeProperty() throws Exception {
         final User user = Generator.generateUser();
         final String type = Generator.URI_BASE + "TypeOne";
         user.setTypes(Collections.singleton(type));
-        sut.serialize(user);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(user);
         final List<?> types = (List<?>) json.get(JsonLd.TYPE);
         assertTrue(types.contains(Vocabulary.USER));
         assertTrue(types.contains(type));
@@ -230,9 +234,7 @@ class CompactedJsonLdSerializerTest {
     void serializationSkipsNullDataPropertyValues() throws Exception {
         final User user = Generator.generateUser();
         user.setAdmin(null);
-        sut.serialize(user);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(user);
         assertFalse(json.containsKey(Vocabulary.IS_ADMIN));
     }
 
@@ -240,9 +242,7 @@ class CompactedJsonLdSerializerTest {
     void serializationSkipsNullObjectPropertyValues() throws Exception {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(null);
-        sut.serialize(employee);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(employee);
         assertFalse(json.containsKey(Vocabulary.IS_MEMBER_OF));
     }
 
@@ -250,9 +250,7 @@ class CompactedJsonLdSerializerTest {
     void serializationSerializesPlainIdentifierObjectPropertyValue() throws Exception {
         final Organization company = Generator.generateOrganization();
         company.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
-        sut.serialize(company);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(company);
         final Object value = json.get(Vocabulary.ORIGIN);
         assertTrue(value instanceof Map);
         final Map<String, ?> country = (Map<String, ?>) value;
@@ -264,9 +262,7 @@ class CompactedJsonLdSerializerTest {
     void serializationGeneratesBlankNodeIfInstancesDoesNotHaveIdentifierValue() throws Exception {
         final Organization company = Generator.generateOrganization();
         company.setUri(null);
-        sut.serialize(company);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(company);
         assertTrue(json.containsKey(JsonLd.ID));
         assertThat(json.get(JsonLd.ID).toString(), StringStartsWith.startsWith("_:"));
     }
@@ -278,9 +274,7 @@ class CompactedJsonLdSerializerTest {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(company);
         company.addEmployee(employee);
-        sut.serialize(company);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(company);
         final String id = (String) json.get(JsonLd.ID);
         final List<?> employees = (List<?>) json.get(Vocabulary.HAS_MEMBER);
         for (Object e : employees) {
@@ -295,9 +289,7 @@ class CompactedJsonLdSerializerTest {
         final PersonWithoutIdentifier person = new PersonWithoutIdentifier();
         person.firstName = "Thomas";
         person.lastName = "Lasky";
-        sut.serialize(person);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(person);
         final String id = (String) json.get(JsonLd.ID);
         assertNotNull(id);
         assertThat(id, startsWith(IdentifierUtil.B_NODE_PREFIX));
@@ -327,9 +319,7 @@ class CompactedJsonLdSerializerTest {
     void serializationSkipsPropertiesWithWriteOnlyAccess() throws Exception {
         final User user = Generator.generateUser();
         user.setPassword("test-117");
-        sut.serialize(user);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(user);
         assertFalse(json.containsKey(Vocabulary.PASSWORD));
     }
 
@@ -340,9 +330,7 @@ class CompactedJsonLdSerializerTest {
         study.setName("Test study");
         study.setParticipants(Collections.singleton(Generator.generateEmployee()));
         study.setMembers(Collections.singleton(Generator.generateEmployee()));
-        sut.serialize(study);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(study);
         assertTrue(json.containsKey(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
         assertEquals(study.getNoOfPeopleInvolved(), json.get(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED));
     }
@@ -352,9 +340,7 @@ class CompactedJsonLdSerializerTest {
         final ObjectWithAnnotationProperties toSerialize = new ObjectWithAnnotationProperties(Generator.generateUri());
         toSerialize.setChangedValue(Generator.generateUri().toString());
 
-        sut.serialize(toSerialize);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(toSerialize);
         assertTrue(json.containsKey(Vocabulary.CHANGED_VALUE));
         assertEquals(toSerialize.getChangedValue(), json.get(Vocabulary.CHANGED_VALUE));
     }
@@ -365,9 +351,7 @@ class CompactedJsonLdSerializerTest {
         toSerialize
                 .setOrigins(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
 
-        sut.serialize(toSerialize);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(toSerialize);
         assertTrue(json.containsKey(Vocabulary.ORIGIN));
         final Object origins = json.get(Vocabulary.ORIGIN);
         assertThat(origins, instanceOf(List.class));
@@ -385,9 +369,7 @@ class CompactedJsonLdSerializerTest {
     void serializationSerializesEnumDataPropertyAsStringValueOfEnumConstant() throws Exception {
         final User user = Generator.generateUser();
         user.setRole(Role.ADMIN);
-        sut.serialize(user);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(user);
         assertTrue(json.containsKey(Vocabulary.ROLE));
         assertEquals(Role.ADMIN.toString(), json.get(Vocabulary.ROLE));
     }
@@ -398,9 +380,7 @@ class CompactedJsonLdSerializerTest {
         instance.setUri(Generator.generateUri());
         instance.setMemberOf(Generator.generateOrganization());
 
-        sut.serialize(instance);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(instance);
         assertTrue(json.containsKey(Vocabulary.IS_MEMBER_OF));
         final Map<?, ?> org = (Map<?, ?>) json.get(Vocabulary.IS_MEMBER_OF);
         assertFalse(org.isEmpty());
@@ -416,9 +396,7 @@ class CompactedJsonLdSerializerTest {
         name.set("cs", "Využití technologií sémantického webu v doménových informačních systémech");
         instance.setLabel(name);
 
-        sut.serialize(instance);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(instance);
         assertTrue(json.containsKey(RDFS.LABEL));
         final List<?> label = (List<?>) json.get(RDFS.LABEL);
         assertEquals(name.getValue().size(), label.size());
@@ -463,9 +441,7 @@ class CompactedJsonLdSerializerTest {
         final Person friend = Generator.generatePerson();
         instance.getProperties().put(URI.create(Vocabulary.KNOWS), Collections.singleton(friend));
 
-        sut.serialize(instance);
-        final Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(instance);
         assertEquals(simpleValue, json.get(someProperty.toString()));
         final Object friendObject = json.get(Vocabulary.KNOWS);
         assertThat(friendObject, instanceOf(Map.class));
@@ -488,9 +464,7 @@ class CompactedJsonLdSerializerTest {
         final URI friendId = Generator.generateUri();
         instance.getProperties().put(URI.create(Vocabulary.KNOWS), Collections.singleton(friendId));
 
-        sut.serialize(instance);
-        final Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(instance);
         assertEquals(simpleValue, json.get(someProperty.toString()));
         final Object friendObject = json.get(Vocabulary.KNOWS);
         assertThat(friendObject, instanceOf(Map.class));
@@ -507,9 +481,7 @@ class CompactedJsonLdSerializerTest {
         final URI property = URI.create("http://xmlns.com/foaf/0.1/nick");
         instance.setProperties(Collections.singletonMap(property, Collections.singleton(ms)));
 
-        sut.serialize(instance);
-        final Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+        final Map<String, ?> json = serializeAndRead(instance);
         assertTrue(json.containsKey(property.toString()));
         final List<?> nick = (List<?>) json.get(property.toString());
         assertEquals(ms.getValue().size(), nick.size());
@@ -530,11 +502,31 @@ class CompactedJsonLdSerializerTest {
         study.setName("Test study");
         study.setParticipants(Collections.singleton(Generator.generateEmployee()));
         study.setMembers(Collections.singleton(Generator.generateEmployee()));
-        sut.serialize(study);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        final Map<String, ?> json = (Map<String, ?>) jsonObject;
+
+        final Map<String, ?> json = serializeAndRead(study);
         assertThat(json, hasKey(RDFS.LABEL));
         assertThat(json, hasKey(Vocabulary.HAS_PARTICIPANT));
         assertThat(json, hasKey(Vocabulary.HAS_MEMBER));
+    }
+
+    @Test
+    void serializationSupportsRegistrationAndUsageOfCustomSerializers() throws Exception {
+        sut.registerSerializer(LocalDate.class, ((value, ctx) -> JsonNodeFactory.createLiteralNode(ctx.getAttributeId(), value.toString())));
+        final OrganizationWithLocalDate organization = new OrganizationWithLocalDate();
+        organization.uri = Generator.generateUri();
+        organization.created = LocalDate.now();
+
+        final Map<String, ?> json = serializeAndRead(organization);
+        assertThat(json, hasKey(Vocabulary.DATE_CREATED));
+        assertEquals(organization.created.toString(), json.get(Vocabulary.DATE_CREATED));
+    }
+
+    @OWLClass(iri = Vocabulary.ORGANIZATION)
+    public static class OrganizationWithLocalDate {
+        @Id
+        private URI uri;
+
+        @OWLDataProperty(iri = Vocabulary.DATE_CREATED)
+        private LocalDate created;
     }
 }
