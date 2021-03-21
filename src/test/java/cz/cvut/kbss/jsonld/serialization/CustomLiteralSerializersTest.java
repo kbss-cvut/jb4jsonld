@@ -35,7 +35,7 @@ class CustomLiteralSerializersTest {
         final JsonNode serialized = JsonNodeFactory.createLiteralNode(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED, (long) study.getNoOfPeopleInvolved());
         when(intSerializer.serialize(any(), any())).thenReturn(serialized);
         treeBuilder.openObject(new SerializationContext<>(study));
-        final SerializationContext<Integer> ctx = new SerializationContext<Integer>(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED, Study.class.getDeclaredField("noOfPeopleInvolved"), study.getNoOfPeopleInvolved());
+        final SerializationContext<Integer> ctx = new SerializationContext<>(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED, Study.class.getDeclaredField("noOfPeopleInvolved"), study.getNoOfPeopleInvolved());
         treeBuilder.visitAttribute(ctx);
         verify(intSerializer).serialize(study.getNoOfPeopleInvolved(), ctx);
         final JsonNode node = JsonLdTreeBuilderTest.getNode(treeBuilder.getTreeRoot(), Vocabulary.NUMBER_OF_PEOPLE_INVOLVED);
