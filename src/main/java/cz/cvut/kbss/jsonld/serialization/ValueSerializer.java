@@ -16,7 +16,7 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 /**
  * Serializes values.
  */
-interface ValueSerializer<T> {
+public interface ValueSerializer<T> {
 
     /**
      * Serializes the specified value, returning a JSON-LD node representing it.

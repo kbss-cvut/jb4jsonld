@@ -27,8 +27,6 @@ public abstract class JsonLdSerializer implements Configurable {
 
     private final Configuration configuration;
 
-    final ObjectGraphTraverser traverser = new ObjectGraphTraverser();
-
     final JsonGenerator jsonGenerator;
 
     final ValueSerializers serializers = new ValueSerializers();
@@ -73,25 +71,26 @@ public abstract class JsonLdSerializer implements Configurable {
      */
     public void serialize(Object root) {
         Objects.requireNonNull(root);
+        final ObjectGraphTraverser traverser = new ObjectGraphTraverser();
         traverser.setRequireId(configuration.is(ConfigParam.REQUIRE_ID));
-        final JsonNode jsonRoot = buildJsonTree(root);
+        final JsonNode jsonRoot = buildJsonTree(root, traverser);
         jsonRoot.write(jsonGenerator);
     }
 
     /**
      * Builds the JSON-LD tree model.
      *
-     * @param root Object graph root
+     * @param root           Object graph root
+     * @param graphTraverser Instance capable of traversing the object graph from the specified root
      * @return {@link JsonNode} corresponding to the JSON-LD's tree root
      */
-    abstract JsonNode buildJsonTree(Object root);
+    protected abstract JsonNode buildJsonTree(Object root, ObjectGraphTraverser graphTraverser);
 
     public static JsonLdSerializer createCompactedJsonLdSerializer(JsonGenerator jsonWriter) {
         return new CompactedJsonLdSerializer(jsonWriter);
     }
 
-    public static JsonLdSerializer createCompactedJsonLdSerializer(JsonGenerator jsonWriter,
-                                                                   Configuration configuration) {
+    public static JsonLdSerializer createCompactedJsonLdSerializer(JsonGenerator jsonWriter, Configuration configuration) {
         return new CompactedJsonLdSerializer(jsonWriter, configuration);
     }
 }
