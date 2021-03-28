@@ -77,11 +77,13 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void visitAttribute(SerializationContext<?> ctx) {
-        if (ctx.getValue() != null && !BeanAnnotationProcessor.isObjectProperty(ctx.getField())) {
+        if (ctx.getValue() != null) {
             assert currentNode != null;
-            final ValueSerializer serializer = serializers.getSerializer(ctx);
+            final ValueSerializer serializer = serializers.getOrDefault(ctx);
             final JsonNode node = serializer.serialize(ctx.getValue(), ctx);
-            currentNode.addItem(node);
+            if (node != null) {
+                currentNode.addItem(node);
+            }
         }
     }
 

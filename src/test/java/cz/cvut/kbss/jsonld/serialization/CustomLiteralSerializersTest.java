@@ -21,7 +21,7 @@ class CustomLiteralSerializersTest {
 
     @BeforeEach
     void setUp() {
-        this.serializers = new ValueSerializers();
+        this.serializers = new CommonValueSerializers();
         this.treeBuilder = new JsonLdTreeBuilder(serializers);
     }
 
