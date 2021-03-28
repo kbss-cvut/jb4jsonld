@@ -140,7 +140,7 @@ public class ClasspathScanner {
         try {
             final Class<?> cls = Class.forName(className);
             listener.accept(cls);
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
             LOG.error("Unable to process class " + className, e);
         }
     }
