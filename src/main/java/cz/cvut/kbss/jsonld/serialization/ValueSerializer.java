@@ -16,6 +16,7 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 /**
  * Serializes values.
  */
+@FunctionalInterface
 public interface ValueSerializer<T> {
 
     /**

@@ -13,12 +13,18 @@ package cz.cvut.kbss.jsonld.serialization.traversal;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
-import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
+/**
+ * Traverses the provided object graph, visiting each instance and its fields, notifying visitors of these encounters.
+ * <p>
+ * Each object is visited only once, so circular references are not a problem.
+ * <p>
+ * The traversal algorithm is is depth-first in nature.
+ */
 public class ObjectGraphTraverser {
 
     private final Set<InstanceVisitor> visitors = new HashSet<>(4);
@@ -27,7 +33,7 @@ public class ObjectGraphTraverser {
 
     private boolean requireId = false;
 
-    private Map<Object, String> knownInstances;
+    private final Map<Object, String> knownInstances = new IdentityHashMap<>();
 
     public void addVisitor(InstanceVisitor visitor) {
         Objects.requireNonNull(visitor);
@@ -38,33 +44,36 @@ public class ObjectGraphTraverser {
         visitors.remove(visitor);
     }
 
-    private void resetKnownInstances() {
-        this.knownInstances = new IdentityHashMap<>();
-    }
-
     public void traverse(Object instance) {
         Objects.requireNonNull(instance);
-        resetKnownInstances();
-        try {
-            if (instance instanceof Collection) {
-                traverseCollection(new SerializationContext<>((Collection<?>) instance));
-            } else {
-                traverseSingular(new SerializationContext<>(instance));
-            }
-        } catch (IllegalAccessException e) {
-            throw new JsonLdSerializationException("Unable to extract field value.", e);
+        if (instance instanceof Collection) {
+            traverseCollection(new SerializationContext<>((Collection<?>) instance));
+        } else {
+            traverseSingular(new SerializationContext<>(instance));
         }
     }
 
-    private void traverseCollection(SerializationContext<? extends Collection<?>> ctx) throws IllegalAccessException {
+    public void traverse(SerializationContext<?> ctx) {
+        Objects.requireNonNull(ctx);
+        if (ctx.getValue() instanceof Collection) {
+            traverseCollection((SerializationContext<? extends Collection<?>>) ctx);
+        } else {
+            traverseSingular(ctx);
+        }
+    }
+
+    private void traverseCollection(SerializationContext<? extends Collection<?>> ctx) {
         openCollection(ctx);
         for (Object item : ctx.getValue()) {
+            if (item == null) {
+                continue;
+            }
             traverseSingular(new SerializationContext<>(item));
         }
         closeCollection(ctx);
     }
 
-    void traverseSingular(SerializationContext<?> ctx) throws IllegalAccessException {
+    void traverseSingular(SerializationContext<?> ctx) {
         if (ctx.getValue() == null) {
             return;
         }
@@ -79,7 +88,7 @@ public class ObjectGraphTraverser {
         closeInstance(ctx);
     }
 
-    private void serializeFields(Object instance) throws IllegalAccessException {
+    private void serializeFields(Object instance) {
         final List<Field> fieldsToSerialize =
                 orderAttributesForSerialization(BeanAnnotationProcessor.getSerializableFields(instance),
                         BeanAnnotationProcessor.getAttributeOrder(instance.getClass()));
@@ -91,9 +100,6 @@ public class ObjectGraphTraverser {
             final SerializationContext<?> ctx =
                     new SerializationContext<>(BeanAnnotationProcessor.getAttributeIdentifier(f), f, value);
             visitAttribute(ctx);
-            if (value != null && BeanAnnotationProcessor.isObjectProperty(f)) {
-                traverseObjectPropertyValue(ctx);
-            }
         }
     }
 
@@ -112,21 +118,6 @@ public class ObjectGraphTraverser {
         }
         result.addAll(fields);
         return result;
-    }
-
-    private void traverseObjectPropertyValue(SerializationContext<?> ctx) throws IllegalAccessException {
-        if (ctx.getValue() instanceof Collection) {
-            final SerializationContext<Collection<?>> colContext = (SerializationContext<Collection<?>>) ctx;
-            openCollection(colContext);
-            for (Object elem : colContext.getValue()) {
-                traverseSingular(new SerializationContext<>(elem));
-            }
-            closeCollection(colContext);
-        } else if (ctx.getValue().getClass().isArray()) {
-            throw new JsonLdSerializationException("Arrays are not supported, yet.");
-        } else {
-            traverseSingular(ctx);
-        }
     }
 
     private void serializePropertiesField(Object instance) {

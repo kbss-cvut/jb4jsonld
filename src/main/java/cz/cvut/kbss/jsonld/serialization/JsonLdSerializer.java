@@ -29,7 +29,7 @@ public abstract class JsonLdSerializer implements Configurable {
 
     final JsonGenerator jsonGenerator;
 
-    final ValueSerializers serializers = new ValueSerializers();
+    final ValueSerializers serializers = new CommonValueSerializers();
 
     protected JsonLdSerializer(JsonGenerator jsonGenerator) {
         this.jsonGenerator = Objects.requireNonNull(jsonGenerator);

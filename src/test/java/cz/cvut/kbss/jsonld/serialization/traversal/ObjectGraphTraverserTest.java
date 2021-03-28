@@ -1,16 +1,12 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
@@ -79,45 +75,6 @@ class ObjectGraphTraverserTest {
         verify(visitor).visitAttribute(ctx(Vocabulary.USERNAME, User.getUsernameField(), user.getUsername()));
     }
 
-    @Test
-    void traverseTraversesObjectReferences() throws Exception {
-        final Employee employee = Generator.generateEmployee();
-        traverser.traverse(employee);
-        final InOrder inOrder = inOrder(visitor);
-        inOrder.verify(visitor).openObject(ctx(null, null, employee));
-        inOrder.verify(visitor)
-               .openObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
-        inOrder.verify(visitor)
-               .closeObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
-        inOrder.verify(visitor).closeObject(ctx(null, null, employee));
-
-        verifyUserFieldsVisited(employee);
-        verify(visitor).visitAttribute(ctx(Vocabulary.IS_MEMBER_OF, Employee.class.getDeclaredField("employer"),
-                employee.getEmployer()));
-        verify(visitor).visitIdentifier(ctx(null, null, employee.getEmployer().getUri().toString()));
-        verify(visitor).visitAttribute(ctx(Vocabulary.DATE_CREATED, Organization.class.getDeclaredField("dateCreated"),
-                employee.getEmployer().getDateCreated()));
-        verify(visitor).visitAttribute(
-                ctx(RDFS.LABEL, Organization.class.getDeclaredField("name"), employee.getEmployer().getName()));
-    }
-
-    @Test
-    void traverseTraversesObjectPropertyCollection() throws Exception {
-        final Organization org = Generator.generateOrganization();
-        generateEmployees(org);
-        traverser.traverse(org);
-
-        final InOrder inOrder = inOrder(visitor);
-        inOrder.verify(visitor).openObject(ctx(null, null, org));
-        inOrder.verify(visitor).openCollection(
-                ctx(Vocabulary.HAS_MEMBER, Organization.class.getDeclaredField("employees"), org.getEmployees()));
-        inOrder.verify(visitor).closeCollection(
-                ctx(Vocabulary.HAS_MEMBER, Organization.class.getDeclaredField("employees"), org.getEmployees()));
-        inOrder.verify(visitor).closeObject(ctx(null, null, org));
-
-        org.getEmployees().forEach(e -> verify(visitor).openObject(ctx(null, null, e)));
-    }
-
     private void generateEmployees(Organization org) {
         org.setEmployees(new HashSet<>());
         for (int i = 0; i < Generator.randomCount(10); i++) {
@@ -133,18 +90,11 @@ class ObjectGraphTraverserTest {
         // Backward reference
         employee.getEmployer().setEmployees(Collections.singleton(employee));
         traverser.traverse(employee);
+        traverser.traverse(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), employee));
 
-        verify(visitor).openObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
-        verify(visitor).openCollection(
-                ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), employee.getEmployer().getEmployees()));
-        verify(visitor, times(2)).openObject(ctx(null, null, employee));
-        verify(visitor, times(2)).visitIdentifier(new SerializationContext<>(null, null, employee.getUri().toString()));
-        // Attributes are processed only once
-        verify(visitor).visitAttribute(
-                ctx(Vocabulary.FIRST_NAME, Person.class.getDeclaredField("firstName"), employee.getFirstName()));
-        verify(visitor).closeCollection(
-                ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), employee.getEmployer().getEmployees()));
-        verify(visitor).closeObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
+        verify(visitor).openObject(ctx(null, null, employee));
+        verify(visitor).openObject(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), employee));
+        verify(visitor).visitTypes(new SerializationContext<>(new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE))));
     }
 
     @Test
@@ -196,7 +146,7 @@ class ObjectGraphTraverserTest {
         inOrder.verify(visitor).visitAttribute(
                 ctx(Vocabulary.HAS_PARTICIPANT, Study.class.getDeclaredField("participants"), study.getParticipants()));
         inOrder.verify(visitor)
-               .visitAttribute(ctx(Vocabulary.HAS_MEMBER, Study.class.getDeclaredField("members"), study.getMembers()));
+                .visitAttribute(ctx(Vocabulary.HAS_MEMBER, Study.class.getDeclaredField("members"), study.getMembers()));
     }
 
     private Study generateStudy() {
@@ -221,7 +171,7 @@ class ObjectGraphTraverserTest {
         inOrder.verify(visitor).visitAttribute(
                 ctx(Vocabulary.HAS_PARTICIPANT, Study.class.getDeclaredField("participants"), ps.getParticipants()));
         inOrder.verify(visitor)
-               .visitAttribute(ctx(Vocabulary.HAS_MEMBER, Study.class.getDeclaredField("members"), ps.getMembers()));
+                .visitAttribute(ctx(Vocabulary.HAS_MEMBER, Study.class.getDeclaredField("members"), ps.getMembers()));
         inOrder.verify(visitor).visitAttribute(ctx(RDFS.LABEL, Study.class.getDeclaredField("name"), ps.getName()));
     }
 
@@ -240,7 +190,7 @@ class ObjectGraphTraverserTest {
 
     @Test
     void traverseGeneratesBlankNodeIdentifierWhenPuttingInstanceWithoutIdentifierIntoKnownInstances() throws
-                                                                                                      Exception {
+            Exception {
         final Person person = Generator.generatePerson();
         person.setUri(null);
         traverser.traverse(person);
@@ -264,12 +214,8 @@ class ObjectGraphTraverserTest {
         employee.setUri(Generator.generateUri());
         employee.employer = Generator.generateUri();
 
-        traverser.traverse(employee);
+        traverser.traverse(ctx(Vocabulary.IS_MEMBER_OF, EmployeeWithUriEmployer.class.getDeclaredField("employer"), employee.employer));
         final InOrder inOrder = inOrder(visitor);
-        inOrder.verify(visitor).openObject(ctx(null, null, employee));
-        inOrder.verify(visitor).visitAttribute(
-                ctx(Vocabulary.IS_MEMBER_OF, EmployeeWithUriEmployer.class.getDeclaredField("employer"),
-                        employee.employer));
         inOrder.verify(visitor).openObject(
                 ctx(Vocabulary.IS_MEMBER_OF, EmployeeWithUriEmployer.class.getDeclaredField("employer"),
                         employee.employer));
@@ -326,18 +272,14 @@ class ObjectGraphTraverserTest {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org);
         org.getEmployees().add(null);
-        traverser.traverse(org);
+        traverser.traverse(org.getEmployees());
 
         final InOrder inOrder = inOrder(visitor);
-        inOrder.verify(visitor).openObject(ctx(null, null, org));
-        inOrder.verify(visitor)
-               .openCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
-        inOrder.verify(visitor)
-               .closeCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
-        inOrder.verify(visitor).closeObject(ctx(null, null, org));
+        inOrder.verify(visitor).openCollection(ctx(null, null, org.getEmployees()));
+        inOrder.verify(visitor).closeCollection(ctx(null, null, org.getEmployees()));
 
         org.getEmployees().stream().filter(Objects::nonNull)
-           .forEach(e -> verify(visitor).openObject(ctx(null, null, e)));
+                .forEach(e -> verify(visitor).openObject(ctx(null, null, e)));
     }
 
     @Test
