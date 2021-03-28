@@ -10,6 +10,15 @@ import java.util.Optional;
 public interface ValueSerializers {
 
     /**
+     * Checks whether a custom serializer is registered for the specified type.
+     *
+     * @param type Type to check for custom serializer for
+     * @param <T>  Type of value
+     * @return Whether a custom serializer exists
+     */
+    <T> boolean hasCustomSerializer(Class<T> type);
+
+    /**
      * Gets a custom serializer for the specified serialization context.
      *
      * @param ctx Context representing the value to serialize

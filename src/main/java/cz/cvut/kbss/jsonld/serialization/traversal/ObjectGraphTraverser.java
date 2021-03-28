@@ -27,7 +27,7 @@ import java.util.*;
  */
 public class ObjectGraphTraverser {
 
-    private final Set<InstanceVisitor> visitors = new HashSet<>(4);
+    private InstanceVisitor visitor;
 
     private final InstanceTypeResolver typeResolver = new InstanceTypeResolver();
 
@@ -35,26 +35,22 @@ public class ObjectGraphTraverser {
 
     private final Map<Object, String> knownInstances = new IdentityHashMap<>();
 
-    public void addVisitor(InstanceVisitor visitor) {
-        Objects.requireNonNull(visitor);
-        visitors.add(visitor);
+    public void setVisitor(InstanceVisitor visitor) {
+        this.visitor = Objects.requireNonNull(visitor);
     }
 
-    public void removeVisitor(InstanceVisitor visitor) {
-        visitors.remove(visitor);
+    public void removeVisitor() {
+        this.visitor = null;
     }
 
     public void traverse(Object instance) {
         Objects.requireNonNull(instance);
-        if (instance instanceof Collection) {
-            traverseCollection(new SerializationContext<>((Collection<?>) instance));
-        } else {
-            traverseSingular(new SerializationContext<>(instance));
-        }
+        traverse(new SerializationContext<>(instance));
     }
 
     public void traverse(SerializationContext<?> ctx) {
         Objects.requireNonNull(ctx);
+        assert visitor != null;
         if (ctx.getValue() instanceof Collection) {
             traverseCollection((SerializationContext<? extends Collection<?>>) ctx);
         } else {
@@ -78,6 +74,10 @@ public class ObjectGraphTraverser {
             return;
         }
         final boolean firstEncounter = !knownInstances.containsKey(ctx.getValue());
+        final boolean shouldTraverse = visitInstance(ctx);
+        if (!shouldTraverse) {
+            return;
+        }
         openInstance(ctx);
         visitIdentifier(ctx.getValue());
         if (!BeanClassProcessor.isIdentifierType(ctx.getValue().getClass()) && firstEncounter) {
@@ -134,12 +134,16 @@ public class ObjectGraphTraverser {
                 .traverseProperties(new SerializationContext<>(propertiesField, (Map<?, ?>) value));
     }
 
+    public boolean visitInstance(SerializationContext<?> ctx) {
+        return visitor.visitObject(ctx);
+    }
+
     public void openInstance(SerializationContext<?> ctx) {
         if (!BeanClassProcessor.isIdentifierType(ctx.getValue().getClass())) {
             final String identifier = resolveIdentifier(ctx.getValue());
             knownInstances.put(ctx.getValue(), identifier);
         }
-        visitors.forEach(v -> v.openObject(ctx));
+        visitor.openObject(ctx);
     }
 
     private String resolveIdentifier(Object instance) {
@@ -152,7 +156,7 @@ public class ObjectGraphTraverser {
     }
 
     public void closeInstance(SerializationContext<?> ctx) {
-        visitors.forEach(v -> v.closeObject(ctx));
+        visitor.closeObject(ctx);
     }
 
     public void visitIdentifier(Object instance) {
@@ -164,26 +168,26 @@ public class ObjectGraphTraverser {
             knownInstances.put(instance, id);
         }
         final SerializationContext<String> idContext = new SerializationContext<>(id);
-        visitors.forEach(v -> v.visitIdentifier(idContext));
+        visitor.visitIdentifier(idContext);
     }
 
     public void visitTypes(Object instance) {
         final Set<String> resolvedTypes = typeResolver.resolveTypes(instance);
         assert !resolvedTypes.isEmpty();
         final SerializationContext<Collection<String>> typesContext = new SerializationContext<>(resolvedTypes);
-        visitors.forEach(v -> v.visitTypes(typesContext));
+        visitor.visitTypes(typesContext);
     }
 
     public void visitAttribute(SerializationContext<?> ctx) {
-        visitors.forEach(v -> v.visitAttribute(ctx));
+        visitor.visitAttribute(ctx);
     }
 
     public void openCollection(SerializationContext<? extends Collection<?>> ctx) {
-        visitors.forEach(v -> v.openCollection(ctx));
+        visitor.openCollection(ctx);
     }
 
     public void closeCollection(SerializationContext<?> ctx) {
-        visitors.forEach(v -> v.closeCollection(ctx));
+        visitor.closeCollection(ctx);
     }
 
     public void setRequireId(boolean requireId) {

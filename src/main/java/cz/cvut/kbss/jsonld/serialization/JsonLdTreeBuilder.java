@@ -11,7 +11,6 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -34,6 +33,22 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     public JsonLdTreeBuilder(ValueSerializers serializers) {
         this.serializers = serializers;
+    }
+
+    @Override
+    public boolean visitObject(SerializationContext<?> ctx) {
+        if (serializers.hasCustomSerializer(ctx.getValue().getClass())) {
+            final ValueSerializer serializer = serializers.getSerializer(ctx).get();
+            final JsonNode node = serializer.serialize(ctx.getValue(), ctx);
+            if (currentNode != null) {
+                currentNode.addItem(node);
+            } else {
+                assert node instanceof CompositeNode;
+                currentNode = (CompositeNode) node;
+            }
+            return false;
+        }
+        return true;
     }
 
     @Override

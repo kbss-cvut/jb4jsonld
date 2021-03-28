@@ -26,6 +26,7 @@ import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.BeforeEach;
@@ -521,6 +522,7 @@ class CompactedJsonLdSerializerTest {
         assertEquals(organization.created.toString(), json.get(Vocabulary.DATE_CREATED));
     }
 
+    @SuppressWarnings("unused")
     @OWLClass(iri = Vocabulary.ORGANIZATION)
     public static class OrganizationWithLocalDate {
         @Id
@@ -528,5 +530,48 @@ class CompactedJsonLdSerializerTest {
 
         @OWLDataProperty(iri = Vocabulary.DATE_CREATED)
         private LocalDate created;
+    }
+
+    @Test
+    void serializationSupportsRegistrationAndUsageOfCustomObjectPropertyValueSerializers() throws Exception {
+        final ValueSerializer<Organization> serializer = (value, ctx) -> JsonNodeFactory.createObjectIdNode(ctx.getAttributeId(), value.getUri());
+        sut.registerSerializer(Organization.class, serializer);
+        final Employee employee = Generator.generateEmployee();
+
+        final Map<String, ?> json = serializeAndRead(employee);
+        assertThat(json, hasKey(Vocabulary.IS_MEMBER_OF));
+        assertEquals(employee.getEmployer().getUri().toString(), json.get(Vocabulary.IS_MEMBER_OF));
+    }
+
+    @Test
+    void serializationSupportsUsageOfCustomObjectPropertyValueSerializersOnPluralAttributes() throws Exception {
+        final ValueSerializer<Employee> serializer = (value, ctx) -> {
+            final ObjectNode node = ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) : JsonNodeFactory.createObjectNode();
+            node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, value.getUri().toString()));
+            node.addItem(JsonNodeFactory.createLiteralNode(Vocabulary.USERNAME, value.getUsername()));
+            return node;
+        };
+        sut.registerSerializer(Employee.class, serializer);
+        final Organization organization = Generator.generateOrganization();
+        final Employee eOne = Generator.generateEmployee();
+        eOne.setEmployer(organization);
+        final Employee eTwo = Generator.generateEmployee();
+        eTwo.setEmployer(organization);
+        organization.setEmployees(new LinkedHashSet<>(Arrays.asList(eOne, eTwo)));
+
+        final Map<String, ?> json = serializeAndRead(organization);
+        assertThat(json, hasKey(Vocabulary.HAS_MEMBER));
+        assertThat(json.get(Vocabulary.HAS_MEMBER), instanceOf(List.class));
+        final List<?> employees = (List<?>) json.get(Vocabulary.HAS_MEMBER);
+        assertEquals(organization.getEmployees().size(), employees.size());
+        final Iterator<Employee> itExp = organization.getEmployees().iterator();
+        final Iterator<?> itRes = employees.iterator();
+        while (itExp.hasNext() && itRes.hasNext()) {
+            final Employee exp = itExp.next();
+            final Map<String, ?> res = (Map<String, ?>) itRes.next();
+            assertEquals(res.size(), 2);
+            assertEquals(exp.getUri().toString(), res.get(JsonLd.ID));
+            assertEquals(exp.getUsername(), res.get(Vocabulary.USERNAME));
+        }
     }
 }
