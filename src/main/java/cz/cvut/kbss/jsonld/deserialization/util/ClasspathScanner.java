@@ -99,7 +99,7 @@ public class ClasspathScanner {
         }
     }
 
-    private void processJarFile(URL jarResource, String packageName) {
+    protected void processJarFile(URL jarResource, String packageName) {
         final String relPath = packageName.replace('.', '/');
         final String jarPath = jarResource.getPath().replaceFirst("[.]jar[!].*", JAR_FILE_SUFFIX)
                                           .replaceFirst("file:", "");
@@ -114,9 +114,11 @@ public class ClasspathScanner {
                 if (shouldSkipEntry(entryName)) {
                     continue;
                 }
-                if (entryName.endsWith(CLASS_FILE_SUFFIX) && entryName.startsWith(relPath)) {
+                if (entryName.endsWith(CLASS_FILE_SUFFIX) && entryName.contains(relPath)) {
                     // Remove prefix from multi-release JAR class names
                     className = entryName.replaceFirst("META-INF/versions/[1-9][0-9]*/", "");
+                    className = className.replaceFirst("WEB-INF/classes/", "");
+                    className = className.replaceFirst("BOOT-INF/classes/", "");
                     className = className.replace('/', '.').replace('\\', '.');
                     className = className.substring(0, className.length() - CLASS_FILE_SUFFIX.length());
                 }
