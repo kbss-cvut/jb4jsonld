@@ -37,7 +37,9 @@ class JsonLdDeserializerTest {
 
     @Test
     void constructionScansClasspathAndBuildsTypeMap() throws Exception {
-        final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer();
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
         assertFalse(typeMap(deserializer).get(Vocabulary.STUDY).isEmpty());
         assertTrue(typeMap(deserializer).get(Vocabulary.STUDY).contains(Study.class));
     }
@@ -63,7 +65,9 @@ class JsonLdDeserializerTest {
 
     @Test
     void deserializationThrowsJsonLdDeserializationExceptionWhenInputIsNotValidJsonLd() throws Exception {
-        final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer();
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
         final Object input = readAndExpand("invalidJsonLd.json");
         assertThrows(JsonLdDeserializationException.class, () -> deserializer.deserialize(input, User.class));
     }
