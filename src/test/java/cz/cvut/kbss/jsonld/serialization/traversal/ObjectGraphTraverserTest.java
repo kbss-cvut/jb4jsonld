@@ -299,4 +299,22 @@ class ObjectGraphTraverserTest {
         }
         inOrder.verify(visitor).closeCollection(ctx(null, null, users));
     }
+
+    @Test
+    void traverseInvokesVisitObjectBeforeOpeningIt() {
+        final Person p = Generator.generatePerson();
+        traverser.traverse(p);
+        final InOrder inOrder = inOrder(visitor);
+        inOrder.verify(visitor).visitObject(ctx(null, null, p));
+        inOrder.verify(visitor).openObject(ctx(null, null, p));
+    }
+
+    @Test
+    void traverseDoesNotOpenObjectWhenVisitObjectReturnedFalse() {
+        when(visitor.visitObject(any())).thenReturn(false);
+        final Person p = Generator.generatePerson();
+        traverser.traverse(p);
+        verify(visitor).visitObject(ctx(null, null, p));
+        verify(visitor, never()).openObject(any());
+    }
 }
