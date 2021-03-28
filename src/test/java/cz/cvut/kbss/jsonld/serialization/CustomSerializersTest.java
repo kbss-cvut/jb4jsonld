@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class CustomLiteralSerializersTest {
+class CustomSerializersTest {
 
     private ValueSerializers serializers;
 

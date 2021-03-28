@@ -24,6 +24,11 @@ public class ObjectGraphValueSerializers implements ValueSerializers {
     }
 
     @Override
+    public <T> boolean hasCustomSerializer(Class<T> type) {
+        return commonSerializers.hasCustomSerializer(type);
+    }
+
+    @Override
     public <T> Optional<ValueSerializer<T>> getSerializer(SerializationContext<T> ctx) {
         final Optional<ValueSerializer<T>> result = commonSerializers.getSerializer(ctx);
         return result.isPresent() ? result : (BeanAnnotationProcessor.isObjectProperty(ctx.getField()) ? Optional.of(opSerializer) : Optional.empty());

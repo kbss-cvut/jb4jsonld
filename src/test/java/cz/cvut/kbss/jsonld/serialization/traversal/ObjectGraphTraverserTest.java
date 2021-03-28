@@ -48,7 +48,8 @@ class ObjectGraphTraverserTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         this.traverser = new ObjectGraphTraverser();
-        traverser.addVisitor(visitor);
+        traverser.setVisitor(visitor);
+        when(visitor.visitObject(any())).thenReturn(true);
     }
 
     @Test
@@ -268,7 +269,7 @@ class ObjectGraphTraverserTest {
     }
 
     @Test
-    void traverseSkipsNullValuesInCollectionAttribute() throws NoSuchFieldException {
+    void traverseSkipsNullValuesInCollectionAttribute() {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org);
         org.getEmployees().add(null);

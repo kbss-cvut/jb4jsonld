@@ -5,6 +5,17 @@ import java.util.Collection;
 public interface InstanceVisitor {
 
     /**
+     * Visits the instance represented by the specified context.
+     * <p>
+     * Called before a new instance is open by the object graph traverser.
+     *
+     * @param ctx Current serialization context
+     * @return Whether the object should be processed or not
+     * @see #openObject(SerializationContext)
+     */
+    boolean visitObject(SerializationContext<?> ctx);
+
+    /**
      * Called when a new instance is discovered by the object graph traverser.
      * <p>
      * The instances attributes will be processed immediately after this method returns.
@@ -25,8 +36,8 @@ public interface InstanceVisitor {
      * Called when an attribute is processed by the object graph traverser.
      * <p>
      * Note that identifiers ({@link cz.cvut.kbss.jopa.model.annotations.Id}) and types ({@link cz.cvut.kbss.jopa.model.annotations.Types})
-     * are processed separately and are not visited as attributes. Also, when processing {@link cz.cvut.kbss.jopa.model.annotations.Properties}, this method
-     * is invoked for each property in the map.
+     * are processed separately and are not visited as attributes. Also, when processing {@link cz.cvut.kbss.jopa.model.annotations.Properties},
+     * this method is invoked for each property in the map.
      *
      * @param ctx Current serialization context
      */

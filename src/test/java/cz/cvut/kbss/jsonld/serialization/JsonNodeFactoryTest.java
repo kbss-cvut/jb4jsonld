@@ -12,9 +12,11 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -161,5 +163,12 @@ class JsonNodeFactoryTest {
         final String language = "en";
         final LangStringNode result = JsonNodeFactory.createLangStringNode(value, language);
         assertEquals(2, result.getItems().size());
+    }
+
+    @Test
+    void createObjectIdNodeWithoutAttributeCreatesNamelessObjectIdNode() {
+        final URI uri = Generator.generateUri();
+        final ObjectIdNode node = JsonNodeFactory.createObjectIdNode(uri);
+        assertNull(node.getName());
     }
 }

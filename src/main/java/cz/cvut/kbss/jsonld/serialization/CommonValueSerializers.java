@@ -16,6 +16,10 @@ public class CommonValueSerializers implements ValueSerializers {
 
     private final ValueSerializer<?> defaultSerializer = new DefaultValueSerializer(new MultilingualStringSerializer());
 
+    @Override
+    public <T> boolean hasCustomSerializer(Class<T> type) {
+        return serializers.containsKey(type);
+    }
 
     @Override
     public <T> Optional<ValueSerializer<T>> getSerializer(SerializationContext<T> ctx) {
