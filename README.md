@@ -89,6 +89,10 @@ Parameter | Default value | Explanation
 
 See `cz.cvut.kbss.jsonld.ConfigParam`.
 
+## Documentation
+
+There is some documentation on the [Wiki](https://github.com/kbss-cvut/jb4jsonld/wiki). API Javadoc is also [available](https://kbss.felk.cvut.cz/jenkins/view/Java%20Tools/job/jaxb-jsonld/javadoc/).
+
 ## Getting JB4JSON-LD
 
 There are two ways to get JB4JSON-LD:
