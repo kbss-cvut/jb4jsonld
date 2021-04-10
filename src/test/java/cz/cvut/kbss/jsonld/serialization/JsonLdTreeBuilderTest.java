@@ -1,14 +1,12 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License along with this program. If not, see
- * <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -40,7 +38,7 @@ import static org.mockito.Mockito.verify;
 
 class JsonLdTreeBuilderTest {
 
-    private final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder();
+    private final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(new CommonValueSerializers());
 
     @Test
     void openInstanceCreatesNewObjectNode() {
@@ -119,7 +117,7 @@ class JsonLdTreeBuilderTest {
         assertNotNull(employerNode);
     }
 
-    private JsonNode getNode(CompositeNode parent, String name) {
+    static JsonNode getNode(CompositeNode parent, String name) {
         for (JsonNode n : parent.getItems()) {
             if (n.getName().equals(name)) {
                 return n;
@@ -198,14 +196,6 @@ class JsonLdTreeBuilderTest {
     }
 
     @Test
-    void visitAttributeDoesNothingWhenFieldIsObjectProperty() throws Exception {
-        final Employee employee = Generator.generateEmployee();
-        treeBuilder.visitAttribute(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
-        final CompositeNode node = treeBuilder.getTreeRoot();
-        assertNull(node);
-    }
-
-    @Test
     void visitAttributeExtractsValueOfDataPropertyAndAddsNodeToTheRoot() throws Exception {
         final User user = Generator.generateUser();
         treeBuilder.openObject(ctx(null, null, user));
@@ -213,7 +203,7 @@ class JsonLdTreeBuilderTest {
         treeBuilder.visitAttribute(ctx(Vocabulary.FIRST_NAME, Person.getFirstNameField(), user.getFirstName()));
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         assertTrue(treeBuilder.getTreeRoot().getItems()
-                              .contains(JsonNodeFactory.createLiteralNode(Vocabulary.FIRST_NAME, user.getFirstName())));
+                .contains(JsonNodeFactory.createLiteralNode(Vocabulary.FIRST_NAME, user.getFirstName())));
     }
 
     @Test
@@ -223,7 +213,7 @@ class JsonLdTreeBuilderTest {
         treeBuilder.visitAttribute(ctx(RDFS.LABEL, Organization.class.getDeclaredField("name"), org.getName()));
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         assertTrue(treeBuilder.getTreeRoot().getItems()
-                              .contains(JsonNodeFactory.createLiteralNode(RDFS.LABEL, org.getName())));
+                .contains(JsonNodeFactory.createLiteralNode(RDFS.LABEL, org.getName())));
     }
 
     @Test

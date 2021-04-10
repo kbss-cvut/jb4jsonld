@@ -1,19 +1,16 @@
 /**
  * Copyright (C) 2020 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License along with this program. If not, see
- * <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -32,13 +29,28 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     private final Stack<CompositeNode> nodeStack = new Stack<>();
     private CompositeNode currentNode;
 
-    private final ValueSerializer literalSerializer;
-    private final ValueSerializer annotationSerializer;
+    private final ValueSerializers serializers;
 
-    public JsonLdTreeBuilder() {
-        final MultilingualStringSerializer msSerializer = new MultilingualStringSerializer();
-        this.literalSerializer = new LiteralValueSerializer(msSerializer);
-        this.annotationSerializer = new AnnotationValueSerializer(msSerializer);
+    public JsonLdTreeBuilder(ValueSerializers serializers) {
+        this.serializers = serializers;
+    }
+
+    @Override
+    public boolean visitObject(SerializationContext<?> ctx) {
+        if (serializers.hasCustomSerializer(ctx.getValue().getClass())) {
+            final ValueSerializer serializer = serializers.getSerializer(ctx).get();
+            final JsonNode node = serializer.serialize(ctx.getValue(), ctx);
+            if (node != null) {
+                if (currentNode != null) {
+                    currentNode.addItem(node);
+                } else {
+                    assert node instanceof CompositeNode;
+                    currentNode = (CompositeNode) node;
+                }
+            }
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -82,15 +94,13 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void visitAttribute(SerializationContext<?> ctx) {
-        if (ctx.getValue() != null && !BeanAnnotationProcessor.isObjectProperty(ctx.getField())) {
+        if (ctx.getValue() != null) {
             assert currentNode != null;
-            final JsonNode node;
-            if (BeanAnnotationProcessor.isAnnotationProperty(ctx.getField())) {
-                node = annotationSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
-            } else {
-                node = literalSerializer.serialize(ctx.getAttributeId(), ctx.getValue());
+            final ValueSerializer serializer = serializers.getOrDefault(ctx);
+            final JsonNode node = serializer.serialize(ctx.getValue(), ctx);
+            if (node != null) {
+                currentNode.addItem(node);
             }
-            currentNode.addItem(node);
         }
     }
 
