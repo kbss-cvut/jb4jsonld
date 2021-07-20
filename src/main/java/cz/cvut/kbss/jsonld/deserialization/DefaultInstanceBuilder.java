@@ -164,8 +164,13 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
                     ctx = new TypesContext(instance, knownInstances,
                             BeanClassProcessor.getCollectionItemType(targetField), currentInstance.getInstanceType());
                 } else {
-                    ctx = new CollectionInstanceContext<>(instance,
-                            BeanClassProcessor.getCollectionItemType(targetField), knownInstances);
+                    final Class<?> elementType = BeanClassProcessor.getCollectionItemType(targetField);
+                    if (MultilingualString.class.equals(elementType)) {
+                        ctx = new MultilingualStringCollectionContext<>((Collection<MultilingualString>) instance, knownInstances);
+                    } else {
+                        ctx = new CollectionInstanceContext<>(instance,
+                                BeanClassProcessor.getCollectionItemType(targetField), knownInstances);
+                    }
                 }
             }
             currentInstance.setFieldValue(targetField, ctx.instance);
@@ -194,7 +199,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
             return existing;
         }
         return BeanAnnotationProcessor.isPropertiesField(targetField) ? new HashMap<>() :
-               BeanClassProcessor.createCollection(targetField);
+                BeanClassProcessor.createCollection(targetField);
     }
 
     @Override
