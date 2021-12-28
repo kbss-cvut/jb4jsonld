@@ -7,7 +7,6 @@ Java Binding for JSON-LD (JB4JSON-LD) is a simple library for serialization of J
 Note that this is the core, abstract implementation. For actual usage, a binding like [https://github.com/kbss-cvut/jb4jsonld-jackson](https://github.com/kbss-cvut/jb4jsonld-jackson)
 has to be used.
 
-More information can be found at [https://kbss.felk.cvut.cz/web/kbss/jb4json-ld](https://kbss.felk.cvut.cz/web/kbss/jb4json-ld).
 
 ## Usage
 
@@ -91,7 +90,7 @@ See `cz.cvut.kbss.jsonld.ConfigParam`.
 
 ## Documentation
 
-There is some documentation on the [Wiki](https://github.com/kbss-cvut/jb4jsonld/wiki). API Javadoc is also [available](https://kbss.felk.cvut.cz/jenkins/view/Java%20Tools/job/jaxb-jsonld/javadoc/).
+Documentation is on the [Wiki](https://github.com/kbss-cvut/jb4jsonld/wiki). API Javadoc is also [available](https://kbss.felk.cvut.cz/jenkins/view/Java%20Tools/job/jaxb-jsonld/javadoc/).
 
 ## Getting JB4JSON-LD
 
