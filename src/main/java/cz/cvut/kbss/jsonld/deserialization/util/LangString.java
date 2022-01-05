@@ -1,5 +1,7 @@
 package cz.cvut.kbss.jsonld.deserialization.util;
 
+import cz.cvut.kbss.jsonld.JsonLd;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -20,8 +22,16 @@ public class LangString implements Serializable {
         return value;
     }
 
+    /**
+     * Gets the language set on this tagged string.
+     * <p>
+     * Note that if the language is {@link JsonLd#NONE} (JSON-LD 1.1 keyword), a {@code null} is returned to ensure
+     * consistency with {@link cz.cvut.kbss.jopa.model.MultilingualString} behavior.
+     *
+     * @return Language tag, possibly {@code null}
+     */
     public String getLanguage() {
-        return language;
+        return JsonLd.NONE.equals(language) ? null : language;
     }
 
     @Override
