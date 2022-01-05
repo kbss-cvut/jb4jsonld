@@ -716,4 +716,19 @@ class ExpandedJsonLdDeserializerTest {
         assertFalse(result.getMembers().isEmpty());
         assertFalse(result.getParticipants().isEmpty());
     }
+
+    /**
+     * Bug #36
+     */
+    @Test
+    void deserializationSupportsMultilingualStringWithNoneLanguage() throws Exception {
+        final Object input = readAndExpand("objectWithLanguageLessMultilingualString.json");
+        final ObjectWithMultilingualString result = sut.deserialize(input, ObjectWithMultilingualString.class);
+        assertNotNull(result);
+        assertNotNull(result.getLabel());
+        assertEquals("Leveraging Semantic Web Technologies in Domain-specific Information Systems",
+                result.getLabel().get());
+        assertEquals("Využití technologií sémantického webu v doménových informačních systémech",
+                result.getLabel().get("cs"));
+    }
 }
