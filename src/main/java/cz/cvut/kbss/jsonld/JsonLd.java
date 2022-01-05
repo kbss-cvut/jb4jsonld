@@ -38,9 +38,14 @@ public class JsonLd {
     public static final String VALUE = "@value";
 
     /**
-     * JSON-lD {@code @language} keyword.
+     * JSON-LD {@code @language} keyword.
      */
     public static final String LANGUAGE = "@language";
+
+    /**
+     * JSON-LD {@code @none} keyword.
+     */
+    public static final String NONE = "@none";
 
     /**
      * JSON-LD media type.

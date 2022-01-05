@@ -16,8 +16,8 @@ public class LangStringNode extends ObjectNode {
     }
 
     private void addItems(String value, String language) {
-        addItem(language != null ? JsonNodeFactory.createLiteralNode(JsonLd.LANGUAGE, language) :
-                new NullNode(JsonLd.LANGUAGE));
+        // @none is a JSON-LD 1.1 feature
+        addItem(JsonNodeFactory.createLiteralNode(JsonLd.LANGUAGE, language != null ? language : JsonLd.NONE));
         addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value));
     }
 
