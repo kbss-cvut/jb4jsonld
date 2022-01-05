@@ -190,6 +190,7 @@
                     <excludes>
                         <exclude>**/src/test/resources/**</exclude>
                         <exclude>**/src/main/resources/**</exclude>
+                        <exclude>**/workflows/maven.yml</exclude>
                         <exclude>license</exclude>
                         <exclude>**/pom.xml</exclude>
                     </excludes>
