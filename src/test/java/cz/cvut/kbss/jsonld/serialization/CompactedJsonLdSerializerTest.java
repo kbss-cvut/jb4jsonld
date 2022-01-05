@@ -574,4 +574,29 @@ class CompactedJsonLdSerializerTest {
             assertEquals(exp.getUsername(), res.get(Vocabulary.USERNAME));
         }
     }
+
+    /**
+     * Bug #36
+     */
+    @Test
+    void serializationSerializesMultilingualStringWithLanguageLessValue() throws Exception {
+        final ObjectWithMultilingualString instance = new ObjectWithMultilingualString(Generator.generateUri());
+        final MultilingualString name = new MultilingualString();
+        name.set("en", "Value in English");
+        name.set("cs", "Hodnota v češtině");
+        name.set("Default value");
+        instance.setLabel(name);
+
+        final Map<String, ?> json = serializeAndRead(instance);
+        assertTrue(json.containsKey(RDFS.LABEL));
+        final List<?> label = (List<?>) json.get(RDFS.LABEL);
+        assertEquals(name.getValue().size(), label.size());
+        final Optional<Map<?, ?>> result = (Optional<Map<?, ?>>) label.stream().filter(item -> {
+            assertThat(item, instanceOf(Map.class));
+            final Map<?, ?> m = (Map<?, ?>) item;
+            return Objects.equals(m.get(JsonLd.LANGUAGE), JsonLd.NONE);
+        }).findAny();
+        assertTrue(result.isPresent());
+        assertEquals(name.get(), result.get().get(JsonLd.VALUE));
+    }
 }

@@ -23,14 +23,14 @@ class LangStringNodeTest extends AbstractNodeTest {
     }
 
     @Test
-    void writeValueWritesValueAndNullWhenLanguageTagIsNotSpecified() throws Exception {
+    void writeValueWritesValueAndNoneWhenLanguageTagIsNotSpecified() throws Exception {
         final String value = "test";
         final LangStringNode sut = new LangStringNode(value, null);
         sut.write(serializerMock);
         final InOrder inOrder = Mockito.inOrder(serializerMock);
         inOrder.verify(serializerMock).writeObjectStart();
         inOrder.verify(serializerMock).writeFieldName(JsonLd.LANGUAGE);
-        inOrder.verify(serializerMock).writeNull();
+        inOrder.verify(serializerMock).writeString(JsonLd.NONE);
         inOrder.verify(serializerMock).writeFieldName(JsonLd.VALUE);
         inOrder.verify(serializerMock).writeString(value);
         inOrder.verify(serializerMock).writeObjectEnd();
