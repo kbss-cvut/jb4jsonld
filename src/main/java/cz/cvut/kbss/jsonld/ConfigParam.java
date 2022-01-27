@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -79,7 +79,18 @@ public enum ConfigParam {
      *
      * @see #ENABLE_OPTIMISTIC_TARGET_TYPE_RESOLUTION
      */
-    PREFER_SUPERCLASS("preferSuperclass");
+    PREFER_SUPERCLASS("preferSuperclass"),
+
+    /**
+     * Whether to serialize date/time values as the number of milliseconds since epoch (if applicable).
+     *
+     * Serialization as the number of millis since epoch is the default way for {@link java.util.Date}, but is not very
+     * useful for the Java 8 datetime API. If set to {@code false}, date/time values will be serialized as String in the
+     * ISO 8601 format.
+     *
+     * To provide consistent behavior of various datetime representations, this property defaults to false.
+     */
+    SERIALIZE_DATETIME_AS_MILLIS("serializeDatetimeAsMillis");
 
     private final String name;
 
