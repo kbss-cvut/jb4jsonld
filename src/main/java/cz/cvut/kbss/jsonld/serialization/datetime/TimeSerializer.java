@@ -10,6 +10,9 @@ import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 
+/**
+ * Serializes time values ({@link LocalTime} and {@link OffsetTime}) to ISO-based string.
+ */
 class TimeSerializer {
 
     static JsonNode serialize(OffsetTime value, SerializationContext<TemporalAccessor> ctx) {

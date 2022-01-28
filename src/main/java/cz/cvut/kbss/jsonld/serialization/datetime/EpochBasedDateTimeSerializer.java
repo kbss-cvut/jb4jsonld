@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization.datetime;
 
+import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
@@ -13,7 +14,6 @@ public class EpochBasedDateTimeSerializer extends DateTimeSerializer {
 
     @Override
     JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
-        // TODO
-        return null;
+        return JsonNodeFactory.createLiteralNode(ctx.getAttributeId(), value.toInstant().toEpochMilli());
     }
 }
