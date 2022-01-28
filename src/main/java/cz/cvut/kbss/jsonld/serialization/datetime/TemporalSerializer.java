@@ -2,6 +2,7 @@ package cz.cvut.kbss.jsonld.serialization.datetime;
 
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.exception.UnsupportedTemporalTypeException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -35,7 +36,7 @@ public class TemporalSerializer implements ValueSerializer<TemporalAccessor> {
         } else if (value instanceof ZonedDateTime) {
             return dateTimeSerializer.serialize(((ZonedDateTime) value).toOffsetDateTime(), ctx);
         }
-        return null;
+        throw new UnsupportedTemporalTypeException("Temporal type " + value.getClass() + " serialization is not supported.");
     }
 
     @Override
