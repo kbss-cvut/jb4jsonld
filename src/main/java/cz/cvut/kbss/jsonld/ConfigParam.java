@@ -83,19 +83,21 @@ public enum ConfigParam {
 
     /**
      * Whether to serialize date/time values as the number of milliseconds since epoch (if applicable).
-     *
+     * <p>
      * Serialization as the number of millis since epoch is the default way for {@link java.util.Date}, but is not very
      * useful for the Java 8 datetime API. If set to {@code false}, date/time values will be serialized as String in the
      * ISO 8601 format.
-     *
+     * <p>
      * To provide consistent behavior of various datetime representations, this property defaults to false.
      */
     SERIALIZE_DATETIME_AS_MILLIS("serializeDatetimeAsMillis"),
 
     /**
-     * Format string used to serialize and deserialize datetime (date, time, datetime) values.
-     *
+     * Format string used to serialize and deserialize datetime values.
+     * <p>
      * Note that if {@link #SERIALIZE_DATETIME_AS_MILLIS} is enabled, this parameter has no effect on serialization of datetime.
+     * <p>
+     * Also note that this format applies only to full datetime values. Date or time values have to be formatted per-attribute.
      */
     DATE_TIME_FORMAT("dateTimeFormat");
 
