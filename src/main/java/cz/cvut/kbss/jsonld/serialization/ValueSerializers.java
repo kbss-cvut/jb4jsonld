@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jsonld.common.Configurable;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Optional;
@@ -21,7 +22,7 @@ import java.util.Optional;
 /**
  * Provides serializers for JSON-LD tree building.
  */
-public interface ValueSerializers {
+public interface ValueSerializers extends Configurable {
 
     /**
      * Checks whether a custom serializer is registered for the specified type.

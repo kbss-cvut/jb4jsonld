@@ -77,6 +77,7 @@ public abstract class JsonLdSerializer implements Configured {
         Objects.requireNonNull(root);
         final ObjectGraphTraverser traverser = new ObjectGraphTraverser();
         traverser.setRequireId(configuration.is(ConfigParam.REQUIRE_ID));
+        serializers.configure(configuration);
         final JsonNode jsonRoot = buildJsonTree(root, traverser);
         jsonRoot.write(jsonGenerator);
     }
