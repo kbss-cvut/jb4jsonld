@@ -90,7 +90,14 @@ public enum ConfigParam {
      *
      * To provide consistent behavior of various datetime representations, this property defaults to false.
      */
-    SERIALIZE_DATETIME_AS_MILLIS("serializeDatetimeAsMillis");
+    SERIALIZE_DATETIME_AS_MILLIS("serializeDatetimeAsMillis"),
+
+    /**
+     * Format string used to serialize and deserialize datetime (date, time, datetime) values.
+     *
+     * Note that if {@link #SERIALIZE_DATETIME_AS_MILLIS} is enabled, this parameter has no effect on serialization of datetime.
+     */
+    DATE_TIME_FORMAT("dateTimeFormat");
 
     private final String name;
 

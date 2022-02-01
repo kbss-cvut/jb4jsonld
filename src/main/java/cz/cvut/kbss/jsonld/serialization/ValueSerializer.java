@@ -15,6 +15,7 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.common.Configurable;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
@@ -22,7 +23,7 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
  * Serializes values.
  */
 @FunctionalInterface
-public interface ValueSerializer<T> {
+public interface ValueSerializer<T> extends Configurable {
 
     /**
      * Serializes the specified value, returning a JSON-LD node representing it.
@@ -47,6 +48,7 @@ public interface ValueSerializer<T> {
      *
      * @param config Configuration to apply
      */
-    default void applyConfiguration(Configuration config) {
+    @Override
+    default void configure(Configuration config) {
     }
 }

@@ -40,9 +40,10 @@ public class TemporalSerializer implements ValueSerializer<TemporalAccessor> {
     }
 
     @Override
-    public void applyConfiguration(Configuration config) {
+    public void configure(Configuration config) {
         assert config != null;
         this.dateTimeSerializer = config.is(ConfigParam.SERIALIZE_DATETIME_AS_MILLIS) ?
                 new EpochBasedDateTimeSerializer() : new IsoDateTimeSerializer();
+        dateTimeSerializer.configure(config);
     }
 }
