@@ -92,6 +92,7 @@ class CompactedJsonLdSerializerTest {
     void testSerializeObjectWithPluralReference() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, false);  // No backward references for this test
+        sut.configuration().set(ConfigParam.SERIALIZE_DATETIME_AS_MILLIS, Boolean.toString(true));
         sut.serialize(org);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
@@ -111,6 +112,7 @@ class CompactedJsonLdSerializerTest {
     void testSerializeObjectWithBackwardReferences() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, true);
+        sut.configuration().set(ConfigParam.SERIALIZE_DATETIME_AS_MILLIS, Boolean.toString(true));
         sut.serialize(org);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
@@ -126,6 +128,7 @@ class CompactedJsonLdSerializerTest {
         if (org.getAdmins() == null || org.getAdmins().isEmpty()) {
             org.setAdmins(new HashSet<>(Collections.singletonList(org.getEmployees().iterator().next())));
         }
+        sut.configuration().set(ConfigParam.SERIALIZE_DATETIME_AS_MILLIS, Boolean.toString(true));
         sut.serialize(org);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);

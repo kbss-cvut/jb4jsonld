@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -14,12 +14,13 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.serialization.datetime.DateSerializer;
+import cz.cvut.kbss.jsonld.serialization.datetime.TemporalSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.*;
+import java.util.*;
 
 /**
  * Manages serializers for a single {@link JsonLdSerializer} instance.
@@ -29,6 +30,23 @@ public class CommonValueSerializers implements ValueSerializers {
     private final Map<Class<?>, ValueSerializer<?>> serializers = new HashMap<>();
 
     private final ValueSerializer<?> defaultSerializer = new DefaultValueSerializer(new MultilingualStringSerializer());
+
+    public CommonValueSerializers() {
+        initBuiltInSerializers();
+    }
+
+    private void initBuiltInSerializers() {
+        final TemporalSerializer ts = new TemporalSerializer();
+        // Register the same temporal serializer for each of the types it supports (needed for key-based map access)
+        serializers.put(LocalDate.class, ts);
+        serializers.put(LocalTime.class, ts);
+        serializers.put(OffsetTime.class, ts);
+        serializers.put(LocalDateTime.class, ts);
+        serializers.put(OffsetDateTime.class, ts);
+        serializers.put(ZonedDateTime.class, ts);
+        serializers.put(Instant.class, ts);
+        serializers.put(Date.class, new DateSerializer(ts));
+    }
 
     @Override
     public <T> boolean hasCustomSerializer(Class<T> type) {
@@ -50,5 +68,10 @@ public class CommonValueSerializers implements ValueSerializers {
         Objects.requireNonNull(forType);
         Objects.requireNonNull(serializer);
         serializers.put(forType, serializer);
+    }
+
+    @Override
+    public void configure(Configuration configuration) {
+        serializers.values().forEach(vs -> vs.configure(configuration));
     }
 }
