@@ -18,7 +18,7 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
-import cz.cvut.kbss.jsonld.common.Configurable;
+import cz.cvut.kbss.jsonld.common.Configured;
 import cz.cvut.kbss.jsonld.deserialization.expanded.ExpandedJsonLdDeserializer;
 import cz.cvut.kbss.jsonld.deserialization.util.ClasspathScanner;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
@@ -30,7 +30,7 @@ import java.util.Objects;
 /**
  * Takes a pre-processed JSON-LD structure and deserializes it.
  */
-public abstract class JsonLdDeserializer implements Configurable {
+public abstract class JsonLdDeserializer implements Configured {
 
     private final Configuration configuration;
 

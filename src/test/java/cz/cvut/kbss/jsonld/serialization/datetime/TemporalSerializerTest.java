@@ -94,7 +94,7 @@ class TemporalSerializerTest {
     private void serializeDatetimeAsMillisSinceEpoch() {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SERIALIZE_DATETIME_AS_MILLIS, Boolean.toString(true));
-        sut.applyConfiguration(config);
+        sut.configure(config);
     }
 
     private void serializeAndVerifyMillisResult(TemporalAccessor value, long expected) {
@@ -118,5 +118,19 @@ class TemporalSerializerTest {
         serializeDatetimeAsMillisSinceEpoch();
         final ZonedDateTime value = ZonedDateTime.now();
         serializeAndVerifyMillisResult(value, value.toInstant().toEpochMilli());
+    }
+
+    @Test
+    void serializeLocalDateTimeUsesConfiguredDateTimeFormat() {
+        final String pattern = "dd/MM/yyyy hh:mm:ss";
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.DATE_TIME_FORMAT, pattern);
+        final LocalDateTime value = LocalDateTime.now();
+        sut.configure(config);
+        final SerializationContext<TemporalAccessor> ctx = new SerializationContext<>(Generator.generateUri()
+                .toString(), value);
+        final JsonNode result = sut.serialize(value, ctx);
+        assertInstanceOf(StringLiteralNode.class, result);
+        assertEquals(value.format(DateTimeFormatter.ofPattern(pattern)), ((StringLiteralNode) result).getValue());
     }
 }

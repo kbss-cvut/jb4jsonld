@@ -35,7 +35,7 @@ class DateSerializerTest {
     void serializeAsMillisSinceEpochReturnsDateAsNumberOfMillisSinceEpochAtUtcOffset() {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SERIALIZE_DATETIME_AS_MILLIS, Boolean.toString(true));
-        sut.applyConfiguration(config);
+        sut.configure(config);
         final Date value = new Date();
         final SerializationContext<Date> ctx = new SerializationContext<>(Generator.generateUri().toString(), value);
         final JsonNode result = sut.serialize(value, ctx);

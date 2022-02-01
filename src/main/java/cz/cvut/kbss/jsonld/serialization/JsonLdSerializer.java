@@ -16,7 +16,7 @@ package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
-import cz.cvut.kbss.jsonld.common.Configurable;
+import cz.cvut.kbss.jsonld.common.Configured;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 
@@ -27,7 +27,7 @@ import java.util.Objects;
  * <p>
  * The serializers will mostly differ in the form of the generated JSON. E.g. the output can be expanded, using contexts etc.
  */
-public abstract class JsonLdSerializer implements Configurable {
+public abstract class JsonLdSerializer implements Configured {
 
     private final Configuration configuration;
 

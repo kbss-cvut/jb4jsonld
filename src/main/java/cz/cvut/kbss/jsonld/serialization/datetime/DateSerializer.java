@@ -25,7 +25,7 @@ public class DateSerializer implements ValueSerializer<Date> {
     }
 
     @Override
-    public void applyConfiguration(Configuration config) {
-        temporalSerializer.applyConfiguration(config);
+    public void configure(Configuration config) {
+        temporalSerializer.configure(config);
     }
 }
