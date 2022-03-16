@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -101,8 +101,8 @@ class DataTypeTransformerTest {
     }
 
     @Test
-    void transformationTransformsZonedDateTimeToLocalDateTime() {
-        final ZonedDateTime value = ZonedDateTime.now();
+    void transformationTransformsOffsetDateTimeToLocalDateTime() {
+        final OffsetDateTime value = OffsetDateTime.now();
         assertEquals(value.toLocalDateTime(), DataTypeTransformer.transformValue(value, LocalDateTime.class));
     }
 
