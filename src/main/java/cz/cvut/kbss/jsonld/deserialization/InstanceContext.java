@@ -21,7 +21,6 @@ import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 
 import java.lang.reflect.Field;
 import java.util.Map;
-import java.util.Optional;
 
 abstract class InstanceContext<T> {
 
@@ -137,13 +136,11 @@ abstract class InstanceContext<T> {
             if (knownInstances.containsKey(value.toString())) {
                 final Object known = knownInstances.get(value.toString());
                 if (!targetType.isAssignableFrom(known.getClass())) {
-                    // TODO Here
                     return DataTypeTransformer.transformValue(value, targetType);
                 } else {
                     return known;
                 }
             } else {
-                // TODO Here
                 return DataTypeTransformer.transformValue(value, targetType);
             }
         }
