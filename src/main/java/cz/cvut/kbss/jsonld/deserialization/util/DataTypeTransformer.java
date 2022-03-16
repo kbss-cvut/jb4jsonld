@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Provides transformations of values to various target types.
+ * Provides transformation of values to various target types.
  */
 public class DataTypeTransformer {
 
