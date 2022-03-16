@@ -78,8 +78,9 @@ class DataTypeTransformerTest {
 
     @Test
     void transformationTransformsLangStringToMultilingualString() {
-        final LangString value = new LangString("building", "en");
-        assertEquals(new MultilingualString(Collections.singletonMap(value.getLanguage().get(), value.getValue())),
+        final String lang = "en";
+        final LangString value = new LangString("building", lang);
+        assertEquals(new MultilingualString(Collections.singletonMap(lang, value.getValue())),
                 DataTypeTransformer.transformValue(value, MultilingualString.class));
     }
 
