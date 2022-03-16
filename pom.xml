@@ -18,7 +18,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <cz.cvut.kbss.jopa.version>0.18.1</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jopa.version>0.18.3</cz.cvut.kbss.jopa.version>
 
         <org.junit.jupiter.version>5.8.2</org.junit.jupiter.version>
         <org.mockito.version>4.2.0</org.mockito.version>

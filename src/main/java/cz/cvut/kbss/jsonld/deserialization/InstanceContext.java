@@ -124,7 +124,7 @@ abstract class InstanceContext<T> {
     }
 
     /**
-     * Gets type of the element type of a collection represented by this context.
+     * Gets type of the element of a collection represented by this context.
      *
      * @return Collection element type
      */
