@@ -18,10 +18,8 @@ import cz.cvut.kbss.jopa.datatype.DatatypeTransformer;
 import cz.cvut.kbss.jopa.datatype.util.Pair;
 import cz.cvut.kbss.jopa.model.MultilingualString;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.time.*;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -39,6 +37,11 @@ public class DataTypeTransformer {
         });
         map.put(new Pair<>(String.class, MultilingualString.class),
                 src -> new MultilingualString(Collections.singletonMap(null, src.toString())));
+        map.put(new Pair<>(OffsetDateTime.class, LocalDateTime.class), src -> ((OffsetDateTime) src).toLocalDateTime());
+        map.put(new Pair<>(OffsetDateTime.class, ZonedDateTime.class), src -> ((OffsetDateTime) src).toZonedDateTime());
+        map.put(new Pair<>(OffsetDateTime.class, Instant.class), src -> ((OffsetDateTime) src).toInstant());
+        map.put(new Pair<>(OffsetDateTime.class, Date.class), src -> Date.from(((OffsetDateTime) src).toInstant()));
+        map.put(new Pair<>(OffsetTime.class, LocalTime.class), src -> ((OffsetTime) src).toLocalTime());
         return map;
     }
 
