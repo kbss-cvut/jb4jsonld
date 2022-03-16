@@ -132,20 +132,22 @@ abstract class InstanceContext<T> {
         throw new UnsupportedOperationException("Not supported by this type of instance context.");
     }
 
-    Optional<Object> resolveAssignableValue(Class<?> targetType, Object value) {
+    Object resolveAssignableValue(Class<?> targetType, Object value) {
         if (!targetType.isAssignableFrom(value.getClass())) {
             if (knownInstances.containsKey(value.toString())) {
                 final Object known = knownInstances.get(value.toString());
                 if (!targetType.isAssignableFrom(known.getClass())) {
-                    return Optional.ofNullable(DataTypeTransformer.transformValue(value, targetType));
+                    // TODO Here
+                    return DataTypeTransformer.transformValue(value, targetType);
                 } else {
-                    return Optional.of(known);
+                    return known;
                 }
             } else {
-                return Optional.ofNullable(DataTypeTransformer.transformValue(value, targetType));
+                // TODO Here
+                return DataTypeTransformer.transformValue(value, targetType);
             }
         }
-        return Optional.of(value);
+        return value;
     }
 
     /**

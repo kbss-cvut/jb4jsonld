@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -48,16 +48,14 @@ class SingularObjectContextTest {
     }
 
     @Test
-    void setFieldValueThrowsDeserializationExceptionWhenInvalidTypeIsUsedAsFieldValue() throws Exception {
+    void setFieldValueThrowsDeserializationExceptionWhenInvalidTypeIsUsedAsFieldValue() {
         final Integer invalidValue = 117;
         final SingularObjectContext<Person> ctx = new SingularObjectContext<>(new User(),
                 BeanAnnotationProcessor.mapFieldsForDeserialization(
                         User.class), Collections.emptyMap());
         JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
                 () -> ctx.setFieldValue(User.class.getDeclaredField("admin"), invalidValue));
-        assertThat(result.getMessage(), containsString(
-                "Type mismatch. Cannot set value " + invalidValue + " of type " + invalidValue.getClass() +
-                        " on field " + User.class.getDeclaredField("admin")));
+        assertThat(result.getMessage(), containsString("Type mismatch"));
     }
 
     @Test
@@ -73,22 +71,18 @@ class SingularObjectContextTest {
     }
 
     @Test
-    void setFieldValueThrowsDeserializationExceptionWhenUnknownObjectIdIsPassedIn() throws Exception {
+    void setFieldValueThrowsDeserializationExceptionWhenUnknownObjectIdIsPassedIn() {
         final Organization org = Generator.generateOrganization();
         final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
                 BeanAnnotationProcessor.mapFieldsForDeserialization(Employee.class),
                 Collections.emptyMap());
         JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
                 () -> ctx.setFieldValue(Employee.class.getDeclaredField("employer"), org.getUri().toString()));
-        assertThat(result.getMessage(),
-                containsString(
-                        "Type mismatch. Cannot set value " + org.getUri().toString() + " of type " + String.class +
-                                " on field " + Employee.class.getDeclaredField("employer")));
+        assertThat(result.getMessage(), containsString("Type mismatch"));
     }
 
     @Test
-    void setFieldValueThrowsDeserializationExceptionWhenIdOfInstanceWithInvalidTypeIsPassedIn()
-            throws Exception {
+    void setFieldValueThrowsDeserializationExceptionWhenIdOfInstanceWithInvalidTypeIsPassedIn() {
         final User u = Generator.generateUser();
         final Map<String, Object> knownInstances = Collections.singletonMap(u.getUri().toString(), u);
         final SingularObjectContext<Employee> ctx = new SingularObjectContext<>(new Employee(),
@@ -96,9 +90,7 @@ class SingularObjectContextTest {
                 knownInstances);
         JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
                 () -> ctx.setFieldValue(Employee.class.getDeclaredField("employer"), u.getUri().toString()));
-        assertThat(result.getMessage(),
-                containsString("Type mismatch. Cannot set value " + u + " of type " + u.getClass() + " on field " +
-                        Employee.class.getDeclaredField("employer")));
+        assertThat(result.getMessage(), containsString("Type mismatch"));
     }
 
     @Test
