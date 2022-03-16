@@ -22,8 +22,7 @@ import cz.cvut.kbss.jsonld.environment.model.Role;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.Collections;
 import java.util.Date;
 
@@ -42,13 +41,6 @@ class DataTypeTransformerTest {
     void transformValueThrowsUnsupportedTypeTransformationExceptionForUnsupportedTransformation() {
         final String value = "RandomValue";
         assertThrows(UnsupportedTypeTransformationException.class, () -> DataTypeTransformer.transformValue(value, Person.class));
-    }
-
-    @Test
-    void testTransformStringToDate() {
-        // Get rid of millis in Date, they are not expressed in the string form
-        final Date date = new Date((System.currentTimeMillis() / 1000) * 1000);
-        assertEquals(date, DataTypeTransformer.transformValue(date.toString(), Date.class));
     }
 
     @Test
@@ -85,15 +77,39 @@ class DataTypeTransformerTest {
     }
 
     @Test
-    void transformationTransformsOffsetDateTimeToLocalDateTime() {
+    void transformationTransformsLangStringToMultilingualString() {
+        final LangString value = new LangString("building", "en");
+        assertEquals(new MultilingualString(Collections.singletonMap(value.getLanguage().get(), value.getValue())),
+                DataTypeTransformer.transformValue(value, MultilingualString.class));
+    }
+
+    @Test
+    void transformationTransformsOffsetDateTimeToLocalDateTimeAtSystemOffset() {
         final OffsetDateTime value = OffsetDateTime.now();
         assertEquals(value.toLocalDateTime(), DataTypeTransformer.transformValue(value, LocalDateTime.class));
     }
 
     @Test
-    void transformationTransformsLangStringToMultilingualString() {
-        final LangString value = new LangString("building", "en");
-        assertEquals(new MultilingualString(Collections.singletonMap(value.getLanguage().get(), value.getValue())),
-                DataTypeTransformer.transformValue(value, MultilingualString.class));
+    void transformationTransformsOffsetDateTimeToZonedDateTimeAtSystemZone() {
+        final OffsetDateTime value = OffsetDateTime.now();
+        assertEquals(value.toZonedDateTime(), DataTypeTransformer.transformValue(value, ZonedDateTime.class));
+    }
+
+    @Test
+    void transformationTransformsOffsetDateTimeToInstantAtUTC() {
+        final OffsetDateTime value = OffsetDateTime.now();
+        assertEquals(value.toInstant(), DataTypeTransformer.transformValue(value, Instant.class));
+    }
+
+    @Test
+    void transformationTransformsOffsetDateTimeToDateAtUTC() {
+        final OffsetDateTime value = OffsetDateTime.now();
+        assertEquals(Date.from(value.toInstant()), DataTypeTransformer.transformValue(value, Date.class));
+    }
+
+    @Test
+    void transformationTransformsOffsetTimeToLocalTime() {
+        final OffsetTime value = OffsetTime.now();
+        assertEquals(value.toLocalTime(), DataTypeTransformer.transformValue(value, LocalTime.class));
     }
 }
