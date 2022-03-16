@@ -31,8 +31,9 @@ class MultilingualStringCollectionContext<T extends Collection<MultilingualStrin
         assert item != null;
         if (item instanceof LangString) {
             final LangString value = (LangString) item;
-            final MultilingualString element = getFirstAvailable(value.getLanguage());
-            element.set(value.getLanguage(), value.getValue());
+            final String language = value.getLanguage().orElse(null);
+            final MultilingualString element = getFirstAvailable(language);
+            element.set(language, value.getValue());
         } else {
             final MultilingualString element = getFirstAvailable(null);
             element.set(item.toString());

@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -14,38 +14,22 @@
  */
 package cz.cvut.kbss.jsonld.deserialization.util;
 
+import cz.cvut.kbss.jopa.datatype.exception.UnsupportedTypeTransformationException;
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.Role;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataTypeTransformerTest {
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void registerTransformationRuleAddsRuleToTransformationRules() throws Exception {
-        final Function<Integer, Double> rule = Integer::doubleValue;
-        DataTypeTransformer.registerTransformationRule(Integer.class, Double.class, rule);
-        final Field rulesField = DataTypeTransformer.class.getDeclaredField("rules");
-        rulesField.setAccessible(true);
-        final Map<DataTypeTransformer.TransformationRuleIdentifier<?, ?>, Function<?, ?>> rules =
-                (Map<DataTypeTransformer.TransformationRuleIdentifier<?, ?>, Function<?, ?>>) rulesField
-                        .get(null);
-        assertTrue(
-                rules.containsKey(new DataTypeTransformer.TransformationRuleIdentifier<>(Integer.class, Double.class)));
-    }
 
     @Test
     void transformValueTransformsStringToUri() {
@@ -55,9 +39,9 @@ class DataTypeTransformerTest {
     }
 
     @Test
-    void transformValueReturnsNullForUnsupportedTransformation() {
+    void transformValueThrowsUnsupportedTypeTransformationExceptionForUnsupportedTransformation() {
         final String value = "RandomValue";
-        assertNull(DataTypeTransformer.transformValue(value, Person.class));
+        assertThrows(UnsupportedTypeTransformationException.class, () -> DataTypeTransformer.transformValue(value, Person.class));
     }
 
     @Test
@@ -109,7 +93,7 @@ class DataTypeTransformerTest {
     @Test
     void transformationTransformsLangStringToMultilingualString() {
         final LangString value = new LangString("building", "en");
-        assertEquals(new MultilingualString(Collections.singletonMap(value.getLanguage(), value.getValue())),
+        assertEquals(new MultilingualString(Collections.singletonMap(value.getLanguage().get(), value.getValue())),
                 DataTypeTransformer.transformValue(value, MultilingualString.class));
     }
 }

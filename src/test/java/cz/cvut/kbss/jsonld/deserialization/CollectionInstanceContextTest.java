@@ -68,9 +68,7 @@ class CollectionInstanceContextTest {
                 Collections.emptyMap());
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
                 () -> ctx.addItem("Test"));
-        assertThat(result.getMessage(), containsString(
-                "Type mismatch. Unable to transform instance of type " + String.class + " to the expected type " +
-                        Integer.class));
+        assertThat(result.getMessage(), containsString("Type mismatch"));
     }
 
     @Test

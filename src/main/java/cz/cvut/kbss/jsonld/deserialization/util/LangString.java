@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -16,58 +16,34 @@ package cz.cvut.kbss.jsonld.deserialization.util;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 
-import java.io.Serializable;
-import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents a string with a language tag.
  */
-public class LangString implements Serializable {
-
-    private final String value;
-    private final String language;
+public class LangString extends cz.cvut.kbss.ontodriver.model.LangString {
 
     public LangString(String value, String language) {
-        this.value = Objects.requireNonNull(value);
-        this.language = language;
-    }
-
-    public String getValue() {
-        return value;
+        super(value, language);
     }
 
     /**
      * Gets the language set on this tagged string.
      * <p>
-     * Note that if the language is {@link JsonLd#NONE} (JSON-LD 1.1 keyword), a {@code null} is returned to ensure
+     * Note that if the language is {@link JsonLd#NONE} (JSON-LD 1.1 keyword), an empty {@link Optional} is returned to ensure
      * consistency with {@link cz.cvut.kbss.jopa.model.MultilingualString} behavior.
      *
-     * @return Language tag, possibly {@code null}
+     * @return Language tag, possibly empty
      */
-    public String getLanguage() {
-        return JsonLd.NONE.equals(language) ? null : language;
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof LangString)) {
-            return false;
-        }
-        LangString that = (LangString) o;
-        return value.equals(that.value) && Objects.equals(language, that.language);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value, language);
+    public Optional<String> getLanguage() {
+        final Optional<String> superResult = super.getLanguage();
+        return JsonLd.NONE.equals(superResult.get()) ? Optional.empty() : superResult;
     }
 
     @Override
     public String toString() {
         // This implementation returns only value to allow its usage in DataTypeTransformer
-        return value;
+        return getValue();
     }
 }

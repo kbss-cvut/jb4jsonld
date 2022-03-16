@@ -244,7 +244,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
         final Field field = currentInstance.getFieldForProperty(property);
         assert field != null;
         final Class<?> type = field.getType();
-        if (BeanClassProcessor.isIdentifierType(type) || Object.class.equals(type)) {
+        if (canDirectlyAddNodeReference(type)) {
             currentInstance.setFieldValue(field, DataTypeTransformer.transformValue(URI.create(nodeId), type));
         } else {
             if (knownInstances.containsKey(nodeId)) {
