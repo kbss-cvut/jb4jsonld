@@ -15,6 +15,7 @@
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.deserialization.CommonValueDeserializers;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
@@ -31,7 +32,7 @@ class DeserializerTest {
     void resolveTargetClassReturnsExpectedClassWhenItIsPlainIdentifierType() throws Exception {
         final Deserializer<Map<?, ?>> deserializer =
                 new ObjectDeserializer(null,
-                        new DeserializerConfig(new Configuration(), new TargetClassResolver(new TypeMap())),
+                        new DeserializerConfig(new Configuration(), new TargetClassResolver(new TypeMap()), new CommonValueDeserializers()),
                         URI.class);
         assertEquals(URI.class,
                 deserializer.resolveTargetClass(TestUtil.readAndExpand("objectWithDataProperties.json"), URI.class));

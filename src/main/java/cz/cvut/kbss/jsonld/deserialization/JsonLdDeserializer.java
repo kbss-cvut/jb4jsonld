@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -36,6 +36,8 @@ public abstract class JsonLdDeserializer implements Configured {
 
     protected final TargetClassResolver classResolver;
 
+    protected ValueDeserializers deserializers = new CommonValueDeserializers();
+
     protected JsonLdDeserializer() {
         this.configuration = new Configuration();
         this.classResolver = initializeTargetClassResolver();
@@ -65,6 +67,21 @@ public abstract class JsonLdDeserializer implements Configured {
     @Override
     public Configuration configuration() {
         return configuration;
+    }
+
+    /**
+     * Registers a custom deserializer for the specified type.
+     * <p>
+     * If a deserializer already existed for the type, it is replaced by the new one.
+     *
+     * @param type       Target type to register the deserializer for
+     * @param deserializer Deserializer to register
+     * @param <T>        Target type
+     */
+    public <T> void registerSerializer(Class<T> type, ValueDeserializer<T> deserializer) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(deserializer);
+        deserializers.registerDeserializer(type, deserializer);
     }
 
     /**

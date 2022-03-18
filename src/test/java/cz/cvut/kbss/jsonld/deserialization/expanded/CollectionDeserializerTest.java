@@ -17,6 +17,7 @@ package cz.cvut.kbss.jsonld.deserialization.expanded;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.deserialization.CommonValueDeserializers;
 import cz.cvut.kbss.jsonld.deserialization.DefaultInstanceBuilder;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
 import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
@@ -52,7 +53,7 @@ class CollectionDeserializerTest {
     void setUp() {
         final TargetClassResolver typeResolver = new TargetClassResolver(new TypeMap());
         this.instanceBuilder = new DefaultInstanceBuilder(typeResolver, new PendingReferenceRegistry());
-        this.deserializerConfig = new DeserializerConfig(new Configuration(), typeResolver);
+        this.deserializerConfig = new DeserializerConfig(new Configuration(), typeResolver, new CommonValueDeserializers());
     }
 
     @Test
