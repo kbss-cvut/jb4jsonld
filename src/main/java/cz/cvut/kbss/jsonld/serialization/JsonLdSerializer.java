@@ -31,9 +31,9 @@ public abstract class JsonLdSerializer implements Configured {
 
     private final Configuration configuration;
 
-    final JsonGenerator jsonGenerator;
+    protected final JsonGenerator jsonGenerator;
 
-    final ValueSerializers serializers = new CommonValueSerializers();
+    protected final ValueSerializers serializers = new CommonValueSerializers();
 
     protected JsonLdSerializer(JsonGenerator jsonGenerator) {
         this.jsonGenerator = Objects.requireNonNull(jsonGenerator);

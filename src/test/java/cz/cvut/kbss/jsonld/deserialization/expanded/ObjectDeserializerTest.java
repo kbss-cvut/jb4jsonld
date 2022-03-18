@@ -22,7 +22,9 @@ import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
+import cz.cvut.kbss.jsonld.deserialization.CommonValueDeserializers;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
+import cz.cvut.kbss.jsonld.deserialization.ValueDeserializers;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
@@ -57,6 +59,8 @@ class ObjectDeserializerTest {
     @Mock
     private TargetClassResolver tcResolverMock;
 
+    private final ValueDeserializers deserializers = new CommonValueDeserializers();
+
     private ObjectDeserializer sut;
 
     @BeforeEach
@@ -75,7 +79,7 @@ class ObjectDeserializerTest {
         doAnswer(inv -> Study.class).when(instanceBuilderMock).getCurrentContextType();
         doAnswer(inv -> Employee.class).when(instanceBuilderMock).getCurrentCollectionElementType();
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
+                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
                         Study.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithPluralReferenceSharingObject.json");
         sut.processValue((Map<?, ?>) input.get(0));
@@ -95,7 +99,7 @@ class ObjectDeserializerTest {
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         doAnswer(inv -> InvalidOrder.class).when(instanceBuilderMock).getCurrentContextType();
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
+                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
                         InvalidOrder.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithPluralReferenceSharingObject.json");
 
@@ -122,7 +126,7 @@ class ObjectDeserializerTest {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
+                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
                         User.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
         sut.processValue((Map<?, ?>) input.get(0));
@@ -134,7 +138,7 @@ class ObjectDeserializerTest {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
+                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
                         User.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithSingularReference.json");
         sut.processValue((Map<?, ?>) input.get(0));
@@ -148,7 +152,7 @@ class ObjectDeserializerTest {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock),
+                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
                         User.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
         sut.processValue((Map<?, ?>) input.get(0));
@@ -161,7 +165,7 @@ class ObjectDeserializerTest {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         this.sut = new ObjectDeserializer(instanceBuilderMock,
-                new DeserializerConfig(new Configuration(), tcResolverMock), User.class);
+                new DeserializerConfig(new Configuration(), tcResolverMock, deserializers), User.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
         ((Map<?, ?>) input.get(0)).remove(JsonLd.ID);
         sut.processValue((Map<?, ?>) input.get(0));
@@ -178,7 +182,7 @@ class ObjectDeserializerTest {
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         when(instanceBuilderMock.isPropertyDeserializable(eq(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED))).thenReturn(false);
         this.sut = new ObjectDeserializer(instanceBuilderMock,
-                new DeserializerConfig(new Configuration(), tcResolverMock), Study.class);
+                new DeserializerConfig(new Configuration(), tcResolverMock, deserializers), Study.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithReadOnlyPropertyValue.json");
         ((Map<?, ?>) input.get(0)).remove(Vocabulary.HAS_MEMBER);
         ((Map<?, ?>) input.get(0)).remove(Vocabulary.HAS_PARTICIPANT);
@@ -195,7 +199,7 @@ class ObjectDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
         this.sut = new ObjectDeserializer(instanceBuilderMock,
-                new DeserializerConfig(config, tcResolverMock), Object.class);
+                new DeserializerConfig(config, tcResolverMock, deserializers), Object.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
         sut.processValue((Map<?, ?>) input.get(0));
     }
@@ -208,7 +212,7 @@ class ObjectDeserializerTest {
         doThrow(ex).when(instanceBuilderMock).openObject(anyString(), any(Class.class));
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(false);
         this.sut = new ObjectDeserializer(instanceBuilderMock,
-                new DeserializerConfig(new Configuration(), tcResolverMock), Object.class);
+                new DeserializerConfig(new Configuration(), tcResolverMock, deserializers), Object.class);
         final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
         final UnknownPropertyException result = assertThrows(UnknownPropertyException.class,
                 () -> sut.processValue((Map<?, ?>) input.get(0)));

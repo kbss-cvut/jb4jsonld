@@ -44,10 +44,11 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
             throw new JsonLdDeserializationException(
                     "Input is not expanded JSON-LD. The input does not contain exactly one root element.");
         }
+        deserializers.configure(configuration());
         final Map<?, ?> root = (Map<?, ?>) input.get(0);
         final PendingReferenceRegistry referenceRegistry = new PendingReferenceRegistry();
         final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(classResolver, referenceRegistry);
-        new ObjectDeserializer(instanceBuilder, new DeserializerConfig(configuration(), classResolver), resultClass)
+        new ObjectDeserializer(instanceBuilder, new DeserializerConfig(configuration(), classResolver, deserializers), resultClass)
                 .processValue(root);
         referenceRegistry.verifyNoUnresolvedReferencesExist();
         assert resultClass.isAssignableFrom(instanceBuilder.getCurrentRoot().getClass());
