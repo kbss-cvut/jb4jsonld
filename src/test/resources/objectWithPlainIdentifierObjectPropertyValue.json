@@ -13,7 +13,7 @@
     "Spartan-II",
     "Mjolnir IV"
   ],
-  "http://purl.org/dc/terms/created": "Mon Aug 01 10:43:04 CEST 2016",
+  "http://purl.org/dc/terms/created": "2016-08-01T09:43:04+01:00",
   "http://www.w3.org/2000/01/rdf-schema#label": "UNSC",
   "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/origin": {
     "@id": "http://dbpedia.org/resource/Czech_Republic"
