@@ -1,14 +1,9 @@
 package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jsonld.Configuration;
-import cz.cvut.kbss.jsonld.deserialization.datetime.DateDeserializer;
-import cz.cvut.kbss.jsonld.deserialization.datetime.LocalDateTimeDeserializer;
-import cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeserializer;
-import cz.cvut.kbss.jsonld.deserialization.datetime.ZonedDateTimeDeserializer;
+import cz.cvut.kbss.jsonld.deserialization.datetime.*;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -23,11 +18,14 @@ public class CommonValueDeserializers implements ValueDeserializers {
     }
 
     private void initBuiltInDeserializers() {
-        final OffsetDateTimeDeserializer coreDeserializer = new OffsetDateTimeDeserializer();
-        deserializers.put(OffsetDateTime.class, coreDeserializer);
-        deserializers.put(LocalDateTime.class, new LocalDateTimeDeserializer(coreDeserializer));
-        deserializers.put(ZonedDateTime.class, new ZonedDateTimeDeserializer(coreDeserializer));
-        deserializers.put(Date.class, new DateDeserializer(coreDeserializer));
+        final OffsetDateTimeDeserializer coreDatetimeDeserializer = new OffsetDateTimeDeserializer();
+        final OffsetTimeDeserializer coreTimeDeserializer = new OffsetTimeDeserializer();
+        deserializers.put(OffsetDateTime.class, coreDatetimeDeserializer);
+        deserializers.put(LocalDateTime.class, new LocalDateTimeDeserializer(coreDatetimeDeserializer));
+        deserializers.put(ZonedDateTime.class, new ZonedDateTimeDeserializer(coreDatetimeDeserializer));
+        deserializers.put(Date.class, new DateDeserializer(coreDatetimeDeserializer));
+        deserializers.put(OffsetTime.class, coreTimeDeserializer);
+        deserializers.put(LocalTime.class, new LocalTimeDeserializer(coreTimeDeserializer));
     }
 
     @Override
