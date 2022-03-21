@@ -49,7 +49,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         final Map<?, ?> root = (Map<?, ?>) input.get(0);
         final PendingReferenceRegistry referenceRegistry = new PendingReferenceRegistry();
         if (deserializers.hasCustomDeserializer(resultClass)) {
-            final DeserializationContext<T> ctx = new DeserializationContext<>(resultClass, null, classResolver, referenceRegistry);
+            final DeserializationContext<T> ctx = new DeserializationContext<>(resultClass, classResolver);
             assert deserializers.getDeserializer(ctx).isPresent();
             return deserializers.getDeserializer(ctx).get().deserialize(root, ctx);
         }

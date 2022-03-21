@@ -17,9 +17,7 @@ package cz.cvut.kbss.jsonld.deserialization.expanded;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.deserialization.CommonValueDeserializers;
-import cz.cvut.kbss.jsonld.deserialization.DefaultInstanceBuilder;
-import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
+import cz.cvut.kbss.jsonld.deserialization.*;
 import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
 import cz.cvut.kbss.jsonld.deserialization.util.LangString;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
@@ -27,21 +25,23 @@ import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
+import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithMultilingualString;
+import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class CollectionDeserializerTest {
@@ -109,5 +109,32 @@ class CollectionDeserializerTest {
         builderSpy.openObject(Generator.generateUri().toString(), ObjectWithMultilingualString.class);
         sut.processValue(labels);
         verify(builderSpy).addValue(eq(RDFS.LABEL), ArgumentMatchers.any(LangString.class));
+    }
+
+    @Test
+    void processValueUsesCustomDeserializerWhenItMatchesSingularPropertyTargetType() throws Exception {
+        final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithSingularReference.json"))
+                .get(0);
+        final OrganizationDeserializer customDeserializer = spy(new OrganizationDeserializer());
+        deserializerConfig.getDeserializers().registerDeserializer(Organization.class, customDeserializer);
+        final CollectionDeserializer sut = new CollectionDeserializer(instanceBuilder, deserializerConfig, Vocabulary.IS_MEMBER_OF);
+        instanceBuilder.openObject(Generator.generateUri().toString(), Employee.class);
+        sut.processValue((List<?>) jsonLd.get(Vocabulary.IS_MEMBER_OF));
+        verify(customDeserializer).deserialize(anyMap(), any(DeserializationContext.class));
+        final Employee e = (Employee) instanceBuilder.getCurrentRoot();
+        assertNotNull(e.getEmployer());
+        assertEquals(TestUtil.UNSC_URI, e.getEmployer().getUri());
+        assertEquals("UNSC", e.getEmployer().getName());
+    }
+
+    private static class OrganizationDeserializer implements ValueDeserializer<Organization> {
+        @Override
+        public Organization deserialize(Map<?, ?> jsonNode, DeserializationContext<Organization> ctx) {
+            final Organization result = new Organization();
+            final Map<?, ?> label = (Map<?, ?>) ((List<?>) jsonNode.get(RDFS.LABEL)).get(0);
+            result.setName(label.get(JsonLd.VALUE).toString());
+            result.setUri(URI.create(jsonNode.get(JsonLd.ID).toString()));
+            return result;
+        }
     }
 }
