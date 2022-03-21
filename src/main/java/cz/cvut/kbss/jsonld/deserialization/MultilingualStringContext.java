@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -34,5 +34,17 @@ public class MultilingualStringContext extends InstanceContext<MultilingualStrin
         } else {
             instance.set(item.toString());
         }
+    }
+
+    /**
+     * Returns {@link LangString} as item type supported by this context.
+     *
+     * This is because a {@link MultilingualString} is essentially a container for a collection of translations of the
+     * same string, and it simplifies client code.
+     * @return {@code LangString} class
+     */
+    @Override
+    Class<?> getItemType() {
+        return LangString.class;
     }
 }
