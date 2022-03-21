@@ -20,7 +20,7 @@ public class CommonValueDeserializers implements ValueDeserializers {
     }
 
     @Override
-    public <T> Optional<ValueDeserializer<T>> getSerializer(DeserializationContext<T> ctx) {
+    public <T> Optional<ValueDeserializer<T>> getDeserializer(DeserializationContext<T> ctx) {
         Objects.requireNonNull(ctx);
         return Optional.ofNullable((ValueDeserializer<T>) deserializers.get(ctx.getTargetType()));
     }

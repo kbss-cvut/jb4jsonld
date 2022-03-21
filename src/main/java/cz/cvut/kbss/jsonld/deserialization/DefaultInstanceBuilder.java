@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -68,7 +68,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
                 final Object oldPropertyObject = BeanClassProcessor
                         .getFieldValue(targetField, currentInstance.getInstance());
                 if (oldPropertyObject != null && !oldPropertyObject.equals(newPropertyObject))
-                    // Value already set on singular attribute of a reopen instance
+                    // Value already set on singular attribute of a reopened instance
                     throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, targetField);
             }
             currentInstance.setFieldValue(targetField, newPropertyObject);
@@ -313,5 +313,16 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     @Override
     public boolean isCurrentCollectionProperties() {
         return currentInstance instanceof PropertiesInstanceContext;
+    }
+
+    @Override
+    public Class<?> getTargetType(String property) {
+        assert isPropertyMapped(property);
+        final Field field = currentInstance.getFieldForProperty(property);
+        if (field == null && currentInstance.hasPropertiesField()) {
+            return Object.class;
+        }
+        assert field != null;
+        return BeanClassProcessor.isCollection(field) ? BeanClassProcessor.getCollectionItemType(field) : field.getType();
     }
 }

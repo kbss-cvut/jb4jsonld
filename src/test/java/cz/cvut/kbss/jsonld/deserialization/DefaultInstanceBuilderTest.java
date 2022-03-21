@@ -579,4 +579,23 @@ class DefaultInstanceBuilderTest {
         sut.addValue(new LangString(value, lang));
         assertEquals(value, ((MultilingualString) sut.getCurrentRoot()).get(lang));
     }
+
+    @Test
+    void getTargetTypeReturnsFieldTypeForSingularMappedProperty() {
+        sut.openObject(Generator.generateUri().toString(), Employee.class);
+        assertEquals(Organization.class, sut.getTargetType(Vocabulary.IS_MEMBER_OF));
+    }
+
+    @Test
+    void getTargetTypeReturnsElementTypeForPluralMappedProperty() {
+        sut.openObject(Generator.generateUri().toString(), Organization.class);
+        assertEquals(Employee.class, sut.getTargetType(Vocabulary.HAS_MEMBER));
+    }
+
+    @Test
+    void getTargetTypeReturnsObjectForPropertyInProperties() {
+        sut.openObject(Generator.generateUri().toString(), Person.class);
+        // From properties
+        assertEquals(Object.class, sut.getTargetType(Vocabulary.IS_MEMBER_OF));
+    }
 }

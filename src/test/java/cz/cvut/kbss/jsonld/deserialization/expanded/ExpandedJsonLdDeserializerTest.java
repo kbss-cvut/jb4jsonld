@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -20,7 +20,10 @@ import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.JsonLdDeserializer;
+import cz.cvut.kbss.jsonld.deserialization.ValueDeserializer;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
@@ -32,9 +35,13 @@ import java.net.URI;
 import java.util.*;
 
 import static cz.cvut.kbss.jsonld.environment.TestUtil.*;
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("unused")
 class ExpandedJsonLdDeserializerTest {
@@ -734,5 +741,29 @@ class ExpandedJsonLdDeserializerTest {
                 result.getLabel().get());
         assertEquals("Využití technologií sémantického webu v doménových informačních systémech",
                 result.getLabel().get("cs"));
+    }
+
+    @Test
+    void deserializeUsesCustomDeserializerForRootObjectIfTargetClassMatches() throws Exception {
+        final Object input = readAndExpand("objectWithBlankNodeIdentifier.json");
+        final PersonDeserializer customDeserializer = spy(new PersonDeserializer());
+        sut.registerDeserializer(Person.class, customDeserializer);
+        final Person result = sut.deserialize(input, Person.class);
+        assertNotNull(result);
+        assertEquals(USERS.get(HALSEY_URI).getFirstName(), result.getFirstName());
+        assertEquals(USERS.get(HALSEY_URI).getLastName(), result.getLastName());
+        verify(customDeserializer).deserialize(anyMap(), any(DeserializationContext.class));
+    }
+
+    private static class PersonDeserializer implements ValueDeserializer<Person> {
+        @Override
+        public Person deserialize(Map<?, ?> jsonNode, DeserializationContext<Person> ctx) {
+            final Person result = new Person();
+            final Map<?, ?> firstNameMap = (Map<?, ?>) ((List<?>) jsonNode.get(Vocabulary.FIRST_NAME)).get(0);
+            result.setFirstName(firstNameMap.get(JsonLd.VALUE).toString());
+            final Map<?, ?> lastNameMap = (Map<?, ?>) ((List<?>) jsonNode.get(Vocabulary.LAST_NAME)).get(0);
+            result.setLastName(lastNameMap.get(JsonLd.VALUE).toString());
+            return result;
+        }
     }
 }
