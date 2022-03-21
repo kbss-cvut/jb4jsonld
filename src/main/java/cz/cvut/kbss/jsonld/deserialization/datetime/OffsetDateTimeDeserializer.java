@@ -28,7 +28,7 @@ public class OffsetDateTimeDeserializer implements ValueDeserializer<OffsetDateT
         final Object value = jsonNode.get(JsonLd.VALUE);
         if (value == null) {
             throw new JsonLdDeserializationException("Cannot deserialize node " + jsonNode + "as date time. " +
-                    "Is is missing attribute " + JsonLd.VALUE + ".");
+                    "It is missing attribute " + JsonLd.VALUE + ".");
         }
         return value instanceof Long ? epochResolver.resolve((Long) value) : stringResolver.resolve(value.toString());
     }

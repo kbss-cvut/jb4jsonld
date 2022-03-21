@@ -61,7 +61,7 @@ class OffsetDateTimeDeserializerTest {
 
     @Test
     void deserializeThrowsJsonLdDeserializationExceptionWhenInputIsMissingValueAttribute() {
-        final Map<String, Object> input = Collections.singletonMap("value",
+        final Map<String, Object> input = Collections.singletonMap("notValue",
                 OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         final JsonLdDeserializationException ex = assertThrows(JsonLdDeserializationException.class,
                 () -> sut.deserialize(input, deserializationContext(OffsetDateTime.class)));
