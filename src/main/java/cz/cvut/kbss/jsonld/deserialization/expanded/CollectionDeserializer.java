@@ -60,7 +60,10 @@ class CollectionDeserializer extends Deserializer<List<?>> {
     }
 
     private void resolveValue(Map<?, ?> value) {
-        if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
+        final Class<?> targetType = instanceBuilder.getCurrentCollectionElementType();
+        if (config.getDeserializers().hasCustomDeserializer(targetType)) {
+            instanceBuilder.addValue(deserializeUsingCustomDeserializer(targetType, value));
+        } else if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
             instanceBuilder.addValue(value.get(JsonLd.VALUE));
         } else if (value.size() == 1 && value.containsKey(JsonLd.ID)) {
             instanceBuilder.addNodeReference(value.get(JsonLd.ID).toString());

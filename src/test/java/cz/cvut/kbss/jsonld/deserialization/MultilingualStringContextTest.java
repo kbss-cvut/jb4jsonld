@@ -48,4 +48,9 @@ class MultilingualStringContextTest {
         assertTrue(sut.getInstance().containsSimple());
         assertEquals(value, sut.getInstance().get());
     }
+
+    @Test
+    void getItemTypeReturnsLangString() {
+        assertEquals(LangString.class, sut.getItemType());
+    }
 }

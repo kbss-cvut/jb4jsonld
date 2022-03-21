@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -121,10 +121,10 @@ class CollectionDeserializerTest {
         instanceBuilder.openObject(Generator.generateUri().toString(), Employee.class);
         sut.processValue((List<?>) jsonLd.get(Vocabulary.IS_MEMBER_OF));
         verify(customDeserializer).deserialize(anyMap(), any(DeserializationContext.class));
-        final Employee e = (Employee) instanceBuilder.getCurrentRoot();
-        assertNotNull(e.getEmployer());
-        assertEquals(TestUtil.UNSC_URI, e.getEmployer().getUri());
-        assertEquals("UNSC", e.getEmployer().getName());
+        final Employee result = (Employee) instanceBuilder.getCurrentRoot();
+        assertNotNull(result.getEmployer());
+        assertEquals(TestUtil.UNSC_URI, result.getEmployer().getUri());
+        assertEquals("UNSC", result.getEmployer().getName());
     }
 
     private static class OrganizationDeserializer implements ValueDeserializer<Organization> {
@@ -134,6 +134,37 @@ class CollectionDeserializerTest {
             final Map<?, ?> label = (Map<?, ?>) ((List<?>) jsonNode.get(RDFS.LABEL)).get(0);
             result.setName(label.get(JsonLd.VALUE).toString());
             result.setUri(URI.create(jsonNode.get(JsonLd.ID).toString()));
+            return result;
+        }
+    }
+
+    @Test
+    void processValueUsesCustomDeserializerWhenItMatchesPluralPropertyElementType() throws Exception {
+        final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithPluralReference.json"))
+                .get(0);
+        final EmployeeDeserializer customDeserializer = spy(new EmployeeDeserializer());
+        deserializerConfig.getDeserializers().registerDeserializer(Employee.class, customDeserializer);
+        final CollectionDeserializer sut = new CollectionDeserializer(instanceBuilder, deserializerConfig, Vocabulary.HAS_MEMBER);
+        instanceBuilder.openObject(Generator.generateUri().toString(), Organization.class);
+        sut.processValue((List<?>) jsonLd.get(Vocabulary.HAS_MEMBER));
+        verify(customDeserializer, times(3)).deserialize(anyMap(), any(DeserializationContext.class));
+        final Organization result = (Organization) instanceBuilder.getCurrentRoot();
+        assertNotNull(result.getEmployees());
+        assertEquals(3, result.getEmployees().size());
+        assertTrue(result.getEmployees().stream().anyMatch(e -> TestUtil.HALSEY_URI.equals(e.getUri())));
+        assertTrue(result.getEmployees().stream().anyMatch(e -> TestUtil.LASKY_URI.equals(e.getUri())));
+        assertTrue(result.getEmployees().stream().anyMatch(e -> TestUtil.PALMER_URI.equals(e.getUri())));
+    }
+
+    private static class EmployeeDeserializer implements ValueDeserializer<Employee> {
+        @Override
+        public Employee deserialize(Map<?, ?> jsonNode, DeserializationContext<Employee> ctx) {
+            final Employee result = new Employee();
+            result.setUri(URI.create(jsonNode.get(JsonLd.ID).toString()));
+            final Map<?, ?> firstNameMap = (Map<?, ?>) ((List<?>) jsonNode.get(Vocabulary.FIRST_NAME)).get(0);
+            result.setFirstName(firstNameMap.get(JsonLd.VALUE).toString());
+            final Map<?, ?> lastNameMap = (Map<?, ?>) ((List<?>) jsonNode.get(Vocabulary.LAST_NAME)).get(0);
+            result.setLastName(lastNameMap.get(JsonLd.VALUE).toString());
             return result;
         }
     }
