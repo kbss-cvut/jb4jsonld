@@ -25,7 +25,7 @@ public interface ValueDeserializers extends Configurable {
      * @param <T> Type of the value
      * @return Optional containing the custom deserializer registered for the specified type or an empty optional if there is none
      */
-    <T> Optional<ValueDeserializer<T>> getSerializer(DeserializationContext<T> ctx);
+    <T> Optional<ValueDeserializer<T>> getDeserializer(DeserializationContext<T> ctx);
 
     /**
      * Registers the specified deserializer for the specified type.

@@ -78,7 +78,7 @@ public abstract class JsonLdDeserializer implements Configured {
      * @param deserializer Deserializer to register
      * @param <T>        Target type
      */
-    public <T> void registerSerializer(Class<T> type, ValueDeserializer<T> deserializer) {
+    public <T> void registerDeserializer(Class<T> type, ValueDeserializer<T> deserializer) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(deserializer);
         deserializers.registerDeserializer(type, deserializer);

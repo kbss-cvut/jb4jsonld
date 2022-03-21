@@ -20,6 +20,7 @@ import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Builds instances from parsed JSON-LD.
@@ -232,4 +233,16 @@ public interface InstanceBuilder {
      * @see cz.cvut.kbss.jsonld.annotation.JsonLdProperty.Access#READ_ONLY
      */
     boolean isPropertyDeserializable(String property);
+
+    /**
+     * Gets the target type of the specified property.
+     *
+     * That is, it retrieves the type of the field to which the specified property is mapped. If the target field is a collection,
+     * the element type is returned (equivalent to {@link #getCurrentCollectionElementType()}).
+     *
+     * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
+     * @param property Property whose target type to resolve
+     * @return Target type wrapped in an optional
+     */
+    Class<?> getTargetType(String property);
 }
