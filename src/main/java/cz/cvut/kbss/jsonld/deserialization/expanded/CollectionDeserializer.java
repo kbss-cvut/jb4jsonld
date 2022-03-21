@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any
  * later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -15,6 +15,7 @@
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
 import cz.cvut.kbss.jsonld.deserialization.util.LangString;
 import cz.cvut.kbss.jsonld.deserialization.util.XSDTypeCoercer;
@@ -81,6 +82,11 @@ class CollectionDeserializer extends Deserializer<List<?>> {
     }
 
     private void resolvePropertyValue(Map<?, ?> value) {
+        final Class<?> targetType = instanceBuilder.getTargetType(property);
+        if (config.getDeserializers().hasCustomDeserializer(targetType)) {
+            instanceBuilder.addValue(property, deserializeUsingCustomDeserializer(targetType, value));
+            return;
+        }
         if (value.containsKey(JsonLd.VALUE)) {
             extractLiteralValue(value);
         } else if (value.size() == 1 && value.containsKey(JsonLd.ID)) {
@@ -88,6 +94,12 @@ class CollectionDeserializer extends Deserializer<List<?>> {
         } else {
             new ObjectDeserializer(instanceBuilder, config, property).processValue(value);
         }
+    }
+
+    private <T> T deserializeUsingCustomDeserializer(Class<T> targetType, Map<?, ?> value) {
+        final DeserializationContext<T> ctx = new DeserializationContext<>(targetType, config.getTargetResolver());
+        assert config.getDeserializers().getDeserializer(ctx).isPresent();
+        return config.getDeserializers().getDeserializer(ctx).get().deserialize(value, ctx);
     }
 
     private void extractLiteralValue(Map<?, ?> value) {
