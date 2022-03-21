@@ -1,11 +1,15 @@
 package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.deserialization.datetime.DateDeserializer;
+import cz.cvut.kbss.jsonld.deserialization.datetime.LocalDateTimeDeserializer;
+import cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeserializer;
+import cz.cvut.kbss.jsonld.deserialization.datetime.ZonedDateTimeDeserializer;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 /**
  * Manages deserializers for one deserialization process.
@@ -13,6 +17,18 @@ import java.util.Optional;
 public class CommonValueDeserializers implements ValueDeserializers {
 
     private final Map<Class<?>, ValueDeserializer<?>> deserializers = new HashMap<>();
+
+    public CommonValueDeserializers() {
+        initBuiltInDeserializers();
+    }
+
+    private void initBuiltInDeserializers() {
+        final OffsetDateTimeDeserializer coreDeserializer = new OffsetDateTimeDeserializer();
+        deserializers.put(OffsetDateTime.class, coreDeserializer);
+        deserializers.put(LocalDateTime.class, new LocalDateTimeDeserializer(coreDeserializer));
+        deserializers.put(ZonedDateTime.class, new ZonedDateTimeDeserializer(coreDeserializer));
+        deserializers.put(Date.class, new DateDeserializer(coreDeserializer));
+    }
 
     @Override
     public <T> boolean hasCustomDeserializer(Class<T> type) {
