@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Deserializes values to {@link OffsetDateTime}.
  * <p>
- * If the value a number, it is taken as the number of milliseconds since the Unix Epoch. Otherwise, it is parsed as a
+ * If the value is a number, it is taken as the number of milliseconds since the Unix Epoch. Otherwise, it is parsed as a
  * string.
  * <p>
  * If a datetime pattern is configured ({@link cz.cvut.kbss.jsonld.ConfigParam#DATE_TIME_FORMAT}), it is used to parse
