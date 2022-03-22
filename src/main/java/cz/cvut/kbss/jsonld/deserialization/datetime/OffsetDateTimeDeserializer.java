@@ -25,16 +25,17 @@ public class OffsetDateTimeDeserializer implements ValueDeserializer<OffsetDateT
 
     @Override
     public OffsetDateTime deserialize(Map<?, ?> jsonNode, DeserializationContext<OffsetDateTime> ctx) {
-        final Object value = jsonNode.get(JsonLd.VALUE);
-        if (value == null) {
-            throw missingValueException(jsonNode);
-        }
+        final Object value = getLiteralValue(jsonNode);
         return value instanceof Long ? epochResolver.resolve((Long) value) : stringResolver.resolve(value.toString());
     }
 
-    static JsonLdDeserializationException missingValueException(Map<?, ?> jsonNode) {
-        return new JsonLdDeserializationException("Cannot deserialize node " + jsonNode + "as literal. " +
-                "It is missing attribute " + JsonLd.VALUE + ".");
+    static Object getLiteralValue(Map<?, ?> jsonNode) {
+        final Object value = jsonNode.get(JsonLd.VALUE);
+        if (value == null) {
+            throw new JsonLdDeserializationException("Cannot deserialize node " + jsonNode + "as literal. " +
+                                                             "It is missing attribute '" + JsonLd.VALUE + "'.");
+        }
+        return value;
     }
 
     @Override

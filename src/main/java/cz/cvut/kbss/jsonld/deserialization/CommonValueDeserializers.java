@@ -28,7 +28,8 @@ public class CommonValueDeserializers implements ValueDeserializers {
         deserializers.put(OffsetTime.class, coreTimeDeserializer);
         deserializers.put(LocalTime.class, new LocalTimeDeserializer(coreTimeDeserializer));
         deserializers.put(LocalDate.class, new LocalDateDeserializer());
-        // TODO Period, Duration
+        deserializers.put(Duration.class, new DurationDeserializer());
+        deserializers.put(Period.class, new PeriodDeserializer());
     }
 
     @Override
