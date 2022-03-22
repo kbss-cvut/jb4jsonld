@@ -24,6 +24,7 @@ public class CommonValueDeserializers implements ValueDeserializers {
         deserializers.put(LocalDateTime.class, new LocalDateTimeDeserializer(coreDatetimeDeserializer));
         deserializers.put(ZonedDateTime.class, new ZonedDateTimeDeserializer(coreDatetimeDeserializer));
         deserializers.put(Date.class, new DateDeserializer(coreDatetimeDeserializer));
+        deserializers.put(Instant.class, new InstantDeserializer(coreDatetimeDeserializer));
         deserializers.put(OffsetTime.class, coreTimeDeserializer);
         deserializers.put(LocalTime.class, new LocalTimeDeserializer(coreTimeDeserializer));
         deserializers.put(LocalDate.class, new LocalDateDeserializer());
