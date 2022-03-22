@@ -11,6 +11,8 @@ import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TemporalValuesHandlingTest {
@@ -34,11 +36,8 @@ public class TemporalValuesHandlingTest {
     @Test
     void serializationAndDeserializationAreCompatibleForTemporalAccessorValues() throws Exception {
         final TemporalEntity original = new TemporalEntity();
-        original.initTemporalValues();
-        serializer.serialize(original);
-        final String jsonLd = jsonWriter.getResult();
-        final Object jsonObject = JsonUtils.fromString(jsonLd);
-        final TemporalEntity result = deserializer.deserialize(JsonLdProcessor.expand(jsonObject), TemporalEntity.class);
+        original.initTemporalAccessorValues();
+        final TemporalEntity result = serializeAndDeserialize(original);
         assertEquals(original.getOffsetDateTime(), result.getOffsetDateTime());
         assertEquals(original.getLocalDateTime(), result.getLocalDateTime());
         assertEquals(original.getZonedDateTime(), result.getZonedDateTime());
@@ -47,5 +46,21 @@ public class TemporalValuesHandlingTest {
         assertEquals(original.getOffsetTime(), result.getOffsetTime());
         assertEquals(original.getLocalTime(), result.getLocalTime());
         assertEquals(original.getLocalDate(), result.getLocalDate());
+    }
+
+    private TemporalEntity serializeAndDeserialize(TemporalEntity original) throws IOException {
+        serializer.serialize(original);
+        final String jsonLd = jsonWriter.getResult();
+        final Object jsonObject = JsonUtils.fromString(jsonLd);
+        return deserializer.deserialize(JsonLdProcessor.expand(jsonObject), TemporalEntity.class);
+    }
+
+    @Test
+    void serializationAndDeserializationAreCompatibleForTemporalAmountValues() throws Exception {
+        final TemporalEntity original = new TemporalEntity();
+        original.initTemporalAmountValues();
+        final TemporalEntity result = serializeAndDeserialize(original);
+        assertEquals(original.getDuration(), result.getDuration());
+        assertEquals(original.getPeriod(), result.getPeriod());
     }
 }

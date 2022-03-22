@@ -23,12 +23,12 @@ class DateSerializerTest {
     @Test
     void serializeReturnsDateAsStringNodeWithIsoOffsetDateTimeAtUtcOffset() {
         final Date value = new Date();
-        final SerializationContext<Date> ctx = new SerializationContext<>(Generator.generateUri().toString(), value);
+        final SerializationContext<Date> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(StringLiteralNode.class, result);
         assertEquals(ctx.getAttributeId(), result.getName());
         assertEquals(value.toInstant().atOffset(ZoneOffset.UTC)
-                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME), ((StringLiteralNode) result).getValue());
+                          .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME), ((StringLiteralNode) result).getValue());
     }
 
     @Test
@@ -37,7 +37,7 @@ class DateSerializerTest {
         config.set(ConfigParam.SERIALIZE_DATETIME_AS_MILLIS, Boolean.toString(true));
         sut.configure(config);
         final Date value = new Date();
-        final SerializationContext<Date> ctx = new SerializationContext<>(Generator.generateUri().toString(), value);
+        final SerializationContext<Date> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(NumericLiteralNode.class, result);
         assertEquals(ctx.getAttributeId(), result.getName());

@@ -18,6 +18,7 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.net.URI;
 import java.util.*;
@@ -141,5 +142,9 @@ public class Generator {
             }
         }
         return map;
+    }
+
+    public static <T> SerializationContext<T> serializationContext(T value) {
+        return new SerializationContext<>(generateUri().toString(), value);
     }
 }

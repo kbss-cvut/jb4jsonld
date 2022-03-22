@@ -2,6 +2,7 @@ package cz.cvut.kbss.jsonld.environment.model;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
 import java.time.*;
@@ -34,7 +35,13 @@ public class TemporalEntity {
     @OWLDataProperty(iri = Vocabulary.DEFAULT_PREFIX + "local-time")
     private LocalTime localTime;
 
-    public void initTemporalValues() {
+    @OWLDataProperty(iri = Vocabulary.DEFAULT_PREFIX + "period")
+    private Period period;
+
+    @OWLDataProperty(iri = Vocabulary.DEFAULT_PREFIX + "duration")
+    private Duration duration;
+
+    public void initTemporalAccessorValues() {
         this.offsetDateTime = OffsetDateTime.now();
         this.localDateTime = offsetDateTime.toLocalDateTime();
         this.zonedDateTime = offsetDateTime.toZonedDateTime();
@@ -43,6 +50,12 @@ public class TemporalEntity {
         this.localDate = offsetDateTime.toLocalDate();
         this.offsetTime = offsetDateTime.toOffsetTime();
         this.localTime = offsetTime.toLocalTime();
+    }
+
+    public void initTemporalAmountValues() {
+        this.period =
+                Period.of(Generator.randomCount(2, 100), Generator.randomCount(1, 12), Generator.randomCount(1, 28));
+        this.duration = Duration.ofSeconds(Generator.randomCount(5, 10000));
     }
 
     public LocalDateTime getLocalDateTime() {
@@ -109,8 +122,35 @@ public class TemporalEntity {
         this.localTime = localTime;
     }
 
+    public Period getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Period period) {
+        this.period = period;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
     @Override
     public String toString() {
-        return "TemporalEntity{" + "localDateTime=" + localDateTime + ", offsetDateTime=" + offsetDateTime + ", zonedDateTime=" + zonedDateTime + ", instant=" + instant + ", timestamp=" + timestamp + ", localDate=" + localDate + ", offsetTime=" + offsetTime + ", localTime=" + localTime + '}';
+        return "TemporalEntity{" +
+                "localDateTime=" + localDateTime +
+                ", offsetDateTime=" + offsetDateTime +
+                ", zonedDateTime=" + zonedDateTime +
+                ", instant=" + instant +
+                ", timestamp=" + timestamp +
+                ", localDate=" + localDate +
+                ", offsetTime=" + offsetTime +
+                ", localTime=" + localTime +
+                ", period=" + period +
+                ", duration=" + duration +
+                '}';
     }
 }

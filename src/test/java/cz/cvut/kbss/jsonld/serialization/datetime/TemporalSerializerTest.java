@@ -35,8 +35,7 @@ class TemporalSerializerTest {
     }
 
     private void serializeAndVerifyStringResult(TemporalAccessor value, String expected) {
-        final SerializationContext<TemporalAccessor> ctx = new SerializationContext<>(Generator.generateUri()
-                .toString(), value);
+        final SerializationContext<TemporalAccessor> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(StringLiteralNode.class, result);
         assertEquals(ctx.getAttributeId(), result.getName());
@@ -47,7 +46,7 @@ class TemporalSerializerTest {
     void serializeReturnsLocalTimeAsStringNodeWithIsoOffsetTimeAttSystemOffset() {
         final LocalTime value = LocalTime.now();
         serializeAndVerifyStringResult(value, value.atOffset(DateTimeUtil.SYSTEM_OFFSET)
-                .format(DateTimeFormatter.ISO_OFFSET_TIME));
+                                                   .format(DateTimeFormatter.ISO_OFFSET_TIME));
     }
 
     @Test
@@ -60,14 +59,14 @@ class TemporalSerializerTest {
     void serializeReturnsLocalDateTimeAsStringNodeWithIsoOffsetDateTimeAtSystemOffset() {
         final LocalDateTime value = LocalDateTime.now();
         serializeAndVerifyStringResult(value, value.atOffset(DateTimeUtil.SYSTEM_OFFSET)
-                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+                                                   .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
     }
 
     @Test
     void serializeReturnsInstantAsStringNodeWithIsoOffsetDateTimeAtUtcOffset() {
         final Instant value = Instant.now();
         serializeAndVerifyStringResult(value, value.atOffset(ZoneOffset.UTC)
-                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+                                                   .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
     }
 
     @Test
@@ -79,8 +78,7 @@ class TemporalSerializerTest {
     @Test
     void serializeThrowsUnsupportedTemporalTypeExceptionForUnsupportedTemporalAccessorType() {
         final JapaneseEra value = JapaneseEra.TAISHO;
-        final SerializationContext<TemporalAccessor> ctx = new SerializationContext<>(Generator.generateUri()
-                .toString(), value);
+        final SerializationContext<TemporalAccessor> ctx = Generator.serializationContext(value);
         assertThrows(UnsupportedTemporalTypeException.class, () -> sut.serialize(value, ctx));
     }
 
@@ -98,8 +96,7 @@ class TemporalSerializerTest {
     }
 
     private void serializeAndVerifyMillisResult(TemporalAccessor value, long expected) {
-        final SerializationContext<TemporalAccessor> ctx = new SerializationContext<>(Generator.generateUri()
-                .toString(), value);
+        final SerializationContext<TemporalAccessor> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(NumericLiteralNode.class, result);
         assertEquals(ctx.getAttributeId(), result.getName());
@@ -127,8 +124,7 @@ class TemporalSerializerTest {
         config.set(ConfigParam.DATE_TIME_FORMAT, pattern);
         final LocalDateTime value = LocalDateTime.now();
         sut.configure(config);
-        final SerializationContext<TemporalAccessor> ctx = new SerializationContext<>(Generator.generateUri()
-                .toString(), value);
+        final SerializationContext<TemporalAccessor> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(StringLiteralNode.class, result);
         assertEquals(value.format(DateTimeFormatter.ofPattern(pattern)), ((StringLiteralNode) result).getValue());
