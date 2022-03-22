@@ -12,10 +12,11 @@ import java.util.Map;
 /**
  * Deserializes values to {@link OffsetDateTime}.
  * <p>
- * If the value a number, it is taken as the number of milliseconds since the Unix Epoch. Otherwise, it is parsed as a string.
+ * If the value a number, it is taken as the number of milliseconds since the Unix Epoch. Otherwise, it is parsed as a
+ * string.
  * <p>
- * If a datetime pattern is configured ({@link cz.cvut.kbss.jsonld.ConfigParam#DATE_TIME_FORMAT}), it is used to parse the
- * value. Otherwise, the default ISO-based pattern is used.
+ * If a datetime pattern is configured ({@link cz.cvut.kbss.jsonld.ConfigParam#DATE_TIME_FORMAT}), it is used to parse
+ * the value. Otherwise, the default ISO-based pattern is used.
  */
 public class OffsetDateTimeDeserializer implements ValueDeserializer<OffsetDateTime> {
 
@@ -26,7 +27,12 @@ public class OffsetDateTimeDeserializer implements ValueDeserializer<OffsetDateT
     @Override
     public OffsetDateTime deserialize(Map<?, ?> jsonNode, DeserializationContext<OffsetDateTime> ctx) {
         final Object value = getLiteralValue(jsonNode);
-        return value instanceof Long ? epochResolver.resolve((Long) value) : stringResolver.resolve(value.toString());
+        try {
+            return value instanceof Long ? epochResolver.resolve((Long) value) :
+                   stringResolver.resolve(value.toString());
+        } catch (RuntimeException e) {
+            throw new JsonLdDeserializationException("Unable to deserialize datetime value.", e);
+        }
     }
 
     static Object getLiteralValue(Map<?, ?> jsonNode) {

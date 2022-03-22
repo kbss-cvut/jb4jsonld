@@ -1,11 +1,11 @@
 package cz.cvut.kbss.jsonld.deserialization.datetime;
 
+import cz.cvut.kbss.jopa.datatype.exception.DatatypeMappingException;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
@@ -22,7 +22,8 @@ class LocalDateDeserializerTest {
     @Test
     void deserializeDeserializesSpecifiedIsoFormattedDateString() {
         final LocalDate value = LocalDate.now();
-        final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, value.format(DateTimeFormatter.ISO_DATE));
+        final Map<String, Object> input =
+                Collections.singletonMap(JsonLd.VALUE, value.format(DateTimeFormatter.ISO_DATE));
 
         final LocalDate result = sut.deserialize(input, deserializationContext(LocalDate.class));
         assertEquals(value, result);
@@ -30,11 +31,22 @@ class LocalDateDeserializerTest {
 
     @Test
     void deserializeThrowsJsonLdDeserializationExceptionWhenInputIsMissingValueAttribute() {
-        final Map<String, Object> input = Collections.singletonMap("notValue", LocalDate.now().format(DateTimeFormatter.ISO_DATE));
+        final Map<String, Object> input =
+                Collections.singletonMap("notValue", LocalDate.now().format(DateTimeFormatter.ISO_DATE));
 
         final JsonLdDeserializationException ex = assertThrows(JsonLdDeserializationException.class,
-                () -> sut.deserialize(input, deserializationContext(LocalDate.class)));
+                                                               () -> sut.deserialize(input, deserializationContext(
+                                                                       LocalDate.class)));
         assertThat(ex.getMessage(), containsString(JsonLd.VALUE));
         assertThat(ex.getMessage(), containsString("missing"));
+    }
+
+    @Test
+    void deserializeThrowsJsonLdDeserializationExceptionWhenInputIsInInvalidFormat() {
+        final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, "invalidValue");
+        final JsonLdDeserializationException ex = assertThrows(JsonLdDeserializationException.class,
+                                                               () -> sut.deserialize(input, deserializationContext(
+                                                                       LocalDate.class)));
+        assertInstanceOf(DatatypeMappingException.class, ex.getCause());
     }
 }
