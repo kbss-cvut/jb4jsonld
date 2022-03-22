@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.deserialization.datetime;
 
+import cz.cvut.kbss.jopa.datatype.exception.DatatypeMappingException;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
@@ -17,8 +18,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OffsetDateTimeDeserializerTest {
 
@@ -67,5 +67,13 @@ class OffsetDateTimeDeserializerTest {
                 () -> sut.deserialize(input, deserializationContext(OffsetDateTime.class)));
         assertThat(ex.getMessage(), containsString(JsonLd.VALUE));
         assertThat(ex.getMessage(), containsString("missing"));
+    }
+
+    @Test
+    void deserializeThrowsJsonLdDeserializationExceptionWhenInputIsInInvalidFormat() {
+        final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, "invalidValue");
+        final JsonLdDeserializationException ex = assertThrows(JsonLdDeserializationException.class,
+                                                               () -> sut.deserialize(input, deserializationContext(OffsetDateTime.class)));
+        assertInstanceOf(DatatypeMappingException.class, ex.getCause());
     }
 }
