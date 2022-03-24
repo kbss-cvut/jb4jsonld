@@ -132,7 +132,7 @@ abstract class InstanceContext<T> {
     }
 
     Object resolveAssignableValue(Class<?> targetType, Object value) {
-        if (!targetType.isAssignableFrom(value.getClass())) {
+        if (value != null && !targetType.isAssignableFrom(value.getClass())) {
             if (knownInstances.containsKey(value.toString())) {
                 final Object known = knownInstances.get(value.toString());
                 if (!targetType.isAssignableFrom(known.getClass())) {
