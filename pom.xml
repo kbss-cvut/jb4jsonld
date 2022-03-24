@@ -6,7 +6,7 @@
 
     <groupId>cz.cvut.kbss.jsonld</groupId>
     <artifactId>jb4jsonld</artifactId>
-    <version>0.8.9</version>
+    <version>0.9.0-SNAPSHOT</version>
     <name>JB4JSON-LD</name>
     <description>Java Binding for JSON-LD allows serialization and deserialization of Java POJOs to/from JSON-LD.
         This is the core implementation, which has to be integrated with Jackson, Jersey etc.
@@ -18,10 +18,10 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <cz.cvut.kbss.jopa.version>0.18.4-SNAPSHOT</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jopa.version>0.18.4</cz.cvut.kbss.jopa.version>
 
         <org.junit.jupiter.version>5.8.2</org.junit.jupiter.version>
-        <org.mockito.version>4.2.0</org.mockito.version>
+        <org.mockito.version>4.3.1</org.mockito.version>
         <com.github.jsonld-java.version>0.13.4</com.github.jsonld-java.version>
     </properties>
 
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.10</version>
+            <version>1.2.11</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -163,7 +163,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <goals>
