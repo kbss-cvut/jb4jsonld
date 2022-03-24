@@ -6,7 +6,6 @@ import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.Map;

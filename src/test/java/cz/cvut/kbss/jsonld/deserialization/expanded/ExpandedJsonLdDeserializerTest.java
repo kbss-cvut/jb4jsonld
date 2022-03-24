@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
@@ -157,9 +155,9 @@ class ExpandedJsonLdDeserializerTest {
         final String property = "http://purl.org/dc/terms/description";
 
         final UnknownPropertyException result = assertThrows(UnknownPropertyException.class,
-                () -> sut.deserialize(input, Organization.class));
+                                                             () -> sut.deserialize(input, Organization.class));
         assertEquals("No field matching property " + property + " was found in " + Organization.class +
-                " or its ancestors.", result.getMessage());
+                             " or its ancestors.", result.getMessage());
     }
 
     @Test
@@ -203,7 +201,7 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationThrowsExceptionWhenTypesAttributeDoesNotContainTargetClassType() throws Exception {
         final Object input = readAndExpand("objectWithDataProperties.json");
         final TargetTypeException result = assertThrows(TargetTypeException.class,
-                () -> sut.deserialize(input, Employee.class));
+                                                        () -> sut.deserialize(input, Employee.class));
         assertThat(result.getMessage(), containsString(
                 "Neither " + Employee.class + " nor any of its subclasses matches the types "));
     }
@@ -253,9 +251,9 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationThrowsExceptionWhenMultipleValuesForSingularFieldAreEncountered() throws Exception {
         final Object input = readAndExpand("objectWithAttributeCardinalityViolation.json");
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> sut.deserialize(input, Person.class));
+                                                                   () -> sut.deserialize(input, Person.class));
         assertThat(result.getMessage(),
-                containsString("Encountered multiple values of property " + Vocabulary.FIRST_NAME));
+                   containsString("Encountered multiple values of property " + Vocabulary.FIRST_NAME));
     }
 
     @Test
@@ -263,9 +261,10 @@ class ExpandedJsonLdDeserializerTest {
             throws Exception {
         final Object input = readAndExpand("objectWithAttributeCardinalityViolation.json");
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> sut.deserialize(input, ClassWithSingularProperties.class));
+                                                                   () -> sut.deserialize(input,
+                                                                                         ClassWithSingularProperties.class));
         assertThat(result.getMessage(),
-                containsString("Encountered multiple values of property " + Vocabulary.FIRST_NAME));
+                   containsString("Encountered multiple values of property " + Vocabulary.FIRST_NAME));
     }
 
     @OWLClass(iri = Vocabulary.PERSON)
@@ -390,7 +389,7 @@ class ExpandedJsonLdDeserializerTest {
                 sut.deserialize(input, OrganizationWithPlainIdentifiers.class);
         assertNotNull(result.members);
         assertTrue(result.members
-                .contains(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey")));
+                           .contains(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey")));
         assertTrue(result.members.contains(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Thomas+Lasky")));
         assertTrue(result.members.contains(URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Sarah+Palmer")));
     }
@@ -501,11 +500,11 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationHandlesSingularAnnotationPropertyWithReferenceValue() throws Exception {
         final Object jsonLd = JsonUtils.fromString("{" +
-                "  \"@id\": \"http://krizik.felk.cvut.cz/ontologies/jb4jsonld#ChangeRecord01\"," +
-                "  \"@type\": \"http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ObjectWithAnnotations\"," +
-                "  \"http://krizik.felk.cvut.cz/ontologies/jb4jsonld/origin\": {" +
-                "      \"@id\": \"http://dbpedia.org/resource/Czech_Republic\"" +
-                "    }}");
+                                                           "  \"@id\": \"http://krizik.felk.cvut.cz/ontologies/jb4jsonld#ChangeRecord01\"," +
+                                                           "  \"@type\": \"http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ObjectWithAnnotations\"," +
+                                                           "  \"http://krizik.felk.cvut.cz/ontologies/jb4jsonld/origin\": {" +
+                                                           "      \"@id\": \"http://dbpedia.org/resource/Czech_Republic\"" +
+                                                           "    }}");
         final Object expanded = JsonLdProcessor.expand(jsonLd);
 
         final ObjectWithAnnotationProperty result = sut.deserialize(expanded, ObjectWithAnnotationProperty.class);
@@ -627,9 +626,9 @@ class ExpandedJsonLdDeserializerTest {
         assertNotNull(result);
         assertNotNull(result.getLabel());
         assertEquals("Leveraging Semantic Web Technologies in Domain-specific Information Systems",
-                result.getLabel().get("en"));
+                     result.getLabel().get("en"));
         assertEquals("Využití technologií sémantického webu v doménových informačních systémech",
-                result.getLabel().get("cs"));
+                     result.getLabel().get("cs"));
     }
 
     @Test
@@ -639,7 +638,7 @@ class ExpandedJsonLdDeserializerTest {
         assertNotNull(result);
         assertNotNull(result.getLabel());
         assertEquals("Leveraging Semantic Web Technologies in Domain-specific Information Systems",
-                result.getLabel().get("en"));
+                     result.getLabel().get("en"));
     }
 
     @Test
@@ -738,9 +737,9 @@ class ExpandedJsonLdDeserializerTest {
         assertNotNull(result);
         assertNotNull(result.getLabel());
         assertEquals("Leveraging Semantic Web Technologies in Domain-specific Information Systems",
-                result.getLabel().get());
+                     result.getLabel().get());
         assertEquals("Využití technologií sémantického webu v doménových informačních systémech",
-                result.getLabel().get("cs"));
+                     result.getLabel().get("cs"));
     }
 
     @Test
@@ -764,6 +763,24 @@ class ExpandedJsonLdDeserializerTest {
             final Map<?, ?> lastNameMap = (Map<?, ?>) ((List<?>) jsonNode.get(Vocabulary.LAST_NAME)).get(0);
             result.setLastName(lastNameMap.get(JsonLd.VALUE).toString());
             return result;
+        }
+    }
+
+    @Test
+    void deserializeHandlesCustomDeserializerReturningNull() throws Exception {
+        final Object input = readAndExpand("objectWithSingularReference.json");
+        final NullDeserializer customDeserializer = spy(new NullDeserializer());
+        sut.registerDeserializer(Organization.class, customDeserializer);
+        final Employee result = sut.deserialize(input, Employee.class);
+        assertNotNull(result);
+        assertNull(result.getEmployer());
+        verify(customDeserializer).deserialize(anyMap(), any(DeserializationContext.class));
+    }
+
+    private static class NullDeserializer implements ValueDeserializer<Organization> {
+        @Override
+        public Organization deserialize(Map<?, ?> jsonNode, DeserializationContext<Organization> ctx) {
+            return null;
         }
     }
 }
