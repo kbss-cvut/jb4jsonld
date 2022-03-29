@@ -84,7 +84,9 @@ Parameter | Default value | Explanation
 `requireId` | `false` | Whether to require an identifier when serializing an object. If set to `true` and no identifier is found (either there is no `@Id` field or its value is `null`), an exception will be thrown. By default a blank node identifier is generated if no id is present.
 `assumeTargetType` | `false` | Whether to allow assuming target type in case the JSON-LD object does not contain types (`@type`). If set to `true`, the provided Java type (deserialization invocation argument, field type) will be used as target type.
 `enableOptimisticTargetTypeResolution` | `false` | Whether to enable optimistic target type resolution. If enabled, this allows to pick a target type even if there are multiple matching classes (which would normally end with an `AmbiguousTargetTypeException`).
-`preferSuperclass` | `false` | Allows to further specify optimistic target type resolution. By default, any of the target classes may be selected. Setting this to `true` will make the resolver attempt to select a superclass of the matching classes (if it is also in the target set). 
+`preferSuperclass` | `false` | Allows to further specify optimistic target type resolution. By default, any of the target classes may be selected. Setting this to `true` will make the resolver attempt to select a superclass of the matching classes (if it is also in the target set).
+`serializeDatetimeAsMillis` | `false` | Whether to serialize datetime values as millis since Unix epoch. If false, datetime value are serialize as string in ISO format (default).
+`datetimeFormat` |  | Format in which datetime values are serialized (and expected for deserialization). Default is undefined, meaning that the ISO 8601 format is used.
 
 See `cz.cvut.kbss.jsonld.ConfigParam`.
 

@@ -99,7 +99,7 @@ public enum ConfigParam {
      * <p>
      * Also note that this format applies only to full datetime values. Date or time values have to be formatted per-attribute.
      */
-    DATE_TIME_FORMAT("dateTimeFormat");
+    DATE_TIME_FORMAT("datetimeFormat");
 
     private final String name;
 
