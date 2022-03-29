@@ -53,7 +53,7 @@ public class DataTypeTransformer {
             return targetClass.cast(value);
         }
         if (targetClass.isEnum()) {
-            return targetClass.cast(transformToEnumConstant(value, (Class<? extends Enum>) targetClass));
+            return (T) transformToEnumConstant(value, (Class) targetClass);
         }
         final Pair<Class<?>, Class<?>> key = new Pair<>(sourceClass, targetClass);
         if (CUSTOM_TRANSFORMERS.containsKey(key)) {
