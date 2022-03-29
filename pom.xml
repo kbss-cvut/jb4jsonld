@@ -241,7 +241,7 @@
         </repository>
         <site>
             <id>jb4jsonld</id>
-            <name>JAXB-JSON-LD</name>
+            <name>JB4JSON-LD</name>
             <url>https://github.com/kbss-cvut/jb4jsonld</url>
         </site>
     </distributionManagement>
