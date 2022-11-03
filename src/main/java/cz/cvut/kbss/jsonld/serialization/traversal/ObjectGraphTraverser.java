@@ -107,7 +107,7 @@ public class ObjectGraphTraverser {
                 continue;
             }
             Object value = BeanClassProcessor.getFieldValue(f, instance);
-            final SerializationContext<?> ctx =serializationContextFactory.create(f, value);
+            final SerializationContext<?> ctx =serializationContextFactory.createWithAttributeId(f, value);
             visitAttribute(ctx);
         }
     }
