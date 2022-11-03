@@ -19,14 +19,14 @@ import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Represents a node serialized as a JSON-LD list.
  * <p>
  * I.e., it is serialized as an object with a single attribute - {@code @list} and its value is a JSON array.
  */
-public class ListNode extends CollectionNode {
+public class ListNode extends CollectionNode<List<JsonNode>> {
 
     public ListNode() {
     }
@@ -36,7 +36,7 @@ public class ListNode extends CollectionNode {
     }
 
     @Override
-    Collection<JsonNode> initItems() {
+    List<JsonNode> initItems() {
         return new ArrayList<>();
     }
 

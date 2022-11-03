@@ -38,7 +38,7 @@ class DefaultValueSerializer implements ValueSerializer {
         final boolean annotationProperty = BeanAnnotationProcessor.isAnnotationProperty(ctx.getField());
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
-            final CollectionNode node = JsonNodeFactory.createCollectionNode(ctx.getAttributeId(), col);
+            final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(ctx.getAttributeId(), col);
             col.forEach(item -> {
                 if (annotationProperty && isReference(item)) {
                     node.addItem(serializeReference(null, item));

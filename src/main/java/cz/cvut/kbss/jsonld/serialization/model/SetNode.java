@@ -17,15 +17,15 @@ package cz.cvut.kbss.jsonld.serialization.model;
 import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Represents a node serialized as a simple JSON array.
  * <p>
  * Note that in JSON-LD, the JSON array represents a set and is thus unordered.
  */
-public class SetNode extends CollectionNode {
+public class SetNode extends CollectionNode<Set<JsonNode>> {
 
     public SetNode() {
     }
@@ -35,7 +35,7 @@ public class SetNode extends CollectionNode {
     }
 
     @Override
-    Collection<JsonNode> initItems() {
+    Set<JsonNode> initItems() {
         return new LinkedHashSet<>();
     }
 

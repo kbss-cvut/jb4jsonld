@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization.model;
 
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -58,5 +59,27 @@ public class ObjectNodeTest extends AbstractNodeTest {
         inOrder.verify(serializerMock).writeObjectStart();
         inOrder.verify(serializerMock).writeObjectEnd();
         verify(serializerMock, never()).writeFieldName(anyString());
+    }
+
+    @Test
+    void prependItemAddsSpecifiedItemToBeginningOfItemsCollection() throws Exception {
+        final ObjectNode node = new ObjectNode();
+        final List<JsonNode> children = generateChildren();
+        children.forEach(node::addItem);
+        node.write(serializerMock);
+        final StringLiteralNode
+                toPrepend = new StringLiteralNode(JsonLd.CONTEXT, "Context value " + Generator.randomCount(1000));
+        node.prependItem(toPrepend);
+
+        node.write(serializerMock);
+        final InOrder inOrder = inOrder(serializerMock);
+        inOrder.verify(serializerMock).writeObjectStart();
+        inOrder.verify(serializerMock).writeFieldName(toPrepend.getName());
+        inOrder.verify(serializerMock).writeString(toPrepend.getValue());
+        for (JsonNode n : children) {
+            inOrder.verify(serializerMock).writeFieldName(n.getName());
+            inOrder.verify(serializerMock).writeNumber(((NumericLiteralNode<?>) n).getValue());
+        }
+        inOrder.verify(serializerMock).writeObjectEnd();
     }
 }
