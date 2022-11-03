@@ -14,11 +14,9 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
-import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.common.Configured;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 
 import java.util.Objects;
 
@@ -75,10 +73,8 @@ public abstract class JsonLdSerializer implements Configured {
      */
     public void serialize(Object root) {
         Objects.requireNonNull(root);
-        final ObjectGraphTraverser traverser = new ObjectGraphTraverser();
-        traverser.setRequireId(configuration.is(ConfigParam.REQUIRE_ID));
         serializers.configure(configuration);
-        final JsonNode jsonRoot = buildJsonTree(root, traverser);
+        final JsonNode jsonRoot = buildJsonTree(root);
         jsonRoot.write(jsonGenerator);
     }
 
@@ -86,10 +82,9 @@ public abstract class JsonLdSerializer implements Configured {
      * Builds the JSON-LD tree model.
      *
      * @param root           Object graph root
-     * @param graphTraverser Instance capable of traversing the object graph from the specified root
      * @return {@link JsonNode} corresponding to the JSON-LD's tree root
      */
-    protected abstract JsonNode buildJsonTree(Object root, ObjectGraphTraverser graphTraverser);
+    protected abstract JsonNode buildJsonTree(Object root);
 
     public static JsonLdSerializer createCompactedJsonLdSerializer(JsonGenerator jsonWriter) {
         return new CompactedJsonLdSerializer(jsonWriter);

@@ -14,8 +14,10 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.traversal.IriBasedSerializationContextFactory;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 
 /**
@@ -34,7 +36,9 @@ public class CompactedJsonLdSerializer extends JsonLdSerializer {
     }
 
     @Override
-    protected JsonNode buildJsonTree(Object root, ObjectGraphTraverser traverser) {
+    protected JsonNode buildJsonTree(Object root) {
+        final ObjectGraphTraverser traverser = new ObjectGraphTraverser(new IriBasedSerializationContextFactory());
+        traverser.setRequireId(configuration().is(ConfigParam.REQUIRE_ID));
         final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(new ObjectGraphValueSerializers(serializers, traverser));
         traverser.setVisitor(treeBuilder);
         traverser.traverse(root);
