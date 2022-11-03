@@ -28,9 +28,10 @@ import cz.cvut.kbss.jsonld.exception.MissingTypeInfoException;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -41,6 +42,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class ObjectGraphTraverserTest {
 
     @Mock
@@ -50,8 +52,7 @@ class ObjectGraphTraverserTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        this.traverser = new ObjectGraphTraverser();
+        this.traverser = new ObjectGraphTraverser(new IriBasedSerializationContextFactory());
         traverser.setVisitor(visitor);
         when(visitor.visitObject(any())).thenReturn(true);
     }

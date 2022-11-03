@@ -31,6 +31,8 @@ import java.util.*;
  */
 public class ObjectGraphTraverser {
 
+    private final SerializationContextFactory serializationContextFactory;
+
     private InstanceVisitor visitor;
 
     private final InstanceTypeResolver typeResolver = new InstanceTypeResolver();
@@ -38,6 +40,10 @@ public class ObjectGraphTraverser {
     private boolean requireId = false;
 
     private final Map<Object, String> knownInstances = new IdentityHashMap<>();
+
+    public ObjectGraphTraverser(SerializationContextFactory serializationContextFactory) {
+        this.serializationContextFactory = serializationContextFactory;
+    }
 
     public void setVisitor(InstanceVisitor visitor) {
         this.visitor = Objects.requireNonNull(visitor);
@@ -49,7 +55,7 @@ public class ObjectGraphTraverser {
 
     public void traverse(Object instance) {
         Objects.requireNonNull(instance);
-        traverse(new SerializationContext<>(instance));
+        traverse(serializationContextFactory.create(instance));
     }
 
     public void traverse(SerializationContext<?> ctx) {
@@ -68,7 +74,7 @@ public class ObjectGraphTraverser {
             if (item == null) {
                 continue;
             }
-            traverseSingular(new SerializationContext<>(item));
+            traverseSingular(serializationContextFactory.create(item));
         }
         closeCollection(ctx);
     }
@@ -101,8 +107,7 @@ public class ObjectGraphTraverser {
                 continue;
             }
             Object value = BeanClassProcessor.getFieldValue(f, instance);
-            final SerializationContext<?> ctx =
-                    new SerializationContext<>(BeanAnnotationProcessor.getAttributeIdentifier(f), f, value);
+            final SerializationContext<?> ctx =serializationContextFactory.create(f, value);
             visitAttribute(ctx);
         }
     }
@@ -135,7 +140,7 @@ public class ObjectGraphTraverser {
         }
         assert value instanceof Map;
         new PropertiesTraverser(this)
-                .traverseProperties(new SerializationContext<>(propertiesField, (Map<?, ?>) value));
+                .traverseProperties(serializationContextFactory.create(propertiesField, (Map<?, ?>) value));
     }
 
     public boolean visitInstance(SerializationContext<?> ctx) {
@@ -171,14 +176,14 @@ public class ObjectGraphTraverser {
             id = resolveIdentifier(instance);
             knownInstances.put(instance, id);
         }
-        final SerializationContext<String> idContext = new SerializationContext<>(id);
+        final SerializationContext<String> idContext = serializationContextFactory.create(id);
         visitor.visitIdentifier(idContext);
     }
 
     public void visitTypes(Object instance) {
         final Set<String> resolvedTypes = typeResolver.resolveTypes(instance);
         assert !resolvedTypes.isEmpty();
-        final SerializationContext<Collection<String>> typesContext = new SerializationContext<>(resolvedTypes);
+        final SerializationContext<Collection<String>> typesContext = serializationContextFactory.create(resolvedTypes);
         visitor.visitTypes(typesContext);
     }
 
