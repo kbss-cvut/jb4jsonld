@@ -27,7 +27,7 @@ import java.util.*;
  * <p>
  * Each object is visited only once, so circular references are not a problem.
  * <p>
- * The traversal algorithm is is depth-first in nature.
+ * The traversal algorithm is depth-first in nature.
  */
 public class ObjectGraphTraverser {
 
