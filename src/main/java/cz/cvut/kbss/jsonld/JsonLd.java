@@ -50,6 +50,11 @@ public class JsonLd {
     public static final String NONE = "@none";
 
     /**
+     * JSON-LD {@code @context} keyword.
+     */
+    public static final String CONTEXT = "@context";
+
+    /**
      * JSON-LD media type.
      */
     public static final String MEDIA_TYPE = "application/ld+json";
