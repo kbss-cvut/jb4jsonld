@@ -18,14 +18,14 @@ import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Represents a JSON object node.
  * <p>
  * I.e. it is a set of key-value pairs, which constitute the state of the object.
  */
-public class ObjectNode extends CompositeNode {
+public class ObjectNode extends CompositeNode<List<JsonNode>> {
 
     public ObjectNode() {
     }
@@ -35,8 +35,12 @@ public class ObjectNode extends CompositeNode {
     }
 
     @Override
-    Collection<JsonNode> initItems() {
+    List<JsonNode> initItems() {
         return new ArrayList<>();
+    }
+
+    public void prependItem(JsonNode node) {
+        items.add(0, node);
     }
 
     @Override

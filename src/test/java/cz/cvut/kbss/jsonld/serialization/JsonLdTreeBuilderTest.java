@@ -90,7 +90,7 @@ class JsonLdTreeBuilderTest {
         assertNotNull(treeBuilder.getTreeRoot());
         treeBuilder.visitTypes(ctx(null, null, Collections.singleton(Vocabulary.PERSON)));
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
-        final CollectionNode typesNode = (CollectionNode) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
+        final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
         assertTrue(typesNode.getItems().contains(JsonNodeFactory.createLiteralNode(Vocabulary.PERSON)));
     }
@@ -103,7 +103,7 @@ class JsonLdTreeBuilderTest {
         treeBuilder.visitTypes(ctx(null, null, Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE)));
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         final Set<String> types = new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE));
-        final CollectionNode typesNode = (CollectionNode) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
+        final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
         for (String t : types) {
             assertTrue(typesNode.getItems().contains(JsonNodeFactory.createLiteralNode(t)));
@@ -117,11 +117,11 @@ class JsonLdTreeBuilderTest {
         treeBuilder.openObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
         treeBuilder.closeObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
         treeBuilder.closeObject(ctx(null, null, employee));
-        final CompositeNode employerNode = (CompositeNode) getNode(treeBuilder.getTreeRoot(), Vocabulary.IS_MEMBER_OF);
+        final CompositeNode<?> employerNode = (CompositeNode<?>) getNode(treeBuilder.getTreeRoot(), Vocabulary.IS_MEMBER_OF);
         assertNotNull(employerNode);
     }
 
-    static JsonNode getNode(CompositeNode parent, String name) {
+    static JsonNode getNode(CompositeNode<?> parent, String name) {
         for (JsonNode n : parent.getItems()) {
             if (n.getName().equals(name)) {
                 return n;
@@ -157,7 +157,7 @@ class JsonLdTreeBuilderTest {
     @Test
     void openCollectionCreatesCollectionNode() {
         treeBuilder.openCollection(ctx(null, null, Collections.singleton(Generator.generateEmployee())));
-        final CompositeNode root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = treeBuilder.getTreeRoot();
         assertNotNull(root);
         assertTrue(root instanceof CollectionNode);
     }
@@ -195,7 +195,7 @@ class JsonLdTreeBuilderTest {
         employee.setFirstName(null);
         treeBuilder.visitAttribute(
                 ctx(Vocabulary.FIRST_NAME, Person.class.getDeclaredField("firstName"), employee.getFirstName()));
-        final CompositeNode node = treeBuilder.getTreeRoot();
+        final CompositeNode<?> node = treeBuilder.getTreeRoot();
         assertNull(node);
     }
 
@@ -227,7 +227,7 @@ class JsonLdTreeBuilderTest {
         treeBuilder
                 .visitAttribute(ctx(Vocabulary.BRAND, Organization.class.getDeclaredField("brands"), org.getBrands()));
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
-        final CollectionNode brandsNode = (CollectionNode) getNode(treeBuilder.getTreeRoot(), Vocabulary.BRAND);
+        final CollectionNode<?> brandsNode = (CollectionNode<?>) getNode(treeBuilder.getTreeRoot(), Vocabulary.BRAND);
         assertNotNull(brandsNode);
         assertTrue(brandsNode instanceof SetNode);
         for (String brand : org.getBrands()) {
@@ -245,7 +245,7 @@ class JsonLdTreeBuilderTest {
         }
         treeBuilder.closeCollection(ctx(null, null, users));
 
-        final CompositeNode root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = treeBuilder.getTreeRoot();
         assertFalse(root.isOpen());
         assertEquals(users.size(), root.getItems().size());
         for (JsonNode item : root.getItems()) {
@@ -259,7 +259,7 @@ class JsonLdTreeBuilderTest {
         final Person p = Generator.generatePerson();
         treeBuilder.openObject(ctx(null, null, p));
         treeBuilder.visitIdentifier(ctx(null, null, p.getUri().toString()));
-        final CompositeNode root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = treeBuilder.getTreeRoot();
         final Collection<JsonNode> nodes = root.getItems();
         final Optional<JsonNode> idNode = nodes.stream().filter(n -> n.getName().equals(JsonLd.ID)).findAny();
         assertTrue(idNode.isPresent());
@@ -278,7 +278,7 @@ class JsonLdTreeBuilderTest {
         treeBuilder.openObject(ctx(null, null, instance));
         treeBuilder.visitAttribute(
                 ctx(Vocabulary.CHANGED_VALUE, WithAnnotation.class.getDeclaredField("value"), instance.value));
-        final CompositeNode root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = treeBuilder.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(Vocabulary.CHANGED_VALUE, valueNode.getName());
@@ -299,12 +299,12 @@ class JsonLdTreeBuilderTest {
         treeBuilder.openObject(ctx(null, null, instance));
         treeBuilder.visitAttribute(
                 ctx(Vocabulary.CHANGED_VALUE, WithAnnotations.class.getDeclaredField("values"), instance.values));
-        final CompositeNode root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = treeBuilder.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(Vocabulary.CHANGED_VALUE, valueNode.getName());
         assertThat(valueNode, instanceOf(CollectionNode.class));
-        final CollectionNode colNode = (CollectionNode) valueNode;
+        final CollectionNode<?> colNode = (CollectionNode<?>) valueNode;
         assertEquals(instance.values.size(), colNode.getItems().size());
         colNode.getItems().forEach(this::verifyObjectIdNode);
     }
@@ -335,12 +335,12 @@ class JsonLdTreeBuilderTest {
         treeBuilder.openObject(ctx(null, null, instance));
         treeBuilder.visitAttribute(
                 ctx(Vocabulary.CHANGED_VALUE, WithAnnotations.class.getDeclaredField("values"), instance.values));
-        final CompositeNode root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = treeBuilder.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(Vocabulary.CHANGED_VALUE, valueNode.getName());
         assertThat(valueNode, instanceOf(CollectionNode.class));
-        final CollectionNode colNode = (CollectionNode) valueNode;
+        final CollectionNode<?> colNode = (CollectionNode<?>) valueNode;
         assertEquals(instance.values.size(), colNode.getItems().size());
         final Iterator<Object> valuesIt = instance.values.iterator();
         final Iterator<JsonNode> nodeIt = colNode.getItems().iterator();
@@ -371,12 +371,12 @@ class JsonLdTreeBuilderTest {
     }
 
     private void verifyMultilingualStringSerialization() {
-        final CompositeNode root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = treeBuilder.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(RDFS.LABEL, valueNode.getName());
         assertThat(valueNode, instanceOf(CollectionNode.class));
-        final CollectionNode colNode = (CollectionNode) valueNode;
+        final CollectionNode<?> colNode = (CollectionNode<?>) valueNode;
         assertEquals(2, colNode.getItems().size());
         colNode.getItems().forEach(item -> assertThat(item, instanceOf(LangStringNode.class)));
     }
@@ -414,16 +414,16 @@ class JsonLdTreeBuilderTest {
     }
 
     private void verifyPluralMultilingualStringsSerialization(String property) {
-        final CompositeNode root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = treeBuilder.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(property, valueNode.getName());
         assertThat(valueNode, instanceOf(CollectionNode.class));
-        final CollectionNode colNode = (CollectionNode) valueNode;
+        final CollectionNode<?> colNode = (CollectionNode<?>) valueNode;
         assertEquals(2, colNode.getItems().size());
         colNode.getItems().forEach(item -> {
             assertThat(item, instanceOf(CollectionNode.class));
-            final CollectionNode itemCol = (CollectionNode) item;
+            final CollectionNode<?> itemCol = (CollectionNode<?>) item;
             assertEquals(2, itemCol.getItems().size());
             itemCol.getItems().forEach(elem -> assertThat(elem, instanceOf(LangStringNode.class)));
         });

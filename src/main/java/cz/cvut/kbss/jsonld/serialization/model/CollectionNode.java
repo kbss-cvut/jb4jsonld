@@ -14,7 +14,9 @@
  */
 package cz.cvut.kbss.jsonld.serialization.model;
 
-public abstract class CollectionNode extends CompositeNode {
+import java.util.Collection;
+
+public abstract class CollectionNode<T extends Collection<JsonNode>> extends CompositeNode<T> {
 
     CollectionNode() {
     }

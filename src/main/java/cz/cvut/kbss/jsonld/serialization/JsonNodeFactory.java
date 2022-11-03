@@ -108,7 +108,7 @@ public class JsonNodeFactory {
      *              result
      * @return An empty collection node
      */
-    public static CollectionNode createCollectionNode(Collection<?> value) {
+    public static CollectionNode<?> createCollectionNode(Collection<?> value) {
         return createCollectionNode(null, value);
     }
 
@@ -120,9 +120,9 @@ public class JsonNodeFactory {
      *              result
      * @return An empty collection node
      */
-    public static CollectionNode createCollectionNode(String name, Collection<?> value) {
+    public static CollectionNode<?> createCollectionNode(String name, Collection<?> value) {
         final CollectionType type = determineCollectionType(value);
-        CollectionNode n = null;
+        CollectionNode<?> n = null;
         switch (type) {
             case LIST:
                 n = name != null ? new ListNode(name) : new ListNode();
@@ -144,11 +144,11 @@ public class JsonNodeFactory {
         }
     }
 
-    public static CollectionNode createCollectionNodeFromArray() {
+    public static SetNode createCollectionNodeFromArray() {
         return new SetNode();
     }
 
-    public static CollectionNode createCollectionNodeFromArray(String name) {
+    public static SetNode createCollectionNodeFromArray(String name) {
         return new SetNode(name);
     }
 

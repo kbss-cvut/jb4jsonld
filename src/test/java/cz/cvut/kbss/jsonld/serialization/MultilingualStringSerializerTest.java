@@ -48,7 +48,7 @@ class MultilingualStringSerializerTest {
         value.set("cs", "stavba");
         final JsonNode result = sut.serialize(ATTRIBUTE_NAME, value);
         assertThat(result, instanceOf(CollectionNode.class));
-        final CollectionNode colNode = (CollectionNode) result;
+        final CollectionNode<?> colNode = (CollectionNode<?>) result;
         assertEquals(ATTRIBUTE_NAME, result.getName());
         assertEquals(2, colNode.getItems().size());
         colNode.getItems().forEach(item -> assertThat(item, instanceOf(LangStringNode.class)));
@@ -68,7 +68,7 @@ class MultilingualStringSerializerTest {
         value.set("cs", "stavba");
         final JsonNode result = sut.serialize(ATTRIBUTE_NAME, value);
         assertThat(result, instanceOf(CollectionNode.class));
-        final CollectionNode colNode = (CollectionNode) result;
+        final CollectionNode<?> colNode = (CollectionNode<?>) result;
         assertEquals(ATTRIBUTE_NAME, result.getName());
         assertEquals(2, colNode.getItems().size());
         colNode.getItems().forEach(item -> assertThat(item, instanceOf(LangStringNode.class)));
@@ -80,7 +80,7 @@ class MultilingualStringSerializerTest {
         value.set("cs", "stavba");
         final JsonNode result = sut.serialize(value);
         assertThat(result, instanceOf(CollectionNode.class));
-        final CollectionNode colNode = (CollectionNode) result;
+        final CollectionNode<?> colNode = (CollectionNode<?>) result;
         assertEquals(2, colNode.getItems().size());
         colNode.getItems().forEach(item -> assertThat(item, instanceOf(LangStringNode.class)));
     }

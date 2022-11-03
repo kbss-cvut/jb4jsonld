@@ -18,9 +18,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
-public abstract class CompositeNode extends JsonNode {
+public abstract class CompositeNode<T extends Collection<JsonNode>> extends JsonNode {
 
-    final Collection<JsonNode> items;
+    final T items;
     private boolean open;
 
     public CompositeNode() {
@@ -34,11 +34,15 @@ public abstract class CompositeNode extends JsonNode {
         this.open = true;
     }
 
-    abstract Collection<JsonNode> initItems();
+    abstract T initItems();
 
     public void addItem(JsonNode item) {
         Objects.requireNonNull(item);
         items.add(item);
+    }
+
+    public void prependItem(JsonNode item) {
+        throw new UnsupportedOperationException("Prepending items is not supported by most composite nodes.");
     }
 
     public Collection<JsonNode> getItems() {

@@ -28,7 +28,7 @@ public class ListNodeTest extends AbstractNodeTest {
 
     @Test
     void writeOutputsItemsInAnObjectWithSingleAttributeOfNameListAndValueAnArray() throws Exception {
-        final CollectionNode node = new ListNode("http://krizik.felk.cvut.cz/ontologies/jsonld#list");
+        final ListNode node = new ListNode("http://krizik.felk.cvut.cz/ontologies/jsonld#list");
         final List<JsonNode> items = generateItems();
         items.forEach(node::addItem);
         node.write(serializerMock);
@@ -55,7 +55,7 @@ public class ListNodeTest extends AbstractNodeTest {
 
     @Test
     void writeOutputsObjectWithSingleAttributeOfNameListAndValueAnEmptyArray() throws Exception {
-        final CollectionNode node = new ListNode();
+        final ListNode node = new ListNode();
         node.write(serializerMock);
 
         final InOrder inOrder = inOrder(serializerMock);

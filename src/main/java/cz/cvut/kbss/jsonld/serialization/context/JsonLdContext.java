@@ -7,10 +7,7 @@ import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Represents the {@literal @context} JSON-LD attribute.
@@ -58,7 +55,7 @@ public class JsonLdContext {
      * @return {@code JsonNode} with registered mappings
      */
     public JsonNode getContextNode() {
-        final CompositeNode node = new ObjectNode(JsonLd.CONTEXT);
+        final ObjectNode node = new ObjectNode(JsonLd.CONTEXT);
         mapping.values().forEach(node::addItem);
         return node;
     }

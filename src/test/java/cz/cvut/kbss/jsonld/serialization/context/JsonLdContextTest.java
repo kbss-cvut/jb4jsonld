@@ -47,7 +47,7 @@ class JsonLdContextTest {
 
         final JsonNode result = sut.getContextNode();
         assertThat(result, instanceOf(CompositeNode.class));
-        final CompositeNode compositeResult = (CompositeNode) result;
+        final CompositeNode<?> compositeResult = (CompositeNode<?>) result;
         assertThat(compositeResult.getItems(),
                    hasItems(JsonNodeFactory.createLiteralNode(firstName, Vocabulary.FIRST_NAME),
                             JsonNodeFactory.createLiteralNode(lastName, Vocabulary.LAST_NAME)));

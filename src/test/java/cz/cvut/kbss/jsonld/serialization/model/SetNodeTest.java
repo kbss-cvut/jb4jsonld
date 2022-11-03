@@ -27,7 +27,7 @@ public class SetNodeTest extends AbstractNodeTest {
 
     @Test
     void writeOutputsItemsAsSimpleJsonArray() throws Exception {
-        final CollectionNode node = new SetNode();
+        final SetNode node = new SetNode();
         final List<JsonNode> items = generateItems();
         items.forEach(node::addItem);
         node.write(serializerMock);
@@ -51,7 +51,7 @@ public class SetNodeTest extends AbstractNodeTest {
 
     @Test
     void writeOutputsEmptyArrayWhenThereAreNoItems() throws Exception {
-        final CollectionNode node = new SetNode();
+        final SetNode node = new SetNode();
         node.write(serializerMock);
 
         final InOrder inOrder = inOrder(serializerMock);

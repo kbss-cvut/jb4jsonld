@@ -18,6 +18,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.InstanceVisitor;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
@@ -30,8 +31,8 @@ import java.util.Stack;
  */
 public class JsonLdTreeBuilder implements InstanceVisitor {
 
-    private final Stack<CompositeNode> nodeStack = new Stack<>();
-    private CompositeNode currentNode;
+    private final Stack<CompositeNode<?>> nodeStack = new Stack<>();
+    private CompositeNode<?> currentNode;
 
     private final ValueSerializers serializers;
 
@@ -49,7 +50,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
                     currentNode.addItem(node);
                 } else {
                     assert node instanceof CompositeNode;
-                    currentNode = (CompositeNode) node;
+                    currentNode = (CompositeNode<?>) node;
                 }
             }
             return false;
@@ -59,13 +60,13 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void openObject(SerializationContext<?> ctx) {
-        final CompositeNode newCurrent =
+        final ObjectNode newCurrent =
                 ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) :
                         JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
     }
 
-    private void openNewNode(CompositeNode newNode) {
+    private void openNewNode(CompositeNode<?> newNode) {
         if (currentNode != null) {
             if (currentNode.isOpen()) {
                 nodeStack.push(currentNode);
@@ -91,7 +92,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void visitTypes(SerializationContext<Collection<String>> typesCtx) {
-        final CollectionNode typesNode = JsonNodeFactory.createCollectionNode(JsonLd.TYPE, typesCtx.getValue());
+        final CollectionNode<?> typesNode = JsonNodeFactory.createCollectionNode(JsonLd.TYPE, typesCtx.getValue());
         typesCtx.getValue().forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
         currentNode.addItem(typesNode);
     }
@@ -110,7 +111,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void openCollection(SerializationContext<? extends Collection<?>> ctx) {
-        final CollectionNode newCurrent =
+        final CollectionNode<?> newCurrent =
                 ctx.getAttributeId() != null ? JsonNodeFactory.createCollectionNode(ctx.getAttributeId(),
                         ctx.getValue()) :
                         JsonNodeFactory.createCollectionNode(ctx.getValue());
@@ -123,7 +124,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
         closeObject(ctx);
     }
 
-    public CompositeNode getTreeRoot() {
+    public CompositeNode<?> getTreeRoot() {
         return currentNode;
     }
 }

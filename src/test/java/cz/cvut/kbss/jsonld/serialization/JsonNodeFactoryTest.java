@@ -29,12 +29,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JsonNodeFactoryTest {
 
-    private static final String NAME = "http://krizik.felk.cvut.cz/ontologies/jsonld#attribute";
+    private static final String NAME = Generator.generateUri().toString();
 
     @Test
     void createCollectionCreatesListNodeFromListWithoutName() {
         final List<String> list = new ArrayList<>();
-        final CollectionNode node = JsonNodeFactory.createCollectionNode(list);
+        final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(list);
         assertThat(node, instanceOf(ListNode.class));
         assertTrue(node.isValueNode());
     }
@@ -42,7 +42,7 @@ class JsonNodeFactoryTest {
     @Test
     void createCollectionCreatesListNodeFromListWithName() {
         final List<String> list = new ArrayList<>();
-        final CollectionNode node = JsonNodeFactory.createCollectionNode(NAME, list);
+        final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(NAME, list);
         assertThat(node, instanceOf(ListNode.class));
         assertEquals(NAME, node.getName());
         assertFalse(node.isValueNode());
@@ -51,7 +51,7 @@ class JsonNodeFactoryTest {
     @Test
     void createCollectionCreatesSetNodeFromSetWithoutName() {
         final Set<String> set = new HashSet<>();
-        final CollectionNode node = JsonNodeFactory.createCollectionNode(set);
+        final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(set);
         assertThat(node, instanceOf(SetNode.class));
         assertTrue(node.isValueNode());
     }
@@ -59,7 +59,7 @@ class JsonNodeFactoryTest {
     @Test
     void createCollectionCreatesSetNodeFromSetWithName() {
         final Set<String> set = new HashSet<>();
-        final CollectionNode node = JsonNodeFactory.createCollectionNode(NAME, set);
+        final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(NAME, set);
         assertThat(node, instanceOf(SetNode.class));
         assertEquals(NAME, node.getName());
         assertFalse(node.isValueNode());
@@ -67,7 +67,7 @@ class JsonNodeFactoryTest {
 
     @Test
     void createCollectionFromArrayCreatesSetNodeWithName() {
-        final CollectionNode node = JsonNodeFactory.createCollectionNodeFromArray(NAME);
+        final CollectionNode<?> node = JsonNodeFactory.createCollectionNodeFromArray(NAME);
         assertThat(node, instanceOf(SetNode.class));
         assertEquals(NAME, node.getName());
         assertFalse(node.isValueNode());
@@ -75,7 +75,7 @@ class JsonNodeFactoryTest {
 
     @Test
     void createCollectionFromArrayCreatesSetNodeWithoutName() {
-        final CollectionNode node = JsonNodeFactory.createCollectionNodeFromArray();
+        final CollectionNode<?> node = JsonNodeFactory.createCollectionNodeFromArray();
         assertThat(node, instanceOf(SetNode.class));
         assertNull(node.getName());
         assertTrue(node.isValueNode());
