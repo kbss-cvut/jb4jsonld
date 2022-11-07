@@ -1,8 +1,10 @@
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 
 import java.lang.reflect.Field;
+import java.util.Set;
 
 /**
  * Default implementation of {@link SerializationContextFactory}.
@@ -17,12 +19,22 @@ public class IriBasedSerializationContextFactory implements SerializationContext
     }
 
     @Override
-    public <T> SerializationContext<T> create(Field field, T value) {
+    public <T> SerializationContext<T> createForProperties(Field field, T value) {
         return new SerializationContext<>(field, value);
     }
 
     @Override
-    public <T> SerializationContext<T> createWithAttributeId(Field field, T value) {
+    public <T> SerializationContext<T> createForAttribute(Field field, T value) {
         return new SerializationContext<>(BeanAnnotationProcessor.getAttributeIdentifier(field), field, value);
+    }
+
+    @Override
+    public SerializationContext<String> createForIdentifier(Field field, String value) {
+        return new SerializationContext<>(JsonLd.ID, field, value);
+    }
+
+    @Override
+    public SerializationContext<Set<String>> createForTypes(Field field, Set<String> value) {
+        return new SerializationContext<>(JsonLd.TYPE, field, value);
     }
 }

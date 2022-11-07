@@ -15,6 +15,7 @@
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
 import java.util.Collection;
+import java.util.Set;
 
 public interface InstanceVisitor {
 
@@ -71,7 +72,7 @@ public interface InstanceVisitor {
      *
      * @param ctx Current serialization context
      */
-    void visitTypes(SerializationContext<Collection<String>> ctx);
+    void visitTypes(SerializationContext<Set<String>> ctx);
 
     /**
      * Called when a collection is encountered by the object traverser.

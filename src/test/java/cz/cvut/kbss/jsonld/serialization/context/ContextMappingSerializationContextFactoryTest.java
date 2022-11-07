@@ -23,7 +23,7 @@ class ContextMappingSerializationContextFactoryTest {
 
     @Test
     void createWithFieldAndValueMapsFieldNameToPropertyInJsonLdContextAndReturnsSerializationContextWithFieldName() throws Exception {
-        final SerializationContext<String> ctx = sut.createWithAttributeId(Person.getFirstNameField(), "Test");
+        final SerializationContext<String> ctx = sut.createForAttribute(Person.getFirstNameField(), "Test");
         assertEquals(Person.getFirstNameField().getName(), ctx.getAttributeId());
         verify(jsonLdContext).registerTermMapping(Person.getFirstNameField().getName(), Vocabulary.FIRST_NAME);
     }
