@@ -21,17 +21,17 @@ import cz.cvut.kbss.jsonld.serialization.traversal.IriBasedSerializationContextF
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 
 /**
- * JSON-LD serializer outputting compacted context-less JSON.
+ * JSON-LD serializer outputting compacted context-less JSON-LD.
  * <p>
  * This means that context info is not used and all attributes are mapped by their full URIs.
  */
 public class CompactedJsonLdSerializer extends JsonLdSerializer {
 
-    CompactedJsonLdSerializer(JsonGenerator jsonGenerator) {
+    public CompactedJsonLdSerializer(JsonGenerator jsonGenerator) {
         super(jsonGenerator);
     }
 
-    CompactedJsonLdSerializer(JsonGenerator jsonGenerator, Configuration configuration) {
+    public CompactedJsonLdSerializer(JsonGenerator jsonGenerator, Configuration configuration) {
         super(jsonGenerator, configuration);
     }
 
