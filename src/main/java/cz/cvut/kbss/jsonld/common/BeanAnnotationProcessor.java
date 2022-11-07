@@ -401,6 +401,10 @@ public class BeanAnnotationProcessor {
         throw new JsonLdSerializationException("Field " + field + " is not JSON-LD serializable.");
     }
 
+    public static Optional<Field> getIdentifierField(Class<?> cls) {
+        return getMarshallableFields(cls, f -> f.isAnnotationPresent(Id.class)).stream().findFirst();
+    }
+
     /**
      * Resolves value of the identifier attribute (i.e. annotated with {@link Id}) of the specified instance.
      *

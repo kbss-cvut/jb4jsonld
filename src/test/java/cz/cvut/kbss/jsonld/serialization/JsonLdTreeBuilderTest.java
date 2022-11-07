@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
@@ -88,7 +86,7 @@ class JsonLdTreeBuilderTest {
         final Person p = new Person();
         treeBuilder.openObject(ctx(null, null, p));
         assertNotNull(treeBuilder.getTreeRoot());
-        treeBuilder.visitTypes(ctx(null, null, Collections.singleton(Vocabulary.PERSON)));
+        treeBuilder.visitTypes(ctx(JsonLd.TYPE, null, Collections.singleton(Vocabulary.PERSON)));
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
@@ -100,7 +98,9 @@ class JsonLdTreeBuilderTest {
         final Employee employee = Generator.generateEmployee();
         treeBuilder.openObject(ctx(null, null, employee));
         assertTrue(getNodeStack().isEmpty());
-        treeBuilder.visitTypes(ctx(null, null, Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE)));
+        treeBuilder.visitTypes(ctx(JsonLd.TYPE, User.class.getDeclaredField("types"),
+                                   new HashSet<>(
+                                           Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE))));
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         final Set<String> types = new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE));
         final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
@@ -117,7 +117,8 @@ class JsonLdTreeBuilderTest {
         treeBuilder.openObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
         treeBuilder.closeObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
         treeBuilder.closeObject(ctx(null, null, employee));
-        final CompositeNode<?> employerNode = (CompositeNode<?>) getNode(treeBuilder.getTreeRoot(), Vocabulary.IS_MEMBER_OF);
+        final CompositeNode<?> employerNode =
+                (CompositeNode<?>) getNode(treeBuilder.getTreeRoot(), Vocabulary.IS_MEMBER_OF);
         assertNotNull(employerNode);
     }
 
@@ -207,7 +208,7 @@ class JsonLdTreeBuilderTest {
         treeBuilder.visitAttribute(ctx(Vocabulary.FIRST_NAME, Person.getFirstNameField(), user.getFirstName()));
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         assertTrue(treeBuilder.getTreeRoot().getItems()
-                .contains(JsonNodeFactory.createLiteralNode(Vocabulary.FIRST_NAME, user.getFirstName())));
+                              .contains(JsonNodeFactory.createLiteralNode(Vocabulary.FIRST_NAME, user.getFirstName())));
     }
 
     @Test
@@ -217,7 +218,7 @@ class JsonLdTreeBuilderTest {
         treeBuilder.visitAttribute(ctx(RDFS.LABEL, Organization.class.getDeclaredField("name"), org.getName()));
         assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
         assertTrue(treeBuilder.getTreeRoot().getItems()
-                .contains(JsonNodeFactory.createLiteralNode(RDFS.LABEL, org.getName())));
+                              .contains(JsonNodeFactory.createLiteralNode(RDFS.LABEL, org.getName())));
     }
 
     @Test
@@ -258,7 +259,7 @@ class JsonLdTreeBuilderTest {
     void visitIdentifierAddsIdNodeToCurrentObjectNode() throws Exception {
         final Person p = Generator.generatePerson();
         treeBuilder.openObject(ctx(null, null, p));
-        treeBuilder.visitIdentifier(ctx(null, null, p.getUri().toString()));
+        treeBuilder.visitIdentifier(ctx(JsonLd.ID, null, p.getUri().toString()));
         final CompositeNode<?> root = treeBuilder.getTreeRoot();
         final Collection<JsonNode> nodes = root.getItems();
         final Optional<JsonNode> idNode = nodes.stream().filter(n -> n.getName().equals(JsonLd.ID)).findAny();
@@ -392,7 +393,7 @@ class JsonLdTreeBuilderTest {
         treeBuilder.openObject(ctx(null, null, instance));
         treeBuilder.visitAttribute(
                 ctx(RDFS.LABEL, ObjectWithMultilingualStringAnnotation.class.getDeclaredField("label"),
-                        instance.label));
+                    instance.label));
         verifyMultilingualStringSerialization();
     }
 
@@ -459,7 +460,7 @@ class JsonLdTreeBuilderTest {
         treeBuilder.openObject(ctx(null, null, instance));
         treeBuilder.visitAttribute(
                 ctx(SKOS.ALT_LABEL, ObjectWithPluralMultilingualStrings.class.getDeclaredField("altLabels"),
-                        instance.altLabels));
+                    instance.altLabels));
 
         verifyPluralMultilingualStringsSerialization(SKOS.ALT_LABEL);
     }

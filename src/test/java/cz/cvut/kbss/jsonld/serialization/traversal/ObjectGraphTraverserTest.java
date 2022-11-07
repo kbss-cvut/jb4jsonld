@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
@@ -19,6 +17,7 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
@@ -75,7 +74,8 @@ class ObjectGraphTraverserTest {
     }
 
     private void verifyUserFieldsVisited(User user) throws NoSuchFieldException {
-        verify(visitor).visitIdentifier(new SerializationContext<>(null, null, user.getUri().toString()));
+        verify(visitor).visitIdentifier(
+                new SerializationContext<>(JsonLd.ID, Person.class.getDeclaredField("uri"), user.getUri().toString()));
         verify(visitor).visitAttribute(ctx(Vocabulary.FIRST_NAME, Person.getFirstNameField(), user.getFirstName()));
         verify(visitor).visitAttribute(ctx(Vocabulary.LAST_NAME, Person.getLastNameField(), user.getLastName()));
         verify(visitor).visitAttribute(ctx(Vocabulary.USERNAME, User.getUsernameField(), user.getUsername()));
@@ -100,7 +100,8 @@ class ObjectGraphTraverserTest {
 
         verify(visitor).openObject(ctx(null, null, employee));
         verify(visitor).openObject(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), employee));
-        verify(visitor).visitTypes(new SerializationContext<>(new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE))));
+        verify(visitor).visitTypes(new SerializationContext<>(JsonLd.TYPE, User.class.getDeclaredField("types"),
+                new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE))));
     }
 
     @Test
@@ -147,12 +148,13 @@ class ObjectGraphTraverserTest {
 
         traverser.traverse(study);
         final InOrder inOrder = inOrder(visitor);
-        inOrder.verify(visitor).visitIdentifier(ctx(null, null, study.getUri().toString()));
+        inOrder.verify(visitor)
+               .visitIdentifier(ctx(JsonLd.ID, Study.class.getDeclaredField("uri"), study.getUri().toString()));
         inOrder.verify(visitor).visitAttribute(ctx(RDFS.LABEL, Study.class.getDeclaredField("name"), study.getName()));
         inOrder.verify(visitor).visitAttribute(
                 ctx(Vocabulary.HAS_PARTICIPANT, Study.class.getDeclaredField("participants"), study.getParticipants()));
         inOrder.verify(visitor)
-                .visitAttribute(ctx(Vocabulary.HAS_MEMBER, Study.class.getDeclaredField("members"), study.getMembers()));
+               .visitAttribute(ctx(Vocabulary.HAS_MEMBER, Study.class.getDeclaredField("members"), study.getMembers()));
     }
 
     private Study generateStudy() {
@@ -177,7 +179,7 @@ class ObjectGraphTraverserTest {
         inOrder.verify(visitor).visitAttribute(
                 ctx(Vocabulary.HAS_PARTICIPANT, Study.class.getDeclaredField("participants"), ps.getParticipants()));
         inOrder.verify(visitor)
-                .visitAttribute(ctx(Vocabulary.HAS_MEMBER, Study.class.getDeclaredField("members"), ps.getMembers()));
+               .visitAttribute(ctx(Vocabulary.HAS_MEMBER, Study.class.getDeclaredField("members"), ps.getMembers()));
         inOrder.verify(visitor).visitAttribute(ctx(RDFS.LABEL, Study.class.getDeclaredField("name"), ps.getName()));
     }
 
@@ -206,12 +208,13 @@ class ObjectGraphTraverserTest {
     }
 
     @Test
-    void traverseInvokesVisitIdentifierWithInstanceIdentifier() {
+    void traverseInvokesVisitIdentifierWithInstanceIdentifier() throws Exception {
         final Person person = Generator.generatePerson();
         traverser.traverse(person);
         final InOrder inOrder = inOrder(visitor);
         inOrder.verify(visitor).openObject(ctx(null, null, person));
-        inOrder.verify(visitor).visitIdentifier(ctx(null, null, person.getUri().toString()));
+        inOrder.verify(visitor)
+               .visitIdentifier(ctx(JsonLd.ID, Person.class.getDeclaredField("uri"), person.getUri().toString()));
     }
 
     @Test
@@ -220,22 +223,24 @@ class ObjectGraphTraverserTest {
         employee.setUri(Generator.generateUri());
         employee.employer = Generator.generateUri();
 
-        traverser.traverse(ctx(Vocabulary.IS_MEMBER_OF, EmployeeWithUriEmployer.class.getDeclaredField("employer"), employee.employer));
+        traverser.traverse(ctx(Vocabulary.IS_MEMBER_OF, EmployeeWithUriEmployer.class.getDeclaredField("employer"),
+                               employee.employer));
         final InOrder inOrder = inOrder(visitor);
         inOrder.verify(visitor).openObject(
                 ctx(Vocabulary.IS_MEMBER_OF, EmployeeWithUriEmployer.class.getDeclaredField("employer"),
-                        employee.employer));
-        inOrder.verify(visitor).visitIdentifier(ctx(null, null, employee.employer.toString()));
+                    employee.employer));
+        inOrder.verify(visitor).visitIdentifier(ctx(JsonLd.ID, null, employee.employer.toString()));
     }
 
     @Test
-    void traverseInvokesVisitTypesAfterOpeningInstance() {
+    void traverseInvokesVisitTypesAfterOpeningInstance() throws Exception {
         final Employee employee = Generator.generateEmployee();
         traverser.traverse(employee);
 
         final InOrder inOrder = inOrder(visitor);
         inOrder.verify(visitor).openObject(ctx(null, null, employee));
-        inOrder.verify(visitor).visitTypes(ctx(null, null, new InstanceTypeResolver().resolveTypes(employee)));
+        inOrder.verify(visitor).visitTypes(ctx(JsonLd.TYPE, User.class.getDeclaredField("types"),
+                                               new InstanceTypeResolver().resolveTypes(employee)));
     }
 
     @Test
@@ -251,18 +256,18 @@ class ObjectGraphTraverserTest {
         final NoType instance = new NoType();
         instance.uri = Generator.generateUri();
         final MissingTypeInfoException result = assertThrows(MissingTypeInfoException.class,
-                () -> traverser.traverse(instance));
+                                                             () -> traverser.traverse(instance));
         assertThat(result.getMessage(), containsString("@OWLClass"));
         assertThat(result.getMessage(), containsString("@Types"));
     }
 
     @Test
-    void traverseSupportsInstanceOfClassWithoutOWLClassAnnotationButWithNonEmptyTypes() {
+    void traverseSupportsInstanceOfClassWithoutOWLClassAnnotationButWithNonEmptyTypes() throws Exception {
         final NoType instance = new NoType();
         instance.uri = Generator.generateUri();
         instance.types = Collections.singleton(Vocabulary.PERSON);
         traverser.traverse(instance);
-        verify(visitor).visitTypes(ctx(null, null, instance.types));
+        verify(visitor).visitTypes(ctx(JsonLd.TYPE, NoType.class.getDeclaredField("types"), instance.types));
     }
 
     private static class NoType {
@@ -285,7 +290,7 @@ class ObjectGraphTraverserTest {
         inOrder.verify(visitor).closeCollection(ctx(null, null, org.getEmployees()));
 
         org.getEmployees().stream().filter(Objects::nonNull)
-                .forEach(e -> verify(visitor).openObject(ctx(null, null, e)));
+           .forEach(e -> verify(visitor).openObject(ctx(null, null, e)));
     }
 
     @Test

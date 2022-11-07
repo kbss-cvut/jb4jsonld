@@ -1,16 +1,14 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
@@ -101,15 +99,20 @@ public class ObjectGraphTraverser {
     private void serializeFields(Object instance) {
         final List<Field> fieldsToSerialize =
                 orderAttributesForSerialization(BeanAnnotationProcessor.getSerializableFields(instance),
-                        BeanAnnotationProcessor.getAttributeOrder(instance.getClass()));
+                                                BeanAnnotationProcessor.getAttributeOrder(instance.getClass()));
         for (Field f : fieldsToSerialize) {
-            if (BeanAnnotationProcessor.isInstanceIdentifier(f) || BeanAnnotationProcessor.isPropertiesField(f) || BeanAnnotationProcessor.isTypesField(f)) {
+            if (shouldSkipFieldSerialization(f)) {
                 continue;
             }
             Object value = BeanClassProcessor.getFieldValue(f, instance);
-            final SerializationContext<?> ctx =serializationContextFactory.createWithAttributeId(f, value);
+            final SerializationContext<?> ctx = serializationContextFactory.createForAttribute(f, value);
             visitAttribute(ctx);
         }
+    }
+
+    private boolean shouldSkipFieldSerialization(Field f) {
+        return BeanAnnotationProcessor.isInstanceIdentifier(f) || BeanAnnotationProcessor.isPropertiesField(
+                f) || BeanAnnotationProcessor.isTypesField(f);
     }
 
     private List<Field> orderAttributesForSerialization(List<Field> fields, String[] ordering) {
@@ -140,7 +143,8 @@ public class ObjectGraphTraverser {
         }
         assert value instanceof Map;
         new PropertiesTraverser(this)
-                .traverseProperties(serializationContextFactory.create(propertiesField, (Map<?, ?>) value));
+                .traverseProperties(
+                        serializationContextFactory.createForProperties(propertiesField, (Map<?, ?>) value));
     }
 
     public boolean visitInstance(SerializationContext<?> ctx) {
@@ -161,7 +165,7 @@ public class ObjectGraphTraverser {
             throw MissingIdentifierException.create(instance);
         }
         return extractedId.orElseGet(() -> knownInstances.containsKey(instance) ? knownInstances.get(instance) :
-                IdentifierUtil.generateBlankNodeId()).toString();
+                                           IdentifierUtil.generateBlankNodeId()).toString();
     }
 
     public void closeInstance(SerializationContext<?> ctx) {
@@ -170,20 +174,24 @@ public class ObjectGraphTraverser {
 
     public void visitIdentifier(Object instance) {
         final String id;
+        final SerializationContext<String> idContext;
         if (BeanClassProcessor.isIdentifierType(instance.getClass())) {
             id = instance.toString();
+            idContext = serializationContextFactory.createForIdentifier(null, id);
         } else {
             id = resolveIdentifier(instance);
+            idContext = serializationContextFactory.createForIdentifier(
+                    BeanAnnotationProcessor.getIdentifierField(instance.getClass()).orElse(null), id);
             knownInstances.put(instance, id);
         }
-        final SerializationContext<String> idContext = serializationContextFactory.create(id);
         visitor.visitIdentifier(idContext);
     }
 
     public void visitTypes(Object instance) {
         final Set<String> resolvedTypes = typeResolver.resolveTypes(instance);
         assert !resolvedTypes.isEmpty();
-        final SerializationContext<Collection<String>> typesContext = serializationContextFactory.create(resolvedTypes);
+        final SerializationContext<Set<String>> typesContext = serializationContextFactory.createForTypes(
+                BeanAnnotationProcessor.getTypesField(instance.getClass()).orElse(null), resolvedTypes);
         visitor.visitTypes(typesContext);
     }
 

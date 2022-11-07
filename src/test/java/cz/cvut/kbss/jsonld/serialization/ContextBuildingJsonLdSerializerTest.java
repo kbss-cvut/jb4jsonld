@@ -7,12 +7,15 @@ import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -64,6 +67,26 @@ class ContextBuildingJsonLdSerializerTest {
         assertEquals(user.getLastName(), jsonMap.get(User.getLastNameField().getName()));
         assertEquals(user.getUsername(), jsonMap.get(User.getUsernameField().getName()));
         assertEquals(user.getAdmin(), jsonMap.get(User.class.getDeclaredField("admin").getName()));
+    }
+
+    @Test
+    void serializeWithContextSupportsTypesAndIdMapping() throws Exception {
+        final User user = Generator.generateUser();
+        user.setTypes(Collections.singleton(Generator.generateUri().toString()));
+        sut.serialize(user);
+        final Object result = JsonUtils.fromString(jsonWriter.getResult());
+        assertInstanceOf(Map.class, result);
+        final Map<String, Object> jsonMap = (Map<String, Object>) result;
+        assertThat(jsonMap, hasKey(JsonLd.CONTEXT));
+        assertInstanceOf(Map.class, jsonMap.get(JsonLd.CONTEXT));
+        final Map<String, String> context = (Map<String, String>) jsonMap.get(JsonLd.CONTEXT);
+        assertEquals(JsonLd.ID, context.get(Person.class.getDeclaredField("uri").getName()));
+        assertEquals(user.getUri().toString(), jsonMap.get(Person.class.getDeclaredField("uri").getName()));
+        assertEquals(JsonLd.TYPE, context.get(User.class.getDeclaredField("types").getName()));
+        assertThat((List<String>) jsonMap.get(User.class.getDeclaredField("types").getName()),
+                   hasItems(user.getTypes().toArray(new String[]{})));
+        assertThat((List<String>) jsonMap.get(User.class.getDeclaredField("types").getName()),
+                   hasItems(Vocabulary.PERSON, Vocabulary.USER));
     }
 
     @Test

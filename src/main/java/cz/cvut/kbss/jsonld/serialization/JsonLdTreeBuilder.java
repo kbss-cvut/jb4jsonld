@@ -1,20 +1,17 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization;
 
-import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -23,6 +20,7 @@ import cz.cvut.kbss.jsonld.serialization.traversal.InstanceVisitor;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -62,7 +60,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     public void openObject(SerializationContext<?> ctx) {
         final ObjectNode newCurrent =
                 ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) :
-                        JsonNodeFactory.createObjectNode();
+                JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
     }
 
@@ -87,12 +85,13 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void visitIdentifier(SerializationContext<String> idCtx) {
         assert currentNode.isOpen();
-        currentNode.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, idCtx.getValue()));
+        currentNode.addItem(JsonNodeFactory.createObjectIdNode(idCtx.getAttributeId(), idCtx.getValue()));
     }
 
     @Override
-    public void visitTypes(SerializationContext<Collection<String>> typesCtx) {
-        final CollectionNode<?> typesNode = JsonNodeFactory.createCollectionNode(JsonLd.TYPE, typesCtx.getValue());
+    public void visitTypes(SerializationContext<Set<String>> typesCtx) {
+        final CollectionNode<?> typesNode =
+                JsonNodeFactory.createCollectionNode(typesCtx.getAttributeId(), typesCtx.getValue());
         typesCtx.getValue().forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
         currentNode.addItem(typesNode);
     }
@@ -113,8 +112,8 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     public void openCollection(SerializationContext<? extends Collection<?>> ctx) {
         final CollectionNode<?> newCurrent =
                 ctx.getAttributeId() != null ? JsonNodeFactory.createCollectionNode(ctx.getAttributeId(),
-                        ctx.getValue()) :
-                        JsonNodeFactory.createCollectionNode(ctx.getValue());
+                                                                                    ctx.getValue()) :
+                JsonNodeFactory.createCollectionNode(ctx.getValue());
         openNewNode(newCurrent);
     }
 
