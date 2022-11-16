@@ -33,6 +33,8 @@ public class TestUtil {
 
     public static final ValueFactory VALUE_FACTORY = SimpleValueFactory.getInstance();
 
+    public static final String ID_FIELD_NAME = "uri";
+
     private TestUtil() {
         throw new AssertionError();
     }
