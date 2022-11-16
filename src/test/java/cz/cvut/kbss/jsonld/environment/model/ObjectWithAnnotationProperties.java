@@ -18,12 +18,16 @@ import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.net.URI;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.OBJECT_WITH_ANNOTATIONS)
-public class ObjectWithAnnotationProperties {
+public class ObjectWithAnnotationProperties implements GeneratesRdf {
 
     @Id
     private URI id;
@@ -49,6 +53,11 @@ public class ObjectWithAnnotationProperties {
         this.id = id;
     }
 
+    @Override
+    public URI getUri() {
+        return id;
+    }
+
     public String getChangedValue() {
         return changedValue;
     }
@@ -63,5 +72,24 @@ public class ObjectWithAnnotationProperties {
 
     public void setOrigins(Set<Object> origins) {
         this.origins = origins;
+    }
+
+    @Override
+    public void toRdf(Model model, ValueFactory vf, Set<URI> visited) {
+        if (visited.contains(id)) {
+            return;
+        }
+        visited.add(id);
+        final IRI iri = vf.createIRI(id.toString());
+        model.add(iri, RDF.TYPE, vf.createIRI(Vocabulary.OBJECT_WITH_ANNOTATIONS));
+        if (changedValue != null) {
+            model.add(iri, vf.createIRI(Vocabulary.CHANGED_VALUE), vf.createLiteral(changedValue));
+        }
+        if (origins != null) {
+            origins.forEach(o -> {
+                assert o instanceof URI;
+                model.add(iri, vf.createIRI(Vocabulary.ORIGIN), vf.createIRI(o.toString()));
+            });
+        }
     }
 }

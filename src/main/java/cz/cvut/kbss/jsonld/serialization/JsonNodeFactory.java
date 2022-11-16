@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 
@@ -44,8 +45,8 @@ public class JsonNodeFactory {
         LiteralNode<?> node = null;
         switch (type) {
             case BOOLEAN:
-                node = name != null ? new BooleanLiteralNode(name, (Boolean) value) : new BooleanLiteralNode(
-                        (Boolean) value);
+                node = name != null ? new BooleanLiteralNode(name, (Boolean) value) :
+                       new BooleanLiteralNode((Boolean) value);
                 break;
             case NUMBER:
                 node = name != null ? new NumericLiteralNode<>(name, (Number) value) :
@@ -59,6 +60,21 @@ public class JsonNodeFactory {
                 node = TemporalNodeFactory.createLiteralNode(name, value);
                 break;
         }
+        return node;
+    }
+
+    /**
+     * Creates a JSON object node containing a value ({@link JsonLd#VALUE}) and its datatype ({@link JsonLd#TYPE}).
+     *
+     * @param name     Name of the node
+     * @param value    Value of the node
+     * @param datatype Type of the value
+     * @return Object node representing the specified value
+     */
+    public static ObjectNode createTypedValueNode(String name, String value, String datatype) {
+        final ObjectNode node = createObjectNode(name);
+        node.addItem(createLiteralNode(JsonLd.TYPE, datatype));
+        node.addItem(createLiteralNode(JsonLd.VALUE, value));
         return node;
     }
 

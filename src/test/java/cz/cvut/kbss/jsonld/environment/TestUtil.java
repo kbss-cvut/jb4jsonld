@@ -18,6 +18,8 @@ import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 import cz.cvut.kbss.jsonld.environment.model.*;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -28,6 +30,8 @@ public class TestUtil {
     public static final URI LASKY_URI = URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Thomas+Lasky");
     public static final URI PALMER_URI = URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Sarah+Palmer");
     public static final URI UNSC_URI = URI.create("http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC");
+
+    public static final ValueFactory VALUE_FACTORY = SimpleValueFactory.getInstance();
 
     private TestUtil() {
         throw new AssertionError();

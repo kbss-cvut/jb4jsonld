@@ -45,6 +45,11 @@ public class JsonLd {
     public static final String LANGUAGE = "@language";
 
     /**
+     * JSON-LD {@code @container} keyword.
+     */
+    public static final String CONTAINER = "@container";
+
+    /**
      * JSON-LD {@code @none} keyword.
      */
     public static final String NONE = "@none";

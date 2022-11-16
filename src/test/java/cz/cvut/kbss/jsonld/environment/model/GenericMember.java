@@ -18,11 +18,16 @@ import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.net.URI;
+import java.util.Set;
 
 @OWLClass(iri = Vocabulary.GENERIC_MEMBER)
-public class GenericMember {
+public class GenericMember implements GeneratesRdf {
 
     @Id
     private URI uri;
@@ -44,5 +49,20 @@ public class GenericMember {
 
     public void setMemberOf(Object memberOf) {
         this.memberOf = memberOf;
+    }
+
+    @Override
+    public void toRdf(Model model, ValueFactory vf, Set<URI> visited) {
+        if (visited.contains(uri)) {
+            return;
+        }
+        visited.add(uri);
+        final IRI id = vf.createIRI(uri.toString());
+        model.add(id, RDF.TYPE, vf.createIRI(Vocabulary.GENERIC_MEMBER));
+        if (memberOf != null && memberOf instanceof GeneratesRdf) {
+            final GeneratesRdf org = (GeneratesRdf) memberOf;
+            model.add(id, vf.createIRI(Vocabulary.IS_MEMBER_OF), vf.createIRI(org.getUri().toString()));
+            org.toRdf(model, vf, visited);
+        }
     }
 }

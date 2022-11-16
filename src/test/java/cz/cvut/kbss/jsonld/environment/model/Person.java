@@ -19,6 +19,10 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -26,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.PERSON)
-public class Person {
+public class Person implements GeneratesRdf {
 
     @Id
     public URI uri;
@@ -70,6 +74,17 @@ public class Person {
 
     public void setProperties(Map<String, Set<String>> properties) {
         this.properties = properties;
+    }
+
+    @Override
+    public void toRdf(Model model, ValueFactory vf, Set<URI> visited) {
+        final IRI id = vf.createIRI(uri.toString());
+        model.add(id, RDF.TYPE, vf.createIRI(Vocabulary.PERSON));
+        model.add(id, vf.createIRI(Vocabulary.FIRST_NAME), vf.createLiteral(firstName));
+        model.add(id, vf.createIRI(Vocabulary.LAST_NAME), vf.createLiteral(lastName));
+        if (properties != null) {
+            properties.forEach((k, v) -> v.forEach(s -> model.add(id, vf.createIRI(k), vf.createLiteral(s))));
+        }
     }
 
     public static Field getFirstNameField() throws NoSuchFieldException {
