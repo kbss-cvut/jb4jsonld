@@ -16,9 +16,6 @@ import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.core.JsonLdUtils;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.MultilingualString;
-import cz.cvut.kbss.jopa.model.annotations.Id;
-import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
@@ -27,16 +24,12 @@ import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
-import org.eclipse.rdf4j.model.Model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.*;
 
-import static cz.cvut.kbss.jsonld.environment.IsIsomorphic.isIsomorphic;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,16 +40,6 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
     @BeforeEach
     void setUp() {
         this.sut = new CompactedJsonLdSerializer(jsonWriter);
-    }
-
-    // The following tests only verify validity of the output JSON-LD, no structure checks are performed
-
-    @Test
-    void testSerializeObjectWithDataProperties() throws Exception {
-        final User user = Generator.generateUser();
-        sut.serialize(user);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        assertNotNull(jsonObject);
     }
 
     @Test
@@ -87,29 +70,11 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
     }
 
     @Test
-    void serializationPutsOwlClassAndTypesContentIntoOneTypeProperty() throws Exception {
-        final User user = Generator.generateUser();
-        final String type = Generator.URI_BASE + "TypeOne";
-        user.setTypes(Collections.singleton(type));
-        final Map<String, ?> json = serializeAndRead(user);
-        final List<?> types = (List<?>) json.get(JsonLd.TYPE);
-        assertTrue(types.contains(Vocabulary.USER));
-        assertTrue(types.contains(type));
-    }
-
-    private Map<String, ?> serializeAndRead(Object value) throws IOException {
-        sut.serialize(value);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        assertThat(jsonObject, instanceOf(Map.class));
-        return (Map<String, ?>) jsonObject;
-    }
-
-    @Test
     void serializationSkipsNullDataPropertyValues() throws Exception {
         final User user = Generator.generateUser();
         user.setAdmin(null);
         final Map<String, ?> json = serializeAndRead(user);
-        assertFalse(json.containsKey(Vocabulary.IS_ADMIN));
+        assertThat(json, not(hasKey(Vocabulary.IS_ADMIN)));
     }
 
     @Test
@@ -117,19 +82,7 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(null);
         final Map<String, ?> json = serializeAndRead(employee);
-        assertFalse(json.containsKey(Vocabulary.IS_MEMBER_OF));
-    }
-
-    @Test
-    void serializationSerializesPlainIdentifierObjectPropertyValue() throws Exception {
-        final Organization company = Generator.generateOrganization();
-        company.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
-        final Map<String, ?> json = serializeAndRead(company);
-        final Object value = json.get(Vocabulary.ORIGIN);
-        assertTrue(value instanceof Map);
-        final Map<String, ?> country = (Map<String, ?>) value;
-        assertEquals(1, country.size());
-        assertEquals(company.getCountry().toString(), country.get(JsonLd.ID));
+        assertThat(json, not(hasKey(Vocabulary.IS_MEMBER_OF)));
     }
 
     @Test
@@ -137,7 +90,7 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final Organization company = Generator.generateOrganization();
         company.setUri(null);
         final Map<String, ?> json = serializeAndRead(company);
-        assertTrue(json.containsKey(JsonLd.ID));
+        assertThat(json, hasKey(JsonLd.ID));
         assertThat(json.get(JsonLd.ID).toString(), startsWith(IdentifierUtil.B_NODE_PREFIX));
     }
 
@@ -156,17 +109,6 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
             final Map<?, ?> employer = (Map<?, ?>) eMap.get(Vocabulary.IS_MEMBER_OF);
             assertEquals(id, employer.get(JsonLd.ID));
         }
-    }
-
-    @Test
-    void serializationGeneratesBlankNodeIdentifierForInstanceOfClassWithoutIdentifierField() throws Exception {
-        final PersonWithoutIdentifier person = new PersonWithoutIdentifier();
-        person.firstName = "Thomas";
-        person.lastName = "Lasky";
-        final Map<String, ?> json = serializeAndRead(person);
-        final String id = (String) json.get(JsonLd.ID);
-        assertNotNull(id);
-        assertThat(id, startsWith(IdentifierUtil.B_NODE_PREFIX));
     }
 
     @Test
@@ -210,44 +152,6 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
     }
 
     @Test
-    void serializationSerializesIndividualsInTypedUnmappedPropertiesAsObjects() throws Exception {
-        final PersonWithTypedProperties instance = new PersonWithTypedProperties();
-        instance.setUri(Generator.generateUri());
-        instance.setFirstName("Sarah");
-        instance.setLastName("Palmer");
-        instance.setProperties(new HashMap<>());
-        final URI someProperty = Generator.generateUri();
-        final String simpleValue = "Simple string value";
-        instance.getProperties().put(someProperty, Collections.singleton(simpleValue));
-        final Person friend = Generator.generatePerson();
-        instance.getProperties().put(URI.create(Vocabulary.KNOWS), Collections.singleton(friend));
-
-        sut.serialize(instance);
-        final Model expected = toRdf(instance);
-        final Model actual = readJson(jsonWriter.getResult());
-        assertThat(actual, isIsomorphic(expected));
-    }
-
-    @Test
-    void serializationSerializesIdentifierInTypedUnmappedPropertiesAsObjectsWithId() throws Exception {
-        final PersonWithTypedProperties instance = new PersonWithTypedProperties();
-        instance.setUri(Generator.generateUri());
-        instance.setFirstName("Sarah");
-        instance.setLastName("Palmer");
-        instance.setProperties(new HashMap<>());
-        final URI someProperty = Generator.generateUri();
-        final Integer simpleValue = 4;
-        instance.getProperties().put(someProperty, Collections.singleton(simpleValue));
-        final URI friendId = Generator.generateUri();
-        instance.getProperties().put(URI.create(Vocabulary.KNOWS), Collections.singleton(friendId));
-
-        sut.serialize(instance);
-        final Model expected = toRdf(instance);
-        final Model actual = readJson(jsonWriter.getResult());
-        assertThat(actual, isIsomorphic(expected));
-    }
-
-    @Test
     void serializationSerializesMultilingualStringInTypedUnmappedProperties() throws Exception {
         final PersonWithTypedProperties instance = new PersonWithTypedProperties();
         instance.setUri(Generator.generateUri());
@@ -272,7 +176,7 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
 
     @Test
     void serializationSupportsCompactedIrisBasedOnJOPANamespaces() throws Exception {
-        final Study study = new Study();
+        final StudyWithNamespaces study = new StudyWithNamespaces();
         study.setUri(Generator.generateUri());
         study.setName("Test study");
         study.setParticipants(Collections.singleton(Generator.generateEmployee()));
@@ -285,42 +189,8 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
     }
 
     @Test
-    void serializationSupportsRegistrationAndUsageOfCustomSerializers() throws Exception {
-        sut.registerSerializer(LocalDate.class, ((value, ctx) -> JsonNodeFactory.createLiteralNode(ctx.getAttributeId(),
-                                                                                                   value.toString())));
-        final OrganizationWithLocalDate organization = new OrganizationWithLocalDate();
-        organization.uri = Generator.generateUri();
-        organization.created = LocalDate.now();
-
-        final Map<String, ?> json = serializeAndRead(organization);
-        assertThat(json, hasKey(Vocabulary.DATE_CREATED));
-        assertEquals(organization.created.toString(), json.get(Vocabulary.DATE_CREATED));
-    }
-
-    @SuppressWarnings("unused")
-    @OWLClass(iri = Vocabulary.ORGANIZATION)
-    public static class OrganizationWithLocalDate {
-        @Id
-        private URI uri;
-
-        @OWLDataProperty(iri = Vocabulary.DATE_CREATED)
-        private LocalDate created;
-    }
-
-    @Test
-    void serializationSupportsRegistrationAndUsageOfCustomObjectPropertyValueSerializers() throws Exception {
-        final ValueSerializer<Organization> serializer =
-                (value, ctx) -> JsonNodeFactory.createObjectIdNode(ctx.getAttributeId(), value.getUri());
-        sut.registerSerializer(Organization.class, serializer);
-        final Employee employee = Generator.generateEmployee();
-
-        final Map<String, ?> json = serializeAndRead(employee);
-        assertThat(json, hasKey(Vocabulary.IS_MEMBER_OF));
-        assertEquals(employee.getEmployer().getUri().toString(), json.get(Vocabulary.IS_MEMBER_OF));
-    }
-
-    @Test
     void serializationSupportsUsageOfCustomObjectPropertyValueSerializersOnPluralAttributes() throws Exception {
+        // TODO Pull up
         final ValueSerializer<Employee> serializer = (value, ctx) -> {
             final ObjectNode node =
                     ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) :
