@@ -20,6 +20,10 @@ import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.jsonld.annotation.JsonLdProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -93,6 +97,22 @@ public class User extends Person {
 
     public void setTypes(Set<String> types) {
         this.types = types;
+    }
+
+    @Override
+    public void toRdf(Model model, ValueFactory vf, Set<URI> visited) {
+        super.toRdf(model, vf, visited);
+        final IRI id = vf.createIRI(uri.toString());
+        model.add(id, RDF.TYPE, vf.createIRI(Vocabulary.USER));
+        model.add(id, vf.createIRI(Vocabulary.USERNAME), vf.createLiteral(username));
+        model.add(id, vf.createIRI(Vocabulary.IS_ADMIN), vf.createLiteral(admin));
+        // Skip password, it is write-only
+        if (role != null) {
+            model.add(id, vf.createIRI(Vocabulary.ROLE), vf.createLiteral(role.toString()));
+        }
+        if (types != null) {
+            types.forEach(t -> model.add(id, RDF.TYPE, vf.createIRI(t)));
+        }
     }
 
     public static Field getUsernameField() throws NoSuchFieldException {

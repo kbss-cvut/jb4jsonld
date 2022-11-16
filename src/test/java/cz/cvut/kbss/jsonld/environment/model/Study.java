@@ -1,31 +1,34 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.environment.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.annotation.JsonLdProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.net.URI;
 import java.util.Set;
 
 @JsonLdAttributeOrder({"uri", "name", "participants", "members"})
 @OWLClass(iri = Vocabulary.STUDY)
-public class Study {
+public class Study implements GeneratesRdf {
 
     @Id
     private URI uri;
@@ -88,5 +91,30 @@ public class Study {
 
     public void setNoOfPeopleInvolved(Integer noOfPeopleInvolved) {
         this.noOfPeopleInvolved = noOfPeopleInvolved;
+    }
+
+    @Override
+    public void toRdf(Model model, ValueFactory vf, Set<URI> visited) {
+        if (visited.contains(uri)) {
+            return;
+        }
+        visited.add(uri);
+        final IRI id = vf.createIRI(uri.toString());
+        model.add(id, RDF.TYPE, vf.createIRI(Vocabulary.STUDY));
+        model.add(id, vf.createIRI(RDFS.LABEL), vf.createLiteral(name));
+        model.add(id, vf.createIRI(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED),
+                  vf.createLiteral(noOfPeopleInvolved.toString(), vf.createIRI(XSD.INTEGER)));
+        if (members != null) {
+            members.forEach(m -> {
+                model.add(id, vf.createIRI(Vocabulary.HAS_MEMBER), vf.createIRI(m.getUri().toString()));
+                m.toRdf(model, vf, visited);
+            });
+        }
+        if (participants != null) {
+            participants.forEach(p -> {
+                model.add(id, vf.createIRI(Vocabulary.HAS_PARTICIPANT), vf.createIRI(p.getUri().toString()));
+                p.toRdf(model, vf, visited);
+            });
+        }
     }
 }

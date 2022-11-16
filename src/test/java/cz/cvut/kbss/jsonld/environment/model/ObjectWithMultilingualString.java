@@ -21,6 +21,7 @@ import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
+import java.lang.reflect.Field;
 import java.net.URI;
 
 @OWLClass(iri = Vocabulary.STUDY)
@@ -53,5 +54,9 @@ public class ObjectWithMultilingualString {
 
     public void setLabel(MultilingualString label) {
         this.label = label;
+    }
+
+    public static Field getLabelField() throws NoSuchFieldException {
+        return ObjectWithMultilingualString.class.getDeclaredField("label");
     }
 }
