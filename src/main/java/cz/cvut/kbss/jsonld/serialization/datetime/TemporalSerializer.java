@@ -1,11 +1,14 @@
 package cz.cvut.kbss.jsonld.serialization.datetime;
 
+import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.exception.UnsupportedTemporalTypeException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.time.*;
@@ -22,7 +25,9 @@ public class TemporalSerializer implements ValueSerializer<TemporalAccessor> {
     @Override
     public JsonNode serialize(TemporalAccessor value, SerializationContext<TemporalAccessor> ctx) {
         if (value instanceof LocalDate) {
-            return JsonNodeFactory.createLiteralNode(ctx.getAttributeId(), ((LocalDate) value).format(DateTimeFormatter.ISO_DATE));
+            return JsonNodeFactory.createTypedValueNode(ctx.getAttributeId(),
+                                                        ((LocalDate) value).format(DateTimeFormatter.ISO_DATE),
+                                                        XSD.DATE);
         } else if (value instanceof OffsetTime) {
             return TimeSerializer.serialize((OffsetTime) value, ctx);
         } else if (value instanceof LocalTime) {
@@ -36,14 +41,15 @@ public class TemporalSerializer implements ValueSerializer<TemporalAccessor> {
         } else if (value instanceof ZonedDateTime) {
             return dateTimeSerializer.serialize(((ZonedDateTime) value).toOffsetDateTime(), ctx);
         }
-        throw new UnsupportedTemporalTypeException("Temporal type " + value.getClass() + " serialization is not supported.");
+        throw new UnsupportedTemporalTypeException(
+                "Temporal type " + value.getClass() + " serialization is not supported.");
     }
 
     @Override
     public void configure(Configuration config) {
         assert config != null;
         this.dateTimeSerializer = config.is(ConfigParam.SERIALIZE_DATETIME_AS_MILLIS) ?
-                new EpochBasedDateTimeSerializer() : new IsoDateTimeSerializer();
+                                  new EpochBasedDateTimeSerializer() : new IsoDateTimeSerializer();
         dateTimeSerializer.configure(config);
     }
 }

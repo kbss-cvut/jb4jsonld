@@ -1,6 +1,7 @@
 package cz.cvut.kbss.jsonld.serialization.datetime;
 
 import cz.cvut.kbss.jopa.datatype.DateTimeUtil;
+import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
@@ -16,7 +17,8 @@ import java.time.temporal.TemporalAccessor;
 class TimeSerializer {
 
     static JsonNode serialize(OffsetTime value, SerializationContext<TemporalAccessor> ctx) {
-        return JsonNodeFactory.createLiteralNode(ctx.getAttributeId(), value.format(DateTimeFormatter.ISO_OFFSET_TIME));
+        return JsonNodeFactory.createTypedValueNode(ctx.getAttributeId(),
+                                                    value.format(DateTimeFormatter.ISO_OFFSET_TIME), XSD.TIME);
     }
 
     static JsonNode serialize(LocalTime value, SerializationContext<TemporalAccessor> ctx) {
