@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization.datetime;
 
+import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
@@ -19,7 +20,7 @@ public class IsoDateTimeSerializer extends DateTimeSerializer {
 
     @Override
     JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
-        return JsonNodeFactory.createLiteralNode(ctx.getAttributeId(), value.format(formatter));
+        return JsonNodeFactory.createTypedValueNode(ctx.getAttributeId(), value.format(formatter), XSD.DATETIME);
     }
 
     @Override
