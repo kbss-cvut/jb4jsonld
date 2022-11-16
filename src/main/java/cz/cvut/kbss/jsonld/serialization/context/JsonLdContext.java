@@ -3,11 +3,13 @@ package cz.cvut.kbss.jsonld.serialization.context;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.exception.AmbiguousTermMappingException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
-import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents the {@literal @context} JSON-LD attribute.
@@ -42,6 +44,23 @@ public class JsonLdContext {
         if (mapping.containsKey(term) && !Objects.equals(mapping.get(term), value)) {
             throw new AmbiguousTermMappingException("Context already contains mapping for term '" + term + "'.");
         }
+    }
+
+    /**
+     * Registers the specified term mapping in this context.
+     * <p>
+     * Compared to {@link #registerTermMapping(String, String)}, this method allows registering more complex mapping
+     * like language container.
+     *
+     * @param term Mapped term
+     * @param mappedNode Object node to which the term is mapped
+     * @throws AmbiguousTermMappingException When term is already mapped to a different IRI
+     */
+    public void registerTermMapping(String term, JsonNode mappedNode) {
+        Objects.requireNonNull(term);
+        Objects.requireNonNull(mappedNode);
+        verifyMappingUnique(term, mappedNode);
+        mapping.put(term, mappedNode);
     }
 
     Map<String, JsonNode> getMapping() {
