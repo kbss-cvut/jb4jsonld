@@ -12,8 +12,11 @@ import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
+import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -33,8 +36,7 @@ import java.util.stream.IntStream;
 
 import static cz.cvut.kbss.jsonld.environment.IsIsomorphic.isIsomorphic;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -223,6 +225,7 @@ public abstract class JsonLdSerializerTestBase {
     @OWLClass(iri = Vocabulary.PERSON)
     protected static class PersonWithoutIdentifier {
 
+
         @OWLDataProperty(iri = Vocabulary.FIRST_NAME)
         protected String firstName;
 
@@ -237,6 +240,27 @@ public abstract class JsonLdSerializerTestBase {
         person.firstName = "Thomas";
         person.lastName = "Lasky";
         assertThrows(MissingIdentifierException.class, () -> sut.serialize(person));
+    }
+
+    @Test
+    void serializationUsesGeneratedBlankNodeForObjectReference() throws Exception {
+        final Organization company = Generator.generateOrganization();
+        company.setUri(null);
+        final Employee employee = Generator.generateEmployee();
+        employee.setEmployer(company);
+        company.addEmployee(employee);
+        sut.serialize(company);
+        final Model result = readJson(jsonWriter.getResult());
+        final Iterator<Statement> statements = result.getStatements(vf().createIRI(employee.getUri().toString()),
+                                                                    vf().createIRI(Vocabulary.IS_MEMBER_OF), null)
+                                                     .iterator();
+        assertTrue(statements.hasNext());
+        while (statements.hasNext()) {
+            final Statement s = statements.next();
+            assertTrue(s.getObject().isBNode());
+            assertThat(result, hasItem(vf().createStatement((BNode) s.getObject(), RDF.TYPE,
+                                                            vf().createIRI(Vocabulary.ORGANIZATION))));
+        }
     }
 
     @Test
@@ -337,9 +361,11 @@ public abstract class JsonLdSerializerTestBase {
 
     @Test
     void serializationSupportsRegistrationAndUsageOfCustomObjectPropertyValueSerializers() throws Exception {
-        // TODO Fix
-        final ValueSerializer<Organization> serializer =
-                (value, ctx) -> JsonNodeFactory.createObjectIdNode(ctx.getAttributeId(), value.getUri());
+        final ValueSerializer<Organization> serializer = (value, ctx) -> {
+            final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getAttributeId());
+            node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, value.getUri()));
+            return node;
+        };
         sut.registerSerializer(Organization.class, serializer);
         final Employee employee = Generator.generateEmployee();
 
@@ -348,5 +374,37 @@ public abstract class JsonLdSerializerTestBase {
         assertThat(result, hasItem(vf().createStatement(vf().createIRI(employee.getUri().toString()),
                                                         vf().createIRI(Vocabulary.IS_MEMBER_OF),
                                                         vf().createIRI(employee.getEmployer().getUri().toString()))));
+    }
+
+    @Test
+    void serializationSupportsUsageOfCustomObjectPropertyValueSerializersOnPluralAttributes() throws Exception {
+        final ValueSerializer<Employee> serializer = (value, ctx) -> {
+            final ObjectNode node =
+                    ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) :
+                    JsonNodeFactory.createObjectNode();
+            node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, value.getUri().toString()));
+            node.addItem(JsonNodeFactory.createLiteralNode(Vocabulary.USERNAME, value.getUsername()));
+            return node;
+        };
+        sut.registerSerializer(Employee.class, serializer);
+        final Organization organization = Generator.generateOrganization();
+        final Employee eOne = Generator.generateEmployee();
+        eOne.setEmployer(organization);
+        final Employee eTwo = Generator.generateEmployee();
+        eTwo.setEmployer(organization);
+        organization.setEmployees(new LinkedHashSet<>(Arrays.asList(eOne, eTwo)));
+
+        sut.serialize(organization);
+        final Model result = readJson(jsonWriter.getResult());
+        organization.getEmployees().forEach(e -> {
+            assertThat(result, hasItem(vf().createStatement(vf().createIRI(organization.getUri().toString()),
+                                                            vf().createIRI(Vocabulary.HAS_MEMBER),
+                                                            vf().createIRI(e.getUri().toString()))));
+            final Model empResult = result.filter(vf().createIRI(e.getUri().toString()), null, null);
+            assertEquals(1, empResult.size());
+            assertThat(empResult, hasItems(vf().createStatement(vf().createIRI(e.getUri().toString()),
+                                                                vf().createIRI(Vocabulary.USERNAME),
+                                                                vf().createLiteral(e.getUsername()))));
+        });
     }
 }

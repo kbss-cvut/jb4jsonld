@@ -147,21 +147,4 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertThat(json, hasKey(TestUtil.ID_FIELD_NAME));
         assertThat(json.get(TestUtil.ID_FIELD_NAME).toString(), startsWith(IdentifierUtil.B_NODE_PREFIX));
     }
-
-    @Test
-    void serializationUsesGeneratedBlankNodeForObjectReference() throws Exception {
-        final Organization company = Generator.generateOrganization();
-        company.setUri(null);
-        final Employee employee = Generator.generateEmployee();
-        employee.setEmployer(company);
-        company.addEmployee(employee);
-        final Map<String, ?> json = serializeAndRead(company);
-        final String id = (String) json.get(TestUtil.ID_FIELD_NAME);
-        final List<?> employees = (List<?>) json.get(Organization.getEmployeesField().getName());
-        for (Object e : employees) {
-            final Map<?, ?> eMap = (Map<?, ?>) e;
-            final Map<?, ?> employer = (Map<?, ?>) eMap.get(Employee.getEmployerField().getName());
-            assertEquals(id, employer.get(TestUtil.ID_FIELD_NAME));
-        }
-    }
 }

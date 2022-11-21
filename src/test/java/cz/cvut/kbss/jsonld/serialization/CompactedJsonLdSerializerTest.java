@@ -23,7 +23,6 @@ import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
-import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -92,23 +91,6 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final Map<String, ?> json = serializeAndRead(company);
         assertThat(json, hasKey(JsonLd.ID));
         assertThat(json.get(JsonLd.ID).toString(), startsWith(IdentifierUtil.B_NODE_PREFIX));
-    }
-
-    @Test
-    void serializationUsesGeneratedBlankNodeForObjectReference() throws Exception {
-        final Organization company = Generator.generateOrganization();
-        company.setUri(null);
-        final Employee employee = Generator.generateEmployee();
-        employee.setEmployer(company);
-        company.addEmployee(employee);
-        final Map<String, ?> json = serializeAndRead(company);
-        final String id = (String) json.get(JsonLd.ID);
-        final List<?> employees = (List<?>) json.get(Vocabulary.HAS_MEMBER);
-        for (Object e : employees) {
-            final Map<?, ?> eMap = (Map<?, ?>) e;
-            final Map<?, ?> employer = (Map<?, ?>) eMap.get(Vocabulary.IS_MEMBER_OF);
-            assertEquals(id, employer.get(JsonLd.ID));
-        }
     }
 
     @Test
@@ -186,41 +168,6 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertThat(json, hasKey(RDFS.LABEL));
         assertThat(json, hasKey(Vocabulary.HAS_PARTICIPANT));
         assertThat(json, hasKey(Vocabulary.HAS_MEMBER));
-    }
-
-    @Test
-    void serializationSupportsUsageOfCustomObjectPropertyValueSerializersOnPluralAttributes() throws Exception {
-        // TODO Pull up
-        final ValueSerializer<Employee> serializer = (value, ctx) -> {
-            final ObjectNode node =
-                    ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) :
-                    JsonNodeFactory.createObjectNode();
-            node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, value.getUri().toString()));
-            node.addItem(JsonNodeFactory.createLiteralNode(Vocabulary.USERNAME, value.getUsername()));
-            return node;
-        };
-        sut.registerSerializer(Employee.class, serializer);
-        final Organization organization = Generator.generateOrganization();
-        final Employee eOne = Generator.generateEmployee();
-        eOne.setEmployer(organization);
-        final Employee eTwo = Generator.generateEmployee();
-        eTwo.setEmployer(organization);
-        organization.setEmployees(new LinkedHashSet<>(Arrays.asList(eOne, eTwo)));
-
-        final Map<String, ?> json = serializeAndRead(organization);
-        assertThat(json, hasKey(Vocabulary.HAS_MEMBER));
-        assertThat(json.get(Vocabulary.HAS_MEMBER), instanceOf(List.class));
-        final List<?> employees = (List<?>) json.get(Vocabulary.HAS_MEMBER);
-        assertEquals(organization.getEmployees().size(), employees.size());
-        final Iterator<Employee> itExp = organization.getEmployees().iterator();
-        final Iterator<?> itRes = employees.iterator();
-        while (itExp.hasNext() && itRes.hasNext()) {
-            final Employee exp = itExp.next();
-            final Map<String, ?> res = (Map<String, ?>) itRes.next();
-            assertEquals(res.size(), 2);
-            assertEquals(exp.getUri().toString(), res.get(JsonLd.ID));
-            assertEquals(exp.getUsername(), res.get(Vocabulary.USERNAME));
-        }
     }
 
     /**
