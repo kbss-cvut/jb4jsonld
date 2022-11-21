@@ -8,17 +8,21 @@ import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.util.Models;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unchecked")
 class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
@@ -146,5 +150,42 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final Map<String, ?> json = serializeAndRead(company);
         assertThat(json, hasKey(TestUtil.ID_FIELD_NAME));
         assertThat(json.get(TestUtil.ID_FIELD_NAME).toString(), startsWith(IdentifierUtil.B_NODE_PREFIX));
+    }
+
+    @Test
+    void serializationOfCollectionReturnsJsonObjectWithContextAndGraphWithSerializedCollection() throws Exception {
+        final List<User> users =
+                IntStream.range(0, 5).mapToObj(i -> Generator.generateUser()).collect(Collectors.toList());
+
+        final Map<String, ?> json = serializeAndRead(users);
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertThat(json, hasKey(JsonLd.GRAPH));
+        assertInstanceOf(List.class, json.get(JsonLd.GRAPH));
+        final Model result = readJson(jsonWriter.getResult());
+        users.forEach(u -> {
+            final Model pModel = new LinkedHashModel();
+            u.toRdf(new LinkedHashModel(), vf(), new HashSet<>());
+            assertTrue(Models.isSubset(pModel, result));
+        });
+    }
+
+    @Test
+    void serializationOfCollectionReusesReferences() throws Exception {
+        final List<Employee> employees = Arrays.asList(Generator.generateEmployee(), Generator.generateEmployee());
+        employees.get(1).setEmployer(employees.get(0).getEmployer());
+
+        final Map<String, ?> json = serializeAndRead(employees);
+        final List<?> items = (List<?>) json.get(JsonLd.GRAPH);
+        final Map<String, ?> eOne = (Map<String, ?>) items.get(0);
+        final Map<String, ?> orgOne = (Map<String, ?>) eOne.get(Employee.getEmployerField().getName());
+        assertThat(orgOne.size(), greaterThan(1));
+        assertEquals(employees.get(0).getEmployer().getUri().toString(), orgOne.get(TestUtil.ID_FIELD_NAME));
+        final Map<String, ?> eTwo = (Map<String, ?>) items.get(1);
+        final Map<String, ?> orgTwo = (Map<String, ?>) eTwo.get(Employee.getEmployerField().getName());
+        assertEquals(Collections.singletonMap(TestUtil.ID_FIELD_NAME, employees.get(1).getEmployer().getUri().toString()), orgTwo);
+
+        final Model result = readJson(jsonWriter.getResult());
+        final Model orgModel = toRdf(employees.get(0).getEmployer());
+        assertTrue(Models.isSubset(orgModel, result));
     }
 }

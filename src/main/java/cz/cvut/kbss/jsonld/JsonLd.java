@@ -60,6 +60,11 @@ public class JsonLd {
     public static final String CONTEXT = "@context";
 
     /**
+     * JSON-LD {@code @graph} keyword.
+     */
+    public static final String GRAPH = "@graph";
+
+    /**
      * JSON-LD media type.
      */
     public static final String MEDIA_TYPE = "application/ld+json";

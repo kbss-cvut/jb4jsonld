@@ -33,7 +33,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("unchecked")
 class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
 
     @BeforeEach
@@ -47,6 +46,7 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         sut.serialize(users);
         Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
         assertNotNull(jsonObject);
+        assertInstanceOf(List.class, jsonObject);
     }
 
     @Test
@@ -173,6 +173,7 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
     /**
      * Bug #36
      */
+    @SuppressWarnings("unchecked")
     @Test
     void serializationSerializesMultilingualStringWithLanguageLessValue() throws Exception {
         final ObjectWithMultilingualString instance = new ObjectWithMultilingualString(Generator.generateUri());
