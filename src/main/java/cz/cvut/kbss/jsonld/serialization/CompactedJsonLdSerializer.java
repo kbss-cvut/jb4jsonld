@@ -42,7 +42,6 @@ public class CompactedJsonLdSerializer extends JsonLdSerializer {
         final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(new ObjectGraphValueSerializers(serializers, traverser));
         traverser.setVisitor(treeBuilder);
         traverser.traverse(root);
-        traverser.removeVisitor();
         return treeBuilder.getTreeRoot();
     }
 }

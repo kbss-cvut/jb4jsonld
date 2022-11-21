@@ -42,7 +42,7 @@ public abstract class CompositeNode<T extends Collection<JsonNode>> extends Json
     }
 
     public void prependItem(JsonNode item) {
-        throw new UnsupportedOperationException("Prepending items is not supported by most composite nodes.");
+        throw new UnsupportedOperationException("Prepending items is not supported by this composite node.");
     }
 
     public Collection<JsonNode> getItems() {
