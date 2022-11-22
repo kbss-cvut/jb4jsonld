@@ -1,4 +1,4 @@
-package cz.cvut.kbss.jsonld.serialization.datetime;
+package cz.cvut.kbss.jsonld.serialization.serializer.datetime;
 
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -10,7 +10,8 @@ import java.time.Duration;
 import java.time.Period;
 import java.time.temporal.TemporalAmount;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class TemporalAmountSerializerTest {
 

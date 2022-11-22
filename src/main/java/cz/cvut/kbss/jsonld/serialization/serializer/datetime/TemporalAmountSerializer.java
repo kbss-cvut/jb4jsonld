@@ -1,7 +1,7 @@
-package cz.cvut.kbss.jsonld.serialization.datetime;
+package cz.cvut.kbss.jsonld.serialization.serializer.datetime;
 
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
-import cz.cvut.kbss.jsonld.serialization.ValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 

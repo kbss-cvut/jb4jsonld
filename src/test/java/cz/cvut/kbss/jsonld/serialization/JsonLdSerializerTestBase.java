@@ -13,6 +13,7 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;

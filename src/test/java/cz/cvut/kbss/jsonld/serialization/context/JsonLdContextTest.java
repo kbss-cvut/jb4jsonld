@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JsonLdContextTest {
 
-    private final JsonLdContext sut = new JsonLdContext();
+    private final MappingJsonLdContext sut = new MappingJsonLdContext();
 
     @Test
     void registerTermMappingWithIriAddsTermMappingToLiteralJsonNode() throws Exception {

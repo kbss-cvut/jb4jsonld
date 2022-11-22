@@ -16,6 +16,8 @@ import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.traversal.InstanceVisitor;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 

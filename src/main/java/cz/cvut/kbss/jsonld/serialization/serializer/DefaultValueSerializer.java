@@ -12,12 +12,13 @@
  * details. You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cvut.kbss.jsonld.serialization;
+package cz.cvut.kbss.jsonld.serialization.serializer;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
+import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;

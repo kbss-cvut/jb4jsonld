@@ -1,18 +1,18 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.serialization.traversal;
+
+import cz.cvut.kbss.jsonld.serialization.context.JsonLdContext;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
@@ -35,22 +35,25 @@ public class SerializationContext<T> {
 
     protected final T value;
 
-    public SerializationContext(String attributeId, T value) {
-        this(attributeId, null, value);
+    protected final JsonLdContext jsonLdContext;
+
+    public SerializationContext(String attributeId, T value, JsonLdContext jsonLdContext) {
+        this(attributeId, null, value, jsonLdContext);
     }
 
-    public SerializationContext(Field field, T value) {
-        this(null, field, value);
+    public SerializationContext(Field field, T value, JsonLdContext jsonLdContext) {
+        this(null, field, value, jsonLdContext);
     }
 
-    public SerializationContext(T value) {
-        this(null, null, value);
+    public SerializationContext(T value, JsonLdContext jsonLdContext) {
+        this(null, null, value, jsonLdContext);
     }
 
-    public SerializationContext(String attributeId, Field field, T value) {
+    public SerializationContext(String attributeId, Field field, T value, JsonLdContext jsonLdContext) {
         this.attributeId = attributeId;
         this.field = field;
         this.value = value;
+        this.jsonLdContext = jsonLdContext;
     }
 
     public String getAttributeId() {
@@ -63,6 +66,10 @@ public class SerializationContext<T> {
 
     public T getValue() {
         return value;
+    }
+
+    public JsonLdContext getJsonLdContext() {
+        return jsonLdContext;
     }
 
     @Override

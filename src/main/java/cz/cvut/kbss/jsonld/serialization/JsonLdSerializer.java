@@ -15,6 +15,9 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.common.Configured;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.CommonValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
 
 import java.util.Objects;
 

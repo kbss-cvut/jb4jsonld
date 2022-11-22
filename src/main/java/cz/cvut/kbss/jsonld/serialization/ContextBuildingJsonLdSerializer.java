@@ -3,12 +3,13 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.serialization.context.ContextMappingSerializationContextFactory;
-import cz.cvut.kbss.jsonld.serialization.context.JsonLdContext;
+import cz.cvut.kbss.jsonld.serialization.context.MappingJsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.ObjectGraphValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
+import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContextFactory;
 
 import java.util.Collection;
 
@@ -27,9 +28,9 @@ public class ContextBuildingJsonLdSerializer extends JsonLdSerializer {
 
     @Override
     protected JsonNode buildJsonTree(Object root) {
-        final JsonLdContext context = new JsonLdContext();
+        final MappingJsonLdContext context = new MappingJsonLdContext();
         final ObjectGraphTraverser traverser =
-                new ObjectGraphTraverser(new ContextMappingSerializationContextFactory(context));
+                new ObjectGraphTraverser(new SerializationContextFactory(context));
         traverser.setRequireId(configuration().is(ConfigParam.REQUIRE_ID));
         final JsonLdTreeBuilder treeBuilder =
                 new JsonLdTreeBuilder(new ObjectGraphValueSerializers(serializers, traverser));
@@ -42,7 +43,7 @@ public class ContextBuildingJsonLdSerializer extends JsonLdSerializer {
         return treeBuilder.getTreeRoot();
     }
 
-    private JsonNode buildObjectWithContextAndGraph(ObjectGraphTraverser traverser, JsonLdContext context,
+    private JsonNode buildObjectWithContextAndGraph(ObjectGraphTraverser traverser, MappingJsonLdContext context,
                                                     Collection<?> items) {
         final CollectionNode<?> graph = JsonNodeFactory.createCollectionNodeFromArray(JsonLd.GRAPH);
         items.stream().map(item -> {
