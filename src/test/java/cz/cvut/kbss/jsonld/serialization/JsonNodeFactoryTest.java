@@ -17,9 +17,10 @@ import cz.cvut.kbss.jsonld.serialization.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -131,30 +132,6 @@ class JsonNodeFactoryTest {
         assertThat(node, instanceOf(StringLiteralNode.class));
         assertTrue(node.isValueNode());
         assertEquals(value, node.getValue());
-    }
-
-    @Test
-    void createLiteralNodeCreatesNumberNodeFromDateInstance() {
-        final Date value = new Date();
-        final LiteralNode<?> node = JsonNodeFactory.createLiteralNode(value);
-        assertThat(node, instanceOf(NumericLiteralNode.class));
-        assertEquals(value.getTime(), node.getValue());
-    }
-
-    @Test
-    void createLiteralNodeCreatesStringNodeContainingIsoFormattedValueForLocalDateTime() {
-        final LocalDateTime value = LocalDateTime.now();
-        final LiteralNode<?> result = JsonNodeFactory.createLiteralNode(value);
-        assertThat(result, instanceOf(StringLiteralNode.class));
-        assertEquals(value.toString(), result.getValue());
-    }
-
-    @Test
-    void createLiteralNodeCreatesStringNodeContainingIsoFormattedValueForZonedDateTime() {
-        final ZonedDateTime value = ZonedDateTime.now();
-        final LiteralNode<?> result = JsonNodeFactory.createLiteralNode(value);
-        assertThat(result, instanceOf(StringLiteralNode.class));
-        assertEquals(value.toString(), result.getValue());
     }
 
     @Test

@@ -20,16 +20,19 @@ import java.util.Objects;
 /**
  * Represents the current serialization context.
  * <p>
- * This means the value being serialized, and optionally the attribute identifier and field.
+ * This means the value being serialized, and optionally the target JSON-LD term identifier and field.
  * <p>
- * Note that attribute and field may not always be available, e.g., when a collection is being serialized, neither is set. This
- * keeps the visitors simple.
+ * Note that term and field may not always be available, e.g., when a collection is being serialized, neither is set.
+ * This keeps the visitors simple.
+ * <p>
+ * This class also provides access to the JSON-LD context (if it is used). However, note that for selected serialization
+ * outputs the context may be just a stub with no bearing on the serialization output.
  *
  * @param <T> Type of the value
  */
 public class SerializationContext<T> {
 
-    protected final String attributeId;
+    protected final String term;
 
     protected final Field field;
 
@@ -37,8 +40,8 @@ public class SerializationContext<T> {
 
     protected final JsonLdContext jsonLdContext;
 
-    public SerializationContext(String attributeId, T value, JsonLdContext jsonLdContext) {
-        this(attributeId, null, value, jsonLdContext);
+    public SerializationContext(String term, T value, JsonLdContext jsonLdContext) {
+        this(term, null, value, jsonLdContext);
     }
 
     public SerializationContext(Field field, T value, JsonLdContext jsonLdContext) {
@@ -49,15 +52,15 @@ public class SerializationContext<T> {
         this(null, null, value, jsonLdContext);
     }
 
-    public SerializationContext(String attributeId, Field field, T value, JsonLdContext jsonLdContext) {
-        this.attributeId = attributeId;
+    public SerializationContext(String term, Field field, T value, JsonLdContext jsonLdContext) {
+        this.term = term;
         this.field = field;
         this.value = value;
         this.jsonLdContext = jsonLdContext;
     }
 
-    public String getAttributeId() {
-        return attributeId;
+    public String getTerm() {
+        return term;
     }
 
     public Field getField() {
@@ -77,12 +80,12 @@ public class SerializationContext<T> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SerializationContext<?> that = (SerializationContext<?>) o;
-        return Objects.equals(getAttributeId(), that.getAttributeId()) && Objects
+        return Objects.equals(getTerm(), that.getTerm()) && Objects
                 .equals(getField(), that.getField()) && Objects.equals(getValue(), that.getValue());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAttributeId(), getField(), getValue());
+        return Objects.hash(getTerm(), getField(), getValue());
     }
 }

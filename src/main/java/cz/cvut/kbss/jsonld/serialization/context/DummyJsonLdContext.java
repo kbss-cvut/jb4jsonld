@@ -27,4 +27,9 @@ public class DummyJsonLdContext implements JsonLdContext {
     public Optional<JsonNode> getTermMapping(String term) {
         return Optional.empty();
     }
+
+    @Override
+    public boolean hasTermMapping(String term) {
+        return false;
+    }
 }

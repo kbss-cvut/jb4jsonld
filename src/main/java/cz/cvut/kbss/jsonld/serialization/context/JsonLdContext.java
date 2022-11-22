@@ -37,5 +37,15 @@ public interface JsonLdContext {
      * @param term Term to get mapping for
      * @return Optional mapping node
      */
-    public Optional<JsonNode> getTermMapping(String term);
+    Optional<JsonNode> getTermMapping(String term);
+
+    /**
+     * Checks whether this JSON-LD context contains mapping for the specified term.
+     *
+     * @param term Term to search mapping for
+     * @return {@code true} if a mapping is already defined for the term, {@code false} otherwise
+     */
+    default boolean hasTermMapping(String term) {
+        return getTermMapping(term).isPresent();
+    }
 }

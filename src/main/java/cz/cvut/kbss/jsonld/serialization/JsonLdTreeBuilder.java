@@ -61,7 +61,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void openObject(SerializationContext<?> ctx) {
         final ObjectNode newCurrent =
-                ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) :
+                ctx.getTerm() != null ? JsonNodeFactory.createObjectNode(ctx.getTerm()) :
                 JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
     }
@@ -87,13 +87,13 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void visitIdentifier(SerializationContext<String> idCtx) {
         assert currentNode.isOpen();
-        currentNode.addItem(JsonNodeFactory.createObjectIdNode(idCtx.getAttributeId(), idCtx.getValue()));
+        currentNode.addItem(JsonNodeFactory.createObjectIdNode(idCtx.getTerm(), idCtx.getValue()));
     }
 
     @Override
     public void visitTypes(SerializationContext<Set<String>> typesCtx) {
         final CollectionNode<?> typesNode =
-                JsonNodeFactory.createCollectionNode(typesCtx.getAttributeId(), typesCtx.getValue());
+                JsonNodeFactory.createCollectionNode(typesCtx.getTerm(), typesCtx.getValue());
         typesCtx.getValue().forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
         currentNode.addItem(typesNode);
     }
@@ -113,8 +113,8 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void openCollection(SerializationContext<? extends Collection<?>> ctx) {
         final CollectionNode<?> newCurrent =
-                ctx.getAttributeId() != null ? JsonNodeFactory.createCollectionNode(ctx.getAttributeId(),
-                                                                                    ctx.getValue()) :
+                ctx.getTerm() != null ? JsonNodeFactory.createCollectionNode(ctx.getTerm(),
+                                                                             ctx.getValue()) :
                 JsonNodeFactory.createCollectionNode(ctx.getValue());
         openNewNode(newCurrent);
     }

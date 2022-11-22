@@ -24,7 +24,7 @@ class TemporalAmountSerializerTest {
         final SerializationContext<TemporalAmount> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(StringLiteralNode.class, result);
-        assertEquals(ctx.getAttributeId(), result.getName());
+        assertEquals(ctx.getTerm(), result.getName());
         assertEquals(value.toString(), ((StringLiteralNode) result).getValue());
     }
 
@@ -34,7 +34,7 @@ class TemporalAmountSerializerTest {
         final SerializationContext<TemporalAmount> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(StringLiteralNode.class, result);
-        assertEquals(ctx.getAttributeId(), result.getName());
+        assertEquals(ctx.getTerm(), result.getName());
         assertEquals(value.toString(), ((StringLiteralNode) result).getValue());
     }
 }
