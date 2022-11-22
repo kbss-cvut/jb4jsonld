@@ -22,7 +22,9 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
+import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.model.*;
+import cz.cvut.kbss.jsonld.serialization.serializer.CommonValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class JsonLdTreeBuilderTest {
+public class JsonLdTreeBuilderTest {
 
     private final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(new CommonValueSerializers());
 
@@ -50,7 +52,7 @@ class JsonLdTreeBuilderTest {
     }
 
     private static <T> SerializationContext<T> ctx(String attId, Field field, T value) {
-        return new SerializationContext<>(attId, field, value);
+        return new SerializationContext<>(attId, field, value, DummyJsonLdContext.INSTANCE);
     }
 
     @Test
@@ -122,7 +124,7 @@ class JsonLdTreeBuilderTest {
         assertNotNull(employerNode);
     }
 
-    static JsonNode getNode(CompositeNode<?> parent, String name) {
+    public static JsonNode getNode(CompositeNode<?> parent, String name) {
         for (JsonNode n : parent.getItems()) {
             if (n.getName().equals(name)) {
                 return n;
@@ -379,7 +381,12 @@ class JsonLdTreeBuilderTest {
         assertThat(valueNode, instanceOf(CollectionNode.class));
         final CollectionNode<?> colNode = (CollectionNode<?>) valueNode;
         assertEquals(2, colNode.getItems().size());
-        colNode.getItems().forEach(item -> assertThat(item, instanceOf(LangStringNode.class)));
+        colNode.getItems().forEach(item -> {
+            assertInstanceOf(ObjectNode.class, item);
+            final ObjectNode n = (ObjectNode) item;
+            assertTrue(n.getItems().stream().anyMatch(p -> Objects.equals(p.getName(), JsonLd.VALUE)));
+            assertTrue(n.getItems().stream().anyMatch(p -> Objects.equals(p.getName(), JsonLd.LANGUAGE)));
+        });
     }
 
     @Test
@@ -426,7 +433,12 @@ class JsonLdTreeBuilderTest {
             assertThat(item, instanceOf(CollectionNode.class));
             final CollectionNode<?> itemCol = (CollectionNode<?>) item;
             assertEquals(2, itemCol.getItems().size());
-            itemCol.getItems().forEach(elem -> assertThat(elem, instanceOf(LangStringNode.class)));
+            itemCol.getItems().forEach(elem -> {
+                assertInstanceOf(ObjectNode.class, elem);
+                final ObjectNode n = (ObjectNode) elem;
+                assertTrue(n.getItems().stream().anyMatch(p -> Objects.equals(p.getName(), JsonLd.VALUE)));
+                assertTrue(n.getItems().stream().anyMatch(p -> Objects.equals(p.getName(), JsonLd.LANGUAGE)));
+            });
         });
     }
 

@@ -16,6 +16,7 @@ package cz.cvut.kbss.jsonld.serialization.traversal;
 
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
+import cz.cvut.kbss.jsonld.serialization.context.JsonLdContext;
 
 import java.util.Collection;
 import java.util.Map;
@@ -43,19 +44,19 @@ class PropertiesTraverser {
             }
             if (e.getValue() instanceof Collection) {
                 final Collection<?> propertyValues = (Collection<?>) e.getValue();
-                serializePropertyValues(property, propertyValues);
+                serializePropertyValues(property, propertyValues, ctx.getJsonLdContext());
             } else {
-                visitSingleValue(property, e.getValue());
+                visitSingleValue(property, e.getValue(), ctx.getJsonLdContext());
             }
         }
     }
 
-    private void visitSingleValue(String property, Object value) {
+    private void visitSingleValue(String property, Object value, JsonLdContext jsonLdContext) {
         assert value != null;
         if (isTraversable(value)) {
-            parent.traverseSingular(new SerializationContext<>(property, value));
+            parent.traverseSingular(new SerializationContext<>(property, value, jsonLdContext));
         } else {
-            parent.visitAttribute(new SerializationContext<>(property, value));
+            parent.visitAttribute(new SerializationContext<>(property, value, jsonLdContext));
         }
     }
 
@@ -66,19 +67,19 @@ class PropertiesTraverser {
                 BeanAnnotationProcessor.hasTypesField(cls);
     }
 
-    private void serializePropertyValues(String property, Collection<?> values) {
+    private void serializePropertyValues(String property, Collection<?> values, JsonLdContext jsonLdContext) {
         if (values.isEmpty()) {
             return;
         }
         if (values.size() == 1) {
             final Object val = values.iterator().next();
             if (val != null) {
-                visitSingleValue(property, val);
+                visitSingleValue(property, val, jsonLdContext);
             }
         } else {
-            final SerializationContext<Collection<?>> colContext = new SerializationContext<>(property, values);
+            final SerializationContext<Collection<?>> colContext = new SerializationContext<>(property, values, jsonLdContext);
             parent.openCollection(colContext);
-            values.stream().filter(Objects::nonNull).forEach(v -> visitSingleValue(null, v));
+            values.stream().filter(Objects::nonNull).forEach(v -> visitSingleValue(null, v, jsonLdContext));
             parent.closeCollection(colContext);
         }
     }

@@ -24,6 +24,7 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import cz.cvut.kbss.jsonld.exception.MissingTypeInfoException;
+import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,7 @@ class ObjectGraphTraverserTest {
 
     @BeforeEach
     void setUp() {
-        this.traverser = new ObjectGraphTraverser(new IriBasedSerializationContextFactory());
+        this.traverser = new ObjectGraphTraverser(new SerializationContextFactory(DummyJsonLdContext.INSTANCE));
         traverser.setVisitor(visitor);
         when(visitor.visitObject(any())).thenReturn(true);
     }
@@ -70,12 +71,12 @@ class ObjectGraphTraverserTest {
     }
 
     private static <T> SerializationContext<T> ctx(String attId, Field field, T value) {
-        return new SerializationContext<>(attId, field, value);
+        return new SerializationContext<>(attId, field, value, DummyJsonLdContext.INSTANCE);
     }
 
     private void verifyUserFieldsVisited(User user) throws NoSuchFieldException {
         verify(visitor).visitIdentifier(
-                new SerializationContext<>(JsonLd.ID, Person.class.getDeclaredField("uri"), user.getUri().toString()));
+                new SerializationContext<>(JsonLd.ID, Person.class.getDeclaredField("uri"), user.getUri().toString(), DummyJsonLdContext.INSTANCE));
         verify(visitor).visitAttribute(ctx(Vocabulary.FIRST_NAME, Person.getFirstNameField(), user.getFirstName()));
         verify(visitor).visitAttribute(ctx(Vocabulary.LAST_NAME, Person.getLastNameField(), user.getLastName()));
         verify(visitor).visitAttribute(ctx(Vocabulary.USERNAME, User.getUsernameField(), user.getUsername()));
@@ -101,7 +102,7 @@ class ObjectGraphTraverserTest {
         verify(visitor).openObject(ctx(null, null, employee));
         verify(visitor).openObject(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), employee));
         verify(visitor).visitTypes(new SerializationContext<>(JsonLd.TYPE, User.class.getDeclaredField("types"),
-                new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE))));
+                new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE)), DummyJsonLdContext.INSTANCE));
     }
 
     @Test

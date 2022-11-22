@@ -10,12 +10,13 @@
  * details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package cz.cvut.kbss.jsonld.serialization;
+package cz.cvut.kbss.jsonld.serialization.serializer;
 
 import cz.cvut.kbss.jsonld.Configuration;
-import cz.cvut.kbss.jsonld.serialization.datetime.DateSerializer;
-import cz.cvut.kbss.jsonld.serialization.datetime.TemporalAmountSerializer;
-import cz.cvut.kbss.jsonld.serialization.datetime.TemporalSerializer;
+import cz.cvut.kbss.jsonld.serialization.JsonLdSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.datetime.TemporalAmountSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.datetime.TemporalSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.time.*;

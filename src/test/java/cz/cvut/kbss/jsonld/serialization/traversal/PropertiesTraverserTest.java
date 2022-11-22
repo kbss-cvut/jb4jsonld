@@ -21,6 +21,7 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
+import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -61,27 +62,27 @@ class PropertiesTraverserTest {
     @Test
     void traversePropertiesInvokesVisitAttributeForSingularPropertyValues() {
         final Map<String, Set<String>> properties = Generator.generateProperties(true);
-        sut.traverseProperties(new SerializationContext<>(null, field, properties));
+        sut.traverseProperties(new SerializationContext<>(null, field, properties, DummyJsonLdContext.INSTANCE));
         for (Map.Entry<String, Set<String>> e : properties.entrySet()) {
             verify(traverser).visitAttribute(
-                    new SerializationContext<>(e.getKey(), null, e.getValue().iterator().next()));
+                    new SerializationContext<>(e.getKey(), null, e.getValue().iterator().next(), DummyJsonLdContext.INSTANCE));
         }
     }
 
     @Test
     void traversePropertiesOpensCollectionsAndAddsPropertyValues() {
         final Map<String, Set<String>> properties = Generator.generateProperties(false);
-        sut.traverseProperties(new SerializationContext<>(null, field, properties));
+        sut.traverseProperties(new SerializationContext<>(null, field, properties, DummyJsonLdContext.INSTANCE));
         for (Map.Entry<String, Set<String>> e : properties.entrySet()) {
             if (e.getValue().size() > 0) {
-                verify(traverser).openCollection(new SerializationContext<>(e.getKey(), null, e.getValue()));
+                verify(traverser).openCollection(new SerializationContext<>(e.getKey(), null, e.getValue(), DummyJsonLdContext.INSTANCE));
                 for (String v : e.getValue()) {
-                    verify(traverser).visitAttribute(new SerializationContext<>(null, null, v));
+                    verify(traverser).visitAttribute(new SerializationContext<>(null, null, v, DummyJsonLdContext.INSTANCE));
                 }
-                verify(traverser).closeCollection(new SerializationContext<>(e.getKey(), null, e.getValue()));
+                verify(traverser).closeCollection(new SerializationContext<>(e.getKey(), null, e.getValue(), DummyJsonLdContext.INSTANCE));
             } else {
                 verify(traverser).visitAttribute(
-                        new SerializationContext<>(e.getKey(), null, e.getValue().iterator().next()));
+                        new SerializationContext<>(e.getKey(), null, e.getValue().iterator().next(), DummyJsonLdContext.INSTANCE));
             }
         }
     }
@@ -90,8 +91,8 @@ class PropertiesTraverserTest {
     void traversePropertiesSkipsEmptyPropertyValues() {
         final Map<String, Set<String>> properties = Generator.generateProperties(false);
         properties.put(property, Collections.emptySet());
-        sut.traverseProperties(new SerializationContext<>(null, field, properties));
-        verify(traverser, never()).openCollection(new SerializationContext<>(property, null, properties.get(property)));
+        sut.traverseProperties(new SerializationContext<>(null, field, properties, DummyJsonLdContext.INSTANCE));
+        verify(traverser, never()).openCollection(new SerializationContext<>(property, null, properties.get(property), DummyJsonLdContext.INSTANCE));
     }
 
     @Test
@@ -101,7 +102,7 @@ class PropertiesTraverserTest {
         values.add(Generator.generateUri().toString());
         values.add(null);
         properties.put(property, values);
-        sut.traverseProperties(new SerializationContext<>(null, field, properties));
+        sut.traverseProperties(new SerializationContext<>(null, field, properties, DummyJsonLdContext.INSTANCE));
         final ArgumentCaptor<SerializationContext<?>> captor = ArgumentCaptor.forClass(SerializationContext.class);
         verify(traverser, atLeastOnce()).visitAttribute(captor.capture());
         assertEquals(values.stream().filter(Objects::nonNull).count(),
@@ -112,7 +113,7 @@ class PropertiesTraverserTest {
     void traversePropertiesSkipsNullPropertyValue() {
         final Map<String, Set<String>> properties = Generator.generateProperties(false);
         properties.put(property, null);
-        sut.traverseProperties(new SerializationContext<>(null, field, properties));
+        sut.traverseProperties(new SerializationContext<>(null, field, properties, DummyJsonLdContext.INSTANCE));
         verify(traverser, never()).openCollection(new SerializationContext<>(property, null, null));
     }
 
@@ -121,9 +122,9 @@ class PropertiesTraverserTest {
         final Map<String, Set<String>> temp = Generator.generateProperties(true);
         final Map<String, String> properties = new HashMap<>();
         temp.forEach((key, value) -> properties.put(key, value.iterator().next()));
-        sut.traverseProperties(new SerializationContext<>(null, field, properties));
+        sut.traverseProperties(new SerializationContext<>(null, field, properties, DummyJsonLdContext.INSTANCE));
         for (Map.Entry<String, String> e : properties.entrySet()) {
-            verify(traverser).visitAttribute(new SerializationContext<>(e.getKey(), null, e.getValue()));
+            verify(traverser).visitAttribute(new SerializationContext<>(e.getKey(), null, e.getValue(), DummyJsonLdContext.INSTANCE));
         }
     }
 
@@ -131,18 +132,18 @@ class PropertiesTraverserTest {
     void traversePropertiesDoesNothingForSingleNullPropertyValue() {
         final Map<String, Set<String>> properties = new HashMap<>();
         properties.put(property, Collections.singleton(null));
-        sut.traverseProperties(new SerializationContext<>(null, field, properties));
+        sut.traverseProperties(new SerializationContext<>(null, field, properties, DummyJsonLdContext.INSTANCE));
         verify(traverser, never()).openCollection(any());
         verify(traverser, never()).visitAttribute(any());
     }
 
     @Test
-    void traverseTypedPropertiesProcessesSingleInstanceIdentifierAsObject() throws Exception {
+    void traverseTypedPropertiesProcessesSingleInstanceIdentifierAsObject() {
         final Map<URI, Set<Object>> properties = new HashMap<>();
         final URI value = Generator.generateUri();
         properties.put(URI.create(property), Collections.singleton(value));
-        sut.traverseProperties(new SerializationContext<>(null, typedField, properties));
-        verify(traverser).traverseSingular(new SerializationContext<>(property, null, value));
+        sut.traverseProperties(new SerializationContext<>(null, typedField, properties, DummyJsonLdContext.INSTANCE));
+        verify(traverser).traverseSingular(new SerializationContext<>(property, null, value, DummyJsonLdContext.INSTANCE));
     }
 
     @Test
@@ -151,48 +152,48 @@ class PropertiesTraverserTest {
         final URI valueOne = Generator.generateUri();
         final URL valueTwo = Generator.generateUri().toURL();
         properties.put(URI.create(property), new HashSet<>(Arrays.asList(valueOne, valueTwo)));
-        sut.traverseProperties(new SerializationContext<>(null, typedField, properties));
+        sut.traverseProperties(new SerializationContext<>(null, typedField, properties, DummyJsonLdContext.INSTANCE));
         verify(traverser)
-                .openCollection(new SerializationContext<>(property, null, properties.get(URI.create(property))));
-        verify(traverser).traverseSingular(new SerializationContext<>(null, null, valueOne));
-        verify(traverser).traverseSingular(new SerializationContext<>(null, null, valueTwo));
+                .openCollection(new SerializationContext<>(property, null, properties.get(URI.create(property)), DummyJsonLdContext.INSTANCE));
+        verify(traverser).traverseSingular(new SerializationContext<>(null, null, valueOne, DummyJsonLdContext.INSTANCE));
+        verify(traverser).traverseSingular(new SerializationContext<>(null, null, valueTwo, DummyJsonLdContext.INSTANCE));
         verify(traverser)
-                .closeCollection(new SerializationContext<>(property, null, properties.get(URI.create(property))));
+                .closeCollection(new SerializationContext<>(property, null, properties.get(URI.create(property)), DummyJsonLdContext.INSTANCE));
     }
 
     @Test
-    void traverseTypedPropertiesProcessesObjectInPropertiesAsObject() throws Exception {
+    void traverseTypedPropertiesProcessesObjectInPropertiesAsObject() {
         final Map<URI, Set<Object>> properties = new HashMap<>();
         final Person value = Generator.generatePerson();
         properties.put(URI.create(property), Collections.singleton(value));
-        sut.traverseProperties(new SerializationContext<>(null, typedField, properties));
-        verify(traverser).traverseSingular(new SerializationContext<>(property, null, value));
+        sut.traverseProperties(new SerializationContext<>(null, typedField, properties, DummyJsonLdContext.INSTANCE));
+        verify(traverser).traverseSingular(new SerializationContext<>(property, null, value, DummyJsonLdContext.INSTANCE));
     }
 
     @Test
-    void traverseTypedPropertiesProcessesObjectsInPropertiesAsObjects() throws Exception {
+    void traverseTypedPropertiesProcessesObjectsInPropertiesAsObjects() {
         final Map<URI, Set<Object>> properties = new HashMap<>();
         final Person valueOne = Generator.generatePerson();
         final Organization valueTwo = Generator.generateOrganization();
         properties.put(URI.create(property), new HashSet<>(Arrays.asList(valueOne, valueTwo)));
-        sut.traverseProperties(new SerializationContext<>(null, typedField, properties));
+        sut.traverseProperties(new SerializationContext<>(null, typedField, properties, DummyJsonLdContext.INSTANCE));
         verify(traverser)
-                .openCollection(new SerializationContext<>(property, null, properties.get(URI.create(property))));
-        verify(traverser).traverseSingular(new SerializationContext<>(null, null, valueOne));
-        verify(traverser).traverseSingular(new SerializationContext<>(null, null, valueTwo));
+                .openCollection(new SerializationContext<>(property, null, properties.get(URI.create(property)), DummyJsonLdContext.INSTANCE));
+        verify(traverser).traverseSingular(new SerializationContext<>(null, null, valueOne, DummyJsonLdContext.INSTANCE));
+        verify(traverser).traverseSingular(new SerializationContext<>(null, null, valueTwo, DummyJsonLdContext.INSTANCE));
         verify(traverser)
-                .closeCollection(new SerializationContext<>(property, null, properties.get(URI.create(property))));
+                .closeCollection(new SerializationContext<>(property, null, properties.get(URI.create(property)), DummyJsonLdContext.INSTANCE));
     }
 
     @Test
-    void traverseTypedPropertiesProcessesObjectWithTypesAsObject() throws Exception {
+    void traverseTypedPropertiesProcessesObjectWithTypesAsObject() {
         final Map<URI, Set<Object>> properties = new HashMap<>();
         final ClassWithTypes value = new ClassWithTypes();
         value.id = Generator.generateUri();
         value.types = Collections.singleton(Vocabulary.AGENT);
         properties.put(URI.create(property), Collections.singleton(value));
-        sut.traverseProperties(new SerializationContext<>(null, typedField, properties));
-        verify(traverser).traverseSingular(new SerializationContext<>(property, null, value));
+        sut.traverseProperties(new SerializationContext<>(null, typedField, properties, DummyJsonLdContext.INSTANCE));
+        verify(traverser).traverseSingular(new SerializationContext<>(property, null, value, DummyJsonLdContext.INSTANCE));
     }
 
     static class ClassWithTypes {

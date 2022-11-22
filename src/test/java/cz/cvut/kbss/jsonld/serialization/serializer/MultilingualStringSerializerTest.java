@@ -12,21 +12,21 @@
  * details. You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cvut.kbss.jsonld.serialization;
+package cz.cvut.kbss.jsonld.serialization.serializer;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.model.LangStringNode;
 import cz.cvut.kbss.jsonld.serialization.model.LiteralNode;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MultilingualStringSerializerTest {
 
@@ -50,28 +50,26 @@ class MultilingualStringSerializerTest {
         assertThat(result, instanceOf(CollectionNode.class));
         final CollectionNode<?> colNode = (CollectionNode<?>) result;
         assertEquals(ATTRIBUTE_NAME, result.getName());
-        assertEquals(2, colNode.getItems().size());
-        colNode.getItems().forEach(item -> assertThat(item, instanceOf(LangStringNode.class)));
+        assertEquals(value.getLanguages().size(), colNode.getItems().size());
+        colNode.getItems().forEach(item -> assertInstanceOf(ObjectNode.class, item));
+        verifyTranslations(colNode);
+    }
+
+    private void verifyTranslations(CollectionNode<?> result) {
+        value.getValue().forEach((k, v) -> assertTrue(result.getItems().stream().anyMatch(n -> {
+            assertInstanceOf(ObjectNode.class, n);
+            final ObjectNode langNode = (ObjectNode) n;
+            return langNode.getItems().contains(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, v)) &&
+                    langNode.getItems().contains(JsonNodeFactory.createLiteralNode(JsonLd.LANGUAGE, k));
+        })));
     }
 
     @Test
     void serializeWithAttributeAndSingleTranslationReturnsLangStringNode() {
         value.set("en", "construction");
         final JsonNode result = sut.serialize(ATTRIBUTE_NAME, value);
-        assertThat(result, instanceOf(LangStringNode.class));
+        assertInstanceOf(ObjectNode.class, result);
         assertEquals(ATTRIBUTE_NAME, result.getName());
-    }
-
-    @Test
-    void serializeWithAttributeAndValuesHandlesSimpleLiteral() {
-        value.set("construction");
-        value.set("cs", "stavba");
-        final JsonNode result = sut.serialize(ATTRIBUTE_NAME, value);
-        assertThat(result, instanceOf(CollectionNode.class));
-        final CollectionNode<?> colNode = (CollectionNode<?>) result;
-        assertEquals(ATTRIBUTE_NAME, result.getName());
-        assertEquals(2, colNode.getItems().size());
-        colNode.getItems().forEach(item -> assertThat(item, instanceOf(LangStringNode.class)));
     }
 
     @Test
@@ -82,22 +80,23 @@ class MultilingualStringSerializerTest {
         assertThat(result, instanceOf(CollectionNode.class));
         final CollectionNode<?> colNode = (CollectionNode<?>) result;
         assertEquals(2, colNode.getItems().size());
-        colNode.getItems().forEach(item -> assertThat(item, instanceOf(LangStringNode.class)));
+        colNode.getItems().forEach(item -> assertInstanceOf(ObjectNode.class, item));
+        verifyTranslations(colNode);
     }
 
     @Test
     void serializeWithSingleTranslationReturnsLangStringNode() {
         value.set("en", "construction");
         final JsonNode result = sut.serialize(value);
-        assertThat(result, instanceOf(LangStringNode.class));
+        assertThat(result, instanceOf(ObjectNode.class));
     }
 
     @Test
     void serializeReturnsLangStringNodeWithNoneKeyForLanguageLessValue() {
         value.set("language-less");
         final JsonNode result = sut.serialize(value);
-        assertThat(result, instanceOf(LangStringNode.class));
-        final LangStringNode lsResult = (LangStringNode) result;
+        assertThat(result, instanceOf(ObjectNode.class));
+        final ObjectNode lsResult = (ObjectNode) result;
         assertTrue(lsResult.getItems().stream().anyMatch(n -> {
             assertThat(n, instanceOf(LiteralNode.class));
             return n.getName().equals(JsonLd.LANGUAGE) && ((LiteralNode<?>) n).getValue().equals(JsonLd.NONE);

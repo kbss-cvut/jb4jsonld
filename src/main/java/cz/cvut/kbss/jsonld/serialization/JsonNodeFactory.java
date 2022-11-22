@@ -14,7 +14,6 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
-import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 
@@ -63,21 +62,6 @@ public class JsonNodeFactory {
         return node;
     }
 
-    /**
-     * Creates a JSON object node containing a value ({@link JsonLd#VALUE}) and its datatype ({@link JsonLd#TYPE}).
-     *
-     * @param name     Name of the node
-     * @param value    Value of the node
-     * @param datatype Type of the value
-     * @return Object node representing the specified value
-     */
-    public static ObjectNode createTypedValueNode(String name, String value, String datatype) {
-        final ObjectNode node = createObjectNode(name);
-        node.addItem(createLiteralNode(JsonLd.TYPE, datatype));
-        node.addItem(createLiteralNode(JsonLd.VALUE, value));
-        return node;
-    }
-
     private static LiteralType determineLiteralType(Object value) {
         if (value instanceof Boolean) {
             return LiteralType.BOOLEAN;
@@ -87,32 +71,6 @@ public class JsonNodeFactory {
             return LiteralType.TEMPORAL;
         }
         return LiteralType.STRING;
-    }
-
-    /**
-     * Creates a node for representing a single translation of a string value.
-     *
-     * @param value    String value
-     * @param language Language tag for the value
-     * @return A node representing the language tagged value
-     */
-    public static LangStringNode createLangStringNode(String value, String language) {
-        return new LangStringNode(value, language);
-    }
-
-    /**
-     * Creates a node for representing a single translation of a string value.
-     * <p>
-     * Usually, multiple translations are expected which are put into a collection. But if there is only one translation
-     * in the multilingual string, this method may be used to directly serialize the attribute.
-     *
-     * @param name     Attribute name
-     * @param value    String value
-     * @param language Language tag for the value
-     * @return A node representing the language tagged value
-     */
-    public static LangStringNode createLangStringNode(String name, String value, String language) {
-        return new LangStringNode(name, value, language);
     }
 
     /**

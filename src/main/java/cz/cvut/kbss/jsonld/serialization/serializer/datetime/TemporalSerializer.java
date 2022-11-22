@@ -1,18 +1,13 @@
-package cz.cvut.kbss.jsonld.serialization.datetime;
+package cz.cvut.kbss.jsonld.serialization.serializer.datetime;
 
-import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
-import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.exception.UnsupportedTemporalTypeException;
-import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
-import cz.cvut.kbss.jsonld.serialization.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 
 /**
@@ -25,9 +20,7 @@ public class TemporalSerializer implements ValueSerializer<TemporalAccessor> {
     @Override
     public JsonNode serialize(TemporalAccessor value, SerializationContext<TemporalAccessor> ctx) {
         if (value instanceof LocalDate) {
-            return JsonNodeFactory.createTypedValueNode(ctx.getAttributeId(),
-                                                        ((LocalDate) value).format(DateTimeFormatter.ISO_DATE),
-                                                        XSD.DATE);
+            return LocalDateSerializer.serialize((LocalDate) value, ctx);
         } else if (value instanceof OffsetTime) {
             return TimeSerializer.serialize((OffsetTime) value, ctx);
         } else if (value instanceof LocalTime) {
