@@ -12,15 +12,18 @@
  * details. You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cvut.kbss.jsonld.serialization.serializer;
+package cz.cvut.kbss.jsonld.serialization.serializer.compact;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
+import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.LiteralNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.MultilingualStringSerializer;
+import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +49,7 @@ class MultilingualStringSerializerTest {
     void serializeWithAttributeAndValuesReturnsCollectionNodeWithTranslations() {
         value.set("en", "construction");
         value.set("cs", "stavba");
-        final JsonNode result = sut.serialize(ATTRIBUTE_NAME, value);
+        final JsonNode result = sut.serialize(value, new SerializationContext<>(ATTRIBUTE_NAME, value, DummyJsonLdContext.INSTANCE));
         assertThat(result, instanceOf(CollectionNode.class));
         final CollectionNode<?> colNode = (CollectionNode<?>) result;
         assertEquals(ATTRIBUTE_NAME, result.getName());
@@ -67,7 +70,7 @@ class MultilingualStringSerializerTest {
     @Test
     void serializeWithAttributeAndSingleTranslationReturnsLangStringNode() {
         value.set("en", "construction");
-        final JsonNode result = sut.serialize(ATTRIBUTE_NAME, value);
+        final JsonNode result = sut.serialize(value, new SerializationContext<>(ATTRIBUTE_NAME, value, DummyJsonLdContext.INSTANCE));
         assertInstanceOf(ObjectNode.class, result);
         assertEquals(ATTRIBUTE_NAME, result.getName());
     }
@@ -76,7 +79,7 @@ class MultilingualStringSerializerTest {
     void serializeReturnsCollectionNodeWithTranslations() {
         value.set("en", "construction");
         value.set("cs", "stavba");
-        final JsonNode result = sut.serialize(value);
+        final JsonNode result = sut.serialize(value, new SerializationContext<>(value, DummyJsonLdContext.INSTANCE));
         assertThat(result, instanceOf(CollectionNode.class));
         final CollectionNode<?> colNode = (CollectionNode<?>) result;
         assertEquals(2, colNode.getItems().size());
@@ -87,14 +90,14 @@ class MultilingualStringSerializerTest {
     @Test
     void serializeWithSingleTranslationReturnsLangStringNode() {
         value.set("en", "construction");
-        final JsonNode result = sut.serialize(value);
+        final JsonNode result = sut.serialize(value, new SerializationContext<>(value, DummyJsonLdContext.INSTANCE));
         assertThat(result, instanceOf(ObjectNode.class));
     }
 
     @Test
     void serializeReturnsLangStringNodeWithNoneKeyForLanguageLessValue() {
         value.set("language-less");
-        final JsonNode result = sut.serialize(value);
+        final JsonNode result = sut.serialize(value, new SerializationContext<>(value, DummyJsonLdContext.INSTANCE));
         assertThat(result, instanceOf(ObjectNode.class));
         final ObjectNode lsResult = (ObjectNode) result;
         assertTrue(lsResult.getItems().stream().anyMatch(n -> {

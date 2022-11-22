@@ -28,34 +28,34 @@ import java.util.Optional;
  */
 public class ObjectGraphValueSerializers implements ValueSerializers {
 
-    private final ValueSerializers commonSerializers;
+    private final ValueSerializers serializers;
 
     private final ObjectPropertyValueSerializer opSerializer;
 
-    public ObjectGraphValueSerializers(ValueSerializers commonSerializers, ObjectGraphTraverser graphTraverser) {
-        this.commonSerializers = Objects.requireNonNull(commonSerializers);
+    public ObjectGraphValueSerializers(ValueSerializers serializers, ObjectGraphTraverser graphTraverser) {
+        this.serializers = Objects.requireNonNull(serializers);
         this.opSerializer = new ObjectPropertyValueSerializer(Objects.requireNonNull(graphTraverser));
     }
 
     @Override
     public <T> boolean hasCustomSerializer(Class<T> type) {
-        return commonSerializers.hasCustomSerializer(type);
+        return serializers.hasCustomSerializer(type);
     }
 
     @Override
     public <T> Optional<ValueSerializer<T>> getSerializer(SerializationContext<T> ctx) {
-        final Optional<ValueSerializer<T>> result = commonSerializers.getSerializer(ctx);
+        final Optional<ValueSerializer<T>> result = serializers.getSerializer(ctx);
         return result.isPresent() ? result : (BeanAnnotationProcessor.isObjectProperty(ctx.getField()) ? Optional.of(opSerializer) : Optional.empty());
     }
 
     @Override
     public <T> ValueSerializer<T> getOrDefault(SerializationContext<T> ctx) {
-        final Optional<ValueSerializer<T>> result = commonSerializers.getSerializer(ctx);
-        return result.orElseGet(() -> (BeanAnnotationProcessor.isObjectProperty(ctx.getField()) ? opSerializer : commonSerializers.getOrDefault(ctx)));
+        final Optional<ValueSerializer<T>> result = serializers.getSerializer(ctx);
+        return result.orElseGet(() -> (BeanAnnotationProcessor.isObjectProperty(ctx.getField()) ? opSerializer : serializers.getOrDefault(ctx)));
     }
 
     @Override
     public <T> void registerSerializer(Class<T> forType, ValueSerializer<T> serializer) {
-        commonSerializers.registerSerializer(forType, serializer);
+        serializers.registerSerializer(forType, serializer);
     }
 }

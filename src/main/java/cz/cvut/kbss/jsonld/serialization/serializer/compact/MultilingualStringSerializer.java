@@ -10,7 +10,7 @@
  * details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package cz.cvut.kbss.jsonld.serialization.serializer;
+package cz.cvut.kbss.jsonld.serialization.serializer.compact;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
@@ -18,28 +18,25 @@ import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.model.SetNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Map;
 
 /**
  * This use used to serialize {@link MultilingualString} values.
  */
-class MultilingualStringSerializer {
+class MultilingualStringSerializer implements ValueSerializer<MultilingualString> {
 
-    JsonNode serialize(String attName, MultilingualString value) {
-        assert value != null;
+    @Override
+    public JsonNode serialize(MultilingualString value, SerializationContext<MultilingualString> ctx) {
         if (value.getValue().size() == 1) {
             final Map.Entry<String, String> entry = value.getValue().entrySet().iterator().next();
-            return createNode(attName, entry.getValue(), entry.getKey());
+            return createNode(ctx.getTerm(), entry.getValue(), entry.getKey());
         }
-        final SetNode collectionNode = JsonNodeFactory.createCollectionNodeFromArray(attName);
+        final SetNode collectionNode = ctx.getTerm() != null ? JsonNodeFactory.createCollectionNodeFromArray(ctx.getTerm()) : JsonNodeFactory.createCollectionNodeFromArray();
         addTranslationsToCollectionNode(value, collectionNode);
         return collectionNode;
-    }
-
-    private void addTranslationsToCollectionNode(MultilingualString str, SetNode target) {
-        str.getValue()
-           .forEach((lang, val) -> target.addItem(createNode(null, val, lang)));
     }
 
     private static JsonNode createNode(String attName, String value, String language) {
@@ -50,14 +47,7 @@ class MultilingualStringSerializer {
         return node;
     }
 
-    JsonNode serialize(MultilingualString value) {
-        assert value != null;
-        if (value.getValue().size() == 1) {
-            final Map.Entry<String, String> entry = value.getValue().entrySet().iterator().next();
-            return createNode(null, entry.getValue(), entry.getKey());
-        }
-        final SetNode collectionNode = JsonNodeFactory.createCollectionNodeFromArray();
-        addTranslationsToCollectionNode(value, collectionNode);
-        return collectionNode;
+    private void addTranslationsToCollectionNode(MultilingualString str, SetNode target) {
+        str.getValue().forEach((lang, val) -> target.addItem(createNode(null, val, lang)));
     }
 }

@@ -1,10 +1,15 @@
-package cz.cvut.kbss.jsonld.serialization.serializer.datetime;
+package cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime;
 
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.exception.UnsupportedTemporalTypeException;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.EpochBasedDateTimeSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.IsoDateTimeSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.LocalDateSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TimeSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateTimeSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.time.*;
@@ -34,15 +39,14 @@ public class TemporalSerializer implements ValueSerializer<TemporalAccessor> {
         } else if (value instanceof ZonedDateTime) {
             return dateTimeSerializer.serialize(((ZonedDateTime) value).toOffsetDateTime(), ctx);
         }
-        throw new UnsupportedTemporalTypeException(
-                "Temporal type " + value.getClass() + " serialization is not supported.");
+        throw new UnsupportedTemporalTypeException("Temporal type " + value.getClass() + " serialization is not supported.");
     }
 
     @Override
     public void configure(Configuration config) {
         assert config != null;
         this.dateTimeSerializer = config.is(ConfigParam.SERIALIZE_DATETIME_AS_MILLIS) ?
-                                  new EpochBasedDateTimeSerializer() : new IsoDateTimeSerializer();
+                new EpochBasedDateTimeSerializer() : new IsoDateTimeSerializer();
         dateTimeSerializer.configure(config);
     }
 }

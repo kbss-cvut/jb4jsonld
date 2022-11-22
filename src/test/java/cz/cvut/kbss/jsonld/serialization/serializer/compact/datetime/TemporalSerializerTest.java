@@ -1,4 +1,4 @@
-package cz.cvut.kbss.jsonld.serialization.serializer.datetime;
+package cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime;
 
 import cz.cvut.kbss.jopa.datatype.DateTimeUtil;
 import cz.cvut.kbss.jopa.vocabulary.XSD;

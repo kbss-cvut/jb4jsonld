@@ -15,7 +15,7 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.common.Configured;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.serializer.CommonValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
 
@@ -32,7 +32,7 @@ public abstract class JsonLdSerializer implements Configured {
 
     protected final JsonGenerator jsonGenerator;
 
-    protected final ValueSerializers serializers = new CommonValueSerializers();
+    protected final ValueSerializers serializers = new LiteralValueSerializers();
 
     protected JsonLdSerializer(JsonGenerator jsonGenerator) {
         this.jsonGenerator = Objects.requireNonNull(jsonGenerator);

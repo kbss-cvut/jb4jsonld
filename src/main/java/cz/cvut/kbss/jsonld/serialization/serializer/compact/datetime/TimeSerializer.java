@@ -1,11 +1,9 @@
-package cz.cvut.kbss.jsonld.serialization.serializer.datetime;
+package cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime;
 
 import cz.cvut.kbss.jopa.datatype.DateTimeUtil;
 import cz.cvut.kbss.jopa.vocabulary.XSD;
-import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.time.LocalTime;
@@ -19,10 +17,7 @@ import java.time.temporal.TemporalAccessor;
 class TimeSerializer {
 
     static JsonNode serialize(OffsetTime value, SerializationContext<TemporalAccessor> ctx) {
-        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.TIME));
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, DateTimeFormatter.ISO_OFFSET_TIME.format(value)));
-        return node;
+        return LiteralValueSerializers.serializeValueWithType(ctx.getTerm(), DateTimeFormatter.ISO_OFFSET_TIME.format(value), XSD.TIME);
     }
 
     static JsonNode serialize(LocalTime value, SerializationContext<TemporalAccessor> ctx) {
