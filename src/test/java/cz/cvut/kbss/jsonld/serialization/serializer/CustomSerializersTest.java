@@ -22,6 +22,7 @@ import cz.cvut.kbss.jsonld.serialization.JsonLdTreeBuilderTest;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ class CustomSerializersTest {
 
     @BeforeEach
     void setUp() {
-        this.serializers = new CommonValueSerializers();
+        this.serializers = new LiteralValueSerializers();
         this.treeBuilder = new JsonLdTreeBuilder(serializers);
     }
 

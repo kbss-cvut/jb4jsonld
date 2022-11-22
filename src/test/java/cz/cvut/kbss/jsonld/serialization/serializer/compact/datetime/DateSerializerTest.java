@@ -1,4 +1,4 @@
-package cz.cvut.kbss.jsonld.serialization.serializer.datetime;
+package cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime;
 
 import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.ConfigParam;
@@ -9,6 +9,7 @@ import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.NumericLiteralNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 import org.junit.jupiter.api.Test;
 

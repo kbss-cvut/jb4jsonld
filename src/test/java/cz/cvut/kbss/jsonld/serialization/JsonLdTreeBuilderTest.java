@@ -24,7 +24,7 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.model.*;
-import cz.cvut.kbss.jsonld.serialization.serializer.CommonValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
 
 public class JsonLdTreeBuilderTest {
 
-    private final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(new CommonValueSerializers());
+    private final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(new LiteralValueSerializers());
 
     @Test
     void openInstanceCreatesNewObjectNode() {

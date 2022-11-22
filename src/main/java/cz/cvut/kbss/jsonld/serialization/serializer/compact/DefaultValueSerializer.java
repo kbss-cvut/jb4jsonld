@@ -12,7 +12,7 @@
  * details. You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cvut.kbss.jsonld.serialization.serializer;
+package cz.cvut.kbss.jsonld.serialization.serializer.compact;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
@@ -22,6 +22,7 @@ import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Collection;
@@ -44,7 +45,7 @@ class DefaultValueSerializer implements ValueSerializer {
                 if (annotationProperty && isReference(item)) {
                     node.addItem(serializeReference(null, item));
                 } else if (item instanceof MultilingualString) {
-                    node.addItem(multilingualStringSerializer.serialize((MultilingualString) item));
+                    node.addItem(multilingualStringSerializer.serialize((MultilingualString) item, new SerializationContext<>((MultilingualString) item, ctx.getJsonLdContext())));
                 } else {
                     node.addItem(JsonNodeFactory.createLiteralNode(item));
                 }
@@ -54,7 +55,7 @@ class DefaultValueSerializer implements ValueSerializer {
             if (annotationProperty && isReference(value)) {
                 return serializeReference(ctx.getTerm(), value);
             } else if (value instanceof MultilingualString) {
-                return multilingualStringSerializer.serialize(ctx.getTerm(), (MultilingualString) value);
+                return multilingualStringSerializer.serialize((MultilingualString) value, ctx);
             }
             return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value);
         }

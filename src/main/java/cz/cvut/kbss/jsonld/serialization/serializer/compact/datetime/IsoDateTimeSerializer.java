@@ -1,12 +1,11 @@
-package cz.cvut.kbss.jsonld.serialization.serializer.datetime;
+package cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime;
 
 import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
-import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.LiteralValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateTimeSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.time.OffsetDateTime;
@@ -21,11 +20,8 @@ public class IsoDateTimeSerializer extends DateTimeSerializer {
     private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     @Override
-    JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
-        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.DATETIME));
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, formatter.format(value)));
-        return node;
+    public JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
+        return LiteralValueSerializers.serializeValueWithType(ctx.getTerm(), formatter.format(value), XSD.DATETIME);
     }
 
     @Override

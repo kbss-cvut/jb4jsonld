@@ -10,15 +10,15 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAccessor;
 
-abstract class DateTimeSerializer implements Configurable {
+public abstract class DateTimeSerializer implements Configurable {
 
-    abstract JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx);
+    public abstract JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx);
 
-    JsonNode serialize(LocalDateTime value, SerializationContext<TemporalAccessor> ctx) {
+    public JsonNode serialize(LocalDateTime value, SerializationContext<TemporalAccessor> ctx) {
         return serialize(DateTimeUtil.toDateTime(value), ctx);
     }
 
-    JsonNode serialize(Instant value, SerializationContext<TemporalAccessor> ctx) {
+    public JsonNode serialize(Instant value, SerializationContext<TemporalAccessor> ctx) {
         return serialize(DateTimeUtil.toDateTime(value), ctx);
     }
 }
