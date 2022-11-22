@@ -24,7 +24,7 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 import java.util.Map;
 
 /**
- * This use used to serialize {@link MultilingualString} values.
+ * This is used to serialize {@link MultilingualString} values.
  */
 class MultilingualStringSerializer implements ValueSerializer<MultilingualString> {
 
