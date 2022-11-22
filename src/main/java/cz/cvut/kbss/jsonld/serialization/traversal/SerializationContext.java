@@ -67,6 +67,10 @@ public class SerializationContext<T> {
         return field;
     }
 
+    public String getFieldName() {
+        return field != null ? field.getName() : null;
+    }
+
     public T getValue() {
         return value;
     }
