@@ -65,14 +65,13 @@ public class MappingJsonLdContext implements JsonLdContext {
         return Collections.unmodifiableMap(mapping);
     }
 
-    /**
-     * Gets the mapping for the specified term (if it exists).
-     *
-     * @param term Term to get mapping for
-     * @return Optional mapping node
-     */
     public Optional<JsonNode> getTermMapping(String term) {
         return Optional.ofNullable(mapping.get(term));
+    }
+
+    @Override
+    public boolean hasTermMapping(String term) {
+        return mapping.containsKey(term);
     }
 
     /**

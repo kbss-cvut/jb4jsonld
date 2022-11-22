@@ -22,7 +22,7 @@ public class IsoDateTimeSerializer extends DateTimeSerializer {
 
     @Override
     JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
-        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getAttributeId());
+        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
         node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.DATETIME));
         node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, formatter.format(value)));
         return node;

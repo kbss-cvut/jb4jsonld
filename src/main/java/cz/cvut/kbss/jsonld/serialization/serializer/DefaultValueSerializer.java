@@ -39,7 +39,7 @@ class DefaultValueSerializer implements ValueSerializer {
         final boolean annotationProperty = BeanAnnotationProcessor.isAnnotationProperty(ctx.getField());
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
-            final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(ctx.getAttributeId(), col);
+            final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(ctx.getTerm(), col);
             col.forEach(item -> {
                 if (annotationProperty && isReference(item)) {
                     node.addItem(serializeReference(null, item));
@@ -52,11 +52,11 @@ class DefaultValueSerializer implements ValueSerializer {
             return node;
         } else {
             if (annotationProperty && isReference(value)) {
-                return serializeReference(ctx.getAttributeId(), value);
+                return serializeReference(ctx.getTerm(), value);
             } else if (value instanceof MultilingualString) {
-                return multilingualStringSerializer.serialize(ctx.getAttributeId(), (MultilingualString) value);
+                return multilingualStringSerializer.serialize(ctx.getTerm(), (MultilingualString) value);
             }
-            return JsonNodeFactory.createLiteralNode(ctx.getAttributeId(), value);
+            return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value);
         }
     }
 

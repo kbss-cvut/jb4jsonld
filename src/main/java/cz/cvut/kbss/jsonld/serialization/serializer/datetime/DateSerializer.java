@@ -20,7 +20,7 @@ public class DateSerializer implements ValueSerializer<Date> {
     @Override
     public JsonNode serialize(Date value, SerializationContext<Date> ctx) {
         final Instant instant = value.toInstant();
-        final SerializationContext<TemporalAccessor> newCtx = new SerializationContext<>(ctx.getAttributeId(), ctx.getField(), instant, ctx.getJsonLdContext());
+        final SerializationContext<TemporalAccessor> newCtx = new SerializationContext<>(ctx.getTerm(), ctx.getField(), instant, ctx.getJsonLdContext());
         return temporalSerializer.serialize(value.toInstant(), newCtx);
     }
 

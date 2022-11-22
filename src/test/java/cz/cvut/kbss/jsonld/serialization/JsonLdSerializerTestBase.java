@@ -336,7 +336,7 @@ public abstract class JsonLdSerializerTestBase {
 
     @Test
     void serializationSupportsRegistrationAndUsageOfCustomSerializers() throws Exception {
-        sut.registerSerializer(LocalDate.class, ((value, ctx) -> JsonNodeFactory.createLiteralNode(ctx.getAttributeId(),
+        sut.registerSerializer(LocalDate.class, ((value, ctx) -> JsonNodeFactory.createLiteralNode(ctx.getTerm(),
                                                                                                    value.toString())));
         final CompactedJsonLdSerializerTest.OrganizationWithLocalDate
                 organization = new CompactedJsonLdSerializerTest.OrganizationWithLocalDate();
@@ -363,7 +363,7 @@ public abstract class JsonLdSerializerTestBase {
     @Test
     void serializationSupportsRegistrationAndUsageOfCustomObjectPropertyValueSerializers() throws Exception {
         final ValueSerializer<Organization> serializer = (value, ctx) -> {
-            final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getAttributeId());
+            final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
             node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, value.getUri()));
             return node;
         };
@@ -381,7 +381,7 @@ public abstract class JsonLdSerializerTestBase {
     void serializationSupportsUsageOfCustomObjectPropertyValueSerializersOnPluralAttributes() throws Exception {
         final ValueSerializer<Employee> serializer = (value, ctx) -> {
             final ObjectNode node =
-                    ctx.getAttributeId() != null ? JsonNodeFactory.createObjectNode(ctx.getAttributeId()) :
+                    ctx.getTerm() != null ? JsonNodeFactory.createObjectNode(ctx.getTerm()) :
                     JsonNodeFactory.createObjectNode();
             node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, value.getUri().toString()));
             node.addItem(JsonNodeFactory.createLiteralNode(Vocabulary.USERNAME, value.getUsername()));

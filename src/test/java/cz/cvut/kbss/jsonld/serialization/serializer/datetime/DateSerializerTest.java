@@ -31,7 +31,7 @@ class DateSerializerTest {
         final SerializationContext<Date> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(ObjectNode.class, result);
-        assertEquals(ctx.getAttributeId(), result.getName());
+        assertEquals(ctx.getTerm(), result.getName());
         assertThat(((ObjectNode) result).getItems(), hasItems(
                 JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value.toInstant().atOffset(ZoneOffset.UTC)
                                                                      .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
@@ -48,7 +48,7 @@ class DateSerializerTest {
         final SerializationContext<Date> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(NumericLiteralNode.class, result);
-        assertEquals(ctx.getAttributeId(), result.getName());
+        assertEquals(ctx.getTerm(), result.getName());
         assertEquals(value.getTime(), ((NumericLiteralNode<Long>) result).getValue());
     }
 }

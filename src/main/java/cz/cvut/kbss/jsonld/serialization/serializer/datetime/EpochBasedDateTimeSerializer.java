@@ -14,6 +14,6 @@ public class EpochBasedDateTimeSerializer extends DateTimeSerializer {
 
     @Override
     JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
-        return JsonNodeFactory.createLiteralNode(ctx.getAttributeId(), value.toInstant().toEpochMilli());
+        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value.toInstant().toEpochMilli());
     }
 }

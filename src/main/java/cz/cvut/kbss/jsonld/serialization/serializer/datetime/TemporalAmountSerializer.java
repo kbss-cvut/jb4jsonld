@@ -15,6 +15,6 @@ public class TemporalAmountSerializer implements ValueSerializer<TemporalAmount>
 
     @Override
     public JsonNode serialize(TemporalAmount value, SerializationContext<TemporalAmount> ctx) {
-        return JsonNodeFactory.createLiteralNode(ctx.getAttributeId(), value.toString());
+        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value.toString());
     }
 }

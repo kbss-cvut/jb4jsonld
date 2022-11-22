@@ -44,7 +44,7 @@ class TemporalSerializerTest {
         final SerializationContext<TemporalAccessor> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(ObjectNode.class, result);
-        assertEquals(ctx.getAttributeId(), result.getName());
+        assertEquals(ctx.getTerm(), result.getName());
         final ObjectNode node = (ObjectNode) result;
         assertThat(node.getItems(), hasItems(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, expected),
                                              JsonNodeFactory.createLiteralNode(JsonLd.TYPE, datatype)));
@@ -108,7 +108,7 @@ class TemporalSerializerTest {
         final SerializationContext<TemporalAccessor> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(NumericLiteralNode.class, result);
-        assertEquals(ctx.getAttributeId(), result.getName());
+        assertEquals(ctx.getTerm(), result.getName());
         assertEquals(expected, ((NumericLiteralNode<Long>) result).getValue());
     }
 

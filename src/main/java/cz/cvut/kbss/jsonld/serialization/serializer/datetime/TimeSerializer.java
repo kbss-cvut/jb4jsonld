@@ -19,7 +19,7 @@ import java.time.temporal.TemporalAccessor;
 class TimeSerializer {
 
     static JsonNode serialize(OffsetTime value, SerializationContext<TemporalAccessor> ctx) {
-        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getAttributeId());
+        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
         node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.TIME));
         node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, DateTimeFormatter.ISO_OFFSET_TIME.format(value)));
         return node;
