@@ -14,13 +14,15 @@ import java.time.temporal.TemporalAccessor;
 /**
  * Serializes time values ({@link LocalTime} and {@link OffsetTime}) to ISO-based string.
  */
-class TimeSerializer {
+public class TimeSerializer {
 
-    static JsonNode serialize(OffsetTime value, SerializationContext<TemporalAccessor> ctx) {
-        return LiteralValueSerializers.serializeValueWithType(ctx.getTerm(), DateTimeFormatter.ISO_OFFSET_TIME.format(value), XSD.TIME);
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_OFFSET_TIME;
+
+    public JsonNode serialize(OffsetTime value, SerializationContext<TemporalAccessor> ctx) {
+        return LiteralValueSerializers.serializeValueWithType(ctx.getTerm(), FORMATTER.format(value), XSD.TIME);
     }
 
-    static JsonNode serialize(LocalTime value, SerializationContext<TemporalAccessor> ctx) {
+    public JsonNode serialize(LocalTime value, SerializationContext<TemporalAccessor> ctx) {
         return serialize(value.atOffset(DateTimeUtil.SYSTEM_OFFSET), ctx);
     }
 }

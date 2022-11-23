@@ -11,7 +11,9 @@ import java.time.temporal.TemporalAccessor;
 
 public class LocalDateSerializer {
 
-    public static JsonNode serialize(LocalDate value, SerializationContext<TemporalAccessor> ctx) {
-        return LiteralValueSerializers.serializeValueWithType(ctx.getTerm(), DateTimeFormatter.ISO_DATE.format(value), XSD.DATE);
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_DATE;
+
+    public JsonNode serialize(LocalDate value, SerializationContext<TemporalAccessor> ctx) {
+        return LiteralValueSerializers.serializeValueWithType(ctx.getTerm(), FORMATTER.format(value), XSD.DATE);
     }
 }

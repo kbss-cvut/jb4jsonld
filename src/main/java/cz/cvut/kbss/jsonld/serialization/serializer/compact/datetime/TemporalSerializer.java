@@ -5,10 +5,6 @@ import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.exception.UnsupportedTemporalTypeException;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.EpochBasedDateTimeSerializer;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.IsoDateTimeSerializer;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.LocalDateSerializer;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TimeSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateTimeSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
@@ -20,16 +16,28 @@ import java.time.temporal.TemporalAccessor;
  */
 public class TemporalSerializer implements ValueSerializer<TemporalAccessor> {
 
-    private DateTimeSerializer dateTimeSerializer = new IsoDateTimeSerializer();
+    protected DateTimeSerializer dateTimeSerializer;
+    private final LocalDateSerializer dateSerializer;
+    private final TimeSerializer timeSerializer;
+
+    public TemporalSerializer() {
+        this(new IsoDateTimeSerializer(), new LocalDateSerializer(), new TimeSerializer());
+    }
+
+    protected TemporalSerializer(DateTimeSerializer dateTimeSerializer, LocalDateSerializer dateSerializer, TimeSerializer timeSerializer) {
+        this.dateTimeSerializer = dateTimeSerializer;
+        this.dateSerializer = dateSerializer;
+        this.timeSerializer = timeSerializer;
+    }
 
     @Override
     public JsonNode serialize(TemporalAccessor value, SerializationContext<TemporalAccessor> ctx) {
         if (value instanceof LocalDate) {
-            return LocalDateSerializer.serialize((LocalDate) value, ctx);
+            return dateSerializer.serialize((LocalDate) value, ctx);
         } else if (value instanceof OffsetTime) {
-            return TimeSerializer.serialize((OffsetTime) value, ctx);
+            return timeSerializer.serialize((OffsetTime) value, ctx);
         } else if (value instanceof LocalTime) {
-            return TimeSerializer.serialize((LocalTime) value, ctx);
+            return timeSerializer.serialize((LocalTime) value, ctx);
         } else if (value instanceof OffsetDateTime) {
             return dateTimeSerializer.serialize((OffsetDateTime) value, ctx);
         } else if (value instanceof LocalDateTime) {
