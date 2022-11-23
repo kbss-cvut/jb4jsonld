@@ -20,9 +20,9 @@ import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
-import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TemporalAmountSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TemporalSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.time.*;

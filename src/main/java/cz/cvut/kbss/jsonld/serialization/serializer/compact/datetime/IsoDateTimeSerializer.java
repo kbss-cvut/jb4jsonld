@@ -17,7 +17,7 @@ import java.time.temporal.TemporalAccessor;
  */
 public class IsoDateTimeSerializer extends DateTimeSerializer {
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+    protected DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     @Override
     public JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
