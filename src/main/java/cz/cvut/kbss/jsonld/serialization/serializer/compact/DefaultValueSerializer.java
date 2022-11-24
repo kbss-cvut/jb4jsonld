@@ -24,11 +24,11 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Collection;
 
-class DefaultValueSerializer implements ValueSerializer {
+public class DefaultValueSerializer implements ValueSerializer {
 
     private final MultilingualStringSerializer multilingualStringSerializer;
 
-    DefaultValueSerializer(MultilingualStringSerializer multilingualStringSerializer) {
+    public DefaultValueSerializer(MultilingualStringSerializer multilingualStringSerializer) {
         this.multilingualStringSerializer = multilingualStringSerializer;
     }
 

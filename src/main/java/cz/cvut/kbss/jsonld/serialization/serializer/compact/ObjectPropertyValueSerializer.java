@@ -12,9 +12,10 @@
  * details. You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cvut.kbss.jsonld.serialization.serializer;
+package cz.cvut.kbss.jsonld.serialization.serializer.compact;
 
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 

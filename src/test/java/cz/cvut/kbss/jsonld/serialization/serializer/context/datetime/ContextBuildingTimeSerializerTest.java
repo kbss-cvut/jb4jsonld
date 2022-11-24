@@ -1,8 +1,9 @@
 package cz.cvut.kbss.jsonld.serialization.serializer.context.datetime;
 
+import cz.cvut.kbss.jopa.datatype.DateTimeUtil;
 import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.environment.Vocabulary;
+import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.model.TemporalEntity;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
@@ -15,7 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
+import java.time.LocalTime;
+import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 
@@ -27,36 +29,38 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class IsoDateTimeSerializerTest {
+class ContextBuildingTimeSerializerTest {
 
-    private final IsoDateTimeSerializer sut = new IsoDateTimeSerializer();
+    private final ContextBuildingTimeSerializer sut = new ContextBuildingTimeSerializer();
 
     @Test
     void serializeRegistersTermDefinitionWithIdAndTypeInJsonLdContext() throws Exception {
         final JsonLdContext ctx = mock(JsonLdContext.class);
-        final OffsetDateTime value = OffsetDateTime.now();
-        final Field field = TemporalEntity.class.getDeclaredField("offsetDateTime");
+        final OffsetTime value = OffsetTime.now();
+        final Field field = TemporalEntity.class.getDeclaredField("offsetTime");
+        final String property = Generator.generateUri().toString();
         final SerializationContext<TemporalAccessor> serializationContext =
-                new SerializationContext<>(Vocabulary.DATE_CREATED, field, value, ctx);
+                new SerializationContext<>(property, field, value, ctx);
         sut.serialize(value, serializationContext);
         final ArgumentCaptor<JsonNode> captor = ArgumentCaptor.forClass(JsonNode.class);
         verify(ctx).registerTermMapping(eq(field.getName()), captor.capture());
         assertInstanceOf(ObjectNode.class, captor.getValue());
         assertThat(((ObjectNode) captor.getValue()).getItems(), hasItems(
-                JsonNodeFactory.createLiteralNode(JsonLd.ID, Vocabulary.DATE_CREATED),
-                JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.DATETIME)
+                JsonNodeFactory.createLiteralNode(JsonLd.ID, property),
+                JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.TIME)
         ));
     }
 
     @Test
     void serializeReturnsLiteralNodeWithStringSerialization() throws Exception {
-        final OffsetDateTime value = OffsetDateTime.now();
-        final Field field = TemporalEntity.class.getDeclaredField("offsetDateTime");
+        final LocalTime value = LocalTime.now();
+        final Field field = TemporalEntity.class.getDeclaredField("localTime");
+        final String property = Generator.generateUri().toString();
         final SerializationContext<TemporalAccessor> serializationContext =
-                new SerializationContext<>(Vocabulary.DATE_CREATED, field, value, DummyJsonLdContext.INSTANCE);
+                new SerializationContext<>(property, field, value, DummyJsonLdContext.INSTANCE);
 
         final JsonNode result = sut.serialize(value, serializationContext);
-        assertEquals(new StringLiteralNode(field.getName(), DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(value)),
-                     result);
+        assertEquals(new StringLiteralNode(field.getName(), DateTimeFormatter.ISO_TIME.format(value.atOffset(
+                DateTimeUtil.SYSTEM_OFFSET))), result);
     }
 }

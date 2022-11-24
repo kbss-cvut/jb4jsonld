@@ -16,9 +16,18 @@ import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.serializer.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ObjectGraphValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.*;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TemporalAmountSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TemporalSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContextFactory;
+
+import java.time.*;
+import java.util.Date;
 
 /**
  * JSON-LD serializer outputting compacted context-less JSON-LD.
@@ -36,12 +45,36 @@ public class CompactedJsonLdSerializer extends JsonLdSerializer {
     }
 
     @Override
+    protected ValueSerializers initSerializers() {
+        final LiteralValueSerializers valueSerializers =
+                new LiteralValueSerializers(new DefaultValueSerializer(new MultilingualStringSerializer()));
+        valueSerializers.registerIdentifierSerializer(new IdentifierSerializer());
+        valueSerializers.registerTypesSerializer(new TypesSerializer());
+        final TemporalSerializer ts = new TemporalSerializer();
+        valueSerializers.registerSerializer(LocalDate.class, ts);
+        // Register the same temporal serializer for each of the types it supports (needed for key-based map access)
+        valueSerializers.registerSerializer(LocalDate.class, ts);
+        valueSerializers.registerSerializer(LocalTime.class, ts);
+        valueSerializers.registerSerializer(OffsetTime.class, ts);
+        valueSerializers.registerSerializer(LocalDateTime.class, ts);
+        valueSerializers.registerSerializer(OffsetDateTime.class, ts);
+        valueSerializers.registerSerializer(ZonedDateTime.class, ts);
+        valueSerializers.registerSerializer(Instant.class, ts);
+        valueSerializers.registerSerializer(Date.class, new DateSerializer(ts));
+        final TemporalAmountSerializer tas = new TemporalAmountSerializer();
+        valueSerializers.registerSerializer(Duration.class, tas);
+        valueSerializers.registerSerializer(Period.class, tas);
+        return valueSerializers;
+    }
+
+    @Override
     protected JsonNode buildJsonTree(Object root) {
         final ObjectGraphTraverser traverser = new ObjectGraphTraverser(new SerializationContextFactory(
                 DummyJsonLdContext.INSTANCE));
         traverser.setRequireId(configuration().is(ConfigParam.REQUIRE_ID));
         final JsonLdTreeBuilder treeBuilder =
-                new JsonLdTreeBuilder(new ObjectGraphValueSerializers(serializers, traverser));
+                new JsonLdTreeBuilder(
+                        new ObjectGraphValueSerializers(serializers, new ObjectPropertyValueSerializer(traverser)));
         traverser.setVisitor(treeBuilder);
         traverser.traverse(root);
         return treeBuilder.getTreeRoot();

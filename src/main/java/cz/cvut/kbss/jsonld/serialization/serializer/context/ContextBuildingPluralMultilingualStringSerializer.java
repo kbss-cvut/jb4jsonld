@@ -10,7 +10,7 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.*;
 
-public class PluralMultilingualStringSerializer implements ValueSerializer<Collection<MultilingualString>> {
+public class ContextBuildingPluralMultilingualStringSerializer implements ValueSerializer<Collection<MultilingualString>> {
 
     @Override
     public ObjectNode serialize(Collection<MultilingualString> value,
@@ -23,7 +23,7 @@ public class PluralMultilingualStringSerializer implements ValueSerializer<Colle
             allValues.putIfAbsent(lang, new LinkedHashSet<>());
             allValues.get(lang).add(text);
         }));
-        final ObjectNode node = ctx.getField() != null ? JsonNodeFactory.createObjectNode(ctx.getFieldName()) : JsonNodeFactory.createObjectNode();
+        final ObjectNode node = ctx.getField() != null ? JsonNodeFactory.createObjectNode(ctx.getTerm()) : JsonNodeFactory.createObjectNode();
         allValues.forEach((lang, texts) -> {
             final String langKey = lang != null ? lang : JsonLd.NONE;
             if (texts.size() == 1) {
@@ -41,6 +41,6 @@ public class PluralMultilingualStringSerializer implements ValueSerializer<Colle
         final ObjectNode mapping = JsonNodeFactory.createObjectNode();
         mapping.addItem(JsonNodeFactory.createLiteralNode(JsonLd.ID, ctx.getTerm()));
         mapping.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, JsonLd.LANGUAGE));
-        ctx.getJsonLdContext().registerTermMapping(ctx.getFieldName(), mapping);
+        ctx.registerTermMapping(ctx.getFieldName(), mapping);
     }
 }

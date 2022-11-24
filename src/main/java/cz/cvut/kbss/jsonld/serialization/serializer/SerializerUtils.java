@@ -4,6 +4,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
+import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
@@ -41,5 +42,21 @@ public class SerializerUtils {
         termDef.addItem(JsonNodeFactory.createLiteralNode(JsonLd.ID, id));
         termDef.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, type));
         return termDef;
+    }
+
+    /**
+     * Serializes the specified value as a JSON object with value ({@link JsonLd#VALUE}) and type ({@link
+     * JsonLd#TYPE}).
+     *
+     * @param term  Term to identify the object in the enclosing object
+     * @param value Value to serialize
+     * @param type  Value type to use
+     * @return Resulting JSON node
+     */
+    public static JsonNode createdTypedValueNode(String term, String value, String type) {
+        final ObjectNode node = JsonNodeFactory.createObjectNode(term);
+        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, type));
+        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value));
+        return node;
     }
 }

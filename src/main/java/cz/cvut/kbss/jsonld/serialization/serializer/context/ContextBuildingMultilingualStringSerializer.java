@@ -10,7 +10,7 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 /**
  * This is used to serialize {@link MultilingualString} values.
  */
-public class MultilingualStringSerializer implements ValueSerializer<MultilingualString> {
+public class ContextBuildingMultilingualStringSerializer implements ValueSerializer<MultilingualString> {
 
     @Override
     public ObjectNode serialize(MultilingualString value, SerializationContext<MultilingualString> ctx) {
@@ -26,6 +26,6 @@ public class MultilingualStringSerializer implements ValueSerializer<Multilingua
         final ObjectNode mapping = JsonNodeFactory.createObjectNode();
         mapping.addItem(JsonNodeFactory.createLiteralNode(JsonLd.ID, ctx.getTerm()));
         mapping.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, JsonLd.LANGUAGE));
-        ctx.getJsonLdContext().registerTermMapping(ctx.getFieldName(), mapping);
+        ctx.registerTermMapping(ctx.getFieldName(), mapping);
     }
 }

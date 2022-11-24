@@ -27,9 +27,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class TemporalAmountSerializerTest {
+class ContextBuildingTemporalAmountSerializerTest {
 
-    private final TemporalAmountSerializer sut = new TemporalAmountSerializer();
+    private final ContextBuildingTemporalAmountSerializer sut = new ContextBuildingTemporalAmountSerializer();
 
     @Test
     void serializeRegistersTermDefinitionWithIdAndTypeInJsonLdContext() throws Exception {

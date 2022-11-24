@@ -24,10 +24,10 @@ public interface JsonLdContext {
      * Registers the specified term mapping in this context.
      * <p>
      * Compared to {@link #registerTermMapping(String, String)}, this method allows registering more complex mapping
-     * like language container.
+     * like language containers or typed literals.
      *
      * @param term       Mapped term
-     * @param mappedNode Object node to which the term is mapped
+     * @param mappedNode Node to which the term is mapped
      */
     void registerTermMapping(String term, JsonNode mappedNode);
 

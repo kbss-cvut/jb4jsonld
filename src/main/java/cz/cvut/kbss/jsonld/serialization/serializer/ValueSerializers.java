@@ -16,6 +16,7 @@ import cz.cvut.kbss.jsonld.common.Configurable;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Provides serializers for JSON-LD tree building.
@@ -59,5 +60,13 @@ public interface ValueSerializers extends Configurable {
      * @param serializer Serializer to register
      * @param <T>        Value type
      */
-    <T> void registerSerializer(Class<T> forType, ValueSerializer<T> serializer);
+    <T> void registerSerializer(Class<T> forType, ValueSerializer<? super T> serializer);
+
+    ValueSerializer<String> getIdentifierSerializer();
+
+    void registerIdentifierSerializer(ValueSerializer<String> idSerializer);
+
+    ValueSerializer<Set<String>> getTypesSerializer();
+
+    void registerTypesSerializer(ValueSerializer<Set<String>> typesSerializer);
 }

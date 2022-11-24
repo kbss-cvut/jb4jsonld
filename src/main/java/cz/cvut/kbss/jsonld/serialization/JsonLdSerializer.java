@@ -15,7 +15,6 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.common.Configured;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
 
@@ -32,16 +31,18 @@ public abstract class JsonLdSerializer implements Configured {
 
     protected final JsonGenerator jsonGenerator;
 
-    protected final ValueSerializers serializers = new LiteralValueSerializers();
+    protected final ValueSerializers serializers;
 
     protected JsonLdSerializer(JsonGenerator jsonGenerator) {
         this.jsonGenerator = Objects.requireNonNull(jsonGenerator);
         this.configuration = new Configuration();
+        this.serializers = initSerializers();
     }
 
     public JsonLdSerializer(JsonGenerator jsonGenerator, Configuration configuration) {
         this.jsonGenerator = Objects.requireNonNull(jsonGenerator);
         this.configuration = Objects.requireNonNull(configuration);
+        this.serializers = initSerializers();
     }
 
     @Override
@@ -78,6 +79,8 @@ public abstract class JsonLdSerializer implements Configured {
         final JsonNode jsonRoot = buildJsonTree(root);
         jsonRoot.write(jsonGenerator);
     }
+
+    protected abstract ValueSerializers initSerializers();
 
     /**
      * Builds the JSON-LD tree model.

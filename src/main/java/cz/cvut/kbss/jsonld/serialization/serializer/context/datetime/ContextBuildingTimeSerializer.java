@@ -10,15 +10,15 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 import java.time.OffsetTime;
 import java.time.temporal.TemporalAccessor;
 
-public class TimeSerializer extends cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TimeSerializer {
+public class ContextBuildingTimeSerializer extends cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TimeSerializer {
 
     @Override
     public JsonNode serialize(OffsetTime value, SerializationContext<TemporalAccessor> ctx) {
         if (ctx.getTerm() != null) {
             final ObjectNode termDef =
                     SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(), XSD.TIME);
-            ctx.getJsonLdContext().registerTermMapping(ctx.getFieldName(), termDef);
+            ctx.registerTermMapping(ctx.getFieldName(), termDef);
         }
-        return JsonNodeFactory.createLiteralNode(ctx.getFieldName(), FORMATTER.format(value));
+        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), FORMATTER.format(value));
     }
 }
