@@ -25,6 +25,8 @@ an executable example of JB4JSON-LD in action (together with Spring and Jackson)
 ### Java
 
 ```Java
+import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+
 @OWLClass(iri = "http://onto.fel.cvut.cz/ontologies/ufo/Person")
 public class User {
 
@@ -36,16 +38,19 @@ public class User {
 
     @OWLDataProperty(iri = "http://xmlns.com/foaf/0.1/lastName")
     private String lastName;
-    
+
     @OWLDataProperty(iri = "http://xmlns.com/foaf/0.1/accountName")
     private String username;
 
     @OWLDataProperty(iri = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/role")
     private Role role;  // Role is an enum
 
+    @OWLDataProperty(iri = "http://purl.org/dc/terms/created")
+    private Instant dateCreated;
+
     @Properties
     private Map<String, Set<String>> properties;
-    
+
     // Getters and setters follow
 }
 ```
@@ -55,23 +60,27 @@ public class User {
 ```JSON
 {
   "@context": {
+    "uri": "@id",
     "firstName": "http://xmlns.com/foaf/0.1/firstName",
     "lastName": "http://xmlns.com/foaf/0.1/lastName",
-    "accountName": "http://xmlns.com/foaf/0.1/accountName",
+    "username": "http://xmlns.com/foaf/0.1/accountName",
     "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin",
-    "role": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/role"
+    "role": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/role",
+    "dateCreated": {
+      "@id": "http://purl.org/dc/terms/created",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    }
   },
-  "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
+  "uri": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
   "@type": [
-    "http://onto.fel.cvut.cz/ontologies/ufo/Person",
-    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User",
-    "http://onto.fel.cvut.cz/ontologies/ufo/Agent"
+    "http://onto.fel.cvut.cz/ontologies/jb4jsonld/User"
   ],
-  "isAdmin": true,
-  "accountName": "halsey@unsc.org",
   "firstName": "Catherine",
   "lastName": "Halsey",
-  "role": "USER"
+  "username": "halsey@unsc.org",
+  "isAdmin": true,
+  "role": "USER",
+  "dateCreated": "2022-11-24T16:47:44Z"
 }
 ```
 
