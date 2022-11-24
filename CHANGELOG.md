@@ -1,5 +1,12 @@
 # JB4JSON-LD Changelog
 
+## 0.10.0 - 2022-11-24
+- Add support for serialization with JSON-LD context (`@context`) (Feature #16).
+- **BREAKING CHANGE**: Serialize temporal literals with type (date, time, datetime, duration).
+- Major serialization code refactoring.
+- Major refactoring of tests.
+- Dependency updates.
+
 ## 0.9.0 - 2022-03-29
 - Implement better support for temporal data handling (Feature #10). ISO-based string is now the preferred way of representing temporal values.
 - Implement support for custom deserializers (Feature #28).
