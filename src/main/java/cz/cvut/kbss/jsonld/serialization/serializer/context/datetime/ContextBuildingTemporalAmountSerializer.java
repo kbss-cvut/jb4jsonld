@@ -9,15 +9,15 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.time.temporal.TemporalAmount;
 
-public class TemporalAmountSerializer implements ValueSerializer<TemporalAmount> {
+public class ContextBuildingTemporalAmountSerializer implements ValueSerializer<TemporalAmount> {
 
     @Override
     public JsonNode serialize(TemporalAmount value, SerializationContext<TemporalAmount> ctx) {
         if (ctx.getTerm() != null) {
             final JsonNode termDef = SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(),
                                                                                XSD.DURATION);
-            ctx.getJsonLdContext().registerTermMapping(ctx.getFieldName(), termDef);
+            ctx.registerTermMapping(ctx.getFieldName(), termDef);
         }
-        return JsonNodeFactory.createLiteralNode(ctx.getFieldName(), value.toString());
+        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value.toString());
     }
 }

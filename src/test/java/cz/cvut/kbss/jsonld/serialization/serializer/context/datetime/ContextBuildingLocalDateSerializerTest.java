@@ -26,9 +26,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class LocalDateSerializerTest {
+class ContextBuildingLocalDateSerializerTest {
 
-    private final LocalDateSerializer sut = new LocalDateSerializer();
+    private final ContextBuildingLocalDateSerializer sut = new ContextBuildingLocalDateSerializer();
 
     @Test
     void serializeRegistersTermDefinitionWithIdAndTypeInJsonLdContext() throws Exception {

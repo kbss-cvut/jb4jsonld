@@ -2,7 +2,7 @@ package cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime;
 
 import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.LiteralValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.SerializerUtils;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
@@ -16,6 +16,6 @@ public class TemporalAmountSerializer implements ValueSerializer<TemporalAmount>
 
     @Override
     public JsonNode serialize(TemporalAmount value, SerializationContext<TemporalAmount> ctx) {
-        return LiteralValueSerializers.serializeValueWithType(ctx.getTerm(), value.toString(), XSD.DURATION);
+        return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value.toString(), XSD.DURATION);
     }
 }

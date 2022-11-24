@@ -13,9 +13,9 @@ import java.time.temporal.TemporalAccessor;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class EpochBasedDateTimeSerializerTest {
+class ContextBuildingEpochBasedDateContextBuildingTimeSerializerTest {
 
-    private final EpochBasedDateTimeSerializer sut = new EpochBasedDateTimeSerializer();
+    private final ContextBuildingEpochBasedDateTimeSerializer sut = new ContextBuildingEpochBasedDateTimeSerializer();
 
     @Test
     void serializeRegistersTermIriInJsonLdContext() throws Exception {

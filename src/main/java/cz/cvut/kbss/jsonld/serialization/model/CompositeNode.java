@@ -56,4 +56,21 @@ public abstract class CompositeNode<T extends Collection<JsonNode>> extends Json
     public boolean isOpen() {
         return open;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CompositeNode<?> that = (CompositeNode<?>) o;
+        return open == that.open && items.equals(that.items);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(items, open);
+    }
 }

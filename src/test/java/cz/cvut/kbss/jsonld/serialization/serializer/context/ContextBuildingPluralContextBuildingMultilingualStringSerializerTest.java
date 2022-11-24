@@ -25,9 +25,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class PluralMultilingualStringSerializerTest {
+class ContextBuildingPluralContextBuildingMultilingualStringSerializerTest {
 
-    private final PluralMultilingualStringSerializer sut = new PluralMultilingualStringSerializer();
+    private final ContextBuildingPluralMultilingualStringSerializer
+            sut = new ContextBuildingPluralMultilingualStringSerializer();
 
     @Test
     void serializeRegistersTermMappingWithLanguageTypeInJsonLdContext() throws Exception {

@@ -24,8 +24,13 @@ import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.model.*;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.LiteralValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.LiteralValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.DefaultValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.IdentifierSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.MultilingualStringSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.TypesSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -42,13 +47,22 @@ import static org.mockito.Mockito.verify;
 
 public class JsonLdTreeBuilderTest {
 
-    private final JsonLdTreeBuilder treeBuilder = new JsonLdTreeBuilder(new LiteralValueSerializers());
+    private JsonLdTreeBuilder sut;
+
+    @BeforeEach
+    void setUp() {
+        final LiteralValueSerializers serializers =
+                new LiteralValueSerializers(new DefaultValueSerializer(new MultilingualStringSerializer()));
+        serializers.registerIdentifierSerializer(new IdentifierSerializer());
+        serializers.registerTypesSerializer(new TypesSerializer());
+        this.sut = new JsonLdTreeBuilder(serializers);
+    }
 
     @Test
     void openInstanceCreatesNewObjectNode() {
         final User u = Generator.generateUser();
-        treeBuilder.openObject(ctx(null, null, u));
-        assertTrue(treeBuilder.getTreeRoot() instanceof ObjectNode);
+        sut.openObject(ctx(null, null, u));
+        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
     }
 
     private static <T> SerializationContext<T> ctx(String attId, Field field, T value) {
@@ -59,9 +73,9 @@ public class JsonLdTreeBuilderTest {
     void openInstancePushesOriginalCurrentToStack() throws Exception {
         final Employee e = Generator.generateEmployee();
         final Organization org = Generator.generateOrganization();
-        treeBuilder.openObject(ctx(null, null, e));
-        treeBuilder.openObject(ctx(null, null, org));
-        assertTrue(treeBuilder.getTreeRoot() instanceof ObjectNode);
+        sut.openObject(ctx(null, null, e));
+        sut.openObject(ctx(null, null, org));
+        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
         assertFalse(getNodeStack().isEmpty());
     }
 
@@ -69,28 +83,28 @@ public class JsonLdTreeBuilderTest {
     private Stack<JsonNode> getNodeStack() throws Exception {
         final Field stackField = JsonLdTreeBuilder.class.getDeclaredField("nodeStack");
         stackField.setAccessible(true);
-        return (Stack<JsonNode>) stackField.get(treeBuilder);
+        return (Stack<JsonNode>) stackField.get(sut);
     }
 
     @Test
     void openInstanceDoesNotPushOriginalCurrentToStackWhenItIsAlreadyClosed() throws Exception {
         final Employee e = Generator.generateEmployee();
         final Organization org = Generator.generateOrganization();
-        treeBuilder.openObject(ctx(null, null, e));
+        sut.openObject(ctx(null, null, e));
         assertTrue(getNodeStack().isEmpty());
-        treeBuilder.closeObject(ctx(null, null, e));
-        treeBuilder.openObject(ctx(null, null, org));
+        sut.closeObject(ctx(null, null, e));
+        sut.openObject(ctx(null, null, org));
         assertTrue(getNodeStack().isEmpty());
     }
 
     @Test
     void visitTypesAddsSingularTypeAttributeToNode() {
         final Person p = new Person();
-        treeBuilder.openObject(ctx(null, null, p));
-        assertNotNull(treeBuilder.getTreeRoot());
-        treeBuilder.visitTypes(ctx(JsonLd.TYPE, null, Collections.singleton(Vocabulary.PERSON)));
-        assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
-        final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
+        sut.openObject(ctx(null, null, p));
+        assertNotNull(sut.getTreeRoot());
+        sut.visitTypes(ctx(JsonLd.TYPE, null, Collections.singleton(Vocabulary.PERSON)));
+        assertFalse(sut.getTreeRoot().getItems().isEmpty());
+        final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(sut.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
         assertTrue(typesNode.getItems().contains(JsonNodeFactory.createLiteralNode(Vocabulary.PERSON)));
     }
@@ -98,14 +112,14 @@ public class JsonLdTreeBuilderTest {
     @Test
     void visitTypesAddsArrayOfTypesToNode() throws Exception {
         final Employee employee = Generator.generateEmployee();
-        treeBuilder.openObject(ctx(null, null, employee));
+        sut.openObject(ctx(null, null, employee));
         assertTrue(getNodeStack().isEmpty());
-        treeBuilder.visitTypes(ctx(JsonLd.TYPE, User.class.getDeclaredField("types"),
-                                   new HashSet<>(
-                                           Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE))));
-        assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
+        sut.visitTypes(ctx(JsonLd.TYPE, User.class.getDeclaredField("types"),
+                           new HashSet<>(
+                                   Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE))));
+        assertFalse(sut.getTreeRoot().getItems().isEmpty());
         final Set<String> types = new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE));
-        final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(treeBuilder.getTreeRoot(), JsonLd.TYPE);
+        final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(sut.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
         for (String t : types) {
             assertTrue(typesNode.getItems().contains(JsonNodeFactory.createLiteralNode(t)));
@@ -115,12 +129,12 @@ public class JsonLdTreeBuilderTest {
     @Test
     void openInstanceAddsAttributeValueToItsParentObject() throws Exception {
         final Employee employee = Generator.generateEmployee();
-        treeBuilder.openObject(ctx(null, null, employee));
-        treeBuilder.openObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
-        treeBuilder.closeObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
-        treeBuilder.closeObject(ctx(null, null, employee));
+        sut.openObject(ctx(null, null, employee));
+        sut.openObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
+        sut.closeObject(ctx(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(), employee.getEmployer()));
+        sut.closeObject(ctx(null, null, employee));
         final CompositeNode<?> employerNode =
-                (CompositeNode<?>) getNode(treeBuilder.getTreeRoot(), Vocabulary.IS_MEMBER_OF);
+                (CompositeNode<?>) getNode(sut.getTreeRoot(), Vocabulary.IS_MEMBER_OF);
         assertNotNull(employerNode);
     }
 
@@ -136,11 +150,11 @@ public class JsonLdTreeBuilderTest {
     @Test
     void closeInstanceClosesNodeAndDoesNothingWhenStackIsEmpty() throws Exception {
         final User u = Generator.generateUser();
-        treeBuilder.openObject(ctx(null, null, u));
+        sut.openObject(ctx(null, null, u));
         assertTrue(getNodeStack().isEmpty());
-        assertTrue(treeBuilder.getTreeRoot() instanceof ObjectNode);
-        treeBuilder.closeObject(ctx(null, null, u));
-        assertFalse(treeBuilder.getTreeRoot().isOpen());
+        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
+        sut.closeObject(ctx(null, null, u));
+        assertFalse(sut.getTreeRoot().isOpen());
         assertTrue(getNodeStack().isEmpty());
     }
 
@@ -148,19 +162,19 @@ public class JsonLdTreeBuilderTest {
     void closeInstancePopsOriginalCurrentFromStack() throws Exception {
         final Employee e = Generator.generateEmployee();
         final Organization org = Generator.generateOrganization();
-        treeBuilder.openObject(ctx(null, null, e));
-        treeBuilder.openObject(ctx(null, null, org));
-        assertTrue(treeBuilder.getTreeRoot() instanceof ObjectNode);
+        sut.openObject(ctx(null, null, e));
+        sut.openObject(ctx(null, null, org));
+        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
         assertFalse(getNodeStack().isEmpty());
-        treeBuilder.closeObject(ctx(null, null, org));
+        sut.closeObject(ctx(null, null, org));
         assertTrue(getNodeStack().isEmpty());
-        assertNotNull(treeBuilder.getTreeRoot());
+        assertNotNull(sut.getTreeRoot());
     }
 
     @Test
     void openCollectionCreatesCollectionNode() {
-        treeBuilder.openCollection(ctx(null, null, Collections.singleton(Generator.generateEmployee())));
-        final CompositeNode<?> root = treeBuilder.getTreeRoot();
+        sut.openCollection(ctx(null, null, Collections.singleton(Generator.generateEmployee())));
+        final CompositeNode<?> root = sut.getTreeRoot();
         assertNotNull(root);
         assertTrue(root instanceof CollectionNode);
     }
@@ -171,11 +185,11 @@ public class JsonLdTreeBuilderTest {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(org);
         org.addEmployee(employee);
-        treeBuilder.openObject(ctx(null, null, org));
+        sut.openObject(ctx(null, null, org));
         assertTrue(getNodeStack().isEmpty());
-        treeBuilder.openCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
+        sut.openCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
         assertFalse(getNodeStack().isEmpty());
-        assertTrue(treeBuilder.getTreeRoot() instanceof CollectionNode);
+        assertTrue(sut.getTreeRoot() instanceof CollectionNode);
     }
 
     @Test
@@ -184,53 +198,53 @@ public class JsonLdTreeBuilderTest {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(org);
         org.addEmployee(employee);
-        treeBuilder.openObject(ctx(null, null, org));
-        treeBuilder.openCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
+        sut.openObject(ctx(null, null, org));
+        sut.openCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
         assertFalse(getNodeStack().isEmpty());
-        treeBuilder.closeCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
+        sut.closeCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
         assertTrue(getNodeStack().isEmpty());
-        assertTrue(treeBuilder.getTreeRoot() instanceof ObjectNode);
+        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
     }
 
     @Test
     void visitAttributeDoesNothingWhenFieldValueIsNull() throws Exception {
         final Employee employee = Generator.generateEmployee();
         employee.setFirstName(null);
-        treeBuilder.visitAttribute(
+        sut.visitAttribute(
                 ctx(Vocabulary.FIRST_NAME, Person.class.getDeclaredField("firstName"), employee.getFirstName()));
-        final CompositeNode<?> node = treeBuilder.getTreeRoot();
+        final CompositeNode<?> node = sut.getTreeRoot();
         assertNull(node);
     }
 
     @Test
     void visitAttributeExtractsValueOfDataPropertyAndAddsNodeToTheRoot() throws Exception {
         final User user = Generator.generateUser();
-        treeBuilder.openObject(ctx(null, null, user));
-        assertNotNull(treeBuilder.getTreeRoot());
-        treeBuilder.visitAttribute(ctx(Vocabulary.FIRST_NAME, Person.getFirstNameField(), user.getFirstName()));
-        assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
-        assertTrue(treeBuilder.getTreeRoot().getItems()
-                              .contains(JsonNodeFactory.createLiteralNode(Vocabulary.FIRST_NAME, user.getFirstName())));
+        sut.openObject(ctx(null, null, user));
+        assertNotNull(sut.getTreeRoot());
+        sut.visitAttribute(ctx(Vocabulary.FIRST_NAME, Person.getFirstNameField(), user.getFirstName()));
+        assertFalse(sut.getTreeRoot().getItems().isEmpty());
+        assertTrue(sut.getTreeRoot().getItems()
+                      .contains(JsonNodeFactory.createLiteralNode(Vocabulary.FIRST_NAME, user.getFirstName())));
     }
 
     @Test
     void visitAttributeExtractsValueOfAnnotationPropertyAndAddsNodeToTheRoot() throws Exception {
         final Organization org = Generator.generateOrganization();
-        treeBuilder.openObject(ctx(null, null, org));
-        treeBuilder.visitAttribute(ctx(RDFS.LABEL, Organization.class.getDeclaredField("name"), org.getName()));
-        assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
-        assertTrue(treeBuilder.getTreeRoot().getItems()
-                              .contains(JsonNodeFactory.createLiteralNode(RDFS.LABEL, org.getName())));
+        sut.openObject(ctx(null, null, org));
+        sut.visitAttribute(ctx(RDFS.LABEL, Organization.class.getDeclaredField("name"), org.getName()));
+        assertFalse(sut.getTreeRoot().getItems().isEmpty());
+        assertTrue(sut.getTreeRoot().getItems()
+                      .contains(JsonNodeFactory.createLiteralNode(RDFS.LABEL, org.getName())));
     }
 
     @Test
     void visitAttributeExtractsValuesOfPluralDataPropertyAndAddsCollectionNodeWithValuesToTheRoot() throws Exception {
         final Organization org = Generator.generateOrganization();
-        treeBuilder.openObject(ctx(null, null, org));
-        treeBuilder
+        sut.openObject(ctx(null, null, org));
+        sut
                 .visitAttribute(ctx(Vocabulary.BRAND, Organization.class.getDeclaredField("brands"), org.getBrands()));
-        assertFalse(treeBuilder.getTreeRoot().getItems().isEmpty());
-        final CollectionNode<?> brandsNode = (CollectionNode<?>) getNode(treeBuilder.getTreeRoot(), Vocabulary.BRAND);
+        assertFalse(sut.getTreeRoot().getItems().isEmpty());
+        final CollectionNode<?> brandsNode = (CollectionNode<?>) getNode(sut.getTreeRoot(), Vocabulary.BRAND);
         assertNotNull(brandsNode);
         assertTrue(brandsNode instanceof SetNode);
         for (String brand : org.getBrands()) {
@@ -241,14 +255,14 @@ public class JsonLdTreeBuilderTest {
     @Test
     void testBuildTreeWithRootCollection() {
         final Set<User> users = Generator.generateUsers();
-        treeBuilder.openCollection(ctx(null, null, users));
+        sut.openCollection(ctx(null, null, users));
         for (User u : users) {
-            treeBuilder.openObject(ctx(null, null, u));
-            treeBuilder.closeObject(ctx(null, null, u));
+            sut.openObject(ctx(null, null, u));
+            sut.closeObject(ctx(null, null, u));
         }
-        treeBuilder.closeCollection(ctx(null, null, users));
+        sut.closeCollection(ctx(null, null, users));
 
-        final CompositeNode<?> root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = sut.getTreeRoot();
         assertFalse(root.isOpen());
         assertEquals(users.size(), root.getItems().size());
         for (JsonNode item : root.getItems()) {
@@ -260,9 +274,9 @@ public class JsonLdTreeBuilderTest {
     @Test
     void visitIdentifierAddsIdNodeToCurrentObjectNode() throws Exception {
         final Person p = Generator.generatePerson();
-        treeBuilder.openObject(ctx(null, null, p));
-        treeBuilder.visitIdentifier(ctx(JsonLd.ID, null, p.getUri().toString()));
-        final CompositeNode<?> root = treeBuilder.getTreeRoot();
+        sut.openObject(ctx(null, null, p));
+        sut.visitIdentifier(ctx(JsonLd.ID, null, p.getUri().toString()));
+        final CompositeNode<?> root = sut.getTreeRoot();
         final Collection<JsonNode> nodes = root.getItems();
         final Optional<JsonNode> idNode = nodes.stream().filter(n -> n.getName().equals(JsonLd.ID)).findAny();
         assertTrue(idNode.isPresent());
@@ -278,10 +292,10 @@ public class JsonLdTreeBuilderTest {
             throws Exception {
         final WithAnnotation instance = new WithAnnotation();
         instance.value = Generator.generateUri();
-        treeBuilder.openObject(ctx(null, null, instance));
-        treeBuilder.visitAttribute(
+        sut.openObject(ctx(null, null, instance));
+        sut.visitAttribute(
                 ctx(Vocabulary.CHANGED_VALUE, WithAnnotation.class.getDeclaredField("value"), instance.value));
-        final CompositeNode<?> root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = sut.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(Vocabulary.CHANGED_VALUE, valueNode.getName());
@@ -299,10 +313,10 @@ public class JsonLdTreeBuilderTest {
             throws Exception {
         final WithAnnotations instance = new WithAnnotations();
         instance.values = IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet());
-        treeBuilder.openObject(ctx(null, null, instance));
-        treeBuilder.visitAttribute(
+        sut.openObject(ctx(null, null, instance));
+        sut.visitAttribute(
                 ctx(Vocabulary.CHANGED_VALUE, WithAnnotations.class.getDeclaredField("values"), instance.values));
-        final CompositeNode<?> root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = sut.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(Vocabulary.CHANGED_VALUE, valueNode.getName());
@@ -335,10 +349,10 @@ public class JsonLdTreeBuilderTest {
             }
             return i;
         }).collect(Collectors.toSet());
-        treeBuilder.openObject(ctx(null, null, instance));
-        treeBuilder.visitAttribute(
+        sut.openObject(ctx(null, null, instance));
+        sut.visitAttribute(
                 ctx(Vocabulary.CHANGED_VALUE, WithAnnotations.class.getDeclaredField("values"), instance.values));
-        final CompositeNode<?> root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = sut.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(Vocabulary.CHANGED_VALUE, valueNode.getName());
@@ -367,14 +381,14 @@ public class JsonLdTreeBuilderTest {
         instance.setLabel(new MultilingualString());
         instance.getLabel().set("en", enValue);
         instance.getLabel().set("cs", csValue);
-        treeBuilder.openObject(ctx(null, null, instance));
-        treeBuilder.visitAttribute(
+        sut.openObject(ctx(null, null, instance));
+        sut.visitAttribute(
                 ctx(RDFS.LABEL, ObjectWithMultilingualString.class.getDeclaredField("label"), instance.getLabel()));
         verifyMultilingualStringSerialization();
     }
 
     private void verifyMultilingualStringSerialization() {
-        final CompositeNode<?> root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = sut.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(RDFS.LABEL, valueNode.getName());
@@ -397,8 +411,8 @@ public class JsonLdTreeBuilderTest {
         instance.label = new MultilingualString();
         instance.label.set("en", enValue);
         instance.label.set("cs", csValue);
-        treeBuilder.openObject(ctx(null, null, instance));
-        treeBuilder.visitAttribute(
+        sut.openObject(ctx(null, null, instance));
+        sut.visitAttribute(
                 ctx(RDFS.LABEL, ObjectWithMultilingualStringAnnotation.class.getDeclaredField("label"),
                     instance.label));
         verifyMultilingualStringSerialization();
@@ -414,15 +428,15 @@ public class JsonLdTreeBuilderTest {
     @Test
     void visitAttributeSerializesPluralMultilingualStringIntoArrayOfArraysOfLangStringObjects() throws Exception {
         final ObjectWithPluralMultilingualStrings instance = initInstanceWithPluralMultilingualStrings();
-        treeBuilder.openObject(ctx(null, null, instance));
-        treeBuilder.visitAttribute(
+        sut.openObject(ctx(null, null, instance));
+        sut.visitAttribute(
                 ctx(RDFS.LABEL, ObjectWithPluralMultilingualStrings.class.getDeclaredField("labels"), instance.labels));
 
         verifyPluralMultilingualStringsSerialization(RDFS.LABEL);
     }
 
     private void verifyPluralMultilingualStringsSerialization(String property) {
-        final CompositeNode<?> root = treeBuilder.getTreeRoot();
+        final CompositeNode<?> root = sut.getTreeRoot();
         assertEquals(1, root.getItems().size());
         final JsonNode valueNode = root.getItems().iterator().next();
         assertEquals(property, valueNode.getName());
@@ -469,8 +483,8 @@ public class JsonLdTreeBuilderTest {
     void visitFieldSerializesPluralAnnotationPropertyMultilingualStringIntoArrayOfArraysOfLangStringObjects()
             throws Exception {
         final ObjectWithPluralMultilingualStrings instance = initInstanceWithPluralMultilingualStrings();
-        treeBuilder.openObject(ctx(null, null, instance));
-        treeBuilder.visitAttribute(
+        sut.openObject(ctx(null, null, instance));
+        sut.visitAttribute(
                 ctx(SKOS.ALT_LABEL, ObjectWithPluralMultilingualStrings.class.getDeclaredField("altLabels"),
                     instance.altLabels));
 

@@ -13,32 +13,34 @@
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
 import cz.cvut.kbss.jsonld.serialization.context.JsonLdContext;
+import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents the current serialization context.
  * <p>
  * This means the value being serialized, and optionally the target JSON-LD term identifier and field.
  * <p>
- * Note that term and field may not always be available, e.g., when a collection is being serialized, neither is set.
- * This keeps the visitors simple.
+ * Note that term and field may not always be available, e.g., when a collection element is being serialized, neither is
+ * set.
  * <p>
  * This class also provides access to the JSON-LD context (if it is used). However, note that for selected serialization
- * outputs the context may be just a stub with no bearing on the serialization output.
+ * methods the context may be just a stub with no bearing on the serialization output.
  *
  * @param <T> Type of the value
  */
-public class SerializationContext<T> {
+public class SerializationContext<T> implements JsonLdContext {
 
-    protected final String term;
+    private String term;
 
-    protected final Field field;
+    private final Field field;
 
-    protected final T value;
+    private final T value;
 
-    protected final JsonLdContext jsonLdContext;
+    private final JsonLdContext jsonLdContext;
 
     public SerializationContext(String term, T value, JsonLdContext jsonLdContext) {
         this(term, null, value, jsonLdContext);
@@ -80,6 +82,28 @@ public class SerializationContext<T> {
     }
 
     @Override
+    public void registerTermMapping(String term, String iri) {
+        jsonLdContext.registerTermMapping(term, iri);
+        this.term = term;
+    }
+
+    @Override
+    public void registerTermMapping(String term, JsonNode mappedNode) {
+        jsonLdContext.registerTermMapping(term, mappedNode);
+        this.term = term;
+    }
+
+    @Override
+    public Optional<JsonNode> getTermMapping(String term) {
+        return jsonLdContext.getTermMapping(term);
+    }
+
+    @Override
+    public boolean hasTermMapping(String term) {
+        return jsonLdContext.hasTermMapping(term);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -92,4 +116,5 @@ public class SerializationContext<T> {
     public int hashCode() {
         return Objects.hash(getTerm(), getField(), getValue());
     }
+
 }

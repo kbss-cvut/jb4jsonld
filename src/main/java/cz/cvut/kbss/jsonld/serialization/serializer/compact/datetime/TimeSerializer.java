@@ -3,7 +3,7 @@ package cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime;
 import cz.cvut.kbss.jopa.datatype.DateTimeUtil;
 import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.LiteralValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.SerializerUtils;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.time.LocalTime;
@@ -19,7 +19,7 @@ public class TimeSerializer {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_OFFSET_TIME;
 
     public JsonNode serialize(OffsetTime value, SerializationContext<TemporalAccessor> ctx) {
-        return LiteralValueSerializers.serializeValueWithType(ctx.getTerm(), FORMATTER.format(value), XSD.TIME);
+        return SerializerUtils.createdTypedValueNode(ctx.getTerm(), FORMATTER.format(value), XSD.TIME);
     }
 
     public JsonNode serialize(LocalTime value, SerializationContext<TemporalAccessor> ctx) {

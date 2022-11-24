@@ -60,9 +60,8 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void openObject(SerializationContext<?> ctx) {
-        final ObjectNode newCurrent =
-                ctx.getTerm() != null ? JsonNodeFactory.createObjectNode(ctx.getTerm()) :
-                JsonNodeFactory.createObjectNode();
+        final ObjectNode newCurrent = ctx.getTerm() != null ? JsonNodeFactory.createObjectNode(ctx.getTerm()) :
+                                      JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
     }
 
@@ -87,15 +86,12 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void visitIdentifier(SerializationContext<String> idCtx) {
         assert currentNode.isOpen();
-        currentNode.addItem(JsonNodeFactory.createObjectIdNode(idCtx.getTerm(), idCtx.getValue()));
+        currentNode.addItem(serializers.getIdentifierSerializer().serialize(idCtx.getValue(), idCtx));
     }
 
     @Override
     public void visitTypes(SerializationContext<Set<String>> typesCtx) {
-        final CollectionNode<?> typesNode =
-                JsonNodeFactory.createCollectionNode(typesCtx.getTerm(), typesCtx.getValue());
-        typesCtx.getValue().forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
-        currentNode.addItem(typesNode);
+        currentNode.addItem(serializers.getTypesSerializer().serialize(typesCtx.getValue(), typesCtx));
     }
 
     @Override

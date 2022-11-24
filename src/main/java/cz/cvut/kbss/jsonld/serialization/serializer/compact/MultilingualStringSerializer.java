@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * This is used to serialize {@link MultilingualString} values.
  */
-class MultilingualStringSerializer implements ValueSerializer<MultilingualString> {
+public class MultilingualStringSerializer implements ValueSerializer<MultilingualString> {
 
     @Override
     public JsonNode serialize(MultilingualString value, SerializationContext<MultilingualString> ctx) {

@@ -15,13 +15,13 @@ import java.util.Collection;
 /**
  * Default serializer for non-object property values.
  */
-public class DefaultValueSerializer implements ValueSerializer {
+public class ContextBuildingDefaultValueSerializer implements ValueSerializer {
 
     private final ValueSerializer<MultilingualString> multilingualStringValueSerializer;
-    private final ValueSerializer<Collection<MultilingualStringSerializer>> pluralMultilingualSerializer;
+    private final ValueSerializer<Collection<MultilingualString>> pluralMultilingualSerializer;
 
-    public DefaultValueSerializer(ValueSerializer<MultilingualString> multilingualStringValueSerializer,
-                                  ValueSerializer<Collection<MultilingualStringSerializer>> pluralMultilingualSerializer) {
+    public ContextBuildingDefaultValueSerializer(ValueSerializer<MultilingualString> multilingualStringValueSerializer,
+                                                 ValueSerializer<Collection<MultilingualString>> pluralMultilingualSerializer) {
         this.multilingualStringValueSerializer = multilingualStringValueSerializer;
         this.pluralMultilingualSerializer = pluralMultilingualSerializer;
     }
@@ -37,7 +37,7 @@ public class DefaultValueSerializer implements ValueSerializer {
             if (SerializerUtils.isAnnotationReference(elem, ctx)) {
                 return serializeReferences(col, ctx);
             } else if (elem instanceof MultilingualString) {
-                return pluralMultilingualSerializer.serialize((Collection<MultilingualStringSerializer>) col, ctx);
+                return pluralMultilingualSerializer.serialize((Collection<MultilingualString>) col, ctx);
             } else {
                 return serializeLiterals(col, ctx);
             }
@@ -47,15 +47,17 @@ public class DefaultValueSerializer implements ValueSerializer {
             } else if (value instanceof MultilingualString) {
                 return multilingualStringValueSerializer.serialize((MultilingualString) value, ctx);
             } else {
-                ctx.getJsonLdContext().registerTermMapping(ctx.getFieldName(), ctx.getTerm());
-                return JsonNodeFactory.createLiteralNode(ctx.getFieldName(), value);
+                if (ctx.getField() != null) {
+                    ctx.registerTermMapping(ctx.getFieldName(), ctx.getTerm());
+                }
+                return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value);
             }
         }
     }
 
     private static JsonNode serializeReferences(Collection<?> elems, SerializationContext<?> ctx) {
-        ctx.getJsonLdContext().registerTermMapping(ctx.getFieldName(), ctx.getTerm());
-        final CollectionNode<?> result = JsonNodeFactory.createCollectionNode(ctx.getFieldName(), elems);
+        ctx.registerTermMapping(ctx.getFieldName(), ctx.getTerm());
+        final CollectionNode<?> result = JsonNodeFactory.createCollectionNode(ctx.getTerm(), elems);
         elems.forEach(
                 e -> result.addItem(serializeReference(e, new SerializationContext<>(e, ctx.getJsonLdContext()))));
         return result;
@@ -64,8 +66,8 @@ public class DefaultValueSerializer implements ValueSerializer {
     private static JsonNode serializeReference(Object value, SerializationContext<?> ctx) {
         final ObjectNode node;
         if (ctx.getTerm() != null) {
-            ctx.getJsonLdContext().registerTermMapping(ctx.getFieldName(), ctx.getTerm());
-            node = JsonNodeFactory.createObjectNode(ctx.getFieldName());
+            ctx.registerTermMapping(ctx.getFieldName(), ctx.getTerm());
+            node = JsonNodeFactory.createObjectNode(ctx.getTerm());
         } else {
             node = JsonNodeFactory.createObjectNode();
         }
@@ -74,8 +76,8 @@ public class DefaultValueSerializer implements ValueSerializer {
     }
 
     private static JsonNode serializeLiterals(Collection<?> elems, SerializationContext<?> ctx) {
-        ctx.getJsonLdContext().registerTermMapping(ctx.getFieldName(), ctx.getTerm());
-        final CollectionNode<?> result = JsonNodeFactory.createCollectionNode(ctx.getFieldName(), elems);
+        ctx.registerTermMapping(ctx.getFieldName(), ctx.getTerm());
+        final CollectionNode<?> result = JsonNodeFactory.createCollectionNode(ctx.getTerm(), elems);
         elems.forEach(e -> result.addItem(JsonNodeFactory.createLiteralNode(e)));
         return result;
     }
