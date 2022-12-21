@@ -33,7 +33,7 @@ public interface InstanceVisitor {
     /**
      * Called when a new instance is discovered by the object graph traverser.
      * <p>
-     * The instances attributes will be processed immediately after this method returns.
+     * The instance attributes will be processed immediately after this method returns.
      *
      * @param ctx Current serialization context
      */
