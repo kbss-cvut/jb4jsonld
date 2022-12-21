@@ -1,5 +1,8 @@
 # JB4JSON-LD Changelog
 
+## 0.10.1 - 2022-12-21
+- Dependency updates: JOPA 0.19.3 (allows marking classes as non-entities).
+
 ## 0.10.0 - 2022-11-24
 - Add support for serialization with JSON-LD context (`@context`) (Feature #16).
 - **BREAKING CHANGE**: Serialize temporal literals with type (date, time, datetime, duration).
