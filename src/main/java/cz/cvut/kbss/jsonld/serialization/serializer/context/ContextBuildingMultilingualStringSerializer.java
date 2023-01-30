@@ -23,9 +23,9 @@ public class ContextBuildingMultilingualStringSerializer implements ValueSeriali
     }
 
     static void registerTermMapping(SerializationContext<MultilingualString> ctx) {
-        final ObjectNode mapping = JsonNodeFactory.createObjectNode();
+        final ObjectNode mapping = JsonNodeFactory.createObjectNode(ctx.getFieldName());
         mapping.addItem(JsonNodeFactory.createLiteralNode(JsonLd.ID, ctx.getTerm()));
-        mapping.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, JsonLd.LANGUAGE));
+        mapping.addItem(JsonNodeFactory.createLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE));
         ctx.registerTermMapping(ctx.getFieldName(), mapping);
     }
 }

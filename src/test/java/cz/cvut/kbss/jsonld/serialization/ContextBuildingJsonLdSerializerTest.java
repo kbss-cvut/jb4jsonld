@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.JsonLd;
@@ -187,5 +188,16 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final Model result = readJson(jsonWriter.getResult());
         final Model orgModel = toRdf(employees.get(0).getEmployer());
         assertTrue(Models.isSubset(orgModel, result));
+    }
+
+    @Test
+    void serializationBuildsCorrectlyContextBasedOnAnnotationPropertyAttribute() throws Exception {
+        final ObjectWithMultilingualString instance = new ObjectWithMultilingualString(Generator.generateUri());
+        instance.setScopeNote(MultilingualString.create("Test scope note", "en"));
+        final Map<String, ?> json = serializeAndRead(instance);
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
+        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
+        assertThat(context, hasKey(ObjectWithMultilingualString.getScopeNoteField().getName()));
     }
 }

@@ -45,7 +45,7 @@ class ContextBuildingPluralContextBuildingMultilingualStringSerializerTest {
         assertInstanceOf(ObjectNode.class, captor.getValue());
         assertThat(((ObjectNode) captor.getValue()).getItems(), hasItems(
                 JsonNodeFactory.createLiteralNode(JsonLd.ID, SKOS.ALT_LABEL),
-                JsonNodeFactory.createLiteralNode(JsonLd.TYPE, JsonLd.LANGUAGE)
+                JsonNodeFactory.createLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE)
         ));
     }
 

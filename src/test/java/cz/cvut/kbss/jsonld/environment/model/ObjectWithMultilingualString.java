@@ -16,9 +16,11 @@ package cz.cvut.kbss.jsonld.environment.model;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.Id;
+import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 
 import java.lang.reflect.Field;
@@ -32,6 +34,9 @@ public class ObjectWithMultilingualString {
 
     @OWLDataProperty(iri = RDFS.LABEL)
     private MultilingualString label;
+
+    @OWLAnnotationProperty(iri = SKOS.SCOPE_NOTE)
+    private MultilingualString scopeNote;
 
     public ObjectWithMultilingualString() {
     }
@@ -56,7 +61,19 @@ public class ObjectWithMultilingualString {
         this.label = label;
     }
 
+    public MultilingualString getScopeNote() {
+        return scopeNote;
+    }
+
+    public void setScopeNote(MultilingualString scopeNote) {
+        this.scopeNote = scopeNote;
+    }
+
     public static Field getLabelField() throws NoSuchFieldException {
         return ObjectWithMultilingualString.class.getDeclaredField("label");
+    }
+
+    public static Field getScopeNoteField() throws NoSuchFieldException {
+        return ObjectWithMultilingualString.class.getDeclaredField("scopeNote");
     }
 }

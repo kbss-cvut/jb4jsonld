@@ -39,7 +39,7 @@ class ContextBuildingMultilingualStringSerializerTest {
         assertInstanceOf(ObjectNode.class, captor.getValue());
         assertThat(((ObjectNode) captor.getValue()).getItems(), hasItems(
                 JsonNodeFactory.createLiteralNode(JsonLd.ID, RDFS.LABEL),
-                JsonNodeFactory.createLiteralNode(JsonLd.TYPE, JsonLd.LANGUAGE)
+                JsonNodeFactory.createLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE)
         ));
     }
 
