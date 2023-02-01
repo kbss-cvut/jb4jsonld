@@ -1,5 +1,10 @@
 # JB4JSON-LD Changelog
 
+## 0.10.2 - 2023-02-01
+- Improve consistency of context-based serialization output.
+- Fix an issue with serializing multilingual strings marked with `@OWLAnnotationProperty`.
+- Dependency updates: JOPA 0.20.0.
+
 ## 0.10.1 - 2022-12-21
 - Dependency updates: JOPA 0.19.3 (allows marking classes as non-entities).
 
