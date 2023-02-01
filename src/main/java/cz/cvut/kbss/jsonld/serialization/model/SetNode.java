@@ -40,7 +40,7 @@ public class SetNode extends CollectionNode<Set<JsonNode>> {
     }
 
     @Override
-    void writeValue(final JsonGenerator writer) throws IOException {
+    protected void writeValue(final JsonGenerator writer) throws IOException {
         writer.writeArrayStart();
         items.forEach(item -> item.write(writer));
         writer.writeArrayEnd();

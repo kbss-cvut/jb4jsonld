@@ -1,6 +1,7 @@
 package cz.cvut.kbss.jsonld.serialization.context;
 
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 
 import java.util.Optional;
 
@@ -29,7 +30,7 @@ public interface JsonLdContext {
      * @param term       Mapped term
      * @param mappedNode Node to which the term is mapped
      */
-    void registerTermMapping(String term, JsonNode mappedNode);
+    void registerTermMapping(String term, ObjectNode mappedNode);
 
     /**
      * Gets the mapping for the specified term (if it exists).
@@ -48,4 +49,14 @@ public interface JsonLdContext {
     default boolean hasTermMapping(String term) {
         return getTermMapping(term).isPresent();
     }
+
+    /**
+     * Gets the term mapped to the specified identifier (if it exists).
+     * <p>
+     * This method checks term mapping in this context and finds a term that is mapped to the specified identifier.
+     *
+     * @param iri Identifier the term is mapped to
+     * @return Optional mapped term, empty optional if there is no such term mapping
+     */
+    Optional<String> getMappedTerm(String iri);
 }

@@ -32,7 +32,7 @@ public class BooleanLiteralNode extends LiteralNode<Boolean> {
     }
 
     @Override
-    void writeValue(JsonGenerator writer) throws IOException {
+    protected void writeValue(JsonGenerator writer) throws IOException {
         writer.writeBoolean(value);
     }
 }

@@ -98,7 +98,7 @@ public class JsonNodeFactory {
                 n = name != null ? new ListNode(name) : new ListNode();
                 break;
             case SET:
-                n = name != null ? new SetNode(name) : new SetNode();
+                n = name != null ? createSetNode(name) : createSetNode();
                 break;
         }
         return n;
@@ -114,12 +114,20 @@ public class JsonNodeFactory {
         }
     }
 
-    public static SetNode createCollectionNodeFromArray() {
+    public static SetNode createSetNode() {
         return new SetNode();
     }
 
-    public static SetNode createCollectionNodeFromArray(String name) {
+    public static SetNode createSetNode(String name) {
         return new SetNode(name);
+    }
+
+    public static SetNode createCollectionNodeFromArray() {
+        return createSetNode();
+    }
+
+    public static SetNode createCollectionNodeFromArray(String name) {
+        return createSetNode(name);
     }
 
     public static ObjectNode createObjectNode() {

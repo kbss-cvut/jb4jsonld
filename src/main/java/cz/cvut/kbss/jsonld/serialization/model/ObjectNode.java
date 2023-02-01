@@ -44,7 +44,7 @@ public class ObjectNode extends CompositeNode<List<JsonNode>> {
     }
 
     @Override
-    void writeValue(JsonGenerator writer) throws IOException {
+    protected void writeValue(JsonGenerator writer) throws IOException {
         writer.writeObjectStart();
         items.forEach(child -> child.write(writer));
         writer.writeObjectEnd();

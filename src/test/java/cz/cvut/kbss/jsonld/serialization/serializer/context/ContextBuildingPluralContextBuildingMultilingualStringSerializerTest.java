@@ -39,11 +39,10 @@ class ContextBuildingPluralContextBuildingMultilingualStringSerializerTest {
         sut.serialize(value,
                       new SerializationContext<>(SKOS.ALT_LABEL, ObjectWithPluralMultilingualString.getAltLabelField(),
                                                  value, jsonLdCtx));
-        final ArgumentCaptor<JsonNode> captor = ArgumentCaptor.forClass(JsonNode.class);
+        final ArgumentCaptor<ObjectNode> captor = ArgumentCaptor.forClass(ObjectNode.class);
         verify(jsonLdCtx).registerTermMapping(eq(ObjectWithPluralMultilingualString.getAltLabelField().getName()),
                                               captor.capture());
-        assertInstanceOf(ObjectNode.class, captor.getValue());
-        assertThat(((ObjectNode) captor.getValue()).getItems(), hasItems(
+        assertThat(captor.getValue().getItems(), hasItems(
                 JsonNodeFactory.createLiteralNode(JsonLd.ID, SKOS.ALT_LABEL),
                 JsonNodeFactory.createLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE)
         ));

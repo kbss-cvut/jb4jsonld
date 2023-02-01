@@ -41,7 +41,7 @@ public class ListNode extends CollectionNode<List<JsonNode>> {
     }
 
     @Override
-    void writeValue(final JsonGenerator writer) throws IOException {
+    protected void writeValue(final JsonGenerator writer) throws IOException {
         writer.writeObjectStart();
         writer.writeFieldName(JsonLd.LIST);
         writer.writeArrayStart();

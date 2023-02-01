@@ -21,7 +21,7 @@ import java.time.temporal.TemporalAccessor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -38,10 +38,9 @@ class ContextBuildingLocalDateSerializerTest {
         final SerializationContext<TemporalAccessor> serializationContext =
                 new SerializationContext<>(Vocabulary.DATE_CREATED, field, value, ctx);
         sut.serialize(value, serializationContext);
-        final ArgumentCaptor<JsonNode> captor = ArgumentCaptor.forClass(JsonNode.class);
+        final ArgumentCaptor<ObjectNode> captor = ArgumentCaptor.forClass(ObjectNode.class);
         verify(ctx).registerTermMapping(eq(field.getName()), captor.capture());
-        assertInstanceOf(ObjectNode.class, captor.getValue());
-        assertThat(((ObjectNode) captor.getValue()).getItems(), hasItems(
+        assertThat(captor.getValue().getItems(), hasItems(
                 JsonNodeFactory.createLiteralNode(JsonLd.ID, Vocabulary.DATE_CREATED),
                 JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.DATE)
         ));

@@ -5,6 +5,7 @@ import cz.cvut.kbss.jsonld.exception.AmbiguousTermMappingException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.model.StringLiteralNode;
 
 import java.util.*;
 
@@ -33,7 +34,7 @@ public class MappingJsonLdContext implements JsonLdContext {
     public void registerTermMapping(String term, String iri) {
         Objects.requireNonNull(term);
         Objects.requireNonNull(iri);
-        final JsonNode value = JsonNodeFactory.createLiteralNode(term, iri);
+        final JsonNode value = JsonNodeFactory.createStringLiteralNode(term, iri);
         verifyMappingUnique(term, value);
         mapping.put(term, value);
     }
@@ -54,7 +55,7 @@ public class MappingJsonLdContext implements JsonLdContext {
      * @param mappedNode Object node to which the term is mapped
      * @throws AmbiguousTermMappingException When term is already mapped to a different IRI
      */
-    public void registerTermMapping(String term, JsonNode mappedNode) {
+    public void registerTermMapping(String term, ObjectNode mappedNode) {
         Objects.requireNonNull(term);
         Objects.requireNonNull(mappedNode);
         verifyMappingUnique(term, mappedNode);
@@ -72,6 +73,29 @@ public class MappingJsonLdContext implements JsonLdContext {
     @Override
     public boolean hasTermMapping(String term) {
         return mapping.containsKey(term);
+    }
+
+    @Override
+    public Optional<String> getMappedTerm(String iri) {
+        Objects.requireNonNull(iri);
+        for (Map.Entry<String, JsonNode> e : mapping.entrySet()) {
+            final Optional<String> id = extractId(e.getValue());
+            if (id.isPresent() && iri.equals(id.get())) {
+                return Optional.of(e.getKey());
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<String> extractId(JsonNode node) {
+        assert node instanceof StringLiteralNode || node instanceof ObjectNode;
+        if (node instanceof StringLiteralNode) {
+            return Optional.of(((StringLiteralNode) node).getValue());
+        } else {
+            final ObjectNode on = (ObjectNode) node;
+            return on.getItems().stream().filter(item -> JsonLd.ID.equals(item.getName()))
+                     .map(idNode -> ((StringLiteralNode) idNode).getValue()).findAny();
+        }
     }
 
     /**

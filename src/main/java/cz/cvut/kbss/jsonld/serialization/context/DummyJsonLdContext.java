@@ -1,6 +1,7 @@
 package cz.cvut.kbss.jsonld.serialization.context;
 
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 
 import java.util.Optional;
 
@@ -19,7 +20,7 @@ public class DummyJsonLdContext implements JsonLdContext {
     }
 
     @Override
-    public void registerTermMapping(String term, JsonNode mappedNode) {
+    public void registerTermMapping(String term, ObjectNode mappedNode) {
         // Do nothing
     }
 
@@ -31,5 +32,10 @@ public class DummyJsonLdContext implements JsonLdContext {
     @Override
     public boolean hasTermMapping(String term) {
         return false;
+    }
+
+    @Override
+    public Optional<String> getMappedTerm(String iri) {
+        return Optional.empty();
     }
 }

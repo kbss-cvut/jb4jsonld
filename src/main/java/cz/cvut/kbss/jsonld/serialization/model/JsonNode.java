@@ -54,11 +54,11 @@ public abstract class JsonNode {
         }
     }
 
-    void writeKey(JsonGenerator writer) throws IOException {
+    protected void writeKey(JsonGenerator writer) throws IOException {
         writer.writeFieldName(name);
     }
 
-    abstract void writeValue(JsonGenerator writer) throws IOException;
+    abstract protected void writeValue(JsonGenerator writer) throws IOException;
 
     @Override
     public String toString() {

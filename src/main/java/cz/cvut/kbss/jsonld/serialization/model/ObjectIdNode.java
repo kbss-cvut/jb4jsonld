@@ -36,7 +36,7 @@ public class ObjectIdNode extends JsonNode {
     }
 
     @Override
-    void writeValue(JsonGenerator writer) throws IOException {
+    protected void writeValue(JsonGenerator writer) throws IOException {
         writer.writeString(identifier);
     }
 

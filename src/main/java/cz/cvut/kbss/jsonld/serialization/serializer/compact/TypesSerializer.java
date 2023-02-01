@@ -11,7 +11,7 @@ import java.util.Set;
 public class TypesSerializer implements ValueSerializer<Set<String>> {
     @Override
     public JsonNode serialize(Set<String> value, SerializationContext<Set<String>> ctx) {
-        final CollectionNode<?> typesNode = JsonNodeFactory.createCollectionNode(ctx.getTerm(), value);
+        final CollectionNode<?> typesNode = JsonNodeFactory.createSetNode(ctx.getTerm());
         value.forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
         return typesNode;
     }

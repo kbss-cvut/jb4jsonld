@@ -14,6 +14,7 @@ package cz.cvut.kbss.jsonld.serialization.traversal;
 
 import cz.cvut.kbss.jsonld.serialization.context.JsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
@@ -88,7 +89,7 @@ public class SerializationContext<T> implements JsonLdContext {
     }
 
     @Override
-    public void registerTermMapping(String term, JsonNode mappedNode) {
+    public void registerTermMapping(String term, ObjectNode mappedNode) {
         jsonLdContext.registerTermMapping(term, mappedNode);
         this.term = term;
     }
@@ -101,6 +102,11 @@ public class SerializationContext<T> implements JsonLdContext {
     @Override
     public boolean hasTermMapping(String term) {
         return jsonLdContext.hasTermMapping(term);
+    }
+
+    @Override
+    public Optional<String> getMappedTerm(String iri) {
+        return jsonLdContext.getMappedTerm(iri);
     }
 
     @Override

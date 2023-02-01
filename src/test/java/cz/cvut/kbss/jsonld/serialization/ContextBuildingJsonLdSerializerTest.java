@@ -200,4 +200,15 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
         assertThat(context, hasKey(ObjectWithMultilingualString.getScopeNoteField().getName()));
     }
+
+    @Test
+    void serializationUsesMappedTermForTypesWhenItIsRegisteredInReferencedObject() throws Exception {
+        final Study instance = new Study();
+        instance.setUri(Generator.generateUri());
+        final Employee emp = Generator.generateEmployee();
+        instance.setMembers(Collections.singleton(emp));
+        final Map<String, ?> json = serializeAndRead(instance);
+        assertThat(json, hasKey("types"));
+        assertEquals(Collections.singletonList(Vocabulary.STUDY), json.get("types"));
+    }
 }
