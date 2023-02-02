@@ -783,4 +783,13 @@ class ExpandedJsonLdDeserializerTest {
             return null;
         }
     }
+
+    @Test
+    void deserializeHandlesObjectWithOnlyType() throws Exception {
+        final String input = "{ \"@type\": [\"" + Vocabulary.USER + "\"]}";
+        final Object jsonObject = JsonUtils.fromString(input);
+        final Object expanded = JsonLdProcessor.expand(jsonObject);
+        final User result = sut.deserialize(expanded, User.class);
+        assertNotNull(result);
+    }
 }
