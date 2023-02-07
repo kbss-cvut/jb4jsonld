@@ -1,6 +1,11 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
+import cz.cvut.kbss.jopa.model.annotations.Id;
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.JsonLd;
@@ -16,6 +21,7 @@ import org.eclipse.rdf4j.model.util.Models;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -207,8 +213,47 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         instance.setUri(Generator.generateUri());
         final Employee emp = Generator.generateEmployee();
         instance.setMembers(Collections.singleton(emp));
+
         final Map<String, ?> json = serializeAndRead(instance);
         assertThat(json, hasKey("types"));
         assertEquals(Collections.singletonList(Vocabulary.STUDY), json.get("types"));
+    }
+
+    @Test
+    void serializationCreatesEmbeddedContextToOverrideIncompatibleTermMapping() throws Exception {
+        final StudyWithTitle instance = new StudyWithTitle();
+        instance.uri = Generator.generateUri();
+        instance.name = "Test study";
+        instance.organization = Generator.generateOrganization();
+
+        final Map<String, ?> json = serializeAndRead(instance);
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
+        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
+        assertEquals(DC.Terms.TITLE, context.get("name"));
+        assertThat(json, hasKey(JsonLd.GRAPH));
+        assertInstanceOf(Map.class, json.get(JsonLd.GRAPH));
+        final Map<String, ?> study = (Map<String, JsonNode>) json.get(JsonLd.GRAPH);
+        assertThat(study, hasKey("organization"));
+        assertInstanceOf(Map.class, study.get("organization"));
+        final Map<String, ?> organization = (Map<String, ?>) study.get("organization");
+        assertThat(organization, hasKey(JsonLd.CONTEXT));
+        assertInstanceOf(Map.class, organization.get(JsonLd.CONTEXT));
+        final Map<String, ?> embeddedCtx = (Map<String, ?>) organization.get(JsonLd.CONTEXT);
+        assertEquals(RDFS.LABEL, embeddedCtx.get("name"));
+    }
+
+    @OWLClass(iri = Vocabulary.STUDY)
+    private static class StudyWithTitle {
+
+        @Id
+        private URI uri;
+
+        // Organization name uses rdfs:label
+        @OWLDataProperty(iri = DC.Terms.TITLE)
+        private String name;
+
+        @OWLObjectProperty(iri = Vocabulary.HAS_PARTICIPANT)
+        private Organization organization;
     }
 }
