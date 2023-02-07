@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization.context;
 
+import cz.cvut.kbss.jsonld.exception.AmbiguousTermMappingException;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 
 import java.util.*;
@@ -28,12 +29,19 @@ class EmbeddedTermMappingHolder extends TermMappingHolder {
         if (!isRoot() && !parentContext.hasTermMapping(term)) {
             parentContext.registerTermMapping(term, mappedNode);
         } else {
+            verifyMappingUnique(term, mappedNode);
             mapping.put(term, mappedNode);
         }
     }
 
-    private boolean isRoot() {
+    boolean isRoot() {
         return parentContext == DummyTermMappingHolder.INSTANCE;
+    }
+
+    private void verifyMappingUnique(String term, JsonNode value) {
+        if (mapping.containsKey(term) && !Objects.equals(mapping.get(term), value)) {
+            throw new AmbiguousTermMappingException("Context already contains mapping for term '" + term + "'.");
+        }
     }
 
     @Override

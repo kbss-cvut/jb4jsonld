@@ -4,10 +4,12 @@ import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.exception.AmbiguousTermMappingException;
 import cz.cvut.kbss.jsonld.serialization.context.JsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.context.JsonLdContextFactory;
 import cz.cvut.kbss.jsonld.serialization.context.MappingJsonLdContextFactory;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
+import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.LiteralValueSerializers;
@@ -24,6 +26,7 @@ import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContextFactory;
 import java.time.*;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * JSON-LD serializer outputting compacted JSON-LD with context.
@@ -77,8 +80,18 @@ public class ContextBuildingJsonLdSerializer extends JsonLdSerializer {
         final JsonLdTreeBuilder treeBuilder = initTreeBuilder(traverser, jsonLdContextFactory);
         traverser.setVisitor(treeBuilder);
         traverser.traverse(root);
+        ensureContextNodeNotPresent(treeBuilder.getTreeRoot(), rootContext.getContextNode());
         treeBuilder.getTreeRoot().prependItem(rootContext.getContextNode());
         return treeBuilder.getTreeRoot();
+    }
+
+    private void ensureContextNodeNotPresent(CompositeNode<?> root, JsonNode rootCtx) {
+        final Optional<JsonNode> ctxNode =
+                root.getItems().stream().filter(n -> JsonLd.CONTEXT.equals(n.getName())).findAny();
+        if (ctxNode.isPresent()) {
+            throw new AmbiguousTermMappingException(
+                    "Unable to build context hierarchy. Attempted to add two root contexts. Original root context: " + rootCtx + ", conflicting: " + ctxNode.get());
+        }
     }
 
     private JsonLdTreeBuilder initTreeBuilder(ObjectGraphTraverser traverser,

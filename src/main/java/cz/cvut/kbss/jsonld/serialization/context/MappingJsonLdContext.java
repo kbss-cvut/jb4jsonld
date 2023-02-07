@@ -31,7 +31,7 @@ public class MappingJsonLdContext implements JsonLdContext {
     @Override
     public void registerTermMapping(String term, String iri) {
         final JsonNode value = JsonNodeFactory.createStringLiteralNode(term, iri);
-        if (!mappingHolder.canRegisterTermMapping(term, value)) {
+        if (!mappingHolder.canRegisterTermMapping(term, value) && !mappingHolder.isRoot()) {
             this.mappingHolder = new EmbeddedTermMappingHolder(mappingHolder);
         }
         mappingHolder.registerTermMapping(term, value);
@@ -39,7 +39,7 @@ public class MappingJsonLdContext implements JsonLdContext {
 
     @Override
     public void registerTermMapping(String term, ObjectNode mappedNode) {
-        if (!mappingHolder.canRegisterTermMapping(term, mappedNode)) {
+        if (!mappingHolder.canRegisterTermMapping(term, mappedNode) && !mappingHolder.isRoot()) {
             this.mappingHolder = new EmbeddedTermMappingHolder(mappingHolder);
         }
         mappingHolder.registerTermMapping(term, mappedNode);
