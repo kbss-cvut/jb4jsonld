@@ -213,7 +213,10 @@ public class BeanAnnotationProcessor {
                 }
             }
         }
-        return new ArrayList<>(fields);
+        final List<Field> result = new ArrayList<>(fields);
+        // Move object properties to the end
+        result.sort(Comparator.comparing(BeanAnnotationProcessor::isObjectProperty));
+        return result;
     }
 
     /**
