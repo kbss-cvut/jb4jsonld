@@ -72,7 +72,7 @@ public class ObjectGraphTraverser {
             if (item == null) {
                 continue;
             }
-            traverseSingular(serializationContextFactory.create(item));
+            traverseSingular(serializationContextFactory.create(item, ctx));
         }
         closeCollection(ctx);
     }
@@ -87,16 +87,17 @@ public class ObjectGraphTraverser {
             return;
         }
         openInstance(ctx);
-        visitIdentifier(ctx.getValue());
+        visitIdentifier(ctx);
         if (!BeanClassProcessor.isIdentifierType(ctx.getValue().getClass()) && firstEncounter) {
-            visitTypes(ctx.getValue());
-            serializeFields(ctx.getValue());
-            serializePropertiesField(ctx.getValue());
+            visitTypes(ctx);
+            serializeFields(ctx);
+            serializePropertiesField(ctx);
         }
         closeInstance(ctx);
     }
 
-    private void serializeFields(Object instance) {
+    private void serializeFields(SerializationContext<?> ctx) {
+        final Object instance = ctx.getValue();
         final List<Field> fieldsToSerialize =
                 orderAttributesForSerialization(BeanAnnotationProcessor.getSerializableFields(instance),
                                                 BeanAnnotationProcessor.getAttributeOrder(instance.getClass()));
@@ -105,8 +106,8 @@ public class ObjectGraphTraverser {
                 continue;
             }
             Object value = BeanClassProcessor.getFieldValue(f, instance);
-            final SerializationContext<?> ctx = serializationContextFactory.createForAttribute(f, value);
-            visitAttribute(ctx);
+            final SerializationContext<?> fieldCtx = serializationContextFactory.createForAttribute(f, value, ctx);
+            visitAttribute(fieldCtx);
         }
     }
 
@@ -132,7 +133,8 @@ public class ObjectGraphTraverser {
         return result;
     }
 
-    private void serializePropertiesField(Object instance) {
+    private void serializePropertiesField(SerializationContext<?> ctx) {
+        final Object instance = ctx.getValue();
         if (!BeanAnnotationProcessor.hasPropertiesField(instance.getClass())) {
             return;
         }
@@ -144,7 +146,7 @@ public class ObjectGraphTraverser {
         assert value instanceof Map;
         new PropertiesTraverser(this)
                 .traverseProperties(
-                        serializationContextFactory.createForProperties(propertiesField, (Map<?, ?>) value));
+                        serializationContextFactory.createForProperties(propertiesField, (Map<?, ?>) value, ctx));
     }
 
     public boolean visitInstance(SerializationContext<?> ctx) {
@@ -172,26 +174,28 @@ public class ObjectGraphTraverser {
         visitor.closeObject(ctx);
     }
 
-    public void visitIdentifier(Object instance) {
+    public void visitIdentifier(SerializationContext<?> ctx) {
+        final Object identifier = ctx.getValue();
         final String id;
         final SerializationContext<String> idContext;
-        if (BeanClassProcessor.isIdentifierType(instance.getClass())) {
-            id = instance.toString();
-            idContext = serializationContextFactory.createForIdentifier(null, id);
+        if (BeanClassProcessor.isIdentifierType(identifier.getClass())) {
+            id = identifier.toString();
+            idContext = serializationContextFactory.createForIdentifier(null, id, ctx);
         } else {
-            id = resolveIdentifier(instance);
+            id = resolveIdentifier(identifier);
             idContext = serializationContextFactory.createForIdentifier(
-                    BeanAnnotationProcessor.getIdentifierField(instance.getClass()).orElse(null), id);
-            knownInstances.put(instance, id);
+                    BeanAnnotationProcessor.getIdentifierField(identifier.getClass()).orElse(null), id, ctx);
+            knownInstances.put(identifier, id);
         }
         visitor.visitIdentifier(idContext);
     }
 
-    public void visitTypes(Object instance) {
+    public void visitTypes(SerializationContext<?> ctx) {
+        final Object instance = ctx.getValue();
         final Set<String> resolvedTypes = typeResolver.resolveTypes(instance);
         assert !resolvedTypes.isEmpty();
         final SerializationContext<Set<String>> typesContext = serializationContextFactory.createForTypes(
-                BeanAnnotationProcessor.getTypesField(instance.getClass()).orElse(null), resolvedTypes);
+                BeanAnnotationProcessor.getTypesField(instance.getClass()).orElse(null), resolvedTypes, ctx);
         visitor.visitTypes(typesContext);
     }
 

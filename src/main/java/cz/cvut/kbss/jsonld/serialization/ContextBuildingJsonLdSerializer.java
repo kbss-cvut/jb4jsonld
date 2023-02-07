@@ -4,7 +4,9 @@ import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.serialization.context.MappingJsonLdContext;
+import cz.cvut.kbss.jsonld.serialization.context.JsonLdContext;
+import cz.cvut.kbss.jsonld.serialization.context.JsonLdContextFactory;
+import cz.cvut.kbss.jsonld.serialization.context.MappingJsonLdContextFactory;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
@@ -64,37 +66,40 @@ public class ContextBuildingJsonLdSerializer extends JsonLdSerializer {
 
     @Override
     protected JsonNode buildJsonTree(Object root) {
-        final MappingJsonLdContext context = new MappingJsonLdContext();
+        final JsonLdContextFactory jsonLdContextFactory = new MappingJsonLdContextFactory();
+        final JsonLdContext rootContext = jsonLdContextFactory.createJsonLdContext();
         final ObjectGraphTraverser traverser =
-                new ObjectGraphTraverser(new SerializationContextFactory(context));
+                new ObjectGraphTraverser(new SerializationContextFactory(rootContext));
         traverser.setRequireId(configuration().is(ConfigParam.REQUIRE_ID));
         if (root instanceof Collection) {
-            return buildObjectWithContextAndGraph(traverser, context, (Collection<?>) root);
+            return buildObjectWithContextAndGraph(traverser, rootContext, jsonLdContextFactory, (Collection<?>) root);
         }
-        final JsonLdTreeBuilder treeBuilder = initTreeBuilder(traverser);
+        final JsonLdTreeBuilder treeBuilder = initTreeBuilder(traverser, jsonLdContextFactory);
         traverser.setVisitor(treeBuilder);
         traverser.traverse(root);
-        treeBuilder.getTreeRoot().prependItem(context.getContextNode());
+        treeBuilder.getTreeRoot().prependItem(rootContext.getContextNode());
         return treeBuilder.getTreeRoot();
     }
 
-    private JsonLdTreeBuilder initTreeBuilder(ObjectGraphTraverser traverser) {
+    private JsonLdTreeBuilder initTreeBuilder(ObjectGraphTraverser traverser,
+                                              JsonLdContextFactory jsonLdContextFactory) {
         return new JsonLdTreeBuilder(new ObjectGraphValueSerializers(serializers,
                                                                      new ContextBuildingObjectPropertyValueSerializer(
-                                                                             traverser)));
+                                                                             traverser)), jsonLdContextFactory);
     }
 
-    private JsonNode buildObjectWithContextAndGraph(ObjectGraphTraverser traverser, MappingJsonLdContext context,
+    private JsonNode buildObjectWithContextAndGraph(ObjectGraphTraverser traverser, JsonLdContext rootContext,
+                                                    JsonLdContextFactory jsonLdContextFactory,
                                                     Collection<?> items) {
         final CollectionNode<?> graph = JsonNodeFactory.createCollectionNodeFromArray(JsonLd.GRAPH);
         items.stream().map(item -> {
-            final JsonLdTreeBuilder treeBuilder = initTreeBuilder(traverser);
+            final JsonLdTreeBuilder treeBuilder = initTreeBuilder(traverser, jsonLdContextFactory);
             traverser.setVisitor(treeBuilder);
             traverser.traverse(item);
             return treeBuilder.getTreeRoot();
         }).forEach(graph::addItem);
         final ObjectNode result = JsonNodeFactory.createObjectNode();
-        result.addItem(context.getContextNode());
+        result.addItem(rootContext.getContextNode());
         result.addItem(graph);
         return result;
     }

@@ -59,4 +59,22 @@ public interface JsonLdContext {
      * @return Optional mapped term, empty optional if there is no such term mapping
      */
     Optional<String> getMappedTerm(String iri);
+
+    /**
+     * Checks whether this particular JSON-LD context is empty.
+     * <p>
+     * Term mapping inherited from any parent contexts is not considered.
+     *
+     * @return {@code true} if this context is empty, {@code false} otherwise
+     */
+    boolean isCurrentEmpty();
+
+    /**
+     * Returns an {@link ObjectNode} representing this context.
+     * <p>
+     * The result can thus be added to serialization output.
+     *
+     * @return {@code JsonNode} with registered mappings
+     */
+    ObjectNode getContextNode();
 }

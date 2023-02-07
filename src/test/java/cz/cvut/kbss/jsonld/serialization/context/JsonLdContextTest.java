@@ -2,14 +2,16 @@ package cz.cvut.kbss.jsonld.serialization.context;
 
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Person;
-import cz.cvut.kbss.jsonld.exception.AmbiguousTermMappingException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JsonLdContextTest {
@@ -20,15 +22,10 @@ class JsonLdContextTest {
     void registerTermMappingWithIriAddsTermMappingToLiteralJsonNode() throws Exception {
         final String term = Person.getFirstNameField().getName();
         sut.registerTermMapping(term, Vocabulary.FIRST_NAME);
-        assertThat(sut.getMapping().keySet(), hasItem(term));
-        assertEquals(sut.getMapping().get(term), JsonNodeFactory.createLiteralNode(term, Vocabulary.FIRST_NAME));
-    }
-
-    @Test
-    void registerTermMappingWithIriThrowsAmbiguousTermMappingExceptionWhenTermIsAlreadyRegisteredToDifferentIri() throws Exception {
-        final String term = Person.getFirstNameField().getName();
-        sut.registerTermMapping(term, Vocabulary.FIRST_NAME);
-        assertThrows(AmbiguousTermMappingException.class, () -> sut.registerTermMapping(term, Vocabulary.LAST_NAME));
+        assertTrue(sut.hasTermMapping(term));
+        final Optional<JsonNode> result = sut.getTermMapping(term);
+        assertTrue(result.isPresent());
+        assertEquals(result.get(), JsonNodeFactory.createLiteralNode(term, Vocabulary.FIRST_NAME));
     }
 
     @Test

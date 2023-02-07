@@ -12,6 +12,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jsonld.serialization.context.JsonLdContextFactory;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.CompositeNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -35,9 +36,11 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     private CompositeNode<?> currentNode;
 
     private final ValueSerializers serializers;
+    private final JsonLdContextFactory jsonLdContextFactory;
 
-    public JsonLdTreeBuilder(ValueSerializers serializers) {
+    public JsonLdTreeBuilder(ValueSerializers serializers, JsonLdContextFactory jsonLdContextFactory) {
         this.serializers = serializers;
+        this.jsonLdContextFactory = jsonLdContextFactory;
     }
 
     @Override
@@ -63,6 +66,8 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
         final ObjectNode newCurrent = ctx.getTerm() != null ? JsonNodeFactory.createObjectNode(ctx.getTerm()) :
                                       JsonNodeFactory.createObjectNode();
         openNewNode(newCurrent);
+        // Prepare to create new JSON-LD context when an object is open
+        ctx.setJsonLdContext(jsonLdContextFactory.createJsonLdContext(ctx.getJsonLdContext()));
     }
 
     private void openNewNode(CompositeNode<?> newNode) {
@@ -77,6 +82,9 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void closeObject(SerializationContext<?> ctx) {
+        if (!ctx.isCurrentEmpty()) {
+            currentNode.prependItem(ctx.getContextNode());
+        }
         currentNode.close();
         if (!nodeStack.empty()) {
             this.currentNode = nodeStack.pop();

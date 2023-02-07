@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization.context;
 
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 
@@ -10,7 +11,7 @@ import java.util.Optional;
  * <p>
  * It can be used in serialization that does not create a JSON-LD context (e.g., expanded, context-less compacted).
  */
-public class DummyJsonLdContext implements JsonLdContext {
+public class DummyJsonLdContext implements JsonLdContext, JsonLdContextFactory {
 
     public static final DummyJsonLdContext INSTANCE = new DummyJsonLdContext();
 
@@ -37,5 +38,25 @@ public class DummyJsonLdContext implements JsonLdContext {
     @Override
     public Optional<String> getMappedTerm(String iri) {
         return Optional.empty();
+    }
+
+    @Override
+    public boolean isCurrentEmpty() {
+        return true;
+    }
+
+    @Override
+    public ObjectNode getContextNode() {
+        return new ObjectNode(JsonLd.CONTEXT);
+    }
+
+    @Override
+    public JsonLdContext createJsonLdContext() {
+        return INSTANCE;
+    }
+
+    @Override
+    public JsonLdContext createJsonLdContext(JsonLdContext parent) {
+        return INSTANCE;
     }
 }
