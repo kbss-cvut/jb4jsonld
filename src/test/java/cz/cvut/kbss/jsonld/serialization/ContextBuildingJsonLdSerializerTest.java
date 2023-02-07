@@ -231,12 +231,9 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
         final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
         assertEquals(DC.Terms.TITLE, context.get("name"));
-        assertThat(json, hasKey(JsonLd.GRAPH));
-        assertInstanceOf(Map.class, json.get(JsonLd.GRAPH));
-        final Map<String, ?> study = (Map<String, JsonNode>) json.get(JsonLd.GRAPH);
-        assertThat(study, hasKey("organization"));
-        assertInstanceOf(Map.class, study.get("organization"));
-        final Map<String, ?> organization = (Map<String, ?>) study.get("organization");
+        assertThat(json, hasKey("organization"));
+        assertInstanceOf(Map.class, json.get("organization"));
+        final Map<String, ?> organization = (Map<String, ?>) json.get("organization");
         assertThat(organization, hasKey(JsonLd.CONTEXT));
         assertInstanceOf(Map.class, organization.get(JsonLd.CONTEXT));
         final Map<String, ?> embeddedCtx = (Map<String, ?>) organization.get(JsonLd.CONTEXT);
