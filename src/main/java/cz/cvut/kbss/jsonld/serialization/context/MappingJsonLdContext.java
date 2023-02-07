@@ -20,6 +20,16 @@ public class MappingJsonLdContext implements JsonLdContext {
 
     private final Map<String, JsonNode> mapping = new HashMap<>();
 
+    private final JsonLdContext parentContext;
+
+    public MappingJsonLdContext() {
+        this.parentContext = new DummyJsonLdContext();
+    }
+
+    public MappingJsonLdContext(JsonLdContext parentContext) {
+        this.parentContext = parentContext;
+    }
+
     /**
      * Registers the specified term mapping in this context.
      * <p>
@@ -67,12 +77,12 @@ public class MappingJsonLdContext implements JsonLdContext {
     }
 
     public Optional<JsonNode> getTermMapping(String term) {
-        return Optional.ofNullable(mapping.get(term));
+        return mapping.containsKey(term) ? Optional.of(mapping.get(term)) : parentContext.getTermMapping(term);
     }
 
     @Override
     public boolean hasTermMapping(String term) {
-        return mapping.containsKey(term);
+        return mapping.containsKey(term) || parentContext.hasTermMapping(term);
     }
 
     @Override
