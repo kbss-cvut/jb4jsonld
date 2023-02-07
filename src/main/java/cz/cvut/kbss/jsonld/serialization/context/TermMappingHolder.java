@@ -31,6 +31,8 @@ abstract class TermMappingHolder {
 
     abstract boolean isEmpty();
 
+    abstract boolean isRoot();
+
     public Optional<String> getMappedTerm(String iri) {
         Objects.requireNonNull(iri);
         for (Map.Entry<String, JsonNode> e : getMapping().entrySet()) {

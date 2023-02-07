@@ -46,4 +46,9 @@ class WriteThroughTermMappingHolder extends TermMappingHolder {
     boolean isEmpty() {
         return true;
     }
+
+    @Override
+    boolean isRoot() {
+        return false;
+    }
 }

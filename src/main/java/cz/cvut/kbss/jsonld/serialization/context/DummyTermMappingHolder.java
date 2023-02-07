@@ -48,4 +48,9 @@ public class DummyTermMappingHolder extends TermMappingHolder {
     boolean isEmpty() {
         return true;
     }
+
+    @Override
+    boolean isRoot() {
+        return true;
+    }
 }
