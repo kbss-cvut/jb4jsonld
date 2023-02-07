@@ -49,6 +49,10 @@ public abstract class CompositeNode<T extends Collection<JsonNode>> extends Json
         return Collections.unmodifiableCollection(items);
     }
 
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
     public void close() {
         this.open = false;
     }
