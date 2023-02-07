@@ -40,7 +40,7 @@ class CustomSerializersTest {
     @BeforeEach
     void setUp() {
         this.serializers = new LiteralValueSerializers(new DefaultValueSerializer(new MultilingualStringSerializer()));
-        this.treeBuilder = new JsonLdTreeBuilder(serializers);
+        this.treeBuilder = new JsonLdTreeBuilder(serializers, DummyJsonLdContext.INSTANCE);
     }
 
     @Test

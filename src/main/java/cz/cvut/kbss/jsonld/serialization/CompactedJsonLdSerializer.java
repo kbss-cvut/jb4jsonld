@@ -74,7 +74,8 @@ public class CompactedJsonLdSerializer extends JsonLdSerializer {
         traverser.setRequireId(configuration().is(ConfigParam.REQUIRE_ID));
         final JsonLdTreeBuilder treeBuilder =
                 new JsonLdTreeBuilder(
-                        new ObjectGraphValueSerializers(serializers, new ObjectPropertyValueSerializer(traverser)));
+                        new ObjectGraphValueSerializers(serializers, new ObjectPropertyValueSerializer(traverser)),
+                        DummyJsonLdContext.INSTANCE);
         traverser.setVisitor(treeBuilder);
         traverser.traverse(root);
         return treeBuilder.getTreeRoot();

@@ -41,7 +41,7 @@ public class SerializationContext<T> implements JsonLdContext {
 
     private final T value;
 
-    private final JsonLdContext jsonLdContext;
+    private JsonLdContext jsonLdContext;
 
     public SerializationContext(String term, T value, JsonLdContext jsonLdContext) {
         this(term, null, value, jsonLdContext);
@@ -82,6 +82,10 @@ public class SerializationContext<T> implements JsonLdContext {
         return jsonLdContext;
     }
 
+    public void setJsonLdContext(JsonLdContext jsonLdContext) {
+        this.jsonLdContext = jsonLdContext;
+    }
+
     @Override
     public void registerTermMapping(String term, String iri) {
         jsonLdContext.registerTermMapping(term, iri);
@@ -107,6 +111,16 @@ public class SerializationContext<T> implements JsonLdContext {
     @Override
     public Optional<String> getMappedTerm(String iri) {
         return jsonLdContext.getMappedTerm(iri);
+    }
+
+    @Override
+    public boolean isCurrentEmpty() {
+        return jsonLdContext.isCurrentEmpty();
+    }
+
+    @Override
+    public ObjectNode getContextNode() {
+        return jsonLdContext.getContextNode();
     }
 
     @Override
