@@ -40,6 +40,10 @@ public class ObjectIdNode extends JsonNode {
         writer.writeString(identifier);
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
     @Override
     public String toString() {
         return super.toString() + identifier + "}";
