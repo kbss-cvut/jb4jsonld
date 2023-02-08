@@ -1,5 +1,10 @@
 # JB4JSON-LD Changelog
 
+## 0.11.0 - 2023-02-08
+- Implement support for embedded JSON-LD contexts (Enhancement #43).
+  - They allow overriding term mapping inherited from parent context.
+- Dependency updates: JOPA 0.20.1. 
+
 ## 0.10.2 - 2023-02-01
 - Improve consistency of context-based serialization output.
 - Fix an issue with serializing multilingual strings marked with `@OWLAnnotationProperty`.

@@ -6,7 +6,7 @@
 
     <groupId>cz.cvut.kbss.jsonld</groupId>
     <artifactId>jb4jsonld</artifactId>
-    <version>0.10.2</version>
+    <version>0.11.0</version>
     <name>JB4JSON-LD</name>
     <description>Java Binding for JSON-LD allows serialization and deserialization of Java POJOs to/from JSON-LD.
         This is the core implementation, which has to be integrated with Jackson, Jersey etc.
@@ -18,7 +18,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <cz.cvut.kbss.jopa.version>0.20.0</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jopa.version>0.20.1</cz.cvut.kbss.jopa.version>
 
         <com.github.jsonld-java.version>0.13.4</com.github.jsonld-java.version>
         <org.junit.jupiter.version>5.9.1</org.junit.jupiter.version>
@@ -225,10 +225,9 @@
         <developer>
             <name>Martin Ledvinka</name>
             <email>martin.ledvinka@fel.cvut.cz</email>
-            <!--<url>http://cyber.felk.cvut.cz/people</url>-->
             <organization>Czech Technical University in Prague, Knowledge Based and Software Systems Group
             </organization>
-            <organizationUrl>http://kbss.felk.cvut.cz</organizationUrl>
+            <organizationUrl>https://kbss.felk.cvut.cz</organizationUrl>
             <roles>
             </roles>
         </developer>
@@ -236,7 +235,7 @@
 
     <organization>
         <name>Czech Technical University in Prague, Knowledge Based and Software Systems Group</name>
-        <url>http://kbss.felk.cvut.cz</url>
+        <url>https://kbss.felk.cvut.cz</url>
     </organization>
 
     <scm>
