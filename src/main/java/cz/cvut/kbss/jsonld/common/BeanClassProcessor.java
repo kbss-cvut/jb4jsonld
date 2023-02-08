@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.jsonld.common;
 
+import cz.cvut.kbss.jopa.model.PersistenceProperties;
 import cz.cvut.kbss.jsonld.exception.BeanProcessingException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 
@@ -254,7 +255,6 @@ public class BeanClassProcessor {
      * @return {@code true} if the specified class can be used as identifier field type, {@code false} otherwise
      */
     public static boolean isIdentifierType(Class<?> cls) {
-        // TODO This should be in JOPA API and reused from there
-        return URI.class.equals(cls) || URL.class.equals(cls) || String.class.equals(cls);
+        return PersistenceProperties.IDENTIFIER_TYPES.contains(cls);
     }
 }
