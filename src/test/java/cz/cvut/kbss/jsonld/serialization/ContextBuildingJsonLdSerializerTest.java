@@ -106,8 +106,9 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final Map<String, Object> orgMap = (Map<String, Object>) jsonMap.get(Employee.getEmployerField().getName());
         assertEquals(employee.getEmployer().getName(),
                      orgMap.get(Organization.class.getDeclaredField("name").getName()));
-        assertEquals(DateTimeFormatter.ISO_DATE_TIME.format(employee.getEmployer().getDateCreated().toInstant().atOffset(
-                ZoneOffset.UTC)), orgMap.get(Organization.class.getDeclaredField("dateCreated").getName()));
+        assertEquals(
+                DateTimeFormatter.ISO_DATE_TIME.format(employee.getEmployer().getDateCreated().toInstant().atOffset(
+                        ZoneOffset.UTC)), orgMap.get(Organization.class.getDeclaredField("dateCreated").getName()));
         assertInstanceOf(Collection.class, orgMap.get(Organization.class.getDeclaredField("brands").getName()));
         final Collection<String> jsonBrands =
                 (Collection<String>) orgMap.get(Organization.class.getDeclaredField("brands").getName());
@@ -252,5 +253,18 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
 
         @OWLObjectProperty(iri = Vocabulary.HAS_PARTICIPANT)
         private Organization organization;
+    }
+
+    @Test
+    void serializationUsesRegisteredIdentifierTermWhenSerializingPlainIdentifierObjectPropertyValue() throws Exception {
+        final Organization instance = Generator.generateOrganization();
+        instance.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
+
+        final Map<String, ?> json = serializeAndRead(instance);
+        assertThat(json, hasKey("country"));
+        assertInstanceOf(Map.class, json.get("country"));
+        final Map<String, ?> country = (Map<String, ?>) json.get("country");
+        assertThat(country, hasKey("uri"));
+        assertEquals(instance.getCountry().toString(), country.get("uri"));
     }
 }
