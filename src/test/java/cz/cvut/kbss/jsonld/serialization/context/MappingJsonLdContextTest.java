@@ -50,8 +50,8 @@ class MappingJsonLdContextTest {
     @Test
     void getTermMappingRetrievesMappingFromParentContextWhenAvailable() {
         sut.registerTermMapping("id", JsonLd.ID);
-        final MappingJsonLdContext currentSut = new MappingJsonLdContext(sut);
-        final Optional<JsonNode> result = currentSut.getTermMapping("id");
+        final MappingJsonLdContext childSut = new MappingJsonLdContext(sut);
+        final Optional<JsonNode> result = childSut.getTermMapping("id");
         assertTrue(result.isPresent());
         assertEquals(JsonNodeFactory.createStringLiteralNode("id", JsonLd.ID), result.get());
     }
@@ -60,9 +60,9 @@ class MappingJsonLdContextTest {
     void getTermMappingReturnsMappingFromCurrentContextThatOverridesParentMapping() {
         final String term = "name";
         sut.registerTermMapping(term, RDFS.LABEL);
-        final MappingJsonLdContext currentSut = new MappingJsonLdContext(sut);
-        currentSut.registerTermMapping(term, DC.Terms.TITLE);
-        final Optional<JsonNode> result = currentSut.getTermMapping(term);
+        final MappingJsonLdContext childSut = new MappingJsonLdContext(sut);
+        childSut.registerTermMapping(term, DC.Terms.TITLE);
+        final Optional<JsonNode> result = childSut.getTermMapping(term);
         assertTrue(result.isPresent());
         assertEquals(JsonNodeFactory.createStringLiteralNode(term, DC.Terms.TITLE), result.get());
     }
@@ -70,7 +70,37 @@ class MappingJsonLdContextTest {
     @Test
     void hasTermMappingReturnsTrueWhenTermIsMappedInParentContext() {
         sut.registerTermMapping("id", JsonLd.ID);
-        final MappingJsonLdContext currentSut = new MappingJsonLdContext(sut);
-        assertTrue(currentSut.hasTermMapping("id"));
+        final MappingJsonLdContext childSut = new MappingJsonLdContext(sut);
+        assertTrue(childSut.hasTermMapping("id"));
+    }
+
+    @Test
+    void registerTermMappingRegistersTermsIntoParentContextAsLongAsNoMappingConflictsAppear() {
+        final MappingJsonLdContext childSut = new MappingJsonLdContext(sut);
+        final String term = "name";
+        childSut.registerTermMapping(term, RDFS.LABEL);
+        childSut.registerTermMapping("uri", JsonLd.ID);
+        assertTrue(sut.hasTermMapping(term));
+        assertTrue(sut.hasTermMapping("uri"));
+        assertTrue(childSut.isCurrentEmpty());
+        childSut.registerTermMapping(term, DC.Terms.TITLE);
+        assertTrue(childSut.hasTermMapping(term));
+        final Optional<JsonNode> parentResult = sut.getTermMapping(term);
+        assertTrue(parentResult.isPresent());
+        assertEquals(JsonNodeFactory.createStringLiteralNode(term, RDFS.LABEL), parentResult.get());
+        final Optional<JsonNode> childResult = childSut.getTermMapping(term);
+        assertTrue(childResult.isPresent());
+        assertEquals(JsonNodeFactory.createStringLiteralNode(term, DC.Terms.TITLE), childResult.get());
+    }
+
+    @Test
+    void registerTermMappingRegistersTermsIntoParentContextAfterMappingConflictWhenRegisteredTermIsNotInConflict() {
+        final MappingJsonLdContext childSut = new MappingJsonLdContext(sut);
+        final String term = "name";
+        childSut.registerTermMapping(term, RDFS.LABEL);
+        childSut.registerTermMapping(term, DC.Terms.TITLE);
+        childSut.registerTermMapping("created", SerializerUtils.createTypedTermDefinition("created", DC.Terms.CREATED,
+                                                                                          XSD.DATETIME));
+        assertTrue(sut.hasTermMapping("created"));
     }
 }
