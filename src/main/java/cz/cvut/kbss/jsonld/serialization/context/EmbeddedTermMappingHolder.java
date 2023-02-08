@@ -26,6 +26,10 @@ class EmbeddedTermMappingHolder extends TermMappingHolder {
     void registerTermMapping(String term, JsonNode mappedNode) {
         Objects.requireNonNull(term);
         Objects.requireNonNull(mappedNode);
+        if (parentContext.hasTermMapping(term, mappedNode)) {
+            // Already mapped in parent
+            return;
+        }
         if (!isRoot() && !parentContext.hasTermMapping(term)) {
             parentContext.registerTermMapping(term, mappedNode);
         } else {
