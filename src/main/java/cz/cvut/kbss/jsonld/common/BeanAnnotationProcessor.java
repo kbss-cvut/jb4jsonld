@@ -213,6 +213,7 @@ public class BeanAnnotationProcessor {
                 }
             }
         }
+        // TODO Consider more specific ordering, e.g., @id, @types, data/annotation properties, object properties, properties
         final List<Field> result = new ArrayList<>(fields);
         // Move object properties to the end
         result.sort(Comparator.comparing(BeanAnnotationProcessor::isObjectProperty));
