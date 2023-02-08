@@ -16,6 +16,7 @@ package cz.cvut.kbss.jsonld.common;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
+import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
@@ -36,6 +37,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("unused")
 class BeanClassProcessorTest {
 
     @Test
@@ -86,7 +88,7 @@ class BeanClassProcessorTest {
 
     private static class ClassWithListField {
 
-        @OWLDataProperty(iri = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/List")
+        @OWLDataProperty(iri = Vocabulary.DEFAULT_PREFIX + "List")
         private List<Integer> list;
     }
 
@@ -184,5 +186,10 @@ class BeanClassProcessorTest {
     private static class RawValueType {
         @Properties
         private Map<String, Set> properties;
+    }
+
+    @Test
+    void isIdentifierTypeReturnsFalseForNullArgument() {
+        assertFalse(BeanClassProcessor.isIdentifierType(null));
     }
 }
