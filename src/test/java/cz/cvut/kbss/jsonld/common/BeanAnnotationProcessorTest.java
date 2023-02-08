@@ -176,7 +176,7 @@ class BeanAnnotationProcessorTest {
         assertFalse(result.isPresent());
     }
 
-    @OWLClass(iri = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ClassWithoutIdentifier")
+    @OWLClass(iri = Vocabulary.DEFAULT_PREFIX + "ClassWithoutIdentifier")
     private static class ClassWithoutIdentifier {
         @OWLAnnotationProperty(iri = RDFS.LABEL)
         private String label;
