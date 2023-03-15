@@ -45,6 +45,23 @@ public class ObjectIdNode extends JsonNode {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ObjectIdNode)) {
+            return false;
+        }
+        ObjectIdNode that = (ObjectIdNode) o;
+        return identifier.equals(that.identifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identifier);
+    }
+
+    @Override
     public String toString() {
         return super.toString() + identifier + "}";
     }
