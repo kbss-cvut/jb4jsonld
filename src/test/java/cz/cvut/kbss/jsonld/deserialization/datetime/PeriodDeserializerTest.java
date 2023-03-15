@@ -22,7 +22,7 @@ class PeriodDeserializerTest {
     @Test
     void deserializeDeserializesIsoStringToPeriod() {
         final Period value =
-                Period.of(Generator.randomCount(5, 100), Generator.randomCount(1, 12), Generator.randomCount(1, 28));
+                Period.of(Generator.randomInt(5, 100), Generator.randomInt(1, 12), Generator.randomInt(1, 28));
         final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, value.toString());
         final Period result = sut.deserialize(input, deserializationContext(Period.class));
         assertEquals(value, result);

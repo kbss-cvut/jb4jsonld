@@ -147,8 +147,8 @@ class DefaultInstanceBuilderTest {
     @Test
     void addValueAddsValuesToCurrentlyOpenCollection() {
         final List<Integer> items = new ArrayList<>();
-        for (int i = 0; i < Generator.randomCount(10); i++) {
-            items.add(Generator.randomCount(Integer.MAX_VALUE));
+        for (int i = 0; i < Generator.randomInt(10); i++) {
+            items.add(Generator.randomInt(Integer.MAX_VALUE));
         }
         sut.openCollection(CollectionType.LIST);
         items.forEach(item -> sut.addValue(item));
