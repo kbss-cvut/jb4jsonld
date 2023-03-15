@@ -792,4 +792,12 @@ class ExpandedJsonLdDeserializerTest {
         final User result = sut.deserialize(expanded, User.class);
         assertNotNull(result);
     }
+
+    @Test
+    void deserializeSupportsMappingIndividualToEnumConstant() throws Exception {
+        final Object input = readAndExpand("objectWithReferenceMappedToEnum.json");
+        final Attribute result = sut.deserialize(input, Attribute.class);
+        assertNotNull(result);
+        assertEquals(OwlPropertyType.DATATYPE_PROPERTY, result.getPropertyType());
+    }
 }
