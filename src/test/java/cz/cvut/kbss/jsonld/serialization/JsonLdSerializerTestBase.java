@@ -97,7 +97,7 @@ public abstract class JsonLdSerializerTestBase {
     }
 
     protected void generateEmployees(Organization org, boolean withBackwardReference) {
-        for (int i = 0; i < Generator.randomCount(5, 10); i++) {
+        for (int i = 0; i < Generator.randomInt(5, 10); i++) {
             final Employee emp = Generator.generateEmployee();
             emp.setEmployer(withBackwardReference ? org : null);
             org.addEmployee(emp);
@@ -407,5 +407,16 @@ public abstract class JsonLdSerializerTestBase {
                                                                 vf().createIRI(Vocabulary.USERNAME),
                                                                 vf().createLiteral(e.getUsername()))));
         });
+    }
+
+    @Test
+    void serializationSerializesEnumConstantMappedToIndividualAsIndividual() throws Exception {
+        final Attribute instance = new Attribute();
+        instance.setUri(Generator.generateUri());
+        instance.setPropertyType(OwlPropertyType.values()[Generator.randomInt(0, OwlPropertyType.values().length)]);
+        sut.serialize(instance);
+        final Model expected = toRdf(instance);
+        final Model actual = readJson(jsonWriter.getResult());
+        assertThat(actual, isIsomorphic(expected));
     }
 }

@@ -25,7 +25,7 @@ class TemporalAmountSerializerTest {
     @Test
     void serializeReturnsIsoStringForPeriodWithXsdDurationAsDatatype() {
         final Period value =
-                Period.of(Generator.randomCount(2, 5), Generator.randomCount(1, 12), Generator.randomCount(1, 28));
+                Period.of(Generator.randomInt(2, 5), Generator.randomInt(1, 12), Generator.randomInt(1, 28));
         final SerializationContext<TemporalAmount> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(ObjectNode.class, result);
@@ -37,7 +37,7 @@ class TemporalAmountSerializerTest {
 
     @Test
     void serializeReturnsIsoStringForDuration() {
-        final Duration value = Duration.ofSeconds(Generator.randomCount(10000));
+        final Duration value = Duration.ofSeconds(Generator.randomInt(10000));
         final SerializationContext<TemporalAmount> ctx = Generator.serializationContext(value);
         final JsonNode result = sut.serialize(value, ctx);
         assertInstanceOf(ObjectNode.class, result);

@@ -33,7 +33,7 @@ class ContextBuildingTemporalAmountSerializerTest {
     @Test
     void serializeRegistersTermDefinitionWithIdAndTypeInJsonLdContext() throws Exception {
         final JsonLdContext ctx = mock(JsonLdContext.class);
-        final Duration value = Duration.ofSeconds(Generator.randomCount(10000));
+        final Duration value = Duration.ofSeconds(Generator.randomInt(10000));
         final Field field = TemporalEntity.class.getDeclaredField("duration");
         final String property = Generator.generateUri().toString();
         final SerializationContext<TemporalAmount> serializationContext =
@@ -49,7 +49,7 @@ class ContextBuildingTemporalAmountSerializerTest {
 
     @Test
     void serializeReturnsLiteralNodeWithStringSerialization() throws Exception {
-        final Period value = Period.ofMonths(Generator.randomCount(100));
+        final Period value = Period.ofMonths(Generator.randomInt(100));
         final Field field = TemporalEntity.class.getDeclaredField("period");
         final String property = Generator.generateUri().toString();
         final SerializationContext<TemporalAmount> serializationContext =

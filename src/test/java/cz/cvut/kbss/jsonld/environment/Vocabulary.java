@@ -28,6 +28,7 @@ public class Vocabulary {
     public static final String AGENT = "http://onto.fel.cvut.cz/ontologies/ufo/Agent";
     public static final String OBJECT_WITH_ANNOTATIONS = DEFAULT_PREFIX + "ObjectWithAnnotations";
     public static final String GENERIC_MEMBER = DEFAULT_PREFIX + "GenericMember";
+    public static final String ATTRIBUTE = DEFAULT_PREFIX + "Attribute";
 
     public static final String FIRST_NAME = "http://xmlns.com/foaf/0.1/firstName";
     public static final String LAST_NAME = "http://xmlns.com/foaf/0.1/lastName";
@@ -45,6 +46,7 @@ public class Vocabulary {
     public static final String ROLE = DEFAULT_PREFIX + "role";
     public static final String PASSWORD = DEFAULT_PREFIX + "password";
     public static final String NUMBER_OF_PEOPLE_INVOLVED = DEFAULT_PREFIX + "numberOfPeopleInvolved";
+    public static final String HAS_PROPERTY_TYPE = DEFAULT_PREFIX + "hasPropertyType";
 
     public static final String CHANGED_VALUE = DEFAULT_PREFIX + "changedValue";
 
