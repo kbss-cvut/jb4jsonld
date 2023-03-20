@@ -19,6 +19,7 @@ import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.Role;
+import cz.cvut.kbss.jsonld.exception.InvalidEnumMappingException;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -120,5 +121,12 @@ class DataTypeTransformerTest {
         assertEquals(OwlPropertyType.ANNOTATION_PROPERTY,
                      DataTypeTransformer.transformIndividualToEnumConstant(OWL.ANNOTATION_PROPERTY,
                                                                            OwlPropertyType.class));
+    }
+
+    @Test
+    void transformIndividualToEnumConstantThrowsInvalidEnumMappingExceptionForIndividualNotMappedToEnumConstant() {
+        assertThrows(InvalidEnumMappingException.class,
+                     () -> DataTypeTransformer.transformIndividualToEnumConstant(Generator.generateUri().toString(),
+                                                                                 OwlPropertyType.class));
     }
 }
