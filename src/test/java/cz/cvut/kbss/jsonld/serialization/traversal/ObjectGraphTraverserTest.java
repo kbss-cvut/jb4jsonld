@@ -84,7 +84,7 @@ class ObjectGraphTraverserTest {
 
     private void generateEmployees(Organization org) {
         org.setEmployees(new HashSet<>());
-        for (int i = 0; i < Generator.randomCount(10); i++) {
+        for (int i = 0; i < Generator.randomInt(10); i++) {
             final Employee emp = new Employee();
             emp.setUri(Generator.generateUri());
             org.getEmployees().add(emp);

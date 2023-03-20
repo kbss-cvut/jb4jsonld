@@ -43,7 +43,7 @@ public class SetNodeTest extends AbstractNodeTest {
 
     private List<JsonNode> generateItems() {
         final List<JsonNode> nodes = new ArrayList<>();
-        for (int i = 0; i < Generator.randomCount(10); i++) {
+        for (int i = 0; i < Generator.randomInt(10); i++) {
             nodes.add(new StringLiteralNode("item" + i));
         }
         return nodes;

@@ -1,22 +1,21 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
+import cz.cvut.kbss.jsonld.deserialization.util.DataTypeTransformer;
 import cz.cvut.kbss.jsonld.deserialization.util.LangString;
 import cz.cvut.kbss.jsonld.deserialization.util.XSDTypeCoercer;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
@@ -66,7 +65,7 @@ class CollectionDeserializer extends Deserializer<List<?>> {
         } else if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
             instanceBuilder.addValue(value.get(JsonLd.VALUE));
         } else if (value.size() == 1 && value.containsKey(JsonLd.ID)) {
-            instanceBuilder.addNodeReference(value.get(JsonLd.ID).toString());
+            handleReferenceNodeInCollection(value, targetType);
         } else if (value.containsKey(JsonLd.LANGUAGE)) {
             assert value.containsKey(JsonLd.VALUE);
             instanceBuilder.addValue(
@@ -84,6 +83,17 @@ class CollectionDeserializer extends Deserializer<List<?>> {
         }
     }
 
+    private void handleReferenceNodeInCollection(Map<?, ?> value, Class<?> targetType) {
+        assert value.size() == 1 && value.containsKey(JsonLd.ID);
+        final String identifier = value.get(JsonLd.ID).toString();
+        if (targetType.isEnum()) {
+            instanceBuilder.addValue(DataTypeTransformer.transformIndividualToEnumConstant(identifier,
+                                                                                           (Class<? extends Enum>) targetType));
+        } else {
+            instanceBuilder.addNodeReference(identifier);
+        }
+    }
+
     private void resolvePropertyValue(Map<?, ?> value) {
         final Class<?> targetType = instanceBuilder.getTargetType(property);
         if (config.getDeserializers().hasCustomDeserializer(targetType)) {
@@ -93,7 +103,7 @@ class CollectionDeserializer extends Deserializer<List<?>> {
         if (value.containsKey(JsonLd.VALUE)) {
             extractLiteralValue(value);
         } else if (value.size() == 1 && value.containsKey(JsonLd.ID)) {
-            instanceBuilder.addNodeReference(property, value.get(JsonLd.ID).toString());
+            handleSingularReferenceNode(value, targetType);
         } else {
             new ObjectDeserializer(instanceBuilder, config, property).processValue(value);
         }
@@ -114,6 +124,17 @@ class CollectionDeserializer extends Deserializer<List<?>> {
             instanceBuilder.addValue(property, new LangString(val.toString(), value.get(JsonLd.LANGUAGE).toString()));
         } else {
             instanceBuilder.addValue(property, val);
+        }
+    }
+
+    private void handleSingularReferenceNode(Map<?, ?> value, Class<?> targetType) {
+        assert value.size() == 1 && value.containsKey(JsonLd.ID);
+        final String identifier = value.get(JsonLd.ID).toString();
+        if (targetType.isEnum()) {
+            instanceBuilder.addValue(property, DataTypeTransformer.transformIndividualToEnumConstant(identifier,
+                                                                                                     (Class<? extends Enum>) targetType));
+        } else {
+            instanceBuilder.addNodeReference(property, identifier);
         }
     }
 }

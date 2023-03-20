@@ -21,7 +21,7 @@ class DurationDeserializerTest {
 
     @Test
     void deserializeDeserializesIsoStringToDuration() {
-        final Duration value = Duration.ofSeconds(Generator.randomCount(5, 10000));
+        final Duration value = Duration.ofSeconds(Generator.randomInt(5, 10000));
         final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, value.toString());
         final Duration result = sut.deserialize(input, deserializationContext(Duration.class));
         assertEquals(value, result);

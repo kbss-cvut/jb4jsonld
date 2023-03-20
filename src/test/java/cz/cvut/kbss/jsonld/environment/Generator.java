@@ -40,8 +40,8 @@ public class Generator {
      * @param max Upper bound
      * @return random integer
      */
-    public static int randomCount(int max) {
-        return randomCount(1, max);
+    public static int randomInt(int max) {
+        return randomInt(1, max);
     }
 
     /**
@@ -51,7 +51,7 @@ public class Generator {
      * @param max Upper bound
      * @return random integer
      */
-    public static int randomCount(int min, int max) {
+    public static int randomInt(int min, int max) {
         assert min >= 0;
         assert max > 1;
         assert min < max;
@@ -74,7 +74,7 @@ public class Generator {
 
     public static Set<User> generateUsers() {
         final Set<User> users = new HashSet<>();
-        for (int i = 0; i < randomCount(10); i++) {
+        for (int i = 0; i < randomInt(10); i++) {
             users.add(generateUser());
         }
         return users;
@@ -117,7 +117,7 @@ public class Generator {
         org.setDateCreated(new Date());
         org.setName("Organization" + RAND.nextInt());
         org.setBrands(new HashSet<>());
-        for (int i = 0; i < randomCount(10); i++) {
+        for (int i = 0; i < randomInt(10); i++) {
             org.getBrands().add("Brandy" + i);
         }
         return org;
@@ -131,13 +131,13 @@ public class Generator {
      */
     public static Map<String, Set<String>> generateProperties(boolean singletons) {
         final Map<String, Set<String>> map = new HashMap<>();
-        for (int i = 0; i < Generator.randomCount(5, 10); i++) {
+        for (int i = 0; i < Generator.randomInt(5, 10); i++) {
             final String property = Generator.generateUri().toString();
             if (singletons) {
                 map.put(property, Collections.singleton(Generator.generateUri().toString()));
             } else {
                 final Set<String> value = new HashSet<>();
-                for (int j = 0; j < Generator.randomCount(2, 5); j++) {
+                for (int j = 0; j < Generator.randomInt(2, 5); j++) {
                     value.add(Generator.generateUri().toString());
                 }
                 map.put(property, value);

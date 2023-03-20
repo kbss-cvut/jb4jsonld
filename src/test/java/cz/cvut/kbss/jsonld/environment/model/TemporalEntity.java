@@ -54,8 +54,8 @@ public class TemporalEntity {
 
     public void initTemporalAmountValues() {
         this.period =
-                Period.of(Generator.randomCount(2, 100), Generator.randomCount(1, 12), Generator.randomCount(1, 28));
-        this.duration = Duration.ofSeconds(Generator.randomCount(5, 10000));
+                Period.of(Generator.randomInt(2, 100), Generator.randomInt(1, 12), Generator.randomInt(1, 28));
+        this.duration = Duration.ofSeconds(Generator.randomInt(5, 10000));
     }
 
     public LocalDateTime getLocalDateTime() {

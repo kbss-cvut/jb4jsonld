@@ -44,7 +44,7 @@ public class ObjectNodeTest extends AbstractNodeTest {
 
     private List<JsonNode> generateChildren() {
         final List<JsonNode> nodes = new ArrayList<>();
-        for (int i = 0; i < Generator.randomCount(10); i++) {
+        for (int i = 0; i < Generator.randomInt(10); i++) {
             nodes.add(new NumericLiteralNode<>(Generator.URI_BASE + i, i));
         }
         return nodes;
@@ -68,7 +68,7 @@ public class ObjectNodeTest extends AbstractNodeTest {
         children.forEach(node::addItem);
         node.write(serializerMock);
         final StringLiteralNode
-                toPrepend = new StringLiteralNode(JsonLd.CONTEXT, "Context value " + Generator.randomCount(1000));
+                toPrepend = new StringLiteralNode(JsonLd.CONTEXT, "Context value " + Generator.randomInt(1000));
         node.prependItem(toPrepend);
 
         node.write(serializerMock);

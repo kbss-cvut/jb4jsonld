@@ -17,6 +17,8 @@ package cz.cvut.kbss.jsonld.deserialization.util;
 import cz.cvut.kbss.jopa.datatype.DatatypeTransformer;
 import cz.cvut.kbss.jopa.datatype.util.Pair;
 import cz.cvut.kbss.jopa.model.MultilingualString;
+import cz.cvut.kbss.jsonld.common.EnumUtil;
+import cz.cvut.kbss.jsonld.exception.InvalidEnumMappingException;
 
 import java.time.*;
 import java.util.*;
@@ -53,7 +55,7 @@ public class DataTypeTransformer {
             return targetClass.cast(value);
         }
         if (targetClass.isEnum()) {
-            return (T) transformToEnumConstant(value, (Class) targetClass);
+            return (T) transformLiteralToEnumConstant(value, (Class) targetClass);
         }
         final Pair<Class<?>, Class<?>> key = new Pair<>(sourceClass, targetClass);
         if (CUSTOM_TRANSFORMERS.containsKey(key)) {
@@ -62,7 +64,24 @@ public class DataTypeTransformer {
         return DatatypeTransformer.transform(value, targetClass);
     }
 
-    private static <T extends Enum<T>> T transformToEnumConstant(Object value, Class<T> targetClass) {
+    private static <T extends Enum<T>> T transformLiteralToEnumConstant(Object value, Class<T> targetClass) {
         return Enum.valueOf(targetClass, value.toString());
+    }
+
+    /**
+     * Transforms the specified individual identifier to the corresponding enum constant.
+     * <p>
+     * This transformation uses the {@link cz.cvut.kbss.jopa.model.annotations.Individual} mapping of enum constants.
+     *
+     * @param identifier  Individual identifier
+     * @param targetClass Target enum
+     * @param <T>         Enum type
+     * @return Matching enum constant
+     * @throws InvalidEnumMappingException When no matching enum constant is found for the specified identifier
+     */
+    public static <T extends Enum<T>> T transformIndividualToEnumConstant(String identifier, Class<T> targetClass) {
+        return EnumUtil.findMatchingConstant(targetClass, (e, iri) -> iri.equals(identifier), (e, iri) -> e)
+                       .orElseThrow(() -> new InvalidEnumMappingException(
+                               "No matching constant found for individual <" + identifier + "> in target class " + targetClass));
     }
 }

@@ -29,6 +29,7 @@ import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
+import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Study;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
@@ -76,6 +77,7 @@ class ObjectDeserializerTest {
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         when(instanceBuilderMock.isPlural(Vocabulary.HAS_MEMBER)).thenReturn(true);
         when(instanceBuilderMock.isPlural(Vocabulary.HAS_PARTICIPANT)).thenReturn(true);
+        doReturn(Organization.class).when(instanceBuilderMock).getTargetType(Vocabulary.IS_MEMBER_OF);
         doAnswer(inv -> Study.class).when(instanceBuilderMock).getCurrentContextType();
         doAnswer(inv -> Employee.class).when(instanceBuilderMock).getCurrentCollectionElementType();
         this.sut =

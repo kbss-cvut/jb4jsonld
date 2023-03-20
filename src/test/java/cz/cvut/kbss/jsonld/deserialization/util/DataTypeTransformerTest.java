@@ -1,24 +1,25 @@
 /**
  * Copyright (C) 2022 Czech Technical University in Prague
  * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.jsonld.deserialization.util;
 
 import cz.cvut.kbss.jopa.datatype.exception.UnsupportedTypeTransformationException;
 import cz.cvut.kbss.jopa.model.MultilingualString;
+import cz.cvut.kbss.jopa.vocabulary.OWL;
 import cz.cvut.kbss.jsonld.environment.Generator;
+import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.environment.model.Role;
+import cz.cvut.kbss.jsonld.exception.InvalidEnumMappingException;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -40,7 +41,8 @@ class DataTypeTransformerTest {
     @Test
     void transformValueThrowsUnsupportedTypeTransformationExceptionForUnsupportedTransformation() {
         final String value = "RandomValue";
-        assertThrows(UnsupportedTypeTransformationException.class, () -> DataTypeTransformer.transformValue(value, Person.class));
+        assertThrows(UnsupportedTypeTransformationException.class,
+                     () -> DataTypeTransformer.transformValue(value, Person.class));
     }
 
     @Test
@@ -81,7 +83,7 @@ class DataTypeTransformerTest {
         final String lang = "en";
         final LangString value = new LangString("building", lang);
         assertEquals(new MultilingualString(Collections.singletonMap(lang, value.getValue())),
-                DataTypeTransformer.transformValue(value, MultilingualString.class));
+                     DataTypeTransformer.transformValue(value, MultilingualString.class));
     }
 
     @Test
@@ -112,5 +114,19 @@ class DataTypeTransformerTest {
     void transformationTransformsOffsetTimeToLocalTime() {
         final OffsetTime value = OffsetTime.now();
         assertEquals(value.toLocalTime(), DataTypeTransformer.transformValue(value, LocalTime.class));
+    }
+
+    @Test
+    void transformIndividualToEnumConstantReturnsConstantMatchingSpecifiedIndividualIdentifier() {
+        assertEquals(OwlPropertyType.ANNOTATION_PROPERTY,
+                     DataTypeTransformer.transformIndividualToEnumConstant(OWL.ANNOTATION_PROPERTY,
+                                                                           OwlPropertyType.class));
+    }
+
+    @Test
+    void transformIndividualToEnumConstantThrowsInvalidEnumMappingExceptionForIndividualNotMappedToEnumConstant() {
+        assertThrows(InvalidEnumMappingException.class,
+                     () -> DataTypeTransformer.transformIndividualToEnumConstant(Generator.generateUri().toString(),
+                                                                                 OwlPropertyType.class));
     }
 }
