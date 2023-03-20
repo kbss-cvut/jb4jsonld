@@ -12,27 +12,20 @@
  */
 package cz.cvut.kbss.jsonld.serialization.serializer.compact;
 
-import cz.cvut.kbss.jopa.model.annotations.Individual;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.common.EnumUtil;
 import cz.cvut.kbss.jsonld.exception.InvalidEnumMappingException;
-import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
 
 /**
  * Value serializer for object property values.
  */
 public class ObjectPropertyValueSerializer implements ValueSerializer {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ObjectPropertyValueSerializer.class);
 
     private final ObjectGraphTraverser graphTraverser;
 
@@ -57,26 +50,7 @@ public class ObjectPropertyValueSerializer implements ValueSerializer {
     }
 
     private String resolveMappedIndividual(Enum<?> value) {
-        try {
-            for (Field f : value.getDeclaringClass().getDeclaredFields()) {
-                if (!f.isEnumConstant()) {
-                    continue;
-                }
-                final Individual individual = f.getAnnotation(Individual.class);
-                if (individual == null) {
-                    LOG.warn(
-                            "Enum constant {} is missing individual mapping, yet it can be used as object property value.",
-                            value);
-                    continue;
-                }
-                if (value == f.get(null)) {
-                    return individual.iri();
-                }
-            }
-        } catch (IllegalAccessException e) {
-            // This should not happen
-            throw new JsonLdSerializationException("Unable to access enum constant!", e);
-        }
-        throw new InvalidEnumMappingException("Missing individual mapping for enum constant " + value);
+        return EnumUtil.findMatchingConstant(value.getDeclaringClass(), (e, iri) -> e == value, (e, iri) -> iri).orElseThrow(
+                () -> new InvalidEnumMappingException("Missing individual mapping for enum constant " + value));
     }
 }
