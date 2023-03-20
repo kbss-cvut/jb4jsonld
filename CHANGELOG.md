@@ -1,5 +1,9 @@
 # JB4JSON-LD Changelog
 
+## 0.12.0 - 2023-03-20
+- Implement support for mapping Java enum constants to reference nodes (nodes with `@id`) (Enhancement #48).
+- Dependency updates: JOPA 0.21.0, JUnit, Mockito.
+
 ## 0.11.0 - 2023-02-08
 - Implement support for embedded JSON-LD contexts (Enhancement #43).
   - They allow overriding term mapping inherited from parent context.
