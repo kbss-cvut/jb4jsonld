@@ -17,6 +17,7 @@ package cz.cvut.kbss.jsonld.deserialization.util;
 import cz.cvut.kbss.jopa.datatype.DatatypeTransformer;
 import cz.cvut.kbss.jopa.datatype.util.Pair;
 import cz.cvut.kbss.jopa.model.MultilingualString;
+import cz.cvut.kbss.jsonld.common.EnumUtil;
 
 import java.time.*;
 import java.util.*;
@@ -53,7 +54,7 @@ public class DataTypeTransformer {
             return targetClass.cast(value);
         }
         if (targetClass.isEnum()) {
-            return (T) transformToEnumConstant(value, (Class) targetClass);
+            return (T) transformLiteralToEnumConstant(value, (Class) targetClass);
         }
         final Pair<Class<?>, Class<?>> key = new Pair<>(sourceClass, targetClass);
         if (CUSTOM_TRANSFORMERS.containsKey(key)) {
@@ -62,7 +63,21 @@ public class DataTypeTransformer {
         return DatatypeTransformer.transform(value, targetClass);
     }
 
-    private static <T extends Enum<T>> T transformToEnumConstant(Object value, Class<T> targetClass) {
+    private static <T extends Enum<T>> T transformLiteralToEnumConstant(Object value, Class<T> targetClass) {
         return Enum.valueOf(targetClass, value.toString());
+    }
+
+    /**
+     * Transforms the specified individual identifier to the corresponding enum constant.
+     *
+     * This transformation uses the {@link cz.cvut.kbss.jopa.model.annotations.Individual} mapping of enum constants.
+     * TODO What should happen if no matching constant exists?
+     * @param identifier Individual identifier
+     * @param targetClass Target enum
+     * @param <T> Enum type
+     * @return Matching enum constant
+     */
+    public static <T extends Enum<T>> T transformIndividualToEnumConstant(String identifier, Class<T> targetClass) {
+        return EnumUtil.findMatchingConstant(targetClass, (e, iri) -> iri.equals(identifier), (e, iri) -> e).orElse(null);
     }
 }

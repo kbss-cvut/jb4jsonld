@@ -66,7 +66,7 @@ class ObjectPropertyValueSerializerTest {
         assertThrows(InvalidEnumMappingException.class, () -> sut.serialize(instance, ctx));
     }
 
-    private enum InvalidEnum {
+    public enum InvalidEnum {
         @Individual(iri = OWL.DATATYPE_PROPERTY)
         DATATYPE_PROPERTY,
         // Missing individual mapping here
