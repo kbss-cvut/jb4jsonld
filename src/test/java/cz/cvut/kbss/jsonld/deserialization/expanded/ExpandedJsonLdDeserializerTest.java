@@ -799,5 +799,7 @@ class ExpandedJsonLdDeserializerTest {
         final Attribute result = sut.deserialize(input, Attribute.class);
         assertNotNull(result);
         assertEquals(OwlPropertyType.DATATYPE_PROPERTY, result.getPropertyType());
+        assertThat(result.getPluralPropertyType(),
+                   hasItems(OwlPropertyType.ANNOTATION_PROPERTY, OwlPropertyType.OBJECT_PROPERTY));
     }
 }
