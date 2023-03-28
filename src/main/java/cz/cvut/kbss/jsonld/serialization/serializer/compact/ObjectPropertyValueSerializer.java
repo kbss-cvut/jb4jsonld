@@ -14,7 +14,6 @@ package cz.cvut.kbss.jsonld.serialization.serializer.compact;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.EnumUtil;
-import cz.cvut.kbss.jsonld.exception.InvalidEnumMappingException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
@@ -42,15 +41,10 @@ public class ObjectPropertyValueSerializer implements ValueSerializer {
         return null;
     }
 
-    private JsonNode serializeEnumConstant(Enum<?> constant, SerializationContext<?> ctx) {
-        final String iri = resolveMappedIndividual(constant);
+    private static JsonNode serializeEnumConstant(Enum<?> constant, SerializationContext<?> ctx) {
+        final String iri = EnumUtil.resolveMappedIndividual(constant);
         final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
         node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, iri));
         return node;
-    }
-
-    private String resolveMappedIndividual(Enum<?> value) {
-        return EnumUtil.findMatchingConstant(value.getDeclaringClass(), (e, iri) -> e == value, (e, iri) -> iri).orElseThrow(
-                () -> new InvalidEnumMappingException("Missing individual mapping for enum constant " + value));
     }
 }

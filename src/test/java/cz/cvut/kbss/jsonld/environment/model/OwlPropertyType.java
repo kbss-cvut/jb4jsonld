@@ -12,7 +12,7 @@ public enum OwlPropertyType {
     @Individual(iri = OWL.OBJECT_PROPERTY)
     OBJECT_PROPERTY;
 
-    static String getMappedIndividual(OwlPropertyType constant) {
+    public static String getMappedIndividual(OwlPropertyType constant) {
         switch (constant) {
             case ANNOTATION_PROPERTY:
                 return OWL.ANNOTATION_PROPERTY;

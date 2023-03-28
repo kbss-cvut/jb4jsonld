@@ -19,6 +19,10 @@ public class Attribute implements GeneratesRdf {
     @OWLObjectProperty(iri = Vocabulary.HAS_PROPERTY_TYPE)
     private OwlPropertyType propertyType;
 
+    @Enumerated(EnumType.OBJECT_ONE_OF)
+    @OWLObjectProperty(iri = Vocabulary.HAS_PLURAL_PROPERTY_TYPE)
+    private Set<OwlPropertyType> pluralPropertyType;
+
     @Override
     public URI getUri() {
         return uri;
@@ -36,13 +40,28 @@ public class Attribute implements GeneratesRdf {
         this.propertyType = propertyType;
     }
 
+    public Set<OwlPropertyType> getPluralPropertyType() {
+        return pluralPropertyType;
+    }
+
+    public void setPluralPropertyType(Set<OwlPropertyType> pluralPropertyType) {
+        this.pluralPropertyType = pluralPropertyType;
+    }
+
     @Override
     public void toRdf(Model model, ValueFactory vf, Set<URI> visited) {
         if (visited.contains(getUri())) {
             return;
         }
         model.add(vf.createIRI(uri.toString()), RDF.TYPE, vf.createIRI(Vocabulary.ATTRIBUTE));
-        model.add(vf.createIRI(uri.toString()), vf.createIRI(Vocabulary.HAS_PROPERTY_TYPE),
-                  vf.createIRI(OwlPropertyType.getMappedIndividual(propertyType)));
+        if (propertyType != null) {
+            model.add(vf.createIRI(uri.toString()), vf.createIRI(Vocabulary.HAS_PROPERTY_TYPE),
+                      vf.createIRI(OwlPropertyType.getMappedIndividual(propertyType)));
+        }
+        if (getPluralPropertyType() != null) {
+            getPluralPropertyType().forEach(
+                    t -> model.add(vf.createIRI(uri.toString()), vf.createIRI(Vocabulary.HAS_PLURAL_PROPERTY_TYPE),
+                                   vf.createIRI(OwlPropertyType.getMappedIndividual(t))));
+        }
     }
 }

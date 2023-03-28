@@ -47,6 +47,7 @@ public class Vocabulary {
     public static final String PASSWORD = DEFAULT_PREFIX + "password";
     public static final String NUMBER_OF_PEOPLE_INVOLVED = DEFAULT_PREFIX + "numberOfPeopleInvolved";
     public static final String HAS_PROPERTY_TYPE = DEFAULT_PREFIX + "hasPropertyType";
+    public static final String HAS_PLURAL_PROPERTY_TYPE = DEFAULT_PREFIX + "hasPluralPropertyType";
 
     public static final String CHANGED_VALUE = DEFAULT_PREFIX + "changedValue";
 

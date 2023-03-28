@@ -195,4 +195,21 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertTrue(result.isPresent());
         assertEquals(name.get(), result.get().get(JsonLd.VALUE));
     }
+
+    @Test
+    void serializationSerializesRootCollectionOfEnumConstantsMappedToIndividualsAsArrayOfIndividuals() throws Exception {
+        final List<OwlPropertyType> value = Arrays.asList(OwlPropertyType.values());
+
+        sut.serialize(new LinkedHashSet<>(value));
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        assertInstanceOf(List.class, jsonObject);
+        final List<?> lst = (List<?>) jsonObject;
+        assertEquals(value.size(), lst.size());
+        for (int i = 0; i < value.size(); i++) {
+            assertInstanceOf(Map.class, lst.get(i));
+            final Map<?, ?> element = (Map<?, ?>) lst.get(i);
+            assertThat(element, hasKey(JsonLd.ID));
+            assertEquals(OwlPropertyType.getMappedIndividual(value.get(i)), element.get(JsonLd.ID));
+        }
+    }
 }

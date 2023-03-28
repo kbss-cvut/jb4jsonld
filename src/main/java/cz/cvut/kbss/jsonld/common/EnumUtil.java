@@ -1,6 +1,7 @@
 package cz.cvut.kbss.jsonld.common;
 
 import cz.cvut.kbss.jopa.model.annotations.Individual;
+import cz.cvut.kbss.jsonld.exception.InvalidEnumMappingException;
 import cz.cvut.kbss.jsonld.exception.JsonLdException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,20 @@ import java.util.function.BiPredicate;
 public class EnumUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(EnumUtil.class);
+
+    /**
+     * Resolves an individual mapped by the specified enum constant.
+     * <p>
+     * This method looks for the value of the {@link Individual} annotation.
+     *
+     * @param value Value to map to individual
+     * @return Matching individual identifier
+     * @throws InvalidEnumMappingException When no matching individual is found
+     */
+    public static String resolveMappedIndividual(Enum<?> value) {
+        return findMatchingConstant(value.getDeclaringClass(), (e, iri) -> e == value, (e, iri) -> iri).orElseThrow(
+                () -> new InvalidEnumMappingException("Missing individual mapping for enum constant " + value));
+    }
 
     /**
      * Finds an enum constant matching the specified filtering predicate and transforms it using the specified mapper.
