@@ -1,5 +1,8 @@
 # JB4JSON-LD Changelog
 
+## 0.12.1 - 2023-03-28
+- Fix an issue with serialization of a collection of enum constants mapped to individuals.
+
 ## 0.12.0 - 2023-03-20
 - Implement support for mapping Java enum constants to reference nodes (nodes with `@id`) (Enhancement #48).
 - Dependency updates: JOPA 0.21.0, JUnit, Mockito.
