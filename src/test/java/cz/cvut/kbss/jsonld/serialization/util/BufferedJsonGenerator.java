@@ -56,6 +56,7 @@ public class BufferedJsonGenerator implements JsonGenerator {
     public void writeObjectEnd() {
         buffer.append('}');
         nodes.pop();
+        this.firstAttribute = false;
     }
 
     @Override

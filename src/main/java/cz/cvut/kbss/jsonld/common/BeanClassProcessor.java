@@ -22,8 +22,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.URL;
 import java.util.*;
 
 public class BeanClassProcessor {
@@ -248,11 +246,10 @@ public class BeanClassProcessor {
 
     /**
      * Checks whether the specified type is a valid identifier type.
-     * <p>
-     * Valid identifiers in JOPA are: {@link URI}, {@link URL}, and {@link String}.
      *
      * @param cls Class to check
      * @return {@code true} if the specified class can be used as identifier field type, {@code false} otherwise
+     * @see PersistenceProperties#IDENTIFIER_TYPES
      */
     public static boolean isIdentifierType(Class<?> cls) {
         return PersistenceProperties.IDENTIFIER_TYPES.contains(cls);

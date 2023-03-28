@@ -419,4 +419,15 @@ public abstract class JsonLdSerializerTestBase {
         final Model actual = readJson(jsonWriter.getResult());
         assertThat(actual, isIsomorphic(expected));
     }
+
+    @Test
+    void serializationSerializesAttributeWithCollectionOfEnumConstantsMappedToIndividualsAsArrayOfIndividuals() throws Exception {
+        final Attribute instance = new Attribute();
+        instance.setUri(Generator.generateUri());
+        instance.setPluralPropertyType(new HashSet<>(Arrays.asList(OwlPropertyType.values())));
+        sut.serialize(instance);
+        final Model expected = toRdf(instance);
+        final Model actual = readJson(jsonWriter.getResult());
+        assertThat(actual, isIsomorphic(expected));
+    }
 }

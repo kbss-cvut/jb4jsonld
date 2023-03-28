@@ -16,6 +16,7 @@ import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jopa.model.annotations.Types;
+import cz.cvut.kbss.jopa.vocabulary.OWL;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
@@ -29,6 +30,7 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -76,7 +78,8 @@ class ObjectGraphTraverserTest {
 
     private void verifyUserFieldsVisited(User user) throws NoSuchFieldException {
         verify(visitor).visitIdentifier(
-                new SerializationContext<>(JsonLd.ID, Person.class.getDeclaredField("uri"), user.getUri().toString(), DummyJsonLdContext.INSTANCE));
+                new SerializationContext<>(JsonLd.ID, Person.class.getDeclaredField("uri"), user.getUri().toString(),
+                                           DummyJsonLdContext.INSTANCE));
         verify(visitor).visitAttribute(ctx(Vocabulary.FIRST_NAME, Person.getFirstNameField(), user.getFirstName()));
         verify(visitor).visitAttribute(ctx(Vocabulary.LAST_NAME, Person.getLastNameField(), user.getLastName()));
         verify(visitor).visitAttribute(ctx(Vocabulary.USERNAME, User.getUsernameField(), user.getUsername()));
@@ -102,7 +105,10 @@ class ObjectGraphTraverserTest {
         verify(visitor).openObject(ctx(null, null, employee));
         verify(visitor).openObject(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), employee));
         verify(visitor).visitTypes(new SerializationContext<>(JsonLd.TYPE, User.class.getDeclaredField("types"),
-                new HashSet<>(Arrays.asList(Vocabulary.PERSON, Vocabulary.USER, Vocabulary.EMPLOYEE)), DummyJsonLdContext.INSTANCE));
+                                                              new HashSet<>(
+                                                                      Arrays.asList(Vocabulary.PERSON, Vocabulary.USER,
+                                                                                    Vocabulary.EMPLOYEE)),
+                                                              DummyJsonLdContext.INSTANCE));
     }
 
     @Test
@@ -327,5 +333,19 @@ class ObjectGraphTraverserTest {
         traverser.traverse(p);
         verify(visitor).visitObject(ctx(null, null, p));
         verify(visitor, never()).openObject(any());
+    }
+
+    @Test
+    void traverseSingularEnumConstantOpensObjectAndAddsOnlyIdentifierToIt() {
+        final SerializationContext<OwlPropertyType> ctx =
+                new SerializationContext<>(OwlPropertyType.OBJECT_PROPERTY, DummyJsonLdContext.INSTANCE);
+        traverser.traverse(ctx);
+        verify(visitor).openObject(ctx);
+        final ArgumentCaptor<SerializationContext<String>> captor = ArgumentCaptor.forClass(SerializationContext.class);
+        verify(visitor).visitIdentifier(captor.capture());
+        assertEquals(OWL.OBJECT_PROPERTY, captor.getValue().getValue());
+        assertEquals(JsonLd.ID, captor.getValue().getTerm());
+        verify(visitor, never()).visitAttribute(any());
+        verify(visitor, never()).visitTypes(any());
     }
 }

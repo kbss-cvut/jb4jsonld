@@ -1,5 +1,6 @@
 package cz.cvut.kbss.jsonld.serialization;
 
+import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
@@ -266,5 +267,25 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final Map<String, ?> country = (Map<String, ?>) json.get("country");
         assertThat(country, hasKey("uri"));
         assertEquals(instance.getCountry().toString(), country.get("uri"));
+    }
+
+    @Test
+    void serializationSerializesRootCollectionOfEnumConstantsMappedToIndividualsAsArrayOfIndividuals() throws Exception {
+        final List<OwlPropertyType> value = Arrays.asList(OwlPropertyType.values());
+
+        sut.serialize(new LinkedHashSet<>(value));
+        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
+        assertInstanceOf(Map.class, jsonObject);
+        final Map<?, ?> map = (Map<?, ?>) jsonObject;
+        assertThat(map, hasKey(JsonLd.GRAPH));
+        assertInstanceOf(List.class, map.get(JsonLd.GRAPH));
+        final List<?> lst = (List<?>) map.get(JsonLd.GRAPH);
+        assertEquals(value.size(), lst.size());
+        for (int i = 0; i < value.size(); i++) {
+            assertInstanceOf(Map.class, lst.get(i));
+            final Map<?, ?> element = (Map<?, ?>) lst.get(i);
+            assertThat(element, hasKey(JsonLd.ID));
+            assertEquals(OwlPropertyType.getMappedIndividual(value.get(i)), element.get(JsonLd.ID));
+        }
     }
 }
