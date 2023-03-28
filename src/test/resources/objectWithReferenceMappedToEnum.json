@@ -5,5 +5,10 @@
   "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Attribute#instance-1587729056",
   "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/hasPropertyType": {
     "@id": "http://www.w3.org/2002/07/owl#DatatypeProperty"
-  }
+  },
+  "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/hasPluralPropertyType": [{
+    "@id": "http://www.w3.org/2002/07/owl#AnnotationProperty"
+  }, {
+    "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+  }]
 }
