@@ -229,6 +229,10 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         instance.organization = Generator.generateOrganization();
 
         final Map<String, ?> json = serializeAndRead(instance);
+        verifyEmbeddedContext(json);
+    }
+
+    private void verifyEmbeddedContext(Map<String, ?> json) {
         assertThat(json, hasKey(JsonLd.CONTEXT));
         assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
         final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
@@ -287,5 +291,22 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
             assertThat(element, hasKey(JsonLd.ID));
             assertEquals(OwlPropertyType.getMappedIndividual(value.get(i)), element.get(JsonLd.ID));
         }
+    }
+
+    /**
+     * Bug #51
+     */
+    @Test
+    void serializationCreatesEmbeddedContextOnCorrectLevel() throws Exception {
+        final StudyWithTitle instance = new StudyWithTitle();
+        instance.uri = Generator.generateUri();
+        instance.name = "Test study";
+        instance.organization = Generator.generateOrganization();
+        instance.organization.addEmployee(Generator.generateEmployee());
+        instance.organization.addEmployee(Generator.generateEmployee());
+        instance.organization.getEmployees().forEach(e -> e.setEmployer(instance.organization));
+
+        final Map<String, ?> json = serializeAndRead(instance);
+        verifyEmbeddedContext(json);
     }
 }
