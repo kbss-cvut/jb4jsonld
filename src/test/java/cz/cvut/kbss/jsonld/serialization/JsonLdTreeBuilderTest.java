@@ -23,7 +23,6 @@ import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
-import cz.cvut.kbss.jsonld.serialization.context.MappingJsonLdContextFactory;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 import cz.cvut.kbss.jsonld.serialization.serializer.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.DefaultValueSerializer;
