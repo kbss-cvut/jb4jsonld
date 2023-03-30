@@ -7,8 +7,10 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jopa.vocabulary.DC;
+import cz.cvut.kbss.jopa.vocabulary.OWL;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.XSD;
+import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
@@ -16,6 +18,7 @@ import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.Models;
@@ -308,5 +311,55 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
 
         final Map<String, ?> json = serializeAndRead(instance);
         verifyEmbeddedContext(json);
+    }
+
+    @Test
+    void serializationSerializesIndividualsAsStringWithExpandedTermDefinitionInContextWhenConfiguredTo() throws Exception {
+        sut.configuration().set(ConfigParam.SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION, Boolean.TRUE.toString());
+        final Attribute instance = new Attribute();
+        instance.setUri(Generator.generateUri());
+        instance.setPropertyType(OwlPropertyType.DATATYPE_PROPERTY);
+        instance.setPluralPropertyType(
+                new HashSet<>(Arrays.asList(OwlPropertyType.ANNOTATION_PROPERTY, OwlPropertyType.OBJECT_PROPERTY)));
+
+        final Map<String, ?> json = serializeAndRead(instance);
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
+        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
+        assertThat(context, hasKey("propertyType"));
+        final ObjectNode termDef = new ObjectNode("propertyType");
+        termDef.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, Vocabulary.HAS_PROPERTY_TYPE));
+        termDef.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, JsonLd.ID));
+        assertEquals(termDef, context.get("propertyType"));
+        assertThat(context, hasKey("pluralPropertyType"));
+        final ObjectNode pluralTermDef = new ObjectNode("pluralPropertyType");
+        pluralTermDef.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, Vocabulary.HAS_PLURAL_PROPERTY_TYPE));
+        pluralTermDef.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, JsonLd.ID));
+        assertEquals(pluralTermDef, context.get("pluralPropertyType"));
+        assertThat(json, hasKey("propertyType"));
+        assertEquals(OWL.DATATYPE_PROPERTY, json.get("propertyType"));
+        assertThat(json, hasKey("pluralPropertyType"));
+        assertInstanceOf(List.class, json.get("pluralPropertyType"));
+        assertThat((List<String>) json.get("pluralPropertyType"),
+                   hasItems(OWL.ANNOTATION_PROPERTY, OWL.OBJECT_PROPERTY));
+    }
+
+    @Test
+    void serializationSerializesPlainIdentifierAsStringWithExpandedTermDefinitionInContextWhenConfiguredTo() throws Exception {
+        sut.configuration().set(ConfigParam.SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION, Boolean.TRUE.toString());
+        final Organization instance = Generator.generateOrganization();
+        instance.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
+
+        final Map<String, ?> json = serializeAndRead(instance);
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
+        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
+        assertThat(context, hasKey("country"));
+        final ObjectNode termDef = new ObjectNode("country");
+        termDef.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, Vocabulary.ORIGIN));
+        termDef.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, JsonLd.ID));
+        assertThat(context, hasKey("country"));
+        assertEquals(termDef, context.get("country"));
+        assertEquals(instance.getCountry().toString(), json.get("country"));
     }
 }
