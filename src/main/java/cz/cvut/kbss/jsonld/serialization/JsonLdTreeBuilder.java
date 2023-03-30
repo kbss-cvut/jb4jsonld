@@ -85,6 +85,10 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
         if (!ctx.isCurrentEmpty()) {
             currentNode.prependItem(ctx.getContextNode());
         }
+        closeCurrentNode();
+    }
+
+    private void closeCurrentNode() {
         currentNode.close();
         if (!nodeStack.empty()) {
             this.currentNode = nodeStack.pop();
@@ -126,7 +130,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     @Override
     public void closeCollection(SerializationContext<?> ctx) {
         assert currentNode instanceof CollectionNode;
-        closeObject(ctx);
+        closeCurrentNode();
     }
 
     public CompositeNode<?> getTreeRoot() {
