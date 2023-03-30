@@ -1,5 +1,8 @@
 # JB4JSON-LD Changelog
 
+## 0.12.2 - 2023-03-30
+- Fix an issue with context embedding (Bug #51).
+
 ## 0.12.1 - 2023-03-28
 - Fix an issue with serialization of a collection of enum constants mapped to individuals.
 
