@@ -13,6 +13,7 @@
 package cz.cvut.kbss.jsonld.serialization.serializer;
 
 import cz.cvut.kbss.jsonld.common.Configurable;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.IndividualSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Optional;
@@ -69,4 +70,8 @@ public interface ValueSerializers extends Configurable {
     ValueSerializer<Set<String>> getTypesSerializer();
 
     void registerTypesSerializer(ValueSerializer<Set<String>> typesSerializer);
+
+    ValueSerializer<?> getIndividualSerializer();
+
+    void registerIndividualSerializer(ValueSerializer<?> individualSerializer);
 }

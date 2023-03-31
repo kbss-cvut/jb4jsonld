@@ -14,7 +14,6 @@ package cz.cvut.kbss.jsonld.serialization.traversal;
 
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
-import cz.cvut.kbss.jsonld.common.EnumUtil;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 
@@ -87,9 +86,13 @@ public class ObjectGraphTraverser {
         if (!shouldTraverse) {
             return;
         }
+        if (isIndividual(ctx)) {
+            visitor.visitIndividual(ctx);
+            return;
+        }
         openInstance(ctx);
         visitIdentifier(ctx);
-        if (shouldTraverseObject(ctx, firstEncounter)) {
+        if (firstEncounter) {
             visitTypes(ctx);
             serializeFields(ctx);
             serializePropertiesField(ctx);
@@ -97,9 +100,8 @@ public class ObjectGraphTraverser {
         closeInstance(ctx);
     }
 
-    private boolean shouldTraverseObject(SerializationContext<?> ctx, boolean firstEncounter) {
-        return firstEncounter && !BeanClassProcessor.isIdentifierType(ctx.getValue().getClass()) &&
-                !ctx.getValue().getClass().isEnum();
+    private static boolean isIndividual(SerializationContext<?> ctx) {
+        return BeanClassProcessor.isIdentifierType(ctx.getValue().getClass()) || ctx.getValue().getClass().isEnum();
     }
 
     private void serializeFields(SerializationContext<?> ctx) {
@@ -185,18 +187,10 @@ public class ObjectGraphTraverser {
         final Class<?> idCls = identifier.getClass();
         final String id;
         final SerializationContext<String> idContext;
-        if (BeanClassProcessor.isIdentifierType(idCls)) {
-            id = identifier.toString();
-            idContext = serializationContextFactory.createForIdentifier(null, id, ctx);
-        } else if (idCls.isEnum()) {
-            id = EnumUtil.resolveMappedIndividual((Enum<?>) identifier);
-            idContext = serializationContextFactory.createForIdentifier(null, id, ctx);
-        } else {
-            id = resolveIdentifier(identifier);
-            idContext = serializationContextFactory.createForIdentifier(
-                    BeanAnnotationProcessor.getIdentifierField(idCls).orElse(null), id, ctx);
-            knownInstances.put(identifier, id);
-        }
+        id = resolveIdentifier(identifier);
+        idContext = serializationContextFactory.createForIdentifier(
+                BeanAnnotationProcessor.getIdentifierField(idCls).orElse(null), id, ctx);
+        knownInstances.put(identifier, id);
         visitor.visitIdentifier(idContext);
     }
 
