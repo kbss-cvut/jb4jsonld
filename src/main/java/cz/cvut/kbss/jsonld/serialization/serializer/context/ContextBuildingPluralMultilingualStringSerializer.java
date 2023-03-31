@@ -23,7 +23,7 @@ public class ContextBuildingPluralMultilingualStringSerializer implements ValueS
             allValues.putIfAbsent(lang, new LinkedHashSet<>());
             allValues.get(lang).add(text);
         }));
-        final ObjectNode node = ctx.getField() != null ? JsonNodeFactory.createObjectNode(ctx.getTerm()) : JsonNodeFactory.createObjectNode();
+        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
         allValues.forEach((lang, texts) -> {
             final String langKey = lang != null ? lang : JsonLd.NONE;
             if (texts.size() == 1) {

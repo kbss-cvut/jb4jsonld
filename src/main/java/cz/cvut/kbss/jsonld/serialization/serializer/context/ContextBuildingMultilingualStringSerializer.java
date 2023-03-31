@@ -17,7 +17,7 @@ public class ContextBuildingMultilingualStringSerializer implements ValueSeriali
         if (ctx.getTerm() != null) {
             registerTermMapping(ctx);
         }
-        final ObjectNode node = ctx.getField() != null ? JsonNodeFactory.createObjectNode(ctx.getFieldName()) : JsonNodeFactory.createObjectNode();
+        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getFieldName());
         value.getValue().forEach((lang, text) -> node.addItem(JsonNodeFactory.createLiteralNode(lang != null ? lang : JsonLd.NONE, text)));
         return node;
     }

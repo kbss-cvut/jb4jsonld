@@ -3,8 +3,6 @@ package cz.cvut.kbss.jsonld.serialization.serializer.context;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.common.EnumUtil;
-import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.SerializerUtils;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.ObjectPropertyValueSerializer;

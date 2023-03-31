@@ -75,8 +75,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void openObject(SerializationContext<?> ctx) {
-        final ObjectNode newCurrent = ctx.getTerm() != null ? JsonNodeFactory.createObjectNode(ctx.getTerm()) :
-                                      JsonNodeFactory.createObjectNode();
+        final ObjectNode newCurrent = JsonNodeFactory.createObjectNode(ctx.getTerm());
         openNewNode(newCurrent);
         // Prepare to create new JSON-LD context when an object is open
         ctx.setJsonLdContext(jsonLdContextFactory.createJsonLdContext(ctx.getJsonLdContext()));
@@ -132,10 +131,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void openCollection(SerializationContext<? extends Collection<?>> ctx) {
-        final CollectionNode<?> newCurrent =
-                ctx.getTerm() != null ? JsonNodeFactory.createCollectionNode(ctx.getTerm(),
-                                                                             ctx.getValue()) :
-                JsonNodeFactory.createCollectionNode(ctx.getValue());
+        final CollectionNode<?> newCurrent =JsonNodeFactory.createCollectionNode(ctx.getTerm(), ctx.getValue());
         openNewNode(newCurrent);
     }
 

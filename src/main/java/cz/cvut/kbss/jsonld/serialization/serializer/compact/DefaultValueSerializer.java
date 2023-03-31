@@ -61,8 +61,7 @@ public class DefaultValueSerializer implements ValueSerializer {
     }
 
     private static JsonNode serializeReference(String attId, Object value) {
-        final ObjectNode node =
-                attId != null ? JsonNodeFactory.createObjectNode(attId) : JsonNodeFactory.createObjectNode();
+        final ObjectNode node = JsonNodeFactory.createObjectNode(attId);
         node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, value));
         return node;
     }
