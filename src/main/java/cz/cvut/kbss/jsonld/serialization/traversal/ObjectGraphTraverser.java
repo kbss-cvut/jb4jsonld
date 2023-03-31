@@ -81,15 +81,15 @@ public class ObjectGraphTraverser {
         if (ctx.getValue() == null) {
             return;
         }
-        final boolean firstEncounter = !knownInstances.containsKey(ctx.getValue());
         final boolean shouldTraverse = visitInstance(ctx);
         if (!shouldTraverse) {
             return;
         }
         if (isIndividual(ctx)) {
-            visitor.visitIndividual(ctx);
+            visitIndividual(ctx);
             return;
         }
+        final boolean firstEncounter = !knownInstances.containsKey(ctx.getValue());
         openInstance(ctx);
         visitIdentifier(ctx);
         if (firstEncounter) {
@@ -159,6 +159,10 @@ public class ObjectGraphTraverser {
 
     public boolean visitInstance(SerializationContext<?> ctx) {
         return visitor.visitObject(ctx);
+    }
+
+    public void visitIndividual(SerializationContext<?> ctx) {
+        visitor.visitIndividual(ctx);
     }
 
     public void openInstance(SerializationContext<?> ctx) {

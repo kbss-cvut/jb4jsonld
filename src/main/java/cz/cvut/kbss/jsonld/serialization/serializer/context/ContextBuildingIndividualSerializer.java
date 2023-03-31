@@ -15,6 +15,7 @@ public class ContextBuildingIndividualSerializer extends IndividualSerializer {
 
     @Override
     public JsonNode serialize(Object value, SerializationContext ctx) {
+        // Assume term has been already registered in context
         if (serializeUsingExtendedDefinition) {
             if (BeanClassProcessor.isIdentifierType(value.getClass())) {
                 return JsonNodeFactory.createStringLiteralNode(ctx.getTerm(), value.toString());
