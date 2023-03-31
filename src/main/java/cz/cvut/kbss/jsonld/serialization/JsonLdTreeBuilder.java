@@ -44,6 +44,18 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
     }
 
     @Override
+    public void visitIndividual(SerializationContext<?> ctx) {
+        final ValueSerializer s = serializers.getIndividualSerializer();
+        final JsonNode node = s.serialize(ctx.getValue(), ctx);
+        if (currentNode != null) {
+            currentNode.addItem(node);
+        } else {
+            assert node instanceof CompositeNode;
+            currentNode = (CompositeNode<?>) node;
+        }
+    }
+
+    @Override
     public boolean visitObject(SerializationContext<?> ctx) {
         if (serializers.hasCustomSerializer(ctx.getValue().getClass())) {
             final ValueSerializer serializer = serializers.getSerializer(ctx).get();

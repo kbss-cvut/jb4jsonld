@@ -50,6 +50,7 @@ public class ContextBuildingJsonLdSerializer extends JsonLdSerializer {
                 new LiteralValueSerializers(new ContextBuildingDefaultValueSerializer(mlsSerializer, mlsColSerializer));
         valueSerializers.registerIdentifierSerializer(new ContextBuildingIdentifierSerializer());
         valueSerializers.registerTypesSerializer(new ContextBuildingTypesSerializer());
+        valueSerializers.registerIndividualSerializer(new ContextBuildingIndividualSerializer());
         final ContextBuildingTemporalSerializer ts = new ContextBuildingTemporalSerializer();
         valueSerializers.registerSerializer(LocalDate.class, ts);
         // Register the same temporal serializer for each of the types it supports (needed for key-based map access)
@@ -96,9 +97,9 @@ public class ContextBuildingJsonLdSerializer extends JsonLdSerializer {
 
     private JsonLdTreeBuilder initTreeBuilder(ObjectGraphTraverser traverser,
                                               JsonLdContextFactory jsonLdContextFactory) {
-        return new JsonLdTreeBuilder(new ObjectGraphValueSerializers(serializers,
-                                                                     new ContextBuildingObjectPropertyValueSerializer(
-                                                                             traverser)), jsonLdContextFactory);
+        final ContextBuildingObjectPropertyValueSerializer opSerializer = new ContextBuildingObjectPropertyValueSerializer(traverser);
+        opSerializer.configure(configuration());
+        return new JsonLdTreeBuilder(new ObjectGraphValueSerializers(serializers, opSerializer), jsonLdContextFactory);
     }
 
     private JsonNode buildObjectWithContextAndGraph(ObjectGraphTraverser traverser, JsonLdContext rootContext,

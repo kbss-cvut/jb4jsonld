@@ -18,7 +18,6 @@ import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 import cz.cvut.kbss.jsonld.serialization.JsonGenerator;
 
 import java.io.IOException;
-import java.util.Objects;
 
 public abstract class JsonNode {
 
@@ -31,8 +30,8 @@ public abstract class JsonNode {
     }
 
     public JsonNode(String name) {
-        this.name = Objects.requireNonNull(name);
-        this.valueNode = false;
+        this.name = name;
+        this.valueNode = name == null;
     }
 
     public String getName() {

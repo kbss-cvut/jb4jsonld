@@ -80,4 +80,14 @@ public class ObjectGraphValueSerializers implements ValueSerializers {
     public void registerTypesSerializer(ValueSerializer<Set<String>> typesSerializer) {
         serializers.registerTypesSerializer(typesSerializer);
     }
+
+    @Override
+    public ValueSerializer<?> getIndividualSerializer() {
+        return serializers.getIndividualSerializer();
+    }
+
+    @Override
+    public void registerIndividualSerializer(ValueSerializer<?> individualSerializer) {
+        serializers.registerIndividualSerializer(individualSerializer);
+    }
 }

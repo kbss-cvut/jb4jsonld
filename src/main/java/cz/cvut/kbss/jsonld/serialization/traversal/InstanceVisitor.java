@@ -20,6 +20,14 @@ import java.util.Set;
 public interface InstanceVisitor {
 
     /**
+     * Visits an object that represents an individual, without any additional attributes.
+     *
+     * This can be an identifier-based attribute value (e.g., URI), or an enum constant mapped to an individual.
+     * @param ctx Current serialization context
+     */
+    void visitIndividual(SerializationContext<?> ctx);
+
+    /**
      * Visits the instance represented by the specified context.
      * <p>
      * Called before a new instance is open by the object graph traverser.

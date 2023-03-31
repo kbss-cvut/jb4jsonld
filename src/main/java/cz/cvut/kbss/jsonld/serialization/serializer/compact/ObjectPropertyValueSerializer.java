@@ -34,17 +34,7 @@ public class ObjectPropertyValueSerializer implements ValueSerializer {
 
     @Override
     public JsonNode serialize(Object value, SerializationContext ctx) {
-        if (value.getClass().isEnum()) {
-            return serializeEnumConstant((Enum<?>) value, ctx);
-        }
         graphTraverser.traverse(ctx);
         return null;
-    }
-
-    private static JsonNode serializeEnumConstant(Enum<?> constant, SerializationContext<?> ctx) {
-        final String iri = EnumUtil.resolveMappedIndividual(constant);
-        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
-        node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, iri));
-        return node;
     }
 }
