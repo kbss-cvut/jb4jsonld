@@ -21,22 +21,21 @@ public class IndividualSerializer implements ValueSerializer {
     public JsonNode serialize(Object value, SerializationContext ctx) {
         assert BeanClassProcessor.isIdentifierType(value.getClass()) || value.getClass().isEnum();
         if (BeanClassProcessor.isIdentifierType(value.getClass())) {
-            final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
-            node.addItem(JsonNodeFactory.createObjectIdNode(idAttribute(ctx), value));
-            return node;
+            return serializeValue(value, ctx);
         } else {
-            return serializeEnumConstant((Enum<?>) value, ctx);
+            assert value instanceof Enum;
+            final String iri = EnumUtil.resolveMappedIndividual((Enum<?>) value);
+            return serialize(iri, ctx);
         }
+    }
+
+    private JsonNode serializeValue(Object value, SerializationContext<?> ctx) {
+        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
+        node.addItem(JsonNodeFactory.createObjectIdNode(idAttribute(ctx), value));
+        return node;
     }
 
     private String idAttribute(SerializationContext<?> ctx) {
         return ctx.getJsonLdContext().getMappedTerm(JsonLd.ID).orElse(JsonLd.ID);
-    }
-
-    protected JsonNode serializeEnumConstant(Enum<?> constant, SerializationContext<?> ctx) {
-        final String iri = EnumUtil.resolveMappedIndividual(constant);
-        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
-        node.addItem(JsonNodeFactory.createObjectIdNode(idAttribute(ctx), iri));
-        return node;
     }
 }
