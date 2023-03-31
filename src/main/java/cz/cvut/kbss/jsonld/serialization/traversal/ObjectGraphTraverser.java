@@ -85,7 +85,7 @@ public class ObjectGraphTraverser {
         if (!shouldTraverse) {
             return;
         }
-        if (isIndividual(ctx)) {
+        if (BeanClassProcessor.isIndividualType(ctx.getValue().getClass())) {
             visitIndividual(ctx);
             return;
         }
@@ -98,10 +98,6 @@ public class ObjectGraphTraverser {
             serializePropertiesField(ctx);
         }
         closeInstance(ctx);
-    }
-
-    private static boolean isIndividual(SerializationContext<?> ctx) {
-        return BeanClassProcessor.isIdentifierType(ctx.getValue().getClass()) || ctx.getValue().getClass().isEnum();
     }
 
     private void serializeFields(SerializationContext<?> ctx) {

@@ -3,11 +3,14 @@ package cz.cvut.kbss.jsonld.serialization.serializer.context;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.SerializerUtils;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.ObjectPropertyValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
+
+import java.util.Collection;
 
 public class ContextBuildingObjectPropertyValueSerializer extends ObjectPropertyValueSerializer {
 
@@ -26,13 +29,28 @@ public class ContextBuildingObjectPropertyValueSerializer extends ObjectProperty
     }
 
     private void registerTermDefinition(SerializationContext<?> ctx) {
-        if (serializeUsingExtendedDefinition) {
+        if (serializeUsingExtendedDefinition && isIndividual(ctx)) {
             ctx.registerTermMapping(ctx.getFieldName(),
                                     SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(),
                                                                               JsonLd.ID));
         } else {
             ctx.registerTermMapping(ctx.getFieldName(), ctx.getTerm());
         }
+    }
+
+    private static boolean isIndividual(SerializationContext<?> ctx) {
+        if (BeanClassProcessor.isIndividualType(ctx.getValue().getClass())) {
+            return true;
+        }
+        if (ctx.getValue() instanceof Collection) {
+            final Collection<?> c = (Collection<?>) ctx.getValue();
+            for (Object elem : c) {
+                if (elem != null) {
+                    return BeanClassProcessor.isIndividualType(elem.getClass());
+                }
+            }
+        }
+        return false;
     }
 
     @Override

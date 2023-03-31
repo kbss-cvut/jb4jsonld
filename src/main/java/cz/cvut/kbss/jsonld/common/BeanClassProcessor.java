@@ -245,6 +245,18 @@ public class BeanClassProcessor {
     }
 
     /**
+     * Checks whether the specified class represents an individual reference and not a complex object.
+     *
+     * Individual references are identifiers or enum constants mapped to individuals.
+     * @param cls Class to check
+     * @return {@code true} when the type represents an individual, {@code false} otherwise
+     * @see #isIdentifierType(Class)
+     */
+    public static boolean isIndividualType(Class<?> cls) {
+        return isIdentifierType(cls) || cls.isEnum();
+    }
+
+    /**
      * Checks whether the specified type is a valid identifier type.
      *
      * @param cls Class to check
