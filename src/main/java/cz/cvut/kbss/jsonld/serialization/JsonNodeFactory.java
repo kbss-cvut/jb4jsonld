@@ -70,19 +70,6 @@ public class JsonNodeFactory {
     }
 
     /**
-     * Creates collection node for the specified collection.
-     * <p>
-     * The node is without name, so it cannot be used as attribute.
-     *
-     * @param value The collection. It is used only to determine the type of the target node, no values are added to the
-     *              result
-     * @return An empty collection node
-     */
-    public static CollectionNode<?> createCollectionNode(Collection<?> value) {
-        return createCollectionNode(null, value);
-    }
-
-    /**
      * Creates collection node with the specified name, for the specified collection.
      *
      * @param name  Name of the node (attribute)
@@ -92,16 +79,14 @@ public class JsonNodeFactory {
      */
     public static CollectionNode<?> createCollectionNode(String name, Collection<?> value) {
         final CollectionType type = determineCollectionType(value);
-        CollectionNode<?> n = null;
         switch (type) {
             case LIST:
-                n = name != null ? new ListNode(name) : new ListNode();
-                break;
+                return new ListNode(name);
             case SET:
-                n = name != null ? createSetNode(name) : createSetNode();
-                break;
+                return createSetNode(name);
+            default:
+                throw new IllegalArgumentException("Unsupported collection type " + type);
         }
-        return n;
     }
 
     private static CollectionType determineCollectionType(Collection<?> collection) {
@@ -114,16 +99,8 @@ public class JsonNodeFactory {
         }
     }
 
-    public static SetNode createSetNode() {
-        return new SetNode();
-    }
-
     public static SetNode createSetNode(String name) {
         return new SetNode(name);
-    }
-
-    public static SetNode createCollectionNodeFromArray() {
-        return createSetNode();
     }
 
     public static SetNode createCollectionNodeFromArray(String name) {
@@ -136,10 +113,6 @@ public class JsonNodeFactory {
 
     public static ObjectNode createObjectNode(String name) {
         return new ObjectNode(name);
-    }
-
-    public static ObjectIdNode createObjectIdNode(Object id) {
-        return new ObjectIdNode(id.toString());
     }
 
     public static ObjectIdNode createObjectIdNode(String name, Object id) {

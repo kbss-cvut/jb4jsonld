@@ -34,10 +34,11 @@ public class LiteralValueSerializers implements ValueSerializers {
 
     private ValueSerializer<Set<String>> typesSerializer;
 
+    private ValueSerializer<?> individualSerializer;
+
     public LiteralValueSerializers(ValueSerializer<?> defaultSerializer) {
         this.defaultSerializer = Objects.requireNonNull(defaultSerializer);
     }
-
 
     @Override
     public <T> boolean hasCustomSerializer(Class<T> type) {
@@ -82,7 +83,21 @@ public class LiteralValueSerializers implements ValueSerializers {
     }
 
     @Override
+    public ValueSerializer<?> getIndividualSerializer() {
+        return individualSerializer;
+    }
+
+    @Override
+    public void registerIndividualSerializer(ValueSerializer<?> individualSerializer) {
+        this.individualSerializer = Objects.requireNonNull(individualSerializer);
+    }
+
+    @Override
     public void configure(Configuration configuration) {
         serializers.values().forEach(vs -> vs.configure(configuration));
+        individualSerializer.configure(configuration);
+        identifierSerializer.configure(configuration);
+        typesSerializer.configure(configuration);
+        defaultSerializer.configure(configuration);
     }
 }

@@ -6,6 +6,8 @@ import cz.cvut.kbss.jsonld.exception.AmbiguousTermMappingException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
@@ -32,5 +34,15 @@ class EmbeddedTermMappingHolderTest {
         child.registerTermMapping(term, JsonNodeFactory.createStringLiteralNode(term, RDFS.LABEL));
         assertThat(child.getMapping(), not(hasKey(term)));
         assertTrue(child.hasTermMapping(term));
+    }
+
+    @Test
+    void getMappedTermReturnsMappedValueFromParentWhenItIsNotPresentInCurrentHolder() {
+        final EmbeddedTermMappingHolder child = new EmbeddedTermMappingHolder(sut);
+        final String term = "name";
+        sut.registerTermMapping(term, JsonNodeFactory.createStringLiteralNode(term, RDFS.LABEL));
+        final Optional<String> result = child.getMappedTerm(RDFS.LABEL);
+        assertTrue(result.isPresent());
+        assertEquals(term, result.get());
     }
 }

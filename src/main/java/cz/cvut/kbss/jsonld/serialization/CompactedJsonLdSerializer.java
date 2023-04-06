@@ -50,6 +50,7 @@ public class CompactedJsonLdSerializer extends JsonLdSerializer {
                 new LiteralValueSerializers(new DefaultValueSerializer(new MultilingualStringSerializer()));
         valueSerializers.registerIdentifierSerializer(new IdentifierSerializer());
         valueSerializers.registerTypesSerializer(new TypesSerializer());
+        valueSerializers.registerIndividualSerializer(new IndividualSerializer());
         final TemporalSerializer ts = new TemporalSerializer();
         valueSerializers.registerSerializer(LocalDate.class, ts);
         // Register the same temporal serializer for each of the types it supports (needed for key-based map access)
@@ -72,12 +73,16 @@ public class CompactedJsonLdSerializer extends JsonLdSerializer {
         final ObjectGraphTraverser traverser = new ObjectGraphTraverser(new SerializationContextFactory(
                 DummyJsonLdContext.INSTANCE));
         traverser.setRequireId(configuration().is(ConfigParam.REQUIRE_ID));
-        final JsonLdTreeBuilder treeBuilder =
-                new JsonLdTreeBuilder(
-                        new ObjectGraphValueSerializers(serializers, new ObjectPropertyValueSerializer(traverser)),
-                        DummyJsonLdContext.INSTANCE);
+        final JsonLdTreeBuilder treeBuilder = initTreeBuilder(traverser);
         traverser.setVisitor(treeBuilder);
         traverser.traverse(root);
         return treeBuilder.getTreeRoot();
+    }
+
+    private JsonLdTreeBuilder initTreeBuilder(ObjectGraphTraverser traverser) {
+        final ObjectPropertyValueSerializer opSerializer = new ObjectPropertyValueSerializer(traverser);
+        opSerializer.configure(configuration());
+        return new JsonLdTreeBuilder(new ObjectGraphValueSerializers(serializers, opSerializer),
+                                     DummyJsonLdContext.INSTANCE);
     }
 }

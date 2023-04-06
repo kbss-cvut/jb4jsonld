@@ -12,11 +12,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization.serializer.compact;
 
-import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.common.EnumUtil;
-import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
-import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
@@ -34,17 +30,7 @@ public class ObjectPropertyValueSerializer implements ValueSerializer {
 
     @Override
     public JsonNode serialize(Object value, SerializationContext ctx) {
-        if (value.getClass().isEnum()) {
-            return serializeEnumConstant((Enum<?>) value, ctx);
-        }
         graphTraverser.traverse(ctx);
         return null;
-    }
-
-    private static JsonNode serializeEnumConstant(Enum<?> constant, SerializationContext<?> ctx) {
-        final String iri = EnumUtil.resolveMappedIndividual(constant);
-        final ObjectNode node = JsonNodeFactory.createObjectNode(ctx.getTerm());
-        node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, iri));
-        return node;
     }
 }

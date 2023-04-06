@@ -73,7 +73,7 @@ class ObjectGraphValueSerializersTest {
     @Test
     void getSerializerReturnsCustomSerializerWhenItIsRegisteredInCommon() throws Exception {
         final ValueSerializer<Organization> serializer =
-                ((value, ctx) -> JsonNodeFactory.createObjectIdNode(Generator.generateUri()));
+                ((value, ctx) -> JsonNodeFactory.createObjectIdNode(ctx.getTerm(), Generator.generateUri()));
         sut.registerSerializer(Organization.class, serializer);
         final SerializationContext<Organization> ctx =
                 new SerializationContext<>(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(),
@@ -95,7 +95,7 @@ class ObjectGraphValueSerializersTest {
     @Test
     void getOrDefaultReturnsCustomSerializerWhenItIsRegistered() throws Exception {
         final ValueSerializer<Organization> serializer =
-                ((value, ctx) -> JsonNodeFactory.createObjectIdNode(Generator.generateUri()));
+                ((value, ctx) -> JsonNodeFactory.createObjectIdNode(ctx.getTerm(), Generator.generateUri()));
         sut.registerSerializer(Organization.class, serializer);
         final SerializationContext<Organization> ctx =
                 new SerializationContext<>(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(),

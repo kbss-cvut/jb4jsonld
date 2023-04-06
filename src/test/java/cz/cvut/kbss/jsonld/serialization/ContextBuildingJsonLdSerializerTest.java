@@ -7,8 +7,10 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jopa.vocabulary.DC;
+import cz.cvut.kbss.jopa.vocabulary.OWL;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.XSD;
+import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
@@ -308,5 +310,58 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
 
         final Map<String, ?> json = serializeAndRead(instance);
         verifyEmbeddedContext(json);
+    }
+
+    @Test
+    void serializationSerializesIndividualsAsStringWithExpandedTermDefinitionInContextWhenConfiguredTo() throws Exception {
+        sut.configuration().set(ConfigParam.SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION, Boolean.TRUE.toString());
+        final Attribute instance = new Attribute();
+        instance.setUri(Generator.generateUri());
+        instance.setPropertyType(OwlPropertyType.DATATYPE_PROPERTY);
+        instance.setPluralPropertyType(
+                new HashSet<>(Arrays.asList(OwlPropertyType.ANNOTATION_PROPERTY, OwlPropertyType.OBJECT_PROPERTY)));
+
+        final Map<String, ?> json = serializeAndRead(instance);
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
+        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
+        assertThat(context, hasKey("propertyType"));
+        assertInstanceOf(Map.class, context.get("propertyType"));
+        final Map<String, ?> termDef = (Map<String, ?>) context.get("propertyType");
+        assertThat(termDef, hasKey(JsonLd.ID));
+        assertEquals(termDef.get(JsonLd.ID), Vocabulary.HAS_PROPERTY_TYPE);
+        assertThat(termDef, hasKey(JsonLd.TYPE));
+        assertEquals(termDef.get(JsonLd.TYPE), JsonLd.ID);
+        assertThat(context, hasKey("pluralPropertyType"));
+        assertInstanceOf(Map.class, context.get("propertyType"));
+        final Map<String, ?> pluralTermDef = (Map<String, ?>) context.get("pluralPropertyType");
+        assertThat(pluralTermDef, hasKey(JsonLd.ID));
+        assertEquals(pluralTermDef.get(JsonLd.ID), Vocabulary.HAS_PLURAL_PROPERTY_TYPE);
+        assertThat(pluralTermDef, hasKey(JsonLd.TYPE));
+        assertEquals(pluralTermDef.get(JsonLd.TYPE), JsonLd.ID);
+        assertThat(json, hasKey("propertyType"));
+        assertEquals(OWL.DATATYPE_PROPERTY, json.get("propertyType"));
+        assertThat(json, hasKey("pluralPropertyType"));
+        assertInstanceOf(List.class, json.get("pluralPropertyType"));
+        assertThat((List<String>) json.get("pluralPropertyType"),
+                   hasItems(OWL.ANNOTATION_PROPERTY, OWL.OBJECT_PROPERTY));
+    }
+
+    @Test
+    void serializationSerializesPlainIdentifierAsStringWithExpandedTermDefinitionInContextWhenConfiguredTo() throws Exception {
+        sut.configuration().set(ConfigParam.SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION, Boolean.TRUE.toString());
+        final Organization instance = Generator.generateOrganization();
+        instance.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
+
+        final Map<String, ?> json = serializeAndRead(instance);
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
+        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
+        assertThat(context, hasKey("country"));
+        assertInstanceOf(Map.class, context.get("country"));
+        final Map<String, ?> termDef = (Map<String, ?>) context.get("country");
+        assertEquals(Vocabulary.ORIGIN, termDef.get(JsonLd.ID));
+        assertEquals(JsonLd.ID, termDef.get(JsonLd.TYPE));
+        assertEquals(instance.getCountry().toString(), json.get("country"));
     }
 }

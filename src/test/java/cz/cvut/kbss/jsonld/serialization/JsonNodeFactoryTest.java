@@ -16,7 +16,6 @@ import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.serialization.model.*;
 import org.junit.jupiter.api.Test;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,14 +30,6 @@ class JsonNodeFactoryTest {
     private static final String NAME = Generator.generateUri().toString();
 
     @Test
-    void createCollectionCreatesListNodeFromListWithoutName() {
-        final List<String> list = new ArrayList<>();
-        final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(list);
-        assertThat(node, instanceOf(ListNode.class));
-        assertTrue(node.isValueNode());
-    }
-
-    @Test
     void createCollectionCreatesListNodeFromListWithName() {
         final List<String> list = new ArrayList<>();
         final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(NAME, list);
@@ -50,7 +41,7 @@ class JsonNodeFactoryTest {
     @Test
     void createCollectionCreatesSetNodeFromSetWithoutName() {
         final Set<String> set = new HashSet<>();
-        final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(set);
+        final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(null, set);
         assertThat(node, instanceOf(SetNode.class));
         assertTrue(node.isValueNode());
     }
@@ -70,14 +61,6 @@ class JsonNodeFactoryTest {
         assertThat(node, instanceOf(SetNode.class));
         assertEquals(NAME, node.getName());
         assertFalse(node.isValueNode());
-    }
-
-    @Test
-    void createCollectionFromArrayCreatesSetNodeWithoutName() {
-        final CollectionNode<?> node = JsonNodeFactory.createCollectionNodeFromArray();
-        assertThat(node, instanceOf(SetNode.class));
-        assertNull(node.getName());
-        assertTrue(node.isValueNode());
     }
 
     @Test
@@ -132,12 +115,5 @@ class JsonNodeFactoryTest {
         assertThat(node, instanceOf(StringLiteralNode.class));
         assertTrue(node.isValueNode());
         assertEquals(value, node.getValue());
-    }
-
-    @Test
-    void createObjectIdNodeWithoutAttributeCreatesNamelessObjectIdNode() {
-        final URI uri = Generator.generateUri();
-        final ObjectIdNode node = JsonNodeFactory.createObjectIdNode(uri);
-        assertNull(node.getName());
     }
 }

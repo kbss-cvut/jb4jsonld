@@ -99,7 +99,15 @@ public enum ConfigParam {
      * <p>
      * Also note that this format applies only to full datetime values. Date or time values have to be formatted per-attribute.
      */
-    DATE_TIME_FORMAT("datetimeFormat");
+    DATE_TIME_FORMAT("datetimeFormat"),
+
+    /**
+     * Whether to serialize individuals using expanded term definition in context.
+     *
+     * This basically means that the individual's identifier is provided directly as a string and an expanded term
+     * definition (consisting of a {@literal @id} and {@literal @type}) is added into the context, specifying that the string is an identifier.
+     */
+    SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION("serializeIndividualsUsingExpandedDefinition");
 
     private final String name;
 

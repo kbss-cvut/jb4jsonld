@@ -69,6 +69,15 @@ class EmbeddedTermMappingHolder extends TermMappingHolder {
     }
 
     @Override
+    public Optional<String> getMappedTerm(String iri) {
+        final Optional<String> result = super.getMappedTerm(iri);
+        if (result.isPresent()) {
+            return result;
+        }
+        return parentContext.getMappedTerm(iri);
+    }
+
+    @Override
     boolean isEmpty() {
         return mapping.isEmpty();
     }

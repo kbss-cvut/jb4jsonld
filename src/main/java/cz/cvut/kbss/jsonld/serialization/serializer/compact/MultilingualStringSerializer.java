@@ -34,14 +34,13 @@ public class MultilingualStringSerializer implements ValueSerializer<Multilingua
             final Map.Entry<String, String> entry = value.getValue().entrySet().iterator().next();
             return createNode(ctx.getTerm(), entry.getValue(), entry.getKey());
         }
-        final SetNode collectionNode = ctx.getTerm() != null ? JsonNodeFactory.createCollectionNodeFromArray(ctx.getTerm()) : JsonNodeFactory.createCollectionNodeFromArray();
+        final SetNode collectionNode = JsonNodeFactory.createCollectionNodeFromArray(ctx.getTerm());
         addTranslationsToCollectionNode(value, collectionNode);
         return collectionNode;
     }
 
     private static JsonNode createNode(String attName, String value, String language) {
-        final ObjectNode node =
-                attName != null ? JsonNodeFactory.createObjectNode(attName) : JsonNodeFactory.createObjectNode();
+        final ObjectNode node = JsonNodeFactory.createObjectNode(attName);
         node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.LANGUAGE, language != null ? language : JsonLd.NONE));
         node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value));
         return node;

@@ -16,7 +16,6 @@ import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jopa.model.annotations.Types;
-import cz.cvut.kbss.jopa.vocabulary.OWL;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
@@ -30,7 +29,6 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -225,18 +223,17 @@ class ObjectGraphTraverserTest {
     }
 
     @Test
-    void traverseInvokesVisitWhenInstanceIsPlainIdentifierPropertyValue() throws Exception {
+    void traverseInvokesVisitIndividualWhenInstanceIsPlainIdentifierPropertyValue() throws Exception {
         final EmployeeWithUriEmployer employee = new EmployeeWithUriEmployer();
         employee.setUri(Generator.generateUri());
         employee.employer = Generator.generateUri();
 
-        traverser.traverse(ctx(Vocabulary.IS_MEMBER_OF, EmployeeWithUriEmployer.class.getDeclaredField("employer"),
-                               employee.employer));
-        final InOrder inOrder = inOrder(visitor);
-        inOrder.verify(visitor).openObject(
-                ctx(Vocabulary.IS_MEMBER_OF, EmployeeWithUriEmployer.class.getDeclaredField("employer"),
-                    employee.employer));
-        inOrder.verify(visitor).visitIdentifier(ctx(JsonLd.ID, null, employee.employer.toString()));
+        final SerializationContext<URI> ctx = ctx(Vocabulary.IS_MEMBER_OF, EmployeeWithUriEmployer.class.getDeclaredField("employer"),
+                                                  employee.employer);
+        traverser.traverse(ctx);
+        verify(visitor).visitIndividual(ctx);
+        verify(visitor, never()).visitAttribute(any());
+        verify(visitor, never()).visitTypes(any());
     }
 
     @Test
@@ -336,15 +333,11 @@ class ObjectGraphTraverserTest {
     }
 
     @Test
-    void traverseSingularEnumConstantOpensObjectAndAddsOnlyIdentifierToIt() {
+    void traverseSingularEnumConstantVisitsIndividual() {
         final SerializationContext<OwlPropertyType> ctx =
                 new SerializationContext<>(OwlPropertyType.OBJECT_PROPERTY, DummyJsonLdContext.INSTANCE);
         traverser.traverse(ctx);
-        verify(visitor).openObject(ctx);
-        final ArgumentCaptor<SerializationContext<String>> captor = ArgumentCaptor.forClass(SerializationContext.class);
-        verify(visitor).visitIdentifier(captor.capture());
-        assertEquals(OWL.OBJECT_PROPERTY, captor.getValue().getValue());
-        assertEquals(JsonLd.ID, captor.getValue().getTerm());
+        verify(visitor).visitIndividual(ctx);
         verify(visitor, never()).visitAttribute(any());
         verify(visitor, never()).visitTypes(any());
     }

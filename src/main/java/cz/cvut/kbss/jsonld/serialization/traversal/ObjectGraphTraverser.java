@@ -14,7 +14,6 @@ package cz.cvut.kbss.jsonld.serialization.traversal;
 
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
-import cz.cvut.kbss.jsonld.common.EnumUtil;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 
@@ -82,24 +81,23 @@ public class ObjectGraphTraverser {
         if (ctx.getValue() == null) {
             return;
         }
-        final boolean firstEncounter = !knownInstances.containsKey(ctx.getValue());
         final boolean shouldTraverse = visitInstance(ctx);
         if (!shouldTraverse) {
             return;
         }
+        if (BeanClassProcessor.isIndividualType(ctx.getValue().getClass())) {
+            visitIndividual(ctx);
+            return;
+        }
+        final boolean firstEncounter = !knownInstances.containsKey(ctx.getValue());
         openInstance(ctx);
         visitIdentifier(ctx);
-        if (shouldTraverseObject(ctx, firstEncounter)) {
+        if (firstEncounter) {
             visitTypes(ctx);
             serializeFields(ctx);
             serializePropertiesField(ctx);
         }
         closeInstance(ctx);
-    }
-
-    private boolean shouldTraverseObject(SerializationContext<?> ctx, boolean firstEncounter) {
-        return firstEncounter && !BeanClassProcessor.isIdentifierType(ctx.getValue().getClass()) &&
-                !ctx.getValue().getClass().isEnum();
     }
 
     private void serializeFields(SerializationContext<?> ctx) {
@@ -159,6 +157,10 @@ public class ObjectGraphTraverser {
         return visitor.visitObject(ctx);
     }
 
+    public void visitIndividual(SerializationContext<?> ctx) {
+        visitor.visitIndividual(ctx);
+    }
+
     public void openInstance(SerializationContext<?> ctx) {
         if (!BeanClassProcessor.isIdentifierType(ctx.getValue().getClass())) {
             final String identifier = resolveIdentifier(ctx.getValue());
@@ -185,18 +187,10 @@ public class ObjectGraphTraverser {
         final Class<?> idCls = identifier.getClass();
         final String id;
         final SerializationContext<String> idContext;
-        if (BeanClassProcessor.isIdentifierType(idCls)) {
-            id = identifier.toString();
-            idContext = serializationContextFactory.createForIdentifier(null, id, ctx);
-        } else if (idCls.isEnum()) {
-            id = EnumUtil.resolveMappedIndividual((Enum<?>) identifier);
-            idContext = serializationContextFactory.createForIdentifier(null, id, ctx);
-        } else {
-            id = resolveIdentifier(identifier);
-            idContext = serializationContextFactory.createForIdentifier(
-                    BeanAnnotationProcessor.getIdentifierField(idCls).orElse(null), id, ctx);
-            knownInstances.put(identifier, id);
-        }
+        id = resolveIdentifier(identifier);
+        idContext = serializationContextFactory.createForIdentifier(
+                BeanAnnotationProcessor.getIdentifierField(idCls).orElse(null), id, ctx);
+        knownInstances.put(identifier, id);
         visitor.visitIdentifier(idContext);
     }
 
