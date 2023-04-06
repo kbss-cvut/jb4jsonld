@@ -1,5 +1,10 @@
 # JB4JSON-LD Changelog
 
+## 0.12.3 - 2023-04-06
+- Support serializing individuals as string with an extended term definition in context (Enhancement #54).
+- Fix serialization of types when parent context specifies term mapping.
+- Remove unused JSON node creation methods.
+
 ## 0.12.2 - 2023-03-30
 - Fix an issue with context embedding (Bug #51).
 
