@@ -105,7 +105,7 @@ public enum ConfigParam {
      * Whether to serialize individuals using expanded term definition in context.
      *
      * This basically means that the individual's identifier is provided directly as a string and an expanded term
-     * definition is added into the context, specifying that the string is an identifier.
+     * definition (consisting of a {@literal @id} and {@literal @type}) is added into the context, specifying that the string is an identifier.
      */
     SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION("serializeIndividualsUsingExpandedDefinition");
 
