@@ -75,7 +75,8 @@ public class BeanAnnotationProcessor {
     }
 
     /**
-     * Attempts to expand the specified IRI in case it is compacted (see {@link IdentifierUtil#isCompactIri(String)}) using JOPA namespace declarations.
+     * Attempts to expand the specified IRI in case it is compacted (see {@link IdentifierUtil#isCompactIri(String)})
+     * using JOPA namespace declarations.
      * <p>
      * If the IRI is not compact or no matching namespace is found, the original IRI is returned.
      *
@@ -92,10 +93,12 @@ public class BeanAnnotationProcessor {
     }
 
     /**
-     * Attempts to expand the specified compact IRI by finding a corresponding {@link Namespace} annotation in the specified class's ancestor hierarchy.
+     * Attempts to expand the specified compact IRI by finding a corresponding {@link Namespace} annotation in the
+     * specified class's ancestor hierarchy.
      * <p>
-     * That is, it tries to find a {@link Namespace} annotation with matching prefix on the specified class or any of its ancestors. If such an annotation
-     * is found, its namespace is concatenated with the suffix from the specified {@code iri} to produce the expanded version of the IRI.
+     * That is, it tries to find a {@link Namespace} annotation with matching prefix on the specified class or any of
+     * its ancestors. If such an annotation is found, its namespace is concatenated with the suffix from the specified
+     * {@code iri} to produce the expanded version of the IRI.
      * <p>
      * If no matching {@link Namespace} annotation is found, an empty {@link Optional} is returned.
      *
@@ -172,7 +175,15 @@ public class BeanAnnotationProcessor {
         return classes;
     }
 
-    private static List<Class<?>> getAncestors(Class<?> cls) {
+    /**
+     * Resolves ancestors of the specified class, up to {@link Object}.
+     * <p>
+     * Ancestors are resolved using the {@link Class#getSuperclass()} method.
+     *
+     * @param cls Class whose ancestors to resolve
+     * @return List of ancestors, including the specified class
+     */
+    public static List<Class<?>> getAncestors(Class<?> cls) {
         final List<Class<?>> classes = new ArrayList<>();
         Class<?> current = cls;
         while (current != null && !current.equals(Object.class)) {

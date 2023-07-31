@@ -1,5 +1,9 @@
 # JB4JSON-LD Changelog
 
+## 0.13.0 - 2023-07-31
+- Make `BeanAnnotationProcessor.getAncestors` public.
+- **Breaking change:** Set Java 11 as minimum Java version.
+
 ## 0.12.3 - 2023-04-06
 - Support serializing individuals as string with an extended term definition in context (Enhancement #54).
 - Fix serialization of types when parent context specifies term mapping.

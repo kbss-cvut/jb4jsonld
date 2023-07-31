@@ -78,8 +78,7 @@ public class ClasspathScanner {
             Enumeration<URL> resources = loader.getResources(".");
             while (resources.hasMoreElements()) {
                 URL resourceURL = resources.nextElement();
-                if (isJar(resourceURL.toString()))
-                    processJarFile(resourceURL, scanPath);
+                if (isJar(resourceURL.toString())) {processJarFile(resourceURL, scanPath);}
             }
         } catch (IOException e) {
             throw new JsonLdException("Unable to scan packages.", e);
@@ -140,8 +139,9 @@ public class ClasspathScanner {
         try {
             final Class<?> cls = Class.forName(className);
             listener.accept(cls);
-        } catch (ClassNotFoundException | NoClassDefFoundError e) {
-            LOG.error("Unable to process class " + className, e);
+        } catch (Throwable e) {
+            LOG.debug("Skipping non-loadable class {}, got error {}: {}.", className, e.getClass()
+                                                                                       .getName(), e.getMessage());
         }
     }
 
