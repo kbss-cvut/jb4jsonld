@@ -39,7 +39,7 @@ class JsonLdPropertyAccessResolverTest {
             "types,               true",
             "id,                  true"})
     void isReadable(String fieldName, boolean result) throws Exception {
-        assertEquals(result, sut.isReadable(TestClass.class.getDeclaredField(fieldName)));
+        assertEquals(result, sut.isReadable(TestClass.class.getDeclaredField(fieldName), TestClass.class));
     }
 
     @ParameterizedTest
