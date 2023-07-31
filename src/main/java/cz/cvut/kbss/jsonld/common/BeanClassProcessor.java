@@ -39,7 +39,7 @@ public class BeanClassProcessor {
      */
     public static Object getFieldValue(Field field, Object instance) {
         Objects.requireNonNull(field);
-        if (!field.isAccessible()) {
+        if (!field.canAccess(instance)) {
             field.setAccessible(true);
         }
         try {
@@ -58,7 +58,7 @@ public class BeanClassProcessor {
      */
     public static void setFieldValue(Field field, Object instance, Object value) {
         Objects.requireNonNull(field);
-        if (!field.isAccessible()) {
+        if (!field.canAccess(instance)) {
             field.setAccessible(true);
         }
         try {

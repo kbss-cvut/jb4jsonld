@@ -25,9 +25,10 @@ public interface PropertyAccessResolver {
      * Resolves whether value of the specified field is readable for serialization.
      *
      * @param field Field to check
+     * @param objectClass Type of the object being serialized
      * @return Whether the field is readable
      */
-    boolean isReadable(Field field);
+    boolean isReadable(Field field, Class<?> objectClass);
 
     /**
      * Resolves whether the specified field is writeable by deserialization.

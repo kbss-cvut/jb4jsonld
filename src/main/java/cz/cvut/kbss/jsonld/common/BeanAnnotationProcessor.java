@@ -24,14 +24,14 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class BeanAnnotationProcessor {
 
     private static final String[] EMPTY_ARRAY = new String[0];
-    private static final Predicate<Field> ALWAYS_TRUE = field -> true;
+    private static final BiPredicate<Field, Class<?>> ALWAYS_TRUE = (f, cls) -> true;
 
     private static PropertyAccessResolver propertyAccessResolver = new JsonLdPropertyAccessResolver();
 
@@ -214,12 +214,12 @@ public class BeanAnnotationProcessor {
         return getMarshallableFields(cls, propertyAccessResolver::isReadable);
     }
 
-    private static List<Field> getMarshallableFields(Class<?> cls, Predicate<Field> filter) {
+    private static List<Field> getMarshallableFields(Class<?> cls, BiPredicate<Field, Class<?>> filter) {
         final List<Class<?>> classes = getAncestors(cls);
         final Set<Field> fields = new HashSet<>();
         for (Class<?> c : classes) {
             for (Field f : c.getDeclaredFields()) {
-                if (!isFieldTransient(f) && filter.test(f)) {
+                if (!isFieldTransient(f) && filter.test(f, cls)) {
                     fields.add(f);
                 }
             }
@@ -416,7 +416,7 @@ public class BeanAnnotationProcessor {
     }
 
     public static Optional<Field> getIdentifierField(Class<?> cls) {
-        return getMarshallableFields(cls, f -> f.isAnnotationPresent(Id.class)).stream().findFirst();
+        return getMarshallableFields(cls, (f, c) -> f.isAnnotationPresent(Id.class)).stream().findFirst();
     }
 
     /**
@@ -431,7 +431,7 @@ public class BeanAnnotationProcessor {
         for (Class<?> cls : classes) {
             for (Field f : cls.getDeclaredFields()) {
                 if (f.getDeclaredAnnotation(Id.class) != null) {
-                    if (!f.isAccessible()) {
+                    if (!f.canAccess(instance)) {
                         f.setAccessible(true);
                     }
                     try {
