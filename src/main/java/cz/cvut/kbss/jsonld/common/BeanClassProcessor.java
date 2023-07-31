@@ -264,6 +264,6 @@ public class BeanClassProcessor {
      * @see PersistenceProperties#IDENTIFIER_TYPES
      */
     public static boolean isIdentifierType(Class<?> cls) {
-        return PersistenceProperties.IDENTIFIER_TYPES.contains(cls);
+        return cls != null && PersistenceProperties.IDENTIFIER_TYPES.contains(cls);
     }
 }
