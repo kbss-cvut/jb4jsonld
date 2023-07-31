@@ -1,5 +1,8 @@
 # JB4JSON-LD Changelog
 
+## 0.13.1 - 2023-07-31
+- Better handle class hierarchies when resolving property access.
+
 ## 0.13.0 - 2023-07-31
 - Make `BeanAnnotationProcessor.getAncestors` public.
 - **Breaking change:** Set Java 11 as minimum Java version.
