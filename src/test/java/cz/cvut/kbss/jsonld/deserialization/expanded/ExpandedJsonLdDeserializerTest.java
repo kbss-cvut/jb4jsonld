@@ -12,6 +12,9 @@
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
+import com.apicatalog.jsonld.api.ExpansionApi;
+import com.apicatalog.jsonld.document.Document;
+import com.apicatalog.jsonld.document.JsonDocument;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
@@ -26,9 +29,11 @@ import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.*;
 import cz.cvut.kbss.jsonld.exception.*;
+import jakarta.json.JsonArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
 
@@ -801,5 +806,15 @@ class ExpandedJsonLdDeserializerTest {
         assertEquals(OwlPropertyType.DATATYPE_PROPERTY, result.getPropertyType());
         assertThat(result.getPluralPropertyType(),
                    hasItems(OwlPropertyType.ANNOTATION_PROPERTY, OwlPropertyType.OBJECT_PROPERTY));
+    }
+
+    @Test
+    void testReadingJsonLdWithTitanium() throws Exception {
+        final InputStream is = TestUtil.class.getClassLoader().getResourceAsStream("objectWithDataProperties.json");
+        assert is != null;
+        final Document doc = JsonDocument.of(is);
+        com.apicatalog.jsonld.JsonLd.compact(doc, null).get();
+        final JsonArray expanded = com.apicatalog.jsonld.JsonLd.expand(doc).get();
+
     }
 }

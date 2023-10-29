@@ -5,9 +5,10 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.ValueDeserializer;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonValue;
 
 import java.time.OffsetDateTime;
-import java.util.Map;
 
 /**
  * Deserializes values to {@link OffsetDateTime}.
@@ -25,23 +26,22 @@ public class OffsetDateTimeDeserializer implements ValueDeserializer<OffsetDateT
     private final EpochBasedDateTimeResolver epochResolver = new EpochBasedDateTimeResolver();
 
     @Override
-    public OffsetDateTime deserialize(Map<?, ?> jsonNode, DeserializationContext<OffsetDateTime> ctx) {
-        final Object value = getLiteralValue(jsonNode);
+    public OffsetDateTime deserialize(JsonValue jsonNode, DeserializationContext<OffsetDateTime> ctx) {
+        final JsonValue value = getLiteralValue(jsonNode);
         try {
-            return value instanceof Long ? epochResolver.resolve((Long) value) :
+            return value.getValueType() == JsonValue.ValueType.NUMBER ? epochResolver.resolve((JsonNumber) value) :
                    stringResolver.resolve(value.toString());
         } catch (RuntimeException e) {
             throw new JsonLdDeserializationException("Unable to deserialize datetime value.", e);
         }
     }
 
-    static Object getLiteralValue(Map<?, ?> jsonNode) {
-        final Object value = jsonNode.get(JsonLd.VALUE);
-        if (value == null) {
+    static JsonValue getLiteralValue(JsonValue jsonNode) {
+        if (jsonNode.getValueType() != JsonValue.ValueType.OBJECT || !jsonNode.asJsonObject().containsKey(JsonLd.VALUE)) {
             throw new JsonLdDeserializationException("Cannot deserialize node " + jsonNode + "as literal. " +
                                                              "It is missing attribute '" + JsonLd.VALUE + "'.");
         }
-        return value;
+        return jsonNode.asJsonObject().get(JsonLd.VALUE);
     }
 
     @Override

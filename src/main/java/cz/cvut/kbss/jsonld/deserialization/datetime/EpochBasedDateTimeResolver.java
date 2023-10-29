@@ -2,6 +2,7 @@ package cz.cvut.kbss.jsonld.deserialization.datetime;
 
 import cz.cvut.kbss.jopa.datatype.DateTimeUtil;
 import cz.cvut.kbss.jsonld.common.Configurable;
+import jakarta.json.JsonNumber;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -11,8 +12,8 @@ import java.time.OffsetDateTime;
  */
 class EpochBasedDateTimeResolver implements Configurable {
 
-    OffsetDateTime resolve(Long value) {
+    OffsetDateTime resolve(JsonNumber value) {
         assert value != null;
-        return DateTimeUtil.toDateTime(Instant.ofEpochMilli(value));
+        return DateTimeUtil.toDateTime(Instant.ofEpochMilli(value.longValue()));
     }
 }

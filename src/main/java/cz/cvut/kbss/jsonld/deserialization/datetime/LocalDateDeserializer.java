@@ -4,9 +4,9 @@ import cz.cvut.kbss.jopa.datatype.xsd.XsdDateMapper;
 import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.ValueDeserializer;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import jakarta.json.JsonValue;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 import static cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeserializer.getLiteralValue;
 
@@ -18,7 +18,7 @@ import static cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeseria
 public class LocalDateDeserializer implements ValueDeserializer<LocalDate> {
 
     @Override
-    public LocalDate deserialize(Map<?, ?> jsonNode, DeserializationContext<LocalDate> ctx) {
+    public LocalDate deserialize(JsonValue jsonNode, DeserializationContext<LocalDate> ctx) {
         final Object value = getLiteralValue(jsonNode);
         try {
             return XsdDateMapper.map(value.toString());

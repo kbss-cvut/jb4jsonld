@@ -4,9 +4,9 @@ import cz.cvut.kbss.jopa.datatype.xsd.XsdTimeMapper;
 import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.ValueDeserializer;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import jakarta.json.JsonValue;
 
 import java.time.OffsetTime;
-import java.util.Map;
 
 import static cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeserializer.getLiteralValue;
 
@@ -18,8 +18,8 @@ import static cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeseria
 public class OffsetTimeDeserializer implements ValueDeserializer<OffsetTime> {
 
     @Override
-    public OffsetTime deserialize(Map<?, ?> jsonNode, DeserializationContext<OffsetTime> ctx) {
-        final Object value = getLiteralValue(jsonNode);
+    public OffsetTime deserialize(JsonValue jsonNode, DeserializationContext<OffsetTime> ctx) {
+        final JsonValue value = getLiteralValue(jsonNode);
         try {
             return XsdTimeMapper.map(value.toString());
         } catch (RuntimeException e) {

@@ -3,9 +3,9 @@ package cz.cvut.kbss.jsonld.deserialization.datetime;
 import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.ValueDeserializer;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import jakarta.json.JsonValue;
 
 import java.time.Period;
-import java.util.Map;
 
 import static cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeserializer.getLiteralValue;
 
@@ -17,8 +17,8 @@ import static cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeseria
 public class PeriodDeserializer implements ValueDeserializer<Period> {
 
     @Override
-    public Period deserialize(Map<?, ?> jsonNode, DeserializationContext<Period> ctx) {
-        final Object value = getLiteralValue(jsonNode);
+    public Period deserialize(JsonValue jsonNode, DeserializationContext<Period> ctx) {
+        final JsonValue value = getLiteralValue(jsonNode);
         try {
             return Period.parse(value.toString());
         } catch (RuntimeException e) {

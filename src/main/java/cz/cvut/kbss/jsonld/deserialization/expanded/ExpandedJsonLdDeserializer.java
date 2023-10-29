@@ -21,9 +21,9 @@ import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
 import cz.cvut.kbss.jsonld.deserialization.JsonLdDeserializer;
 import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
-
-import java.util.List;
-import java.util.Map;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
@@ -35,18 +35,18 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
     }
 
     @Override
-    public <T> T deserialize(Object jsonLd, Class<T> resultClass) {
-        if (!(jsonLd instanceof List)) {
+    public <T> T deserialize(JsonValue jsonLd, Class<T> resultClass) {
+        if (jsonLd.getValueType() != JsonValue.ValueType.ARRAY) {
             throw new JsonLdDeserializationException(
                     "Expanded JSON-LD deserializer requires a JSON-LD array as input.");
         }
-        final List<?> input = (List<?>) jsonLd;
+        final JsonArray input = jsonLd.asJsonArray();
         if (input.size() != 1) {
             throw new JsonLdDeserializationException(
                     "Input is not expanded JSON-LD. The input does not contain exactly one root element.");
         }
         deserializers.configure(configuration());
-        final Map<?, ?> root = (Map<?, ?>) input.get(0);
+        final JsonObject root = input.getJsonObject(0);
         final PendingReferenceRegistry referenceRegistry = new PendingReferenceRegistry();
         if (deserializers.hasCustomDeserializer(resultClass)) {
             final DeserializationContext<T> ctx = new DeserializationContext<>(resultClass, classResolver);
