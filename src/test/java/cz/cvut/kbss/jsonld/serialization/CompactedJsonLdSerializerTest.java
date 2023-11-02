@@ -12,26 +12,47 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
-import com.github.jsonldjava.core.JsonLdProcessor;
-import com.github.jsonldjava.core.JsonLdUtils;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.*;
+import cz.cvut.kbss.jsonld.environment.model.Employee;
+import cz.cvut.kbss.jsonld.environment.model.ObjectWithMultilingualString;
+import cz.cvut.kbss.jsonld.environment.model.ObjectWithPluralMultilingualString;
+import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
+import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
+import cz.cvut.kbss.jsonld.environment.model.StudyWithNamespaces;
+import cz.cvut.kbss.jsonld.environment.model.User;
+import jakarta.json.JsonArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
 
@@ -128,9 +149,17 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         instance.setAltLabel(new HashSet<>(Arrays.asList(one, two)));
 
         sut.serialize(instance);
-        final Object resultExpanded = JsonLdProcessor.expand(JsonUtils.fromString(jsonWriter.getResult()));
-        final Object expectedExpanded = TestUtil.readAndExpand("objectWithPluralMultilingualString.json");
-        assertTrue(JsonLdUtils.deepCompare(expectedExpanded, resultExpanded));
+        final JsonArray resultExpanded = TestUtil.parseAndExpand(jsonWriter.getResult());
+        final JsonArray strCol = resultExpanded.getJsonObject(0).getJsonArray(SKOS.ALT_LABEL);
+        instance.getAltLabel().forEach(ms -> ms.getValue()
+                                               .forEach((lang, lex) -> assertTrue(strCol.stream()
+                                                                                        .anyMatch(val -> lex.equals(
+                                                                                                val.asJsonObject()
+                                                                                                   .getString(
+                                                                                                           JsonLd.VALUE)) && lang.equals(
+                                                                                                val.asJsonObject()
+                                                                                                   .getString(
+                                                                                                           JsonLd.LANGUAGE))))));
     }
 
     @Test

@@ -14,15 +14,23 @@
  */
 package cz.cvut.kbss.jsonld.environment;
 
-import com.github.jsonldjava.core.JsonLdProcessor;
-import com.github.jsonldjava.utils.JsonUtils;
+import com.apicatalog.jsonld.JsonLd;
+import com.apicatalog.jsonld.document.Document;
+import com.apicatalog.jsonld.document.JsonDocument;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
-import cz.cvut.kbss.jsonld.environment.model.*;
+import cz.cvut.kbss.jsonld.environment.model.Employee;
+import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.Study;
+import cz.cvut.kbss.jsonld.environment.model.User;
+import jakarta.json.JsonArray;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 public class TestUtil {
 
@@ -49,9 +57,29 @@ public class TestUtil {
         return tm;
     }
 
-    public static Object readAndExpand(String fileName) throws Exception {
+    /**
+     * Reads and expands JSON-LD from a file on classpath with the specified name.
+     *
+     * @param fileName Name of file
+     * @return Expanded JSON-LD content of the file
+     * @throws Exception When reading, parsing or expansion fail
+     */
+    public static JsonArray readAndExpand(String fileName) throws Exception {
         final InputStream is = TestUtil.class.getClassLoader().getResourceAsStream(fileName);
-        final Object jsonObject = JsonUtils.fromInputStream(is);
-        return JsonLdProcessor.expand(jsonObject);
+        assert is != null;
+        final Document doc = JsonDocument.of(is);
+        return JsonLd.expand(doc).get();
+    }
+
+    /**
+     * Parses and expands the specified JSON-LD.
+     *
+     * @param jsonLdContent JSON-LD string
+     * @return Expanded JSON-LD
+     * @throws Exception When parsing or expansion fail
+     */
+    public static JsonArray parseAndExpand(String jsonLdContent) throws Exception {
+        final Document doc = JsonDocument.of(new ByteArrayInputStream(jsonLdContent.getBytes(StandardCharsets.UTF_8)));
+        return JsonLd.expand(doc).get();
     }
 }

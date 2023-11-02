@@ -34,6 +34,8 @@ import cz.cvut.kbss.jsonld.environment.model.Study;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,13 +46,25 @@ import org.mockito.MockitoAnnotations;
 
 import java.net.URI;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyCollection;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ObjectDeserializerTest {
 
@@ -81,10 +95,11 @@ class ObjectDeserializerTest {
         doAnswer(inv -> Study.class).when(instanceBuilderMock).getCurrentContextType();
         doAnswer(inv -> Employee.class).when(instanceBuilderMock).getCurrentCollectionElementType();
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
-                        Study.class);
-        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithPluralReferenceSharingObject.json");
-        sut.processValue((Map<?, ?>) input.get(0));
+                new ObjectDeserializer(instanceBuilderMock,
+                                       new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
+                                       Study.class);
+        final JsonArray input = TestUtil.readAndExpand("objectWithPluralReferenceSharingObject.json");
+        sut.processValue(input.getJsonObject(0));
 
         final InOrder inOrder = inOrder(instanceBuilderMock);
         inOrder.verify(instanceBuilderMock).addValue(eq(RDFS.LABEL), any());
@@ -101,15 +116,17 @@ class ObjectDeserializerTest {
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         doAnswer(inv -> InvalidOrder.class).when(instanceBuilderMock).getCurrentContextType();
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
-                        InvalidOrder.class);
-        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithPluralReferenceSharingObject.json");
+                new ObjectDeserializer(instanceBuilderMock,
+                                       new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
+                                       InvalidOrder.class);
+        final JsonArray input = TestUtil.readAndExpand("objectWithPluralReferenceSharingObject.json");
 
         final JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> sut.processValue((Map<?, ?>) input.get(0)));
+                                                                   () -> sut.processValue(input.getJsonObject(0)));
         assertThat(result.getMessage(),
-                containsString("Field called unknown declared in JsonLdAttributeOrder annotation not found in class " +
-                        InvalidOrder.class));
+                   containsString(
+                           "Field called unknown declared in JsonLdAttributeOrder annotation not found in class " +
+                                   InvalidOrder.class));
     }
 
     @OWLClass(iri = Vocabulary.ORGANIZATION)
@@ -128,10 +145,11 @@ class ObjectDeserializerTest {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
-                        User.class);
-        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
-        sut.processValue((Map<?, ?>) input.get(0));
+                new ObjectDeserializer(instanceBuilderMock,
+                                       new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
+                                       User.class);
+        final JsonArray input = TestUtil.readAndExpand("objectWithDataProperties.json");
+        sut.processValue(input.getJsonObject(0));
         verify(instanceBuilderMock).openObject(TestUtil.HALSEY_URI.toString(), User.class);
     }
 
@@ -140,13 +158,14 @@ class ObjectDeserializerTest {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
-                        User.class);
-        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithSingularReference.json");
-        sut.processValue((Map<?, ?>) input.get(0));
+                new ObjectDeserializer(instanceBuilderMock,
+                                       new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
+                                       User.class);
+        final JsonArray input = TestUtil.readAndExpand("objectWithSingularReference.json");
+        sut.processValue(input.getJsonObject(0));
         verify(instanceBuilderMock).openObject(TestUtil.HALSEY_URI.toString(), User.class);
         verify(instanceBuilderMock).openObject(TestUtil.UNSC_URI.toString(), Vocabulary.IS_MEMBER_OF,
-                Collections.singletonList(Vocabulary.ORGANIZATION));
+                                               Collections.singletonList(Vocabulary.ORGANIZATION));
     }
 
     @Test
@@ -154,10 +173,11 @@ class ObjectDeserializerTest {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         this.sut =
-                new ObjectDeserializer(instanceBuilderMock, new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
-                        User.class);
-        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
-        sut.processValue((Map<?, ?>) input.get(0));
+                new ObjectDeserializer(instanceBuilderMock,
+                                       new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
+                                       User.class);
+        final JsonArray input = TestUtil.readAndExpand("objectWithDataProperties.json");
+        sut.processValue(input.getJsonObject(0));
         verify(instanceBuilderMock).openObject(TestUtil.HALSEY_URI.toString(), User.class);
         verify(instanceBuilderMock, never()).addValue(eq(JsonLd.ID), any());
     }
@@ -167,10 +187,13 @@ class ObjectDeserializerTest {
         doReturn(User.class).when(tcResolverMock).getTargetClass(eq(User.class), anyCollection());
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         this.sut = new ObjectDeserializer(instanceBuilderMock,
-                new DeserializerConfig(new Configuration(), tcResolverMock, deserializers), User.class);
-        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
-        ((Map<?, ?>) input.get(0)).remove(JsonLd.ID);
-        sut.processValue((Map<?, ?>) input.get(0));
+                                          new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
+                                          User.class);
+        final JsonArray input = TestUtil.readAndExpand("objectWithDataProperties.json");
+        final Map<String, Object> objectMap = new HashMap<>(input.getJsonObject(0));
+        objectMap.remove(JsonLd.ID);
+
+        sut.processValue(Json.createObjectBuilder(objectMap).build());
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(instanceBuilderMock).openObject(captor.capture(), eq(User.class));
         assertNotNull(captor.getValue());
@@ -184,11 +207,14 @@ class ObjectDeserializerTest {
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         when(instanceBuilderMock.isPropertyDeserializable(eq(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED))).thenReturn(false);
         this.sut = new ObjectDeserializer(instanceBuilderMock,
-                new DeserializerConfig(new Configuration(), tcResolverMock, deserializers), Study.class);
-        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithReadOnlyPropertyValue.json");
-        ((Map<?, ?>) input.get(0)).remove(Vocabulary.HAS_MEMBER);
-        ((Map<?, ?>) input.get(0)).remove(Vocabulary.HAS_PARTICIPANT);
-        sut.processValue((Map<?, ?>) input.get(0));
+                                          new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
+                                          Study.class);
+        final JsonArray input = TestUtil.readAndExpand("objectWithReadOnlyPropertyValue.json");
+        final Map<String, Object> objectMap = new HashMap<>(input.getJsonObject(0));
+        objectMap.remove(Vocabulary.HAS_MEMBER);
+        objectMap.remove(Vocabulary.HAS_PARTICIPANT);
+
+        sut.processValue(Json.createObjectBuilder(objectMap).build());
         verify(instanceBuilderMock, never()).addValue(eq(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED), any());
     }
 
@@ -201,9 +227,9 @@ class ObjectDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
         this.sut = new ObjectDeserializer(instanceBuilderMock,
-                new DeserializerConfig(config, tcResolverMock, deserializers), Object.class);
-        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
-        sut.processValue((Map<?, ?>) input.get(0));
+                                          new DeserializerConfig(config, tcResolverMock, deserializers), Object.class);
+        final JsonArray input = TestUtil.readAndExpand("objectWithDataProperties.json");
+        sut.processValue(input.getJsonObject(0));
     }
 
     @Test
@@ -214,10 +240,11 @@ class ObjectDeserializerTest {
         doThrow(ex).when(instanceBuilderMock).openObject(anyString(), any(Class.class));
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(false);
         this.sut = new ObjectDeserializer(instanceBuilderMock,
-                new DeserializerConfig(new Configuration(), tcResolverMock, deserializers), Object.class);
-        final List<?> input = (List<?>) TestUtil.readAndExpand("objectWithDataProperties.json");
+                                          new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
+                                          Object.class);
+        final JsonArray input = TestUtil.readAndExpand("objectWithDataProperties.json");
         final UnknownPropertyException result = assertThrows(UnknownPropertyException.class,
-                () -> sut.processValue((Map<?, ?>) input.get(0)));
+                                                             () -> sut.processValue(input.getJsonObject(0)));
         assertEquals(ex, result);
     }
 }

@@ -8,17 +8,19 @@ import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class OffsetDateTimeDeserializerTest {
 
@@ -27,7 +29,7 @@ class OffsetDateTimeDeserializerTest {
     @Test
     void deserializeResolvesValueInEpochMillis() {
         final OffsetDateTime value = OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS);
-        final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, value.toInstant().toEpochMilli());
+        final JsonObject input = Json.createObjectBuilder().add(JsonLd.VALUE, value.toInstant().toEpochMilli()).build();
 
         final OffsetDateTime result = sut.deserialize(input, deserializationContext(OffsetDateTime.class));
         assertEquals(value.toInstant(), result.toInstant());
@@ -40,7 +42,9 @@ class OffsetDateTimeDeserializerTest {
     @Test
     void deserializeResolveValueFromIsoOffsetString() {
         final OffsetDateTime value = OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS);
-        final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        final JsonObject input =
+                Json.createObjectBuilder().add(JsonLd.VALUE, value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                    .build();
 
         final OffsetDateTime result = sut.deserialize(input, deserializationContext(OffsetDateTime.class));
         assertEquals(value, result);
@@ -50,7 +54,9 @@ class OffsetDateTimeDeserializerTest {
     void deserializeResolvesValueFromCustomFormattedString() {
         final String pattern = "yyyy-dd-MM'T'HH:mm:ssXXX";
         final OffsetDateTime value = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, value.format(DateTimeFormatter.ofPattern(pattern)));
+        final JsonObject input =
+                Json.createObjectBuilder().add(JsonLd.VALUE, value.format(DateTimeFormatter.ofPattern(pattern)))
+                    .build();
 
         final Configuration configuration = new Configuration();
         configuration.set(ConfigParam.DATE_TIME_FORMAT, pattern);
@@ -61,19 +67,22 @@ class OffsetDateTimeDeserializerTest {
 
     @Test
     void deserializeThrowsJsonLdDeserializationExceptionWhenInputIsMissingValueAttribute() {
-        final Map<String, Object> input = Collections.singletonMap("notValue",
-                OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        final JsonObject input = Json.createObjectBuilder().add("notValue", OffsetDateTime.now()
+                                                                                          .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                                     .build();
         final JsonLdDeserializationException ex = assertThrows(JsonLdDeserializationException.class,
-                () -> sut.deserialize(input, deserializationContext(OffsetDateTime.class)));
+                                                               () -> sut.deserialize(input, deserializationContext(
+                                                                       OffsetDateTime.class)));
         assertThat(ex.getMessage(), containsString(JsonLd.VALUE));
         assertThat(ex.getMessage(), containsString("missing"));
     }
 
     @Test
     void deserializeThrowsJsonLdDeserializationExceptionWhenInputIsInInvalidFormat() {
-        final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, "invalidValue");
+        final JsonObject input = Json.createObjectBuilder().add(JsonLd.VALUE, "invalidValue").build();
         final JsonLdDeserializationException ex = assertThrows(JsonLdDeserializationException.class,
-                                                               () -> sut.deserialize(input, deserializationContext(OffsetDateTime.class)));
+                                                               () -> sut.deserialize(input, deserializationContext(
+                                                                       OffsetDateTime.class)));
         assertInstanceOf(DatatypeMappingException.class, ex.getCause());
     }
 }

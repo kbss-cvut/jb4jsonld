@@ -24,6 +24,7 @@ import cz.cvut.kbss.jsonld.environment.model.Study;
 import cz.cvut.kbss.jsonld.environment.model.StudyWithNamespaces;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import jakarta.json.JsonValue;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -31,7 +32,9 @@ import java.lang.reflect.Field;
 import static cz.cvut.kbss.jsonld.environment.TestUtil.readAndExpand;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JsonLdDeserializerTest {
 
@@ -68,7 +71,7 @@ class JsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
         final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
-        final Object input = readAndExpand("invalidJsonLd.json");
+        final JsonValue input = readAndExpand("invalidJsonLd.json");
         assertThrows(JsonLdDeserializationException.class, () -> deserializer.deserialize(input, User.class));
     }
 
