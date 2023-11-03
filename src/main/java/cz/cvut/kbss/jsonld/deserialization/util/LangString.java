@@ -41,7 +41,7 @@ public class LangString extends cz.cvut.kbss.ontodriver.model.LangString {
     @Override
     public Optional<String> getLanguage() {
         final Optional<String> superResult = super.getLanguage();
-        return JsonLd.NONE.equals(superResult.get()) ? Optional.empty() : superResult;
+        return superResult.filter(s -> !JsonLd.NONE.equals(s));
     }
 
     @Override
