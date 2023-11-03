@@ -2,10 +2,10 @@ package cz.cvut.kbss.jsonld.deserialization.datetime;
 
 import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.ValueDeserializer;
+import jakarta.json.JsonValue;
 
 import java.time.LocalTime;
 import java.time.OffsetTime;
-import java.util.Map;
 
 /**
  * Deserializes values to {@link LocalTime}.
@@ -21,7 +21,7 @@ public class LocalTimeDeserializer implements ValueDeserializer<LocalTime> {
     }
 
     @Override
-    public LocalTime deserialize(Map<?, ?> jsonNode, DeserializationContext<LocalTime> ctx) {
+    public LocalTime deserialize(JsonValue jsonNode, DeserializationContext<LocalTime> ctx) {
         return innerDeserializer.deserialize(jsonNode,
                 new DeserializationContext<>(OffsetTime.class, ctx.getClassResolver())).toLocalTime();
     }

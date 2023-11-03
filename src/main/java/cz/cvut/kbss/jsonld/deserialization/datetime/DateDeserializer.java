@@ -3,10 +3,10 @@ package cz.cvut.kbss.jsonld.deserialization.datetime;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.ValueDeserializer;
+import jakarta.json.JsonValue;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * Deserializes values to {@link Date}.
@@ -20,7 +20,7 @@ public class DateDeserializer implements ValueDeserializer<Date> {
     }
 
     @Override
-    public Date deserialize(Map<?, ?> jsonNode, DeserializationContext<Date> ctx) {
+    public Date deserialize(JsonValue jsonNode, DeserializationContext<Date> ctx) {
         return Date.from(innerDeserializer.deserialize(jsonNode,
                 new DeserializationContext<>(OffsetDateTime.class, ctx.getClassResolver())).toInstant());
     }

@@ -1,11 +1,11 @@
 package cz.cvut.kbss.jsonld.deserialization.datetime;
 
 import cz.cvut.kbss.jsonld.JsonLd;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
 
 import static cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeserializerTest.deserializationContext;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +17,7 @@ class DateDeserializerTest {
     @Test
     void deserializeSupportsDeserializationOfEpochMillis() {
         final Date value = new Date();
-        final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, value.getTime());
+        final JsonObject input = Json.createObjectBuilder().add(JsonLd.VALUE, value.getTime()).build();
 
         final Date result = sut.deserialize(input, deserializationContext(Date.class));
         assertEquals(value, result);
@@ -26,7 +26,7 @@ class DateDeserializerTest {
     @Test
     void deserializeSupportsDeserializationOfIsoUTCDatetimeString() {
         final Date value = new Date();
-        final Map<String, Object> input = Collections.singletonMap(JsonLd.VALUE, value.toInstant().toString());
+        final JsonObject input = Json.createObjectBuilder().add(JsonLd.VALUE, value.toInstant().toString()).build();
 
         final Date result = sut.deserialize(input, deserializationContext(Date.class));
         assertEquals(value, result);

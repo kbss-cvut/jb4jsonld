@@ -2,12 +2,11 @@ package cz.cvut.kbss.jsonld.deserialization.datetime;
 
 import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.ValueDeserializer;
+import cz.cvut.kbss.jsonld.deserialization.util.ValueUtils;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
+import jakarta.json.JsonValue;
 
 import java.time.Period;
-import java.util.Map;
-
-import static cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeserializer.getLiteralValue;
 
 /**
  * Deserializes JSON values to {@link Period}.
@@ -17,10 +16,10 @@ import static cz.cvut.kbss.jsonld.deserialization.datetime.OffsetDateTimeDeseria
 public class PeriodDeserializer implements ValueDeserializer<Period> {
 
     @Override
-    public Period deserialize(Map<?, ?> jsonNode, DeserializationContext<Period> ctx) {
-        final Object value = getLiteralValue(jsonNode);
+    public Period deserialize(JsonValue jsonNode, DeserializationContext<Period> ctx) {
+        final JsonValue value = ValueUtils.getValue(jsonNode);
         try {
-            return Period.parse(value.toString());
+            return Period.parse(ValueUtils.stringValue(value));
         } catch (RuntimeException e) {
             throw new JsonLdDeserializationException("Unable to deserialize duration.", e);
         }

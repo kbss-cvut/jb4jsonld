@@ -24,6 +24,7 @@ import cz.cvut.kbss.jsonld.deserialization.util.ClasspathScanner;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolverConfig;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
+import jakarta.json.JsonValue;
 
 import java.util.Objects;
 
@@ -92,7 +93,7 @@ public abstract class JsonLdDeserializer implements Configured {
      * @param resultClass Type of the result instance
      * @return Deserialized Java instance
      */
-    public abstract <T> T deserialize(Object jsonLd, Class<T> resultClass);
+    public abstract <T> T deserialize(JsonValue jsonLd, Class<T> resultClass);
 
     /**
      * Creates deserializer for expanded JSON-LD, initialized with the specified configuration.
