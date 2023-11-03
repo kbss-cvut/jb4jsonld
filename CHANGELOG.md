@@ -1,5 +1,9 @@
 # JB4JSON-LD Changelog
 
+## 0.14.0 - 2023-11-03
+- Rewrite API to use Jakarta JSON (**Breaking change**).
+- Dependency updates: JOPA 1.1.4, test deps.
+
 ## 0.13.1 - 2023-07-31
 - Better handle class hierarchies when resolving property access.
 

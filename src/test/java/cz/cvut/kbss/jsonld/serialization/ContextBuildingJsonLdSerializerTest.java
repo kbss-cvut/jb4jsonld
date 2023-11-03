@@ -1,6 +1,22 @@
+/*
+ * JB4JSON-LD
+ * Copyright (C) 2023 Czech Technical University in Prague
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ */
 package cz.cvut.kbss.jsonld.serialization;
 
-import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
@@ -16,8 +32,19 @@ import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.*;
-import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.environment.model.Attribute;
+import cz.cvut.kbss.jsonld.environment.model.Employee;
+import cz.cvut.kbss.jsonld.environment.model.ObjectWithMultilingualString;
+import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
+import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.Study;
+import cz.cvut.kbss.jsonld.environment.model.StudyWithNamespaces;
+import cz.cvut.kbss.jsonld.environment.model.User;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.Models;
@@ -27,15 +54,23 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("unchecked")
 class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
 
     @BeforeEach
@@ -47,25 +82,25 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
     void jsonLdContextContainsCorrectAttributeToPropertyMapping() throws Exception {
         final User user = Generator.generateUser();
 
-        final Map<String, ?> jsonMap = serializeAndRead(user);
+        final JsonObject jsonMap = serializeAndRead(user).asJsonObject();
         assertThat(jsonMap, hasKey(JsonLd.CONTEXT));
-        assertInstanceOf(Map.class, jsonMap.get(JsonLd.CONTEXT));
-        final Map<String, String> context = (Map<String, String>) jsonMap.get(JsonLd.CONTEXT);
-        assertEquals(Vocabulary.FIRST_NAME, context.get(User.getFirstNameField().getName()));
-        assertEquals(Vocabulary.LAST_NAME, context.get(User.getLastNameField().getName()));
-        assertEquals(Vocabulary.USERNAME, context.get(User.getUsernameField().getName()));
-        assertEquals(Vocabulary.IS_ADMIN, context.get(User.class.getDeclaredField("admin").getName()));
+        assertEquals(JsonValue.ValueType.OBJECT, jsonMap.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = jsonMap.getJsonObject(JsonLd.CONTEXT);
+        assertEquals(Vocabulary.FIRST_NAME, context.getString(User.getFirstNameField().getName()));
+        assertEquals(Vocabulary.LAST_NAME, context.getString(User.getLastNameField().getName()));
+        assertEquals(Vocabulary.USERNAME, context.getString(User.getUsernameField().getName()));
+        assertEquals(Vocabulary.IS_ADMIN, context.getString(User.class.getDeclaredField("admin").getName()));
     }
 
     @Test
     void serializeWithContextUsesFieldNamesAsJsonLdAttributeNames() throws Exception {
         final User user = Generator.generateUser();
 
-        final Map<String, ?> jsonMap = serializeAndRead(user);
-        assertEquals(user.getFirstName(), jsonMap.get(User.getFirstNameField().getName()));
-        assertEquals(user.getLastName(), jsonMap.get(User.getLastNameField().getName()));
-        assertEquals(user.getUsername(), jsonMap.get(User.getUsernameField().getName()));
-        assertEquals(user.getAdmin(), jsonMap.get(User.class.getDeclaredField("admin").getName()));
+        final JsonObject jsonMap = serializeAndRead(user).asJsonObject();
+        assertEquals(user.getFirstName(), jsonMap.getString(User.getFirstNameField().getName()));
+        assertEquals(user.getLastName(), jsonMap.getString(User.getLastNameField().getName()));
+        assertEquals(user.getUsername(), jsonMap.getString(User.getUsernameField().getName()));
+        assertEquals(user.getAdmin(), jsonMap.getBoolean(User.class.getDeclaredField("admin").getName()));
     }
 
     @Test
@@ -73,57 +108,56 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final User user = Generator.generateUser();
         user.setTypes(Collections.singleton(Generator.generateUri().toString()));
 
-        final Map<String, ?> jsonMap = serializeAndRead(user);
-        assertThat(jsonMap, hasKey(JsonLd.CONTEXT));
-        assertInstanceOf(Map.class, jsonMap.get(JsonLd.CONTEXT));
-        final Map<String, String> context = (Map<String, String>) jsonMap.get(JsonLd.CONTEXT);
-        assertEquals(JsonLd.ID, context.get(Person.class.getDeclaredField("uri").getName()));
-        assertEquals(JsonLd.TYPE, context.get(User.class.getDeclaredField("types").getName()));
+        final JsonObject jsonMap = serializeAndRead(user).asJsonObject();
+        assertEquals(JsonValue.ValueType.OBJECT, jsonMap.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = jsonMap.getJsonObject(JsonLd.CONTEXT);
+        assertEquals(JsonLd.ID, context.getString(Person.class.getDeclaredField("uri").getName()));
+        assertEquals(JsonLd.TYPE, context.getString(User.class.getDeclaredField("types").getName()));
     }
 
     @Test
     void serializeWithContextBuildsContextForObjectProperty() throws Exception {
         final Employee employee = Generator.generateEmployee();
 
-        final Map<String, ?> jsonMap = serializeAndRead(employee);
+        final JsonObject jsonMap = serializeAndRead(employee).asJsonObject();
         assertThat(jsonMap, hasKey(JsonLd.CONTEXT));
-        assertInstanceOf(Map.class, jsonMap.get(JsonLd.CONTEXT));
-        final Map<String, ?> context = (Map<String, JsonNode>) jsonMap.get(JsonLd.CONTEXT);
-        assertEquals(Vocabulary.IS_MEMBER_OF, context.get(Employee.getEmployerField().getName()));
-        assertEquals(RDFS.LABEL, context.get(Organization.class.getDeclaredField("name").getName()));
-        assertEquals(Vocabulary.BRAND, context.get(Organization.class.getDeclaredField("brands").getName()));
-        final Object dateDefinition = context.get(Organization.class.getDeclaredField("dateCreated").getName());
-        assertInstanceOf(Map.class, dateDefinition);
-        final Map<String, String> expected = new HashMap<>();
-        expected.put(JsonLd.TYPE, XSD.DATETIME);
-        expected.put(JsonLd.ID, Vocabulary.DATE_CREATED);
-        assertEquals(expected, dateDefinition);
+        assertEquals(JsonValue.ValueType.OBJECT, jsonMap.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = jsonMap.getJsonObject(JsonLd.CONTEXT);
+        assertEquals(Vocabulary.IS_MEMBER_OF, context.getString(Employee.getEmployerField().getName()));
+        assertEquals(RDFS.LABEL, context.getString(Organization.class.getDeclaredField("name").getName()));
+        assertEquals(Vocabulary.BRAND, context.getString(Organization.class.getDeclaredField("brands").getName()));
+        final JsonValue dateDefinition = context.get(Organization.class.getDeclaredField("dateCreated").getName());
+        assertEquals(JsonValue.ValueType.OBJECT, dateDefinition.getValueType());
+        assertEquals(XSD.DATETIME, dateDefinition.asJsonObject().getString(JsonLd.TYPE));
+        assertEquals(Vocabulary.DATE_CREATED, dateDefinition.asJsonObject().getString(JsonLd.ID));
     }
 
     @Test
     void serializeWithContextUsesReferencedEntityFieldNamesAsAttributeNames() throws Exception {
         final Employee employee = Generator.generateEmployee();
 
-        final Map<String, ?> jsonMap = serializeAndRead(employee);
-        assertInstanceOf(Map.class, jsonMap.get(Employee.getEmployerField().getName()));
-        final Map<String, Object> orgMap = (Map<String, Object>) jsonMap.get(Employee.getEmployerField().getName());
+        final JsonObject jsonMap = serializeAndRead(employee).asJsonObject();
+        assertEquals(JsonValue.ValueType.OBJECT, jsonMap.get(Employee.getEmployerField().getName()).getValueType());
+        final JsonObject orgMap = jsonMap.getJsonObject(Employee.getEmployerField().getName());
         assertEquals(employee.getEmployer().getName(),
-                     orgMap.get(Organization.class.getDeclaredField("name").getName()));
+                     orgMap.getString(Organization.class.getDeclaredField("name").getName()));
         assertEquals(
                 DateTimeFormatter.ISO_DATE_TIME.format(employee.getEmployer().getDateCreated().toInstant().atOffset(
-                        ZoneOffset.UTC)), orgMap.get(Organization.class.getDeclaredField("dateCreated").getName()));
-        assertInstanceOf(Collection.class, orgMap.get(Organization.class.getDeclaredField("brands").getName()));
-        final Collection<String> jsonBrands =
-                (Collection<String>) orgMap.get(Organization.class.getDeclaredField("brands").getName());
+                        ZoneOffset.UTC)),
+                orgMap.getString(Organization.class.getDeclaredField("dateCreated").getName()));
+        assertEquals(JsonValue.ValueType.ARRAY,
+                     orgMap.get(Organization.class.getDeclaredField("brands").getName()).getValueType());
+        final JsonArray jsonBrands = orgMap.getJsonArray(Organization.class.getDeclaredField("brands").getName());
         assertEquals(employee.getEmployer().getBrands().size(), jsonBrands.size());
-        assertThat(jsonBrands, hasItems(employee.getEmployer().getBrands().toArray(new String[]{})));
+        assertThat(jsonBrands.stream().map(item -> ((JsonString) item).getString()).collect(Collectors.toList()),
+                   hasItems(employee.getEmployer().getBrands().toArray(new String[]{})));
     }
 
     @Test
     void serializationSkipsNullDataPropertyValues() throws Exception {
         final User user = Generator.generateUser();
         user.setAdmin(null);
-        final Map<String, ?> json = serializeAndRead(user);
+        final JsonObject json = serializeAndRead(user).asJsonObject();
         assertThat(json, not(hasKey(User.class.getDeclaredField("admin").getName())));
     }
 
@@ -131,7 +165,7 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
     void serializationSkipsNullObjectPropertyValues() throws Exception {
         final Employee employee = Generator.generateEmployee();
         employee.setEmployer(null);
-        final Map<String, ?> json = serializeAndRead(employee);
+        final JsonObject json = serializeAndRead(employee).asJsonObject();
         assertThat(json, not(hasKey(Employee.getEmployerField().getName())));
     }
 
@@ -143,22 +177,22 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         study.setParticipants(Collections.singleton(Generator.generateEmployee()));
         study.setMembers(Collections.singleton(Generator.generateEmployee()));
 
-        final Map<String, ?> json = serializeAndRead(study);
-        final Map<String, String> context = (Map<String, String>) json.get(JsonLd.CONTEXT);
-        assertEquals(RDFS.LABEL, context.get(StudyWithNamespaces.class.getDeclaredField("name").getName()));
+        final JsonObject json = serializeAndRead(study).asJsonObject();
+        final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
+        assertEquals(RDFS.LABEL, context.getString(StudyWithNamespaces.class.getDeclaredField("name").getName()));
         assertEquals(Vocabulary.HAS_PARTICIPANT,
-                     context.get(StudyWithNamespaces.class.getDeclaredField("participants").getName()));
+                     context.getString(StudyWithNamespaces.class.getDeclaredField("participants").getName()));
         assertEquals(Vocabulary.HAS_MEMBER,
-                     context.get(StudyWithNamespaces.class.getDeclaredField("members").getName()));
+                     context.getString(StudyWithNamespaces.class.getDeclaredField("members").getName()));
     }
 
     @Test
-    void serializationGeneratesBlankNodeIfInstancesDoesNotHaveIdentifierValue() throws Exception {
+    void serializationGeneratesBlankNodeIfInstancesDoesNotHaveIdentifierValue() {
         final Organization company = Generator.generateOrganization();
         company.setUri(null);
-        final Map<String, ?> json = serializeAndRead(company);
+        final JsonObject json = serializeAndRead(company).asJsonObject();
         assertThat(json, hasKey(TestUtil.ID_FIELD_NAME));
-        assertThat(json.get(TestUtil.ID_FIELD_NAME).toString(), startsWith(IdentifierUtil.B_NODE_PREFIX));
+        assertThat(json.getString(TestUtil.ID_FIELD_NAME), startsWith(IdentifierUtil.B_NODE_PREFIX));
     }
 
     @Test
@@ -166,10 +200,10 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final List<User> users =
                 IntStream.range(0, 5).mapToObj(i -> Generator.generateUser()).collect(Collectors.toList());
 
-        final Map<String, ?> json = serializeAndRead(users);
+        final JsonObject json = serializeAndRead(users).asJsonObject();
         assertThat(json, hasKey(JsonLd.CONTEXT));
         assertThat(json, hasKey(JsonLd.GRAPH));
-        assertInstanceOf(List.class, json.get(JsonLd.GRAPH));
+        assertEquals(JsonValue.ValueType.ARRAY, json.get(JsonLd.GRAPH).getValueType());
         final Model result = readJson(jsonWriter.getResult());
         users.forEach(u -> {
             final Model pModel = new LinkedHashModel();
@@ -183,17 +217,16 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final List<Employee> employees = Arrays.asList(Generator.generateEmployee(), Generator.generateEmployee());
         employees.get(1).setEmployer(employees.get(0).getEmployer());
 
-        final Map<String, ?> json = serializeAndRead(employees);
-        final List<?> items = (List<?>) json.get(JsonLd.GRAPH);
-        final Map<String, ?> eOne = (Map<String, ?>) items.get(0);
-        final Map<String, ?> orgOne = (Map<String, ?>) eOne.get(Employee.getEmployerField().getName());
+        final JsonObject json = serializeAndRead(employees).asJsonObject();
+        final JsonArray items = json.getJsonArray(JsonLd.GRAPH);
+        final JsonObject eOne = items.getJsonObject(0);
+        final JsonObject orgOne = eOne.getJsonObject(Employee.getEmployerField().getName());
         assertThat(orgOne.size(), greaterThan(1));
-        assertEquals(employees.get(0).getEmployer().getUri().toString(), orgOne.get(TestUtil.ID_FIELD_NAME));
-        final Map<String, ?> eTwo = (Map<String, ?>) items.get(1);
-        final Map<String, ?> orgTwo = (Map<String, ?>) eTwo.get(Employee.getEmployerField().getName());
-        assertEquals(
-                Collections.singletonMap(TestUtil.ID_FIELD_NAME, employees.get(1).getEmployer().getUri().toString()),
-                orgTwo);
+        assertEquals(employees.get(0).getEmployer().getUri().toString(), orgOne.getString(TestUtil.ID_FIELD_NAME));
+        final JsonObject eTwo = items.getJsonObject(1);
+        final JsonObject orgTwo = eTwo.getJsonObject(Employee.getEmployerField().getName());
+        assertEquals(1, orgTwo.size());
+        assertEquals(employees.get(1).getEmployer().getUri().toString(), orgTwo.getString(TestUtil.ID_FIELD_NAME));
 
         final Model result = readJson(jsonWriter.getResult());
         final Model orgModel = toRdf(employees.get(0).getEmployer());
@@ -204,48 +237,50 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
     void serializationBuildsCorrectlyContextBasedOnAnnotationPropertyAttribute() throws Exception {
         final ObjectWithMultilingualString instance = new ObjectWithMultilingualString(Generator.generateUri());
         instance.setScopeNote(MultilingualString.create("Test scope note", "en"));
-        final Map<String, ?> json = serializeAndRead(instance);
+        final JsonObject json = serializeAndRead(instance).asJsonObject();
         assertThat(json, hasKey(JsonLd.CONTEXT));
-        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
-        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
+        assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = json.get(JsonLd.CONTEXT).asJsonObject();
         assertThat(context, hasKey(ObjectWithMultilingualString.getScopeNoteField().getName()));
     }
 
     @Test
-    void serializationUsesMappedTermForTypesWhenItIsRegisteredInReferencedObject() throws Exception {
+    void serializationUsesMappedTermForTypesWhenItIsRegisteredInReferencedObject() {
         final Study instance = new Study();
         instance.setUri(Generator.generateUri());
         final Employee emp = Generator.generateEmployee();
         instance.setMembers(Collections.singleton(emp));
 
-        final Map<String, ?> json = serializeAndRead(instance);
+        final JsonObject json = serializeAndRead(instance).asJsonObject();
         assertThat(json, hasKey("types"));
-        assertEquals(Collections.singletonList(Vocabulary.STUDY), json.get("types"));
+        assertEquals(Collections.singletonList(Vocabulary.STUDY),
+                     json.getJsonArray("types").stream().map(v -> ((JsonString) v).getString()).collect(
+                             Collectors.toList()));
     }
 
     @Test
-    void serializationCreatesEmbeddedContextToOverrideIncompatibleTermMapping() throws Exception {
+    void serializationCreatesEmbeddedContextToOverrideIncompatibleTermMapping() {
         final StudyWithTitle instance = new StudyWithTitle();
         instance.uri = Generator.generateUri();
         instance.name = "Test study";
         instance.organization = Generator.generateOrganization();
 
-        final Map<String, ?> json = serializeAndRead(instance);
+        final JsonObject json = serializeAndRead(instance).asJsonObject();
         verifyEmbeddedContext(json);
     }
 
-    private void verifyEmbeddedContext(Map<String, ?> json) {
+    private void verifyEmbeddedContext(JsonObject json) {
         assertThat(json, hasKey(JsonLd.CONTEXT));
-        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
-        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
-        assertEquals(DC.Terms.TITLE, context.get("name"));
+        assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
+        assertEquals(DC.Terms.TITLE, context.getString("name"));
         assertThat(json, hasKey("organization"));
-        assertInstanceOf(Map.class, json.get("organization"));
-        final Map<String, ?> organization = (Map<String, ?>) json.get("organization");
+        assertEquals(JsonValue.ValueType.OBJECT, json.get("organization").getValueType());
+        final JsonObject organization = json.getJsonObject("organization");
         assertThat(organization, hasKey(JsonLd.CONTEXT));
-        assertInstanceOf(Map.class, organization.get(JsonLd.CONTEXT));
-        final Map<String, ?> embeddedCtx = (Map<String, ?>) organization.get(JsonLd.CONTEXT);
-        assertEquals(RDFS.LABEL, embeddedCtx.get("name"));
+        assertEquals(JsonValue.ValueType.OBJECT, organization.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject embeddedCtx = organization.getJsonObject(JsonLd.CONTEXT);
+        assertEquals(RDFS.LABEL, embeddedCtx.getString("name"));
     }
 
     @OWLClass(iri = Vocabulary.STUDY)
@@ -263,35 +298,32 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
     }
 
     @Test
-    void serializationUsesRegisteredIdentifierTermWhenSerializingPlainIdentifierObjectPropertyValue() throws Exception {
+    void serializationUsesRegisteredIdentifierTermWhenSerializingPlainIdentifierObjectPropertyValue() {
         final Organization instance = Generator.generateOrganization();
         instance.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
 
-        final Map<String, ?> json = serializeAndRead(instance);
+        final JsonObject json = serializeAndRead(instance).asJsonObject();
         assertThat(json, hasKey("country"));
-        assertInstanceOf(Map.class, json.get("country"));
-        final Map<String, ?> country = (Map<String, ?>) json.get("country");
+        assertEquals(JsonValue.ValueType.OBJECT, json.get("country").getValueType());
+        final JsonObject country = json.getJsonObject("country");
         assertThat(country, hasKey("uri"));
-        assertEquals(instance.getCountry().toString(), country.get("uri"));
+        assertEquals(instance.getCountry().toString(), country.getString("uri"));
     }
 
     @Test
-    void serializationSerializesRootCollectionOfEnumConstantsMappedToIndividualsAsArrayOfIndividuals() throws Exception {
+    void serializationSerializesRootCollectionOfEnumConstantsMappedToIndividualsAsArrayOfIndividuals() {
         final List<OwlPropertyType> value = Arrays.asList(OwlPropertyType.values());
 
-        sut.serialize(new LinkedHashSet<>(value));
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        assertInstanceOf(Map.class, jsonObject);
-        final Map<?, ?> map = (Map<?, ?>) jsonObject;
-        assertThat(map, hasKey(JsonLd.GRAPH));
-        assertInstanceOf(List.class, map.get(JsonLd.GRAPH));
-        final List<?> lst = (List<?>) map.get(JsonLd.GRAPH);
+        final JsonObject jsonObject = serializeAndRead(new LinkedHashSet<>(value)).asJsonObject();
+        assertThat(jsonObject, hasKey(JsonLd.GRAPH));
+        assertEquals(JsonValue.ValueType.ARRAY, jsonObject.get(JsonLd.GRAPH).getValueType());
+        final JsonArray lst = jsonObject.getJsonArray(JsonLd.GRAPH);
         assertEquals(value.size(), lst.size());
         for (int i = 0; i < value.size(); i++) {
-            assertInstanceOf(Map.class, lst.get(i));
-            final Map<?, ?> element = (Map<?, ?>) lst.get(i);
+            assertEquals(JsonValue.ValueType.OBJECT, lst.get(i).getValueType());
+            final JsonObject element = lst.getJsonObject(i);
             assertThat(element, hasKey(JsonLd.ID));
-            assertEquals(OwlPropertyType.getMappedIndividual(value.get(i)), element.get(JsonLd.ID));
+            assertEquals(OwlPropertyType.getMappedIndividual(value.get(i)), element.getString(JsonLd.ID));
         }
     }
 
@@ -299,7 +331,7 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
      * Bug #51
      */
     @Test
-    void serializationCreatesEmbeddedContextOnCorrectLevel() throws Exception {
+    void serializationCreatesEmbeddedContextOnCorrectLevel() {
         final StudyWithTitle instance = new StudyWithTitle();
         instance.uri = Generator.generateUri();
         instance.name = "Test study";
@@ -308,12 +340,12 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         instance.organization.addEmployee(Generator.generateEmployee());
         instance.organization.getEmployees().forEach(e -> e.setEmployer(instance.organization));
 
-        final Map<String, ?> json = serializeAndRead(instance);
+        final JsonObject json = serializeAndRead(instance).asJsonObject();
         verifyEmbeddedContext(json);
     }
 
     @Test
-    void serializationSerializesIndividualsAsStringWithExpandedTermDefinitionInContextWhenConfiguredTo() throws Exception {
+    void serializationSerializesIndividualsAsStringWithExpandedTermDefinitionInContextWhenConfiguredTo() {
         sut.configuration().set(ConfigParam.SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION, Boolean.TRUE.toString());
         final Attribute instance = new Attribute();
         instance.setUri(Generator.generateUri());
@@ -321,47 +353,47 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         instance.setPluralPropertyType(
                 new HashSet<>(Arrays.asList(OwlPropertyType.ANNOTATION_PROPERTY, OwlPropertyType.OBJECT_PROPERTY)));
 
-        final Map<String, ?> json = serializeAndRead(instance);
+        final JsonObject json = serializeAndRead(instance).asJsonObject();
         assertThat(json, hasKey(JsonLd.CONTEXT));
-        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
-        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
+        assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
         assertThat(context, hasKey("propertyType"));
-        assertInstanceOf(Map.class, context.get("propertyType"));
-        final Map<String, ?> termDef = (Map<String, ?>) context.get("propertyType");
+        assertEquals(JsonValue.ValueType.OBJECT, context.get("propertyType").getValueType());
+        final JsonObject termDef = context.getJsonObject("propertyType");
         assertThat(termDef, hasKey(JsonLd.ID));
-        assertEquals(termDef.get(JsonLd.ID), Vocabulary.HAS_PROPERTY_TYPE);
+        assertEquals(Vocabulary.HAS_PROPERTY_TYPE, termDef.getString(JsonLd.ID));
         assertThat(termDef, hasKey(JsonLd.TYPE));
-        assertEquals(termDef.get(JsonLd.TYPE), JsonLd.ID);
+        assertEquals(JsonLd.ID, termDef.getString(JsonLd.TYPE));
         assertThat(context, hasKey("pluralPropertyType"));
-        assertInstanceOf(Map.class, context.get("propertyType"));
-        final Map<String, ?> pluralTermDef = (Map<String, ?>) context.get("pluralPropertyType");
+        assertEquals(JsonValue.ValueType.OBJECT, context.get("pluralPropertyType").getValueType());
+        final JsonObject pluralTermDef = context.getJsonObject("pluralPropertyType");
         assertThat(pluralTermDef, hasKey(JsonLd.ID));
-        assertEquals(pluralTermDef.get(JsonLd.ID), Vocabulary.HAS_PLURAL_PROPERTY_TYPE);
+        assertEquals(Vocabulary.HAS_PLURAL_PROPERTY_TYPE, pluralTermDef.getString(JsonLd.ID));
         assertThat(pluralTermDef, hasKey(JsonLd.TYPE));
-        assertEquals(pluralTermDef.get(JsonLd.TYPE), JsonLd.ID);
+        assertEquals(JsonLd.ID, pluralTermDef.getString(JsonLd.TYPE));
         assertThat(json, hasKey("propertyType"));
-        assertEquals(OWL.DATATYPE_PROPERTY, json.get("propertyType"));
+        assertEquals(OWL.DATATYPE_PROPERTY, json.getString("propertyType"));
         assertThat(json, hasKey("pluralPropertyType"));
-        assertInstanceOf(List.class, json.get("pluralPropertyType"));
-        assertThat((List<String>) json.get("pluralPropertyType"),
-                   hasItems(OWL.ANNOTATION_PROPERTY, OWL.OBJECT_PROPERTY));
+        assertEquals(JsonValue.ValueType.ARRAY, json.get("pluralPropertyType").getValueType());
+        assertThat(json.getJsonArray("pluralPropertyType").stream().map(v -> ((JsonString) v).getString()).collect(
+                Collectors.toList()), hasItems(OWL.ANNOTATION_PROPERTY, OWL.OBJECT_PROPERTY));
     }
 
     @Test
-    void serializationSerializesPlainIdentifierAsStringWithExpandedTermDefinitionInContextWhenConfiguredTo() throws Exception {
+    void serializationSerializesPlainIdentifierAsStringWithExpandedTermDefinitionInContextWhenConfiguredTo() {
         sut.configuration().set(ConfigParam.SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION, Boolean.TRUE.toString());
         final Organization instance = Generator.generateOrganization();
         instance.setCountry(URI.create("http://dbpedia.org/resource/Czech_Republic"));
 
-        final Map<String, ?> json = serializeAndRead(instance);
+        final JsonObject json = serializeAndRead(instance).asJsonObject();
         assertThat(json, hasKey(JsonLd.CONTEXT));
-        assertInstanceOf(Map.class, json.get(JsonLd.CONTEXT));
-        final Map<String, ?> context = (Map<String, JsonNode>) json.get(JsonLd.CONTEXT);
+        assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
         assertThat(context, hasKey("country"));
-        assertInstanceOf(Map.class, context.get("country"));
-        final Map<String, ?> termDef = (Map<String, ?>) context.get("country");
-        assertEquals(Vocabulary.ORIGIN, termDef.get(JsonLd.ID));
-        assertEquals(JsonLd.ID, termDef.get(JsonLd.TYPE));
-        assertEquals(instance.getCountry().toString(), json.get("country"));
+        assertEquals(JsonValue.ValueType.OBJECT, context.get("country").getValueType());
+        final JsonObject termDef = context.getJsonObject("country");
+        assertEquals(Vocabulary.ORIGIN, termDef.getString(JsonLd.ID));
+        assertEquals(JsonLd.ID, termDef.getString(JsonLd.TYPE));
+        assertEquals(instance.getCountry().toString(), json.getString("country"));
     }
 }

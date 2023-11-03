@@ -1,28 +1,39 @@
-/**
- * Copyright (C) 2022 Czech Technical University in Prague
+/*
+ * JB4JSON-LD
+ * Copyright (C) 2023 Czech Technical University in Prague
  *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
  */
 package cz.cvut.kbss.jsonld.environment;
 
-import com.github.jsonldjava.core.JsonLdProcessor;
-import com.github.jsonldjava.utils.JsonUtils;
+import com.apicatalog.jsonld.JsonLd;
+import com.apicatalog.jsonld.document.Document;
+import com.apicatalog.jsonld.document.JsonDocument;
 import cz.cvut.kbss.jsonld.deserialization.util.TypeMap;
-import cz.cvut.kbss.jsonld.environment.model.*;
+import cz.cvut.kbss.jsonld.environment.model.Employee;
+import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.Study;
+import cz.cvut.kbss.jsonld.environment.model.User;
+import jakarta.json.JsonArray;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 public class TestUtil {
 
@@ -49,9 +60,29 @@ public class TestUtil {
         return tm;
     }
 
-    public static Object readAndExpand(String fileName) throws Exception {
+    /**
+     * Reads and expands JSON-LD from a file on classpath with the specified name.
+     *
+     * @param fileName Name of file
+     * @return Expanded JSON-LD content of the file
+     * @throws Exception When reading, parsing or expansion fail
+     */
+    public static JsonArray readAndExpand(String fileName) throws Exception {
         final InputStream is = TestUtil.class.getClassLoader().getResourceAsStream(fileName);
-        final Object jsonObject = JsonUtils.fromInputStream(is);
-        return JsonLdProcessor.expand(jsonObject);
+        assert is != null;
+        final Document doc = JsonDocument.of(is);
+        return JsonLd.expand(doc).get();
+    }
+
+    /**
+     * Parses and expands the specified JSON-LD.
+     *
+     * @param jsonLdContent JSON-LD string
+     * @return Expanded JSON-LD
+     * @throws Exception When parsing or expansion fail
+     */
+    public static JsonArray parseAndExpand(String jsonLdContent) throws Exception {
+        final Document doc = JsonDocument.of(new ByteArrayInputStream(jsonLdContent.getBytes(StandardCharsets.UTF_8)));
+        return JsonLd.expand(doc).get();
     }
 }

@@ -1,9 +1,25 @@
+/*
+ * JB4JSON-LD
+ * Copyright (C) 2023 Czech Technical University in Prague
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ */
 package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.common.Configurable;
-
-import java.util.Map;
+import jakarta.json.JsonValue;
 
 /**
  * Deserializes JSON-LD nodes to Java objects.
@@ -19,7 +35,7 @@ public interface ValueDeserializer<T> extends Configurable {
      * @param ctx      Deserialization context
      * @return Deserialized object
      */
-    T deserialize(Map<?, ?> jsonNode, DeserializationContext<T> ctx);
+    T deserialize(JsonValue jsonNode, DeserializationContext<T> ctx);
 
     /**
      * Applies the specified configuration to this deserializer.

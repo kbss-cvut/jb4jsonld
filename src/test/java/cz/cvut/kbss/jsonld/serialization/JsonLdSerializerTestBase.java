@@ -1,6 +1,22 @@
+/*
+ * JB4JSON-LD
+ * Copyright (C) 2023 Czech Technical University in Prague
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ */
 package cz.cvut.kbss.jsonld.serialization;
 
-import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
@@ -10,11 +26,24 @@ import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.*;
+import cz.cvut.kbss.jsonld.environment.model.Attribute;
+import cz.cvut.kbss.jsonld.environment.model.Employee;
+import cz.cvut.kbss.jsonld.environment.model.GeneratesRdf;
+import cz.cvut.kbss.jsonld.environment.model.GenericMember;
+import cz.cvut.kbss.jsonld.environment.model.ObjectWithAnnotationProperties;
+import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
+import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
+import cz.cvut.kbss.jsonld.environment.model.Role;
+import cz.cvut.kbss.jsonld.environment.model.Study;
+import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
+import jakarta.json.Json;
+import jakarta.json.JsonValue;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
@@ -27,18 +56,32 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static cz.cvut.kbss.jsonld.environment.IsIsomorphic.isIsomorphic;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Contains tests common to all {@link JsonLdSerializer} implementations.
@@ -68,11 +111,10 @@ public abstract class JsonLdSerializerTestBase {
         return model;
     }
 
-    protected Map<String, ?> serializeAndRead(Object value) throws IOException {
+    protected JsonValue serializeAndRead(Object value) {
         sut.serialize(value);
-        Object jsonObject = JsonUtils.fromString(jsonWriter.getResult());
-        assertInstanceOf(Map.class, jsonObject);
-        return (Map<String, ?>) jsonObject;
+        return Json.createReader(new ByteArrayInputStream(jsonWriter.getResult().getBytes(StandardCharsets.UTF_8)))
+                   .read();
     }
 
     @Test
@@ -213,12 +255,13 @@ public abstract class JsonLdSerializerTestBase {
     }
 
     @Test
-    void serializationGeneratesBlankNodeIdentifierForInstanceOfClassWithoutIdentifierField() throws Exception {
+    void serializationGeneratesBlankNodeIdentifierForInstanceOfClassWithoutIdentifierField() {
         final PersonWithoutIdentifier person = new PersonWithoutIdentifier();
         person.firstName = "Thomas";
         person.lastName = "Lasky";
-        final Map<String, ?> json = serializeAndRead(person);
-        final String id = (String) json.get(JsonLd.ID);
+        final JsonValue json = serializeAndRead(person);
+        assertEquals(JsonValue.ValueType.OBJECT, json.getValueType());
+        final String id = json.asJsonObject().getString(JsonLd.ID);
         assertNotNull(id);
         assertThat(id, startsWith(IdentifierUtil.B_NODE_PREFIX));
     }

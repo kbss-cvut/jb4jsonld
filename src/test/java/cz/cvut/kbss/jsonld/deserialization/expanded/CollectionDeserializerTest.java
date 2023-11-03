@@ -1,23 +1,30 @@
-/**
- * Copyright (C) 2022 Czech Technical University in Prague
- * <p>
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+/*
+ * JB4JSON-LD
+ * Copyright (C) 2023 Czech Technical University in Prague
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.jsonld.deserialization.*;
+import cz.cvut.kbss.jsonld.deserialization.CommonValueDeserializers;
+import cz.cvut.kbss.jsonld.deserialization.DefaultInstanceBuilder;
+import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
+import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
+import cz.cvut.kbss.jsonld.deserialization.ValueDeserializer;
 import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
 import cz.cvut.kbss.jsonld.deserialization.util.LangString;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
@@ -30,19 +37,30 @@ import cz.cvut.kbss.jsonld.environment.model.ObjectWithMultilingualString;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.Person;
 import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.net.URI;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class CollectionDeserializerTest {
 
@@ -53,15 +71,16 @@ class CollectionDeserializerTest {
     void setUp() {
         final TargetClassResolver typeResolver = new TargetClassResolver(new TypeMap());
         this.instanceBuilder = new DefaultInstanceBuilder(typeResolver, new PendingReferenceRegistry());
-        this.deserializerConfig = new DeserializerConfig(new Configuration(), typeResolver, new CommonValueDeserializers());
+        this.deserializerConfig =
+                new DeserializerConfig(new Configuration(), typeResolver, new CommonValueDeserializers());
     }
 
     @Test
     void processValueAddsObjectIdentifiersIntoPropertiesMap() throws Exception {
-        final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithPluralReference.json")).get(0);
-        final List<?> collection = (List<?>) jsonLd.get(Vocabulary.HAS_MEMBER);
+        final JsonValue jsonLd = TestUtil.readAndExpand("objectWithPluralReference.json").get(0);
+        final JsonArray collection = jsonLd.asJsonObject().getJsonArray(Vocabulary.HAS_MEMBER);
         final CollectionDeserializer sut = new CollectionDeserializer(instanceBuilder, deserializerConfig,
-                Vocabulary.HAS_MEMBER);
+                                                                      Vocabulary.HAS_MEMBER);
         instanceBuilder.openObject(Generator.generateUri().toString(), Person.class);
         sut.processValue(collection);
         final Person person = (Person) instanceBuilder.getCurrentRoot();
@@ -74,24 +93,25 @@ class CollectionDeserializerTest {
     @Test
     void processValueThrowsMissingIdentifierExceptionWhenInstanceToBeAddedIntoPropertiesHasNoIdentifier()
             throws Exception {
-        final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithPluralReference.json")).get(0);
-        final List<?> collection = (List<?>) jsonLd.get(Vocabulary.HAS_MEMBER);
-        final Map<?, ?> item = (Map<?, ?>) collection.get(0);
-        item.remove(JsonLd.ID);
+        final JsonObject jsonLd = TestUtil.readAndExpand("objectWithPluralReference.json").getJsonObject(0);
+        final JsonObject item = jsonLd.getJsonArray(Vocabulary.HAS_MEMBER).getJsonObject(0);
+        final Map<String, Object> itemMap = new HashMap<>(item);
+        itemMap.remove(JsonLd.ID);
+        final JsonObject itemUpdated = Json.createObjectBuilder(itemMap).build();
+        final JsonArray collectionToProcess = Json.createArrayBuilder().add(itemUpdated).build();
         final CollectionDeserializer sut = new CollectionDeserializer(instanceBuilder, deserializerConfig,
-                Vocabulary.HAS_MEMBER);
+                                                                      Vocabulary.HAS_MEMBER);
         instanceBuilder.openObject(Generator.generateUri().toString(), Person.class);
         final MissingIdentifierException result = assertThrows(MissingIdentifierException.class,
-                () -> sut.processValue(collection));
+                                                               () -> sut.processValue(collectionToProcess));
         assertThat(result.getMessage(),
-                containsString("Cannot put an object without an identifier into @Properties. Object: "));
+                   containsString("Cannot put an object without an identifier into @Properties. Object: "));
     }
 
     @Test
     void processValueAddsLangStringWhenItemHasLanguageString() throws Exception {
-        final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithMultilingualString.json"))
-                .get(0);
-        final List<?> labels = (List<?>) jsonLd.get(RDFS.LABEL);
+        final JsonObject jsonLd = TestUtil.readAndExpand("objectWithMultilingualString.json").getJsonObject(0);
+        final JsonArray labels = jsonLd.getJsonArray(RDFS.LABEL);
         final InstanceBuilder builderSpy = spy(instanceBuilder);
         final CollectionDeserializer sut = new CollectionDeserializer(builderSpy, deserializerConfig, RDFS.LABEL);
         builderSpy.openObject(Generator.generateUri().toString(), ObjectWithMultilingualString.class);
@@ -101,9 +121,8 @@ class CollectionDeserializerTest {
 
     @Test
     void processValueAddsLangStringWhenAttributeValueIsSingleObjectWithLanguageTag() throws Exception {
-        final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithSingleLangStringValue.json"))
-                .get(0);
-        final List<?> labels = (List<?>) jsonLd.get(RDFS.LABEL);
+        final JsonObject jsonLd = TestUtil.readAndExpand("objectWithSingleLangStringValue.json").getJsonObject(0);
+        final JsonArray labels = jsonLd.getJsonArray(RDFS.LABEL);
         final InstanceBuilder builderSpy = spy(instanceBuilder);
         final CollectionDeserializer sut = new CollectionDeserializer(builderSpy, deserializerConfig, RDFS.LABEL);
         builderSpy.openObject(Generator.generateUri().toString(), ObjectWithMultilingualString.class);
@@ -113,14 +132,14 @@ class CollectionDeserializerTest {
 
     @Test
     void processValueUsesCustomDeserializerWhenItMatchesSingularPropertyTargetType() throws Exception {
-        final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithSingularReference.json"))
-                .get(0);
+        final JsonObject jsonLd = TestUtil.readAndExpand("objectWithSingularReference.json").getJsonObject(0);
         final OrganizationDeserializer customDeserializer = spy(new OrganizationDeserializer());
         deserializerConfig.getDeserializers().registerDeserializer(Organization.class, customDeserializer);
-        final CollectionDeserializer sut = new CollectionDeserializer(instanceBuilder, deserializerConfig, Vocabulary.IS_MEMBER_OF);
+        final CollectionDeserializer sut =
+                new CollectionDeserializer(instanceBuilder, deserializerConfig, Vocabulary.IS_MEMBER_OF);
         instanceBuilder.openObject(Generator.generateUri().toString(), Employee.class);
-        sut.processValue((List<?>) jsonLd.get(Vocabulary.IS_MEMBER_OF));
-        verify(customDeserializer).deserialize(anyMap(), any(DeserializationContext.class));
+        sut.processValue(jsonLd.getJsonArray(Vocabulary.IS_MEMBER_OF));
+        verify(customDeserializer).deserialize(any(JsonObject.class), any(DeserializationContext.class));
         final Employee result = (Employee) instanceBuilder.getCurrentRoot();
         assertNotNull(result.getEmployer());
         assertEquals(TestUtil.UNSC_URI, result.getEmployer().getUri());
@@ -129,25 +148,26 @@ class CollectionDeserializerTest {
 
     private static class OrganizationDeserializer implements ValueDeserializer<Organization> {
         @Override
-        public Organization deserialize(Map<?, ?> jsonNode, DeserializationContext<Organization> ctx) {
+        public Organization deserialize(JsonValue jsonNode, DeserializationContext<Organization> ctx) {
+            assert jsonNode.getValueType() == JsonValue.ValueType.OBJECT;
             final Organization result = new Organization();
-            final Map<?, ?> label = (Map<?, ?>) ((List<?>) jsonNode.get(RDFS.LABEL)).get(0);
-            result.setName(label.get(JsonLd.VALUE).toString());
-            result.setUri(URI.create(jsonNode.get(JsonLd.ID).toString()));
+            final JsonValue label = jsonNode.asJsonObject().get(RDFS.LABEL).asJsonArray().get(0);
+            result.setName(label.asJsonObject().getString(JsonLd.VALUE));
+            result.setUri(URI.create(jsonNode.asJsonObject().getString(JsonLd.ID)));
             return result;
         }
     }
 
     @Test
     void processValueUsesCustomDeserializerWhenItMatchesPluralPropertyElementType() throws Exception {
-        final Map<?, ?> jsonLd = (Map<?, ?>) ((List) TestUtil.readAndExpand("objectWithPluralReference.json"))
-                .get(0);
+        final JsonObject jsonLd = TestUtil.readAndExpand("objectWithPluralReference.json").getJsonObject(0);
         final EmployeeDeserializer customDeserializer = spy(new EmployeeDeserializer());
         deserializerConfig.getDeserializers().registerDeserializer(Employee.class, customDeserializer);
-        final CollectionDeserializer sut = new CollectionDeserializer(instanceBuilder, deserializerConfig, Vocabulary.HAS_MEMBER);
+        final CollectionDeserializer sut =
+                new CollectionDeserializer(instanceBuilder, deserializerConfig, Vocabulary.HAS_MEMBER);
         instanceBuilder.openObject(Generator.generateUri().toString(), Organization.class);
-        sut.processValue((List<?>) jsonLd.get(Vocabulary.HAS_MEMBER));
-        verify(customDeserializer, times(3)).deserialize(anyMap(), any(DeserializationContext.class));
+        sut.processValue(jsonLd.getJsonArray(Vocabulary.HAS_MEMBER));
+        verify(customDeserializer, times(3)).deserialize(any(JsonObject.class), any(DeserializationContext.class));
         final Organization result = (Organization) instanceBuilder.getCurrentRoot();
         assertNotNull(result.getEmployees());
         assertEquals(3, result.getEmployees().size());
@@ -158,13 +178,13 @@ class CollectionDeserializerTest {
 
     private static class EmployeeDeserializer implements ValueDeserializer<Employee> {
         @Override
-        public Employee deserialize(Map<?, ?> jsonNode, DeserializationContext<Employee> ctx) {
+        public Employee deserialize(JsonValue jsonNode, DeserializationContext<Employee> ctx) {
             final Employee result = new Employee();
-            result.setUri(URI.create(jsonNode.get(JsonLd.ID).toString()));
-            final Map<?, ?> firstNameMap = (Map<?, ?>) ((List<?>) jsonNode.get(Vocabulary.FIRST_NAME)).get(0);
-            result.setFirstName(firstNameMap.get(JsonLd.VALUE).toString());
-            final Map<?, ?> lastNameMap = (Map<?, ?>) ((List<?>) jsonNode.get(Vocabulary.LAST_NAME)).get(0);
-            result.setLastName(lastNameMap.get(JsonLd.VALUE).toString());
+            result.setUri(URI.create(jsonNode.asJsonObject().getString(JsonLd.ID)));
+            final JsonArray firstName = jsonNode.asJsonObject().get(Vocabulary.FIRST_NAME).asJsonArray();
+            result.setFirstName(firstName.get(0).asJsonObject().getString(JsonLd.VALUE));
+            final JsonArray lastName = jsonNode.asJsonObject().get(Vocabulary.LAST_NAME).asJsonArray();
+            result.setLastName(lastName.get(0).asJsonObject().getString(JsonLd.VALUE));
             return result;
         }
     }

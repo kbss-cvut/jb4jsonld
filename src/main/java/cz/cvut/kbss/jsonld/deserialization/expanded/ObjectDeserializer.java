@@ -1,16 +1,19 @@
-/**
- * Copyright (C) 2022 Czech Technical University in Prague
+/*
+ * JB4JSON-LD
+ * Copyright (C) 2023 Czech Technical University in Prague
  *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
@@ -19,13 +22,21 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
+import cz.cvut.kbss.jsonld.deserialization.util.ValueUtils;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-class ObjectDeserializer extends Deserializer<Map<?, ?>> {
+class ObjectDeserializer extends Deserializer<JsonObject> {
 
     private final String property;
     private final Class<?> targetClass;
@@ -45,21 +56,21 @@ class ObjectDeserializer extends Deserializer<Map<?, ?>> {
     }
 
     @Override
-    void processValue(Map<?, ?> value) {
+    void processValue(JsonObject value) {
         openObject(value);
-        for (Map.Entry<?, ?> e : orderAttributesForProcessing(value).entrySet()) {
-            final String property = e.getKey().toString();
+        final List<String> orderedProps = orderAttributesForProcessing(value);
+        for (String property : orderedProps) {
             final boolean shouldSkip = shouldSkipProperty(property);
             if (shouldSkip) {
                 continue;
             }
-            assert e.getValue() instanceof List;
-            new CollectionDeserializer(instanceBuilder, config, property).processValue((List<?>) e.getValue());
+            assert value.get(property).getValueType() == JsonValue.ValueType.ARRAY;
+            new CollectionDeserializer(instanceBuilder, config, property).processValue(value.getJsonArray(property));
         }
         instanceBuilder.closeObject();
     }
 
-    private void openObject(Map<?, ?> value) {
+    private void openObject(JsonObject value) {
         try {
             if (property != null) {
                 instanceBuilder.openObject(getId(value), property, getObjectTypes(value));
@@ -76,28 +87,17 @@ class ObjectDeserializer extends Deserializer<Map<?, ?>> {
         }
     }
 
-    private String getId(Map<?, ?> object) {
-        return object.containsKey(JsonLd.ID) ? object.get(JsonLd.ID).toString() : IdentifierUtil.generateBlankNodeId();
+    private String getId(JsonObject object) {
+        return object.containsKey(JsonLd.ID) ? ValueUtils.stringValue(object.get(JsonLd.ID)) : IdentifierUtil.generateBlankNodeId();
     }
 
-    private Map<?, ?> orderAttributesForProcessing(Map<?, ?> value) {
+    private List<String> orderAttributesForProcessing(JsonObject value) {
         final List<String> propertyOrder = getPropertyOrder();
-        if (propertyOrder.isEmpty()) {
-            return value;
-        }
-        final Map result = new LinkedHashMap<>(value.size());
-        for (String property : propertyOrder) {
-            final Iterator<? extends Map.Entry<?, ?>> it = value.entrySet().iterator();
-            while (it.hasNext()) {
-                final Map.Entry<?, ?> e = it.next();
-                if (property.equals(e.getKey())) {
-                    result.put(e.getKey(), e.getValue());
-                    it.remove();
-                    break;
-                }
-            }
-        }
-        result.putAll(value);
+        final Set<String> ordered = new HashSet<>(propertyOrder);
+        final List<String> result = new ArrayList<>();
+        propertyOrder.stream().filter(value::containsKey).forEach(result::add);
+
+        value.keySet().stream().filter(p -> !ordered.contains(p)).forEach(result::add);
         return result;
     }
 
@@ -115,7 +115,7 @@ class ObjectDeserializer extends Deserializer<Map<?, ?>> {
         final List<String> propertyOrder = new ArrayList<>(attributeOrder.length);
         for (String name : attributeOrder) {
             final Optional<Field> field = fields.stream().filter(f -> f.getName().equals(name)).findFirst();
-            if (!field.isPresent()) {
+            if (field.isEmpty()) {
                 throw new JsonLdDeserializationException(
                         "Field called " + name + " declared in JsonLdAttributeOrder annotation not found in class " +
                                 cls + ".");
