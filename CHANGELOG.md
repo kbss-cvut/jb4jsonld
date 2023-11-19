@@ -1,5 +1,9 @@
 # JB4JSON-LD Changelog
 
+## 0.14.1 - 2023-11-19
+- Bump Jakarta JSON version to 2.1.3.
+- Switch to Parsson as Jakarta JSON implementation for tests.
+
 ## 0.14.0 - 2023-11-03
 - Rewrite API to use Jakarta JSON (**Breaking change**).
 - Dependency updates: JOPA 1.1.4, test deps.
