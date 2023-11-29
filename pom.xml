@@ -22,7 +22,7 @@
 
         <org.junit.jupiter.version>5.9.2</org.junit.jupiter.version>
         <org.mockito.version>4.11.0</org.mockito.version>
-        <ch.qos.logback.version>1.4.11</ch.qos.logback.version>
+        <ch.qos.logback.version>1.4.12</ch.qos.logback.version>
         <org.eclipse.rdf4j.version>4.3.7</org.eclipse.rdf4j.version>
     </properties>
 
