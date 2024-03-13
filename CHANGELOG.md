@@ -1,5 +1,9 @@
 # JB4JSON-LD Changelog
 
+## 0.14.2 - 2024-03-13
+- Fix an issue with scanning classpath when running in a Spring Boot 3.2.x bundle (Bug #63).
+- Dependency updates: JOPA 1.2.2, test deps.
+
 ## 0.14.1 - 2023-11-19
 - Bump Jakarta JSON version to 2.1.3.
 - Switch to Parsson as Jakarta JSON implementation for tests.
