@@ -58,7 +58,8 @@ public class ClasspathScanner {
      * This parameter is optional, but it is highly recommended to specify it, as it can speed up the process
      * dramatically.
      * <p>
-     * Inspired by https://github.com/ddopson/java-class-enumerator
+     * Inspired by <a
+     * href="https://github.com/ddopson/java-class-enumerator">https://github.com/ddopson/java-class-enumerator</a>
      *
      * @param scanPath Package narrowing down the scan space. Optional
      */
@@ -81,7 +82,9 @@ public class ClasspathScanner {
             Enumeration<URL> resources = loader.getResources(".");
             while (resources.hasMoreElements()) {
                 URL resourceURL = resources.nextElement();
-                if (isJar(resourceURL.toString())) {processJarFile(resourceURL, scanPath);}
+                if (isJar(resourceURL.toString())) {
+                    processJarFile(resourceURL, scanPath);
+                }
             }
         } catch (IOException e) {
             throw new JsonLdException("Unable to scan packages.", e);
@@ -103,8 +106,9 @@ public class ClasspathScanner {
 
     protected void processJarFile(URL jarResource, String packageName) {
         final String relPath = packageName.replace('.', '/');
-        final String jarPath = jarResource.getPath().replaceFirst("[.]jar[!].*", JAR_FILE_SUFFIX)
-                                          .replaceFirst("file:", "");
+        final String jarPath = jarResource.getPath().replaceFirst("[.]jar/?!.*", JAR_FILE_SUFFIX)
+                                          .replaceFirst("file:", "")
+                                          .replaceFirst("nested:", "");
 
         LOG.trace("Scanning jar file {} for classes.", jarPath);
         try (final JarFile jarFile = new JarFile(jarPath)) {
