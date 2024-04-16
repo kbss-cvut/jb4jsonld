@@ -1,6 +1,6 @@
 /*
  * JB4JSON-LD
- * Copyright (C) 2023 Czech Technical University in Prague
+ * Copyright (C) 2024 Czech Technical University in Prague
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -67,7 +67,7 @@ public class JsonLdTreeBuilderTest {
     void openInstanceCreatesNewObjectNode() {
         final User u = Generator.generateUser();
         sut.openObject(ctx(null, null, u));
-        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
+        assertInstanceOf(ObjectNode.class, sut.getTreeRoot());
     }
 
     private static <T> SerializationContext<T> ctx(String attId, Field field, T value) {
@@ -80,7 +80,7 @@ public class JsonLdTreeBuilderTest {
         final Organization org = Generator.generateOrganization();
         sut.openObject(ctx(null, null, e));
         sut.openObject(ctx(null, null, org));
-        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
+        assertInstanceOf(ObjectNode.class, sut.getTreeRoot());
         assertFalse(getNodeStack().isEmpty());
     }
 
@@ -157,7 +157,7 @@ public class JsonLdTreeBuilderTest {
         final User u = Generator.generateUser();
         sut.openObject(ctx(null, null, u));
         assertTrue(getNodeStack().isEmpty());
-        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
+        assertInstanceOf(ObjectNode.class, sut.getTreeRoot());
         sut.closeObject(ctx(null, null, u));
         assertFalse(sut.getTreeRoot().isOpen());
         assertTrue(getNodeStack().isEmpty());
@@ -169,7 +169,7 @@ public class JsonLdTreeBuilderTest {
         final Organization org = Generator.generateOrganization();
         sut.openObject(ctx(null, null, e));
         sut.openObject(ctx(null, null, org));
-        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
+        assertInstanceOf(ObjectNode.class, sut.getTreeRoot());
         assertFalse(getNodeStack().isEmpty());
         sut.closeObject(ctx(null, null, org));
         assertTrue(getNodeStack().isEmpty());
@@ -181,7 +181,7 @@ public class JsonLdTreeBuilderTest {
         sut.openCollection(ctx(null, null, Collections.singleton(Generator.generateEmployee())));
         final CompositeNode<?> root = sut.getTreeRoot();
         assertNotNull(root);
-        assertTrue(root instanceof CollectionNode);
+        assertInstanceOf(CollectionNode.class, root);
     }
 
     @Test
@@ -194,7 +194,7 @@ public class JsonLdTreeBuilderTest {
         assertTrue(getNodeStack().isEmpty());
         sut.openCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
         assertFalse(getNodeStack().isEmpty());
-        assertTrue(sut.getTreeRoot() instanceof CollectionNode);
+        assertInstanceOf(CollectionNode.class, sut.getTreeRoot());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class JsonLdTreeBuilderTest {
         assertFalse(getNodeStack().isEmpty());
         sut.closeCollection(ctx(Vocabulary.HAS_MEMBER, Organization.getEmployeesField(), org.getEmployees()));
         assertTrue(getNodeStack().isEmpty());
-        assertTrue(sut.getTreeRoot() instanceof ObjectNode);
+        assertInstanceOf(ObjectNode.class, sut.getTreeRoot());
     }
 
     @Test
@@ -251,7 +251,7 @@ public class JsonLdTreeBuilderTest {
         assertFalse(sut.getTreeRoot().getItems().isEmpty());
         final CollectionNode<?> brandsNode = (CollectionNode<?>) getNode(sut.getTreeRoot(), Vocabulary.BRAND);
         assertNotNull(brandsNode);
-        assertTrue(brandsNode instanceof SetNode);
+        assertInstanceOf(SetNode.class, brandsNode);
         for (String brand : org.getBrands()) {
             assertTrue(brandsNode.getItems().contains(JsonNodeFactory.createLiteralNode(brand)));
         }
@@ -271,7 +271,7 @@ public class JsonLdTreeBuilderTest {
         assertFalse(root.isOpen());
         assertEquals(users.size(), root.getItems().size());
         for (JsonNode item : root.getItems()) {
-            assertTrue(item instanceof ObjectNode);
+            assertInstanceOf(ObjectNode.class, item);
             assertNull(item.getName());
         }
     }
@@ -285,7 +285,7 @@ public class JsonLdTreeBuilderTest {
         final Collection<JsonNode> nodes = root.getItems();
         final Optional<JsonNode> idNode = nodes.stream().filter(n -> n.getName().equals(JsonLd.ID)).findAny();
         assertTrue(idNode.isPresent());
-        assertTrue(idNode.get() instanceof ObjectIdNode);
+        assertInstanceOf(ObjectIdNode.class, idNode.get());
         final ObjectIdNode node = (ObjectIdNode) idNode.get();
         JsonGenerator generator = mock(JsonGenerator.class);
         node.write(generator);

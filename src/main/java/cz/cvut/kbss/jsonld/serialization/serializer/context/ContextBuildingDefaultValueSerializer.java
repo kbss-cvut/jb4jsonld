@@ -1,6 +1,6 @@
 /*
  * JB4JSON-LD
- * Copyright (C) 2023 Czech Technical University in Prague
+ * Copyright (C) 2024 Czech Technical University in Prague
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,6 +48,7 @@ public class ContextBuildingDefaultValueSerializer implements ValueSerializer {
         if (value instanceof Collection) {
             final Collection<?> col = (Collection<?>) value;
             if (col.isEmpty()) {
+                ctx.registerTermMapping(ctx.getFieldName(), ctx.getTerm());
                 return JsonNodeFactory.createCollectionNode(ctx.getTerm(), col);
             }
             final Object elem = col.iterator().next();
