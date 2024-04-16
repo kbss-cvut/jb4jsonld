@@ -34,6 +34,7 @@ import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Attribute;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
+import cz.cvut.kbss.jsonld.environment.model.ObjectWithAnnotationProperties;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithMultilingualString;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
@@ -395,5 +396,17 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(Vocabulary.ORIGIN, termDef.getString(JsonLd.ID));
         assertEquals(JsonLd.ID, termDef.getString(JsonLd.TYPE));
         assertEquals(instance.getCountry().toString(), json.getString("country"));
+    }
+
+    @Test
+    void serializationAddsToContextMappingForCollectionValuedAnnotationPropertyAttributeWithEmptyValue() {
+        final ObjectWithAnnotationProperties instance = new ObjectWithAnnotationProperties(Generator.generateUri());
+        instance.setOrigins(Collections.emptySet());
+
+        final JsonObject json = serializeAndRead(instance).asJsonObject();
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
+        assertThat(context, hasKey("origins"));
     }
 }
