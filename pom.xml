@@ -6,7 +6,7 @@
 
     <groupId>cz.cvut.kbss.jsonld</groupId>
     <artifactId>jb4jsonld</artifactId>
-    <version>0.14.2</version>
+    <version>0.14.3</version>
     <name>JB4JSON-LD</name>
     <description>Java Binding for JSON-LD allows serialization and deserialization of Java POJOs to/from JSON-LD.
         This is the core implementation, which has to be integrated with Jackson, Jersey etc.
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>com.apicatalog</groupId>
             <artifactId>titanium-json-ld</artifactId>
-            <version>1.3.2</version>
+            <version>1.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

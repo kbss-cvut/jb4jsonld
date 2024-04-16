@@ -1,5 +1,8 @@
 # JB4JSON-LD Changelog
 
+## 0.14.3 - 2024-04-16
+- Fix missing context entry when serializing empty collection mapped to data/annotation property.
+
 ## 0.14.2 - 2024-03-13
 - Fix an issue with scanning classpath when running in a Spring Boot 3.2.x bundle (Bug #63).
 - Dependency updates: JOPA 1.2.2, test deps.
