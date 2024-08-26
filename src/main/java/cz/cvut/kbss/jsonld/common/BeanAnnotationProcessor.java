@@ -17,8 +17,15 @@
  */
 package cz.cvut.kbss.jsonld.common;
 
+import cz.cvut.kbss.jopa.model.annotations.Id;
+import cz.cvut.kbss.jopa.model.annotations.Namespace;
+import cz.cvut.kbss.jopa.model.annotations.Namespaces;
+import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
-import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
@@ -26,7 +33,15 @@ import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -126,7 +141,7 @@ public class BeanAnnotationProcessor {
             }
         }
         return declaringClass.getSuperclass() != null ? expandIri(iri, declaringClass.getSuperclass()) :
-                Optional.empty();
+               Optional.empty();
     }
 
     private static Optional<String> resolveNamespace(AnnotatedElement annotated, String prefix) {
@@ -418,6 +433,14 @@ public class BeanAnnotationProcessor {
         throw new JsonLdSerializationException("Field " + field + " is not JSON-LD serializable.");
     }
 
+    /**
+     * Gets the identifier field of the specified class.
+     * <p>
+     * That is, gets the field annotated with {@link Id}, even inherited.
+     *
+     * @param cls Class whose identifier field to retrieve
+     * @return Matching field, optionally empty
+     */
     public static Optional<Field> getIdentifierField(Class<?> cls) {
         return getMarshallableFields(cls, (f, c) -> f.isAnnotationPresent(Id.class)).stream().findFirst();
     }

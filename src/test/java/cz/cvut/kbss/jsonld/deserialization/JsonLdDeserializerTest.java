@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 import static cz.cvut.kbss.jsonld.environment.TestUtil.readAndExpand;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,6 +46,7 @@ class JsonLdDeserializerTest {
     void constructionScansClasspathAndBuildsTypeMap() throws Exception {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
         assertFalse(typeMap(deserializer).get(Vocabulary.STUDY).isEmpty());
         assertTrue(typeMap(deserializer).get(Vocabulary.STUDY).contains(Study.class));
@@ -60,6 +62,7 @@ class JsonLdDeserializerTest {
     void constructionScansClasspathWithSpecifiedPackageAndBuildsTypeMap() throws Exception {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.deserialization");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
         assertTrue(typeMap(deserializer).get(Vocabulary.GENERIC_MEMBER).isEmpty());
         assertTrue(typeMap(deserializer).get(Vocabulary.AGENT).contains(TestClass.class));
@@ -82,8 +85,38 @@ class JsonLdDeserializerTest {
     void constructionExpandsCompactIrisWhenBuildingTypeMap() throws Exception {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
         assertFalse(typeMap(deserializer).get(Vocabulary.STUDY).isEmpty());
         assertThat(typeMap(deserializer).get(Vocabulary.STUDY), hasItem(StudyWithNamespaces.class));
+    }
+
+    @Test
+    void constructionCachesTypeMapByDefault() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        final JsonLdDeserializer deserializerOne = JsonLdDeserializer.createExpandedDeserializer(config);
+        final TypeMap typeMapOne = typeMap(deserializerOne);
+        assertThat(typeMapOne.get(Vocabulary.STUDY), hasItem(Study.class));
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.deserialization");
+        final JsonLdDeserializer deserializerTwo = JsonLdDeserializer.createExpandedDeserializer(config);
+        final TypeMap typeMapTwo = typeMap(deserializerTwo);
+        // If classpath scanning occurred again, the updated scan package would be too specific for Study
+        assertThat(typeMapTwo.get(Vocabulary.STUDY), hasItem(Study.class));
+    }
+
+    @Test
+    void constructionBuildsFreshTypeMapWhenTypeMapCacheIsDisabled() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        final JsonLdDeserializer deserializerOne = JsonLdDeserializer.createExpandedDeserializer(config);
+        final TypeMap typeMapOne = typeMap(deserializerOne);
+        assertThat(typeMapOne.get(Vocabulary.STUDY), hasItem(Study.class));
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.deserialization");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
+        final JsonLdDeserializer deserializerTwo = JsonLdDeserializer.createExpandedDeserializer(config);
+        final TypeMap typeMapTwo = typeMap(deserializerTwo);
+        // If classpath scanning occurred again, the updated scan package would be too specific for Study
+        assertThat(typeMapTwo.get(Vocabulary.STUDY), not(hasItem(Study.class)));
     }
 }

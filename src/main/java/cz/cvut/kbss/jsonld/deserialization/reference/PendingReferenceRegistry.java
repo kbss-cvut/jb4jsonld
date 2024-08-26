@@ -44,7 +44,7 @@ public class PendingReferenceRegistry {
     }
 
     private void addReference(String identifier, PendingReference reference) {
-        final Set<PendingReference> refs = pendingReferences.computeIfAbsent(identifier, (id) -> new HashSet<>());
+        final Set<PendingReference> refs = pendingReferences.computeIfAbsent(identifier, (id) -> new LinkedHashSet<>());
         refs.add(reference);
     }
 
@@ -90,5 +90,9 @@ public class PendingReferenceRegistry {
             throw new UnresolvedReferenceException(
                     "There are unresolved references to objects " + pendingReferences.keySet());
         }
+    }
+
+    Map<String, Set<PendingReference>> getPendingReferences() {
+        return Collections.unmodifiableMap(pendingReferences);
     }
 }

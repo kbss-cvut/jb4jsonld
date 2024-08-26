@@ -22,6 +22,7 @@ import cz.cvut.kbss.jsonld.exception.TargetTypeException;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents a singular pending reference.
@@ -48,6 +49,11 @@ public final class SingularPendingReference implements PendingReference {
                             .getClass() + " to field " + targetField);
         }
         BeanClassProcessor.setFieldValue(targetField, targetObject, referencedObject);
+    }
+
+    @Override
+    public Optional<Class<?>> getTargetType() {
+        return Optional.of(targetField.getType());
     }
 
     @Override

@@ -1,0 +1,22 @@
+{
+  "@context": {
+    "firstName": "http://xmlns.com/foaf/0.1/firstName",
+    "lastName": "http://xmlns.com/foaf/0.1/lastName",
+    "accountName": "http://xmlns.com/foaf/0.1/accountName",
+    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin"
+  },
+  "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
+  "@type": [
+    "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/GenericMember"
+  ],
+  "isAdmin": true,
+  "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isMemberOf": {
+    "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#UNSC"
+  },
+  "accountName": "halsey@unsc.org",
+  "firstName": "Catherine",
+  "lastName": "Halsey"
+}

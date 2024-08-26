@@ -63,7 +63,7 @@ public class TargetClassResolver {
      */
     public <T> Class<? extends T> getTargetClass(Class<T> expectedClass, Collection<String> types) {
         if (types.isEmpty() && config.shouldAllowAssumingTargetType()) {
-            LOG.trace("Assuming target type to be " + expectedClass);
+            LOG.trace("Assuming target type to be {}", expectedClass);
             return expectedClass;
         }
         final List<Class<?>> candidates = getTargetClassCandidates(types);
@@ -99,7 +99,7 @@ public class TargetClassResolver {
 
     private Class<?> selectFinalTargetClass(List<Class<?>> mostSpecificCandidates, List<Class<?>> candidates,
                                             Collection<String> types) {
-        assert mostSpecificCandidates.size() > 0;
+        assert !mostSpecificCandidates.isEmpty();
         if (mostSpecificCandidates.size() > 1) {
             if (!config.isOptimisticTypeResolutionEnabled()) {
                 throw ambiguousTargetType(types, mostSpecificCandidates);

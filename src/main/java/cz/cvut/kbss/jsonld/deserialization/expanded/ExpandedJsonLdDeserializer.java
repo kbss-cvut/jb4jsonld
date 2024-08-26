@@ -17,11 +17,13 @@
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
+import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.deserialization.DefaultInstanceBuilder;
 import cz.cvut.kbss.jsonld.deserialization.DeserializationContext;
 import cz.cvut.kbss.jsonld.deserialization.InstanceBuilder;
 import cz.cvut.kbss.jsonld.deserialization.JsonLdDeserializer;
+import cz.cvut.kbss.jsonld.deserialization.reference.AssumedTypeReferenceReplacer;
 import cz.cvut.kbss.jsonld.deserialization.reference.PendingReferenceRegistry;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import jakarta.json.JsonArray;
@@ -59,6 +61,9 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(classResolver, referenceRegistry);
         new ObjectDeserializer(instanceBuilder, new DeserializerConfig(configuration(), classResolver, deserializers), resultClass)
                 .processValue(root);
+        if (configuration().is(ConfigParam.ASSUME_TARGET_TYPE)) {
+            new AssumedTypeReferenceReplacer().replacePendingReferencesWithAssumedTypedObjects(referenceRegistry);
+        }
         referenceRegistry.verifyNoUnresolvedReferencesExist();
         assert resultClass.isAssignableFrom(instanceBuilder.getCurrentRoot().getClass());
         return resultClass.cast(instanceBuilder.getCurrentRoot());
