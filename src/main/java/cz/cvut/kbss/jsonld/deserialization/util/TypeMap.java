@@ -17,14 +17,19 @@
  */
 package cz.cvut.kbss.jsonld.deserialization.util;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a map of type IRIs to their mapped Java classes.
  * <p>
  * Used by the deserialization when determining target class from JSON-LD object types.
  * <p>
- * This class is not synchronized, as it is expected that types will be registered by one thread once and then only queried.
+ * Read access is not synchronized, as it is expected that types will be registered by one thread once and then only
+ * queried.
  */
 public class TypeMap {
 
@@ -40,5 +45,9 @@ public class TypeMap {
 
     public Set<Class<?>> get(String type) {
         return typeMap.getOrDefault(type, Collections.emptySet());
+    }
+
+    public synchronized boolean isEmpty() {
+        return typeMap.isEmpty();
     }
 }

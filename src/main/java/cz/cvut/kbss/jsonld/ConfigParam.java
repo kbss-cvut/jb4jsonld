@@ -39,9 +39,9 @@ public enum ConfigParam {
     /**
      * Whether to require an identifier when serializing an object.
      * <p>
-     * If set to {@code true} and no identifier is found (either there is no identifier field or its value is {@code
-     * null}), an exception will be thrown. If configured to {@code false}, a blank node identifier is generated if no
-     * id is present.
+     * If set to {@code true} and no identifier is found (either there is no identifier field or its value is
+     * {@code null}), an exception will be thrown. If configured to {@code false}, a blank node identifier is generated
+     * if no id is present.
      */
     REQUIRE_ID("requireId"),
 
@@ -59,8 +59,8 @@ public enum ConfigParam {
      * Enables optimistic target type resolution.
      * <p>
      * This means that when a an ambiguous target type is encountered during deserialization of an object (i.e.,
-     * multiple concrete classes match the data type), instead of throwing an {@link
-     * cz.cvut.kbss.jsonld.exception.AmbiguousTargetTypeException}, one of the classes will be selected for
+     * multiple concrete classes match the data type), instead of throwing an
+     * {@link cz.cvut.kbss.jsonld.exception.AmbiguousTargetTypeException}, one of the classes will be selected for
      * instantiation.
      * <p>
      * Note that enabling this behavior should probably be done together with setting {@link #IGNORE_UNKNOWN_PROPERTIES}
@@ -98,19 +98,34 @@ public enum ConfigParam {
     /**
      * Format string used to serialize and deserialize datetime values.
      * <p>
-     * Note that if {@link #SERIALIZE_DATETIME_AS_MILLIS} is enabled, this parameter has no effect on serialization of datetime.
+     * Note that if {@link #SERIALIZE_DATETIME_AS_MILLIS} is enabled, this parameter has no effect on serialization of
+     * datetime.
      * <p>
-     * Also note that this format applies only to full datetime values. Date or time values have to be formatted per-attribute.
+     * Also note that this format applies only to full datetime values. Date or time values have to be formatted
+     * per-attribute.
      */
     DATE_TIME_FORMAT("datetimeFormat"),
 
     /**
      * Whether to serialize individuals using expanded term definition in context.
-     *
+     * <p>
      * This basically means that the individual's identifier is provided directly as a string and an expanded term
-     * definition (consisting of a {@literal @id} and {@literal @type}) is added into the context, specifying that the string is an identifier.
+     * definition (consisting of a {@literal @id} and {@literal @type}) is added into the context, specifying that the
+     * string is an identifier.
      */
-    SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION("serializeIndividualsUsingExpandedDefinition");
+    SERIALIZE_INDIVIDUALS_USING_EXPANDED_DEFINITION("serializeIndividualsUsingExpandedDefinition"),
+
+    /**
+     * Whether to disable the type map cache.
+     * <p>
+     * Type map is used to map JSON-LD types to Java classes for deserialization. Since this map is built by scanning
+     * the classpath (see the {@link #SCAN_PACKAGE} parameter), it is cached by default to avoid repeated scanning of
+     * the classpath.
+     * <p>
+     * If every deserializer instance should get a fresh type map based on the current configuration, disable this
+     * cache.
+     */
+    DISABLE_TYPE_MAP_CACHE("disableTypeMapCache");
 
     private final String name;
 

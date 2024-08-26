@@ -36,6 +36,8 @@ import java.util.Objects;
  */
 public abstract class JsonLdDeserializer implements Configured {
 
+    private static final TypeMap TYPE_MAP = new TypeMap();
+
     private final Configuration configuration;
 
     protected final TargetClassResolver classResolver;
@@ -53,19 +55,33 @@ public abstract class JsonLdDeserializer implements Configured {
     }
 
     private TargetClassResolver initializeTargetClassResolver() {
-        final TypeMap typeMap = new TypeMap();
         final String scanPath = configuration.get(ConfigParam.SCAN_PACKAGE, "");
+        final TypeMap typeMap = discoverAvailableTypes(scanPath, configuration.is(ConfigParam.DISABLE_TYPE_MAP_CACHE));
+        return new TargetClassResolver(typeMap,
+                                       new TargetClassResolverConfig(
+                                               configuration.is(ConfigParam.ASSUME_TARGET_TYPE),
+                                               configuration().is(ConfigParam.ENABLE_OPTIMISTIC_TARGET_TYPE_RESOLUTION),
+                                               configuration().is(ConfigParam.PREFER_SUPERCLASS)));
+    }
+
+    /**
+     * Finds potential deserialization target types on the classpath.
+     *
+     * @param scanPath Path to scan on classpath
+     * @return Map of types to Java classes
+     */
+    private static TypeMap discoverAvailableTypes(String scanPath, boolean disableCache) {
+        final TypeMap map = disableCache ? new TypeMap() : TYPE_MAP;
+        if (!map.isEmpty()) {
+            return map;
+        }
         new ClasspathScanner(c -> {
             final OWLClass ann = c.getDeclaredAnnotation(OWLClass.class);
             if (ann != null) {
-                typeMap.register(BeanAnnotationProcessor.expandIriIfNecessary(ann.iri(), c), c);
+                map.register(BeanAnnotationProcessor.expandIriIfNecessary(ann.iri(), c), c);
             }
         }).processClasses(scanPath);
-        return new TargetClassResolver(typeMap,
-                new TargetClassResolverConfig(
-                        configuration.is(ConfigParam.ASSUME_TARGET_TYPE),
-                        configuration().is(ConfigParam.ENABLE_OPTIMISTIC_TARGET_TYPE_RESOLUTION),
-                        configuration().is(ConfigParam.PREFER_SUPERCLASS)));
+        return map;
     }
 
     @Override
@@ -78,9 +94,9 @@ public abstract class JsonLdDeserializer implements Configured {
      * <p>
      * If a deserializer already existed for the type, it is replaced by the new one.
      *
-     * @param type       Target type to register the deserializer for
+     * @param type         Target type to register the deserializer for
      * @param deserializer Deserializer to register
-     * @param <T>        Target type
+     * @param <T>          Target type
      */
     public <T> void registerDeserializer(Class<T> type, ValueDeserializer<T> deserializer) {
         Objects.requireNonNull(type);
