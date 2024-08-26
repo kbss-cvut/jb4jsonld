@@ -108,6 +108,7 @@ class ExpandedJsonLdDeserializerTest {
     void setUp() {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
     }
 
