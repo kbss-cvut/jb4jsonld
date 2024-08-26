@@ -76,6 +76,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -381,7 +382,7 @@ class ExpandedJsonLdDeserializerTest {
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithSingularPolymorphicReference.json");
         final PolymorphicPerson result = sut.deserialize(input, PolymorphicPerson.class);
-        assertTrue(result.friend instanceof Employee);
+        assertInstanceOf(Employee.class, result.friend);
     }
 
     @OWLClass(iri = Vocabulary.PERSON)
@@ -846,5 +847,20 @@ class ExpandedJsonLdDeserializerTest {
         assertEquals(OwlPropertyType.DATATYPE_PROPERTY, result.getPropertyType());
         assertThat(result.getPluralPropertyType(),
                    hasItems(OwlPropertyType.ANNOTATION_PROPERTY, OwlPropertyType.OBJECT_PROPERTY));
+    }
+
+    @Test
+    void deserializationUsesProvidedTargetTypeWhenNoTypeIsSpecifiedTypeAssumingIsEnabledAndObjectHasOnlyId() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.ASSUME_TARGET_TYPE, Boolean.TRUE.toString());
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
+        final JsonArray input = readAndExpand("objectWithSingularReferenceWithIdOnly.json");
+        final Employee result = sut.deserialize(input, Employee.class);
+        assertNotNull(result);
+        verifyUserAttributes(USERS.get(HALSEY_URI), result);
+        assertNotNull(result.getEmployer());
+        assertEquals(TestUtil.UNSC_URI, result.getEmployer().getUri());
+        assertNull(result.getEmployer().getName());
     }
 }
