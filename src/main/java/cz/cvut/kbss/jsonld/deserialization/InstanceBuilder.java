@@ -23,7 +23,6 @@ import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Builds instances from parsed JSON-LD.
@@ -58,8 +57,8 @@ public interface InstanceBuilder {
      * <p>
      * The new instance also becomes the currently open object.
      * <p>
-     * This method is intended for creating top level objects or adding objects to collections. Use {@link
-     * #openObject(String, String, List)} for opening objects as values of attributes.
+     * This method is intended for creating top level objects or adding objects to collections. Use
+     * {@link #openObject(String, String, List)} for opening objects as values of attributes.
      *
      * @param <T> The type of the object to open
      * @param id  Identifier of the object being open
@@ -82,8 +81,8 @@ public interface InstanceBuilder {
      * <p>
      * The new collection also becomes the currently open object.
      * <p>
-     * This method should also verify cardinality, i.e. a collection cannot be set as value of a field mapped by {@code
-     * property}, if the field is singular.
+     * This method should also verify cardinality, i.e. a collection cannot be set as value of a field mapped by
+     * {@code property}, if the field is singular.
      * <p>
      * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      *
@@ -99,8 +98,8 @@ public interface InstanceBuilder {
      * <p>
      * The new collection also becomes the currently open object.
      * <p>
-     * This method is intended for creating top level collections or nesting collections. Use {@link
-     * #openCollection(String)} for opening collections as values of attributes.
+     * This method is intended for creating top level collections or nesting collections. Use
+     * {@link #openCollection(String)} for opening collections as values of attributes.
      *
      * @param collectionType Type of the JSON collection to instantiate in Java
      * @see #openCollection(String)
@@ -188,8 +187,8 @@ public interface InstanceBuilder {
      * Checks whether the current collection context represents a {@link cz.cvut.kbss.jopa.model.annotations.Properties}
      * attribute.
      *
-     * @return {@code true} if the current context is a collection representing a {@link
-     * cz.cvut.kbss.jopa.model.annotations.Properties} field
+     * @return {@code true} if the current context is a collection representing a
+     * {@link cz.cvut.kbss.jopa.model.annotations.Properties} field
      */
     boolean isCurrentCollectionProperties();
 
@@ -239,11 +238,12 @@ public interface InstanceBuilder {
 
     /**
      * Gets the target type of the specified property.
-     *
-     * That is, it retrieves the type of the field to which the specified property is mapped. If the target field is a collection,
-     * the element type is returned (equivalent to {@link #getCurrentCollectionElementType()}).
-     *
+     * <p>
+     * That is, it retrieves the type of the field to which the specified property is mapped. If the target field is a
+     * collection, the element type is returned (equivalent to {@link #getCurrentCollectionElementType()}).
+     * <p>
      * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
+     *
      * @param property Property whose target type to resolve
      * @return Target type wrapped in an optional
      */
