@@ -17,6 +17,8 @@
  */
 package cz.cvut.kbss.jsonld.deserialization.reference;
 
+import java.util.Optional;
+
 /**
  * Represents a pending reference.
  * <p>
@@ -35,4 +37,16 @@ public interface PendingReference {
      * @param referencedObject The object referenced by this pending reference
      */
     void apply(Object referencedObject);
+
+    /**
+     * Gets the target type of the pending reference.
+     * <p>
+     * If the target type cannot be reliably determined (for instance, because it is a collection), this method should
+     * return {@link Optional#empty()}.
+     *
+     * @return The target type
+     */
+    default Optional<Class<?>> getTargetType() {
+        return Optional.empty();
+    }
 }
