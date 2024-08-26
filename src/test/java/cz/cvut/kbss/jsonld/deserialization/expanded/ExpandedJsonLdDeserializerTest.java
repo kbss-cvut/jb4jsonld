@@ -71,7 +71,6 @@ import static cz.cvut.kbss.jsonld.environment.TestUtil.readAndExpand;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -346,7 +345,7 @@ class ExpandedJsonLdDeserializerTest {
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithDataProperties.json");
         final Person result = sut.deserialize(input, Person.class);
-        assertTrue(result instanceof User);
+        assertInstanceOf(User.class, result);
     }
 
     @Test
@@ -359,7 +358,7 @@ class ExpandedJsonLdDeserializerTest {
         final PolymorphicOrganization result = sut.deserialize(input, PolymorphicOrganization.class);
         assertNotNull(result.employees);
         assertEquals(3, result.employees.size());
-        result.employees.forEach(e -> assertTrue(e instanceof Employee));
+        result.employees.forEach(e -> assertInstanceOf(Employee.class, e));
     }
 
     @OWLClass(iri = Vocabulary.ORGANIZATION)
