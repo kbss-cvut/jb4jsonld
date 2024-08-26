@@ -6,7 +6,7 @@
 
     <groupId>cz.cvut.kbss.jsonld</groupId>
     <artifactId>jb4jsonld</artifactId>
-    <version>0.14.3</version>
+    <version>0.15.0</version>
     <name>JB4JSON-LD</name>
     <description>Java Binding for JSON-LD allows serialization and deserialization of Java POJOs to/from JSON-LD.
         This is the core implementation, which has to be integrated with Jackson, Jersey etc.

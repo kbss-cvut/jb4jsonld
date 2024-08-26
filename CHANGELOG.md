@@ -1,5 +1,11 @@
 # JB4JSON-LD Changelog
 
+## 0.15.0 - 2024-08-26
+- Support deserializing objects containing only identifier when `ASSUME_TARGET_TYPE` is enabled (Enhancement #69).
+- Cache deserialization type map (Enhancement #68).
+- Dependency updates: JOPA 2.0.4, test deps.
+- **Breaking change:** Set Java 17 as minimum Java version.
+
 ## 0.14.3 - 2024-04-16
 - Fix missing context entry when serializing empty collection mapped to data/annotation property.
 
