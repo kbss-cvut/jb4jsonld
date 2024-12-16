@@ -43,14 +43,11 @@ public class JsonNodeFactory {
 
     public static LiteralNode<?> createLiteralNode(String name, Object value) {
         final LiteralType type = determineLiteralType(value);
-        switch (type) {
-            case BOOLEAN:
-                return createBooleanLiteralNode(name, (Boolean) value);
-            case NUMBER:
-                return createNumericLiteralNode(name, (Number) value);
-            default:
-                return createStringLiteralNode(name, value.toString());
-        }
+        return switch (type) {
+            case BOOLEAN -> createBooleanLiteralNode(name, (Boolean) value);
+            case NUMBER -> createNumericLiteralNode(name, (Number) value);
+            default -> createStringLiteralNode(name, value.toString());
+        };
     }
 
     private static LiteralType determineLiteralType(Object value) {
@@ -84,14 +81,10 @@ public class JsonNodeFactory {
      */
     public static CollectionNode<?> createCollectionNode(String name, Collection<?> value) {
         final CollectionType type = determineCollectionType(value);
-        switch (type) {
-            case LIST:
-                return new ListNode(name);
-            case SET:
-                return createSetNode(name);
-            default:
-                throw new IllegalArgumentException("Unsupported collection type " + type);
-        }
+        return switch (type) {
+            case LIST -> new ListNode(name);
+            case SET -> createSetNode(name);
+        };
     }
 
     private static CollectionType determineCollectionType(Collection<?> collection) {

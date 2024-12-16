@@ -18,8 +18,11 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.model.annotations.Id;
+import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jopa.vocabulary.DC;
+import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
@@ -43,8 +46,11 @@ import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -73,6 +79,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static cz.cvut.kbss.jsonld.environment.IsIsomorphic.isIsomorphic;
+import static cz.cvut.kbss.jsonld.environment.TestUtil.parseAndExpand;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -472,5 +479,45 @@ public abstract class JsonLdSerializerTestBase {
         final Model expected = toRdf(instance);
         final Model actual = readJson(jsonWriter.getResult());
         assertThat(actual, isIsomorphic(expected));
+    }
+
+    @Test
+    void serializationIncludesDatatypeOfNumericLiterals() throws Exception {
+        final Product p = new Product();
+        p.price = 155.15;
+        p.name = "Test product";
+        p.uri = Generator.generateUri();
+        sut.serialize(p);
+        final JsonArray result = parseAndExpand(jsonWriter.getResult());
+        final JsonObject obj = result.getJsonObject(0);
+        final JsonArray priceAtt = obj.getJsonArray("https://schema.org/price");
+        assertEquals(1, priceAtt.size());
+        assertEquals(XSD.DOUBLE, priceAtt.getJsonObject(0).getString("@type"));
+        assertEquals(p.price.toString(), priceAtt.getJsonObject(0).getJsonNumber("@value").toString());
+    }
+
+    @OWLClass(iri = Vocabulary.DEFAULT_PREFIX + "Product")
+    private static class Product implements GeneratesRdf {
+        @Id
+        private URI uri;
+
+        @OWLAnnotationProperty(iri = DC.Terms.TITLE)
+        private String name;
+
+        @OWLDataProperty(iri = "https://schema.org/price")
+        private Double price;
+
+        @Override
+        public URI getUri() {
+            return uri;
+        }
+
+        @Override
+        public void toRdf(Model model, ValueFactory vf, Set<URI> visited) {
+            final IRI subject = vf.createIRI(uri.toString());
+            model.add(subject, RDF.TYPE, vf.createIRI(Vocabulary.DEFAULT_PREFIX + "Product"));
+            model.add(subject, vf.createIRI(DC.Terms.TITLE), vf.createLiteral(name));
+            model.add(subject, vf.createIRI("https://schema.org/price"), vf.createLiteral(price));
+        }
     }
 }
