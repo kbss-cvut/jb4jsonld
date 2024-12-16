@@ -70,7 +70,7 @@ public class SerializerUtils {
      * @param type  Value type to use
      * @return Resulting JSON node
      */
-    public static JsonNode createdTypedValueNode(String term, String value, String type) {
+    public static JsonNode createdTypedValueNode(String term, Object value, String type) {
         final ObjectNode node = JsonNodeFactory.createObjectNode(term);
         node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, type));
         node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value));

@@ -87,14 +87,13 @@ public class PersonWithTypedProperties implements GeneratesRdf {
         model.add(id, vf.createIRI(Vocabulary.LAST_NAME), vf.createLiteral(lastName));
         if (properties != null) {
             properties.forEach((k, v) -> v.forEach(o -> {
-                if (o instanceof GeneratesRdf) {
-                    final GeneratesRdf entity = (GeneratesRdf) o;
+                if (o instanceof GeneratesRdf entity) {
                     model.add(id, vf.createIRI(k.toString()), vf.createIRI(entity.getUri().toString()));
                     entity.toRdf(model, vf, visited);
                 }  else if (o instanceof URI) {
                     model.add(id, vf.createIRI(k.toString()), vf.createIRI(o.toString()));
                 } else if (o instanceof Integer) {
-                    model.add(id, vf.createIRI(k.toString()), vf.createLiteral(o.toString(), vf.createIRI(XSD.INTEGER)));
+                    model.add(id, vf.createIRI(k.toString()), vf.createLiteral(o.toString(), vf.createIRI(XSD.INT)));
                 } else {
                     model.add(id, vf.createIRI(k.toString()), vf.createLiteral(o.toString()));
                 }
