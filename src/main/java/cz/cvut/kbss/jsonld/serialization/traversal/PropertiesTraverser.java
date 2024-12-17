@@ -45,8 +45,7 @@ class PropertiesTraverser {
             if (e.getValue() == null) {
                 continue;
             }
-            if (e.getValue() instanceof Collection) {
-                final Collection<?> propertyValues = (Collection<?>) e.getValue();
+            if (e.getValue() instanceof Collection<?> propertyValues) {
                 serializePropertyValues(property, propertyValues, ctx.getJsonLdContext());
             } else {
                 visitSingleValue(property, e.getValue(), ctx.getJsonLdContext());
