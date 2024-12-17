@@ -109,7 +109,7 @@ class ExpandedJsonLdDeserializerTest {
     @BeforeEach
     void setUp() {
         final Configuration config = new Configuration();
-        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment");
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
         config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
     }
@@ -343,9 +343,6 @@ class ExpandedJsonLdDeserializerTest {
 
     @Test
     void deserializationReturnsSubclassInstanceWhenTypesMatch() throws Exception {
-        final Configuration config = new Configuration();
-        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
-        this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithDataProperties.json");
         final Person result = sut.deserialize(input, Person.class);
         assertInstanceOf(User.class, result);
@@ -356,6 +353,7 @@ class ExpandedJsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithPluralReference.json");
         final PolymorphicOrganization result = sut.deserialize(input, PolymorphicOrganization.class);
@@ -382,6 +380,7 @@ class ExpandedJsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithSingularPolymorphicReference.json");
         final PolymorphicPerson result = sut.deserialize(input, PolymorphicPerson.class);
@@ -404,6 +403,7 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationSupportsDeserializingObjectAsPlainIdentifier() throws Exception {
         final Configuration config = new Configuration();
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithSingularPolymorphicReference.json");
@@ -429,6 +429,7 @@ class ExpandedJsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithPluralReference.json");
         final OrganizationWithPlainIdentifiers result =
@@ -457,6 +458,7 @@ class ExpandedJsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithList.json");
         final OrganizationWithListOfMembers result =
@@ -592,10 +594,10 @@ class ExpandedJsonLdDeserializerTest {
     void deserializationHandlesObjectPropertyFieldOfTypeObject() throws Exception {
         final JsonArray input = readAndExpand("objectWithSingularReference.json");
         final Configuration config = new Configuration();
-        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
         // This will prevent problems with multiple classes matching the same type (Organization)
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final GenericMember result = sut.deserialize(input, GenericMember.class);
         assertNotNull(result.getMemberOf());
@@ -646,6 +648,7 @@ class ExpandedJsonLdDeserializerTest {
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.TRUE.toString());
         // This will prevent problems with multiple classes matching the same type (Organization)
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithDataProperties.json");
         final Object result = sut.deserialize(input, Object.class);
@@ -658,6 +661,7 @@ class ExpandedJsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.ASSUME_TARGET_TYPE, Boolean.TRUE.toString());
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithoutTypes.json");
         final User result = sut.deserialize(input, User.class);
@@ -727,6 +731,7 @@ class ExpandedJsonLdDeserializerTest {
         final Configuration config = sut.configuration();
         config.set(ConfigParam.ENABLE_OPTIMISTIC_TARGET_TYPE_RESOLUTION, Boolean.toString(true));
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
         final StudyOnPersons result = sut.deserialize(input, StudyOnPersons.class);
@@ -741,6 +746,7 @@ class ExpandedJsonLdDeserializerTest {
         config.set(ConfigParam.PREFER_SUPERCLASS, Boolean.toString(true));
         config.set(ConfigParam.IGNORE_UNKNOWN_PROPERTIES, Boolean.toString(true));
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment.model");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
         final StudyOnPersons result = sut.deserialize(input, StudyOnPersons.class);
@@ -753,6 +759,7 @@ class ExpandedJsonLdDeserializerTest {
             throws Exception {
         final Configuration config = sut.configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
         assertThrows(AmbiguousTargetTypeException.class, () -> sut.deserialize(input, StudyOnPersons.class));
@@ -860,6 +867,7 @@ class ExpandedJsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.ASSUME_TARGET_TYPE, Boolean.TRUE.toString());
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithSingularReferenceWithIdOnly.json");
         final Employee result = sut.deserialize(input, Employee.class);
