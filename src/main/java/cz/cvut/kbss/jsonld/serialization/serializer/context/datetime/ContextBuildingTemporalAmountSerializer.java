@@ -31,7 +31,7 @@ public class ContextBuildingTemporalAmountSerializer implements ValueSerializer<
 
     @Override
     public JsonNode serialize(TemporalAmount value, SerializationContext<TemporalAmount> ctx) {
-        if (ctx.getTerm() != null) {
+        if (ctx.getTerm() != null && ctx.getFieldName() != null) {
             final ObjectNode termDef = SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(),
                                                                                  XSD.DURATION);
             ctx.registerTermMapping(ctx.getFieldName(), termDef);

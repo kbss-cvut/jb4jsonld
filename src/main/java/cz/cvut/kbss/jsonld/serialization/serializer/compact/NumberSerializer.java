@@ -19,20 +19,24 @@ public class NumberSerializer implements ValueSerializer<Number> {
     @Override
     public JsonNode serialize(Number value, SerializationContext<Number> ctx) {
         Objects.requireNonNull(value);
+        return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, getDatatype(value));
+    }
+
+    protected String getDatatype(Number value) {
         if (value instanceof Integer) {
-            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, XSD.INT);
+            return XSD.INT;
         } else if (value instanceof Long) {
-            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, XSD.LONG);
+            return XSD.LONG;
         } else if (value instanceof Double) {
-            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, XSD.DOUBLE);
+            return XSD.DOUBLE;
         } else if (value instanceof Float) {
-            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, XSD.FLOAT);
+            return XSD.FLOAT;
         } else if (value instanceof Short) {
-            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, XSD.SHORT);
+            return XSD.SHORT;
         } else if (value instanceof BigInteger) {
-            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, XSD.INTEGER);
+            return XSD.INTEGER;
         } else if (value instanceof BigDecimal) {
-            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, XSD.DECIMAL);
+            return XSD.DECIMAL;
         } else {
             throw new IllegalArgumentException("Unsupported numeric literal type " + value.getClass());
         }
