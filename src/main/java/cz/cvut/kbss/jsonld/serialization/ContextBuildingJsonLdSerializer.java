@@ -33,14 +33,22 @@ import cz.cvut.kbss.jsonld.serialization.serializer.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ObjectGraphValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
-import cz.cvut.kbss.jsonld.serialization.serializer.context.*;
+import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingDefaultValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingIdentifierSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingIndividualSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingMultilingualStringSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingNumberSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingObjectPropertyValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingPluralMultilingualStringSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingTypesSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.context.datetime.ContextBuildingTemporalAmountSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.context.datetime.ContextBuildingTemporalSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContextFactory;
 
-import java.time.*;
+import java.time.Duration;
+import java.time.Period;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
@@ -69,19 +77,16 @@ public class ContextBuildingJsonLdSerializer extends JsonLdSerializer {
         valueSerializers.registerTypesSerializer(new ContextBuildingTypesSerializer());
         valueSerializers.registerIndividualSerializer(new ContextBuildingIndividualSerializer());
         final ContextBuildingTemporalSerializer ts = new ContextBuildingTemporalSerializer();
-        valueSerializers.registerSerializer(LocalDate.class, ts);
         // Register the same temporal serializer for each of the types it supports (needed for key-based map access)
-        valueSerializers.registerSerializer(LocalDate.class, ts);
-        valueSerializers.registerSerializer(LocalTime.class, ts);
-        valueSerializers.registerSerializer(OffsetTime.class, ts);
-        valueSerializers.registerSerializer(LocalDateTime.class, ts);
-        valueSerializers.registerSerializer(OffsetDateTime.class, ts);
-        valueSerializers.registerSerializer(ZonedDateTime.class, ts);
-        valueSerializers.registerSerializer(Instant.class, ts);
+        ContextBuildingTemporalSerializer.getSupportedTypes()
+                                         .forEach(cls -> valueSerializers.registerSerializer(cls, ts));
         valueSerializers.registerSerializer(Date.class, new DateSerializer(ts));
         final ContextBuildingTemporalAmountSerializer tas = new ContextBuildingTemporalAmountSerializer();
         valueSerializers.registerSerializer(Duration.class, tas);
         valueSerializers.registerSerializer(Period.class, tas);
+        final ContextBuildingNumberSerializer ns = new ContextBuildingNumberSerializer();
+        ContextBuildingNumberSerializer.getSupportedTypes()
+                                       .forEach(cls -> valueSerializers.registerSerializer(cls, ns));
         return valueSerializers;
     }
 
@@ -114,7 +119,8 @@ public class ContextBuildingJsonLdSerializer extends JsonLdSerializer {
 
     private JsonLdTreeBuilder initTreeBuilder(ObjectGraphTraverser traverser,
                                               JsonLdContextFactory jsonLdContextFactory) {
-        final ContextBuildingObjectPropertyValueSerializer opSerializer = new ContextBuildingObjectPropertyValueSerializer(traverser);
+        final ContextBuildingObjectPropertyValueSerializer opSerializer =
+                new ContextBuildingObjectPropertyValueSerializer(traverser);
         opSerializer.configure(configuration());
         return new JsonLdTreeBuilder(new ObjectGraphValueSerializers(serializers, opSerializer), jsonLdContextFactory);
     }

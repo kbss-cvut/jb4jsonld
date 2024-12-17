@@ -32,11 +32,13 @@ public class ContextBuildingIsoDateTimeSerializer extends IsoDateTimeSerializer 
 
     @Override
     public JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
-        if (ctx.getTerm() != null) {
+        if (ctx.getTerm() != null && ctx.getFieldName() != null) {
             final ObjectNode termDef =
                     SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(), XSD.DATETIME);
             ctx.registerTermMapping(ctx.getFieldName(), termDef);
+            return JsonNodeFactory.createLiteralNode(ctx.getTerm(), formatter.format(value));
+        } else {
+            return super.serialize(value, ctx);
         }
-        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), formatter.format(value));
     }
 }

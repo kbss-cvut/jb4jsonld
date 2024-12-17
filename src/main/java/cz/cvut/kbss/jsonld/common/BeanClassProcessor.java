@@ -27,6 +27,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
+/**
+ * Reflection-related utilities.
+ */
 public class BeanClassProcessor {
 
     private BeanClassProcessor() {
@@ -82,7 +85,8 @@ public class BeanClassProcessor {
     public static <T> T createInstance(Class<T> cls) {
         try {
             return cls.getDeclaredConstructor().newInstance();
-        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IllegalAccessException e) {
+        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException |
+                 IllegalAccessException e) {
             throw new BeanProcessingException("Class " + cls + " is missing a public no-arg constructor.", e);
         }
     }
@@ -94,14 +98,10 @@ public class BeanClassProcessor {
      * @return New collection instance
      */
     public static Collection<?> createCollection(CollectionType type) {
-        switch (type) {
-            case LIST:
-                return new ArrayList<>();
-            case SET:
-                return new HashSet<>();
-            default:
-                throw new IllegalArgumentException("Unsupported collection type " + type);
-        }
+        return switch (type) {
+            case LIST -> new ArrayList<>();
+            case SET -> new HashSet<>();
+        };
     }
 
     /**
@@ -249,8 +249,9 @@ public class BeanClassProcessor {
 
     /**
      * Checks whether the specified class represents an individual reference and not a complex object.
-     *
+     * <p>
      * Individual references are identifiers or enum constants mapped to individuals.
+     *
      * @param cls Class to check
      * @return {@code true} when the type represents an individual, {@code false} otherwise
      * @see #isIdentifierType(Class)

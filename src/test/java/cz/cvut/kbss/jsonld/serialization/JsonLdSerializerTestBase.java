@@ -20,6 +20,7 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
@@ -31,6 +32,7 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.GeneratesRdf;
 import cz.cvut.kbss.jsonld.environment.model.GenericMember;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithAnnotationProperties;
+import cz.cvut.kbss.jsonld.environment.model.ObjectWithNumericAttributes;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
 import cz.cvut.kbss.jsonld.environment.model.Person;
@@ -43,6 +45,8 @@ import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.util.BufferedJsonGenerator;
 import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -59,6 +63,8 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -73,6 +79,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static cz.cvut.kbss.jsonld.environment.IsIsomorphic.isIsomorphic;
+import static cz.cvut.kbss.jsonld.environment.TestUtil.parseAndExpand;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -472,5 +479,34 @@ public abstract class JsonLdSerializerTestBase {
         final Model expected = toRdf(instance);
         final Model actual = readJson(jsonWriter.getResult());
         assertThat(actual, isIsomorphic(expected));
+    }
+
+    @Test
+    void serializationIncludesDatatypeOfNumericLiterals() throws Exception {
+        final ObjectWithNumericAttributes instance = new ObjectWithNumericAttributes(Generator.generateUri());
+        instance.setDoubleValue(155.15);
+        instance.setFloatValue(155.15f);
+        instance.setLongValue(155L);
+        instance.setShortValue((short) 155);
+        instance.setIntValue(155);
+        instance.setBigIntegerValue(BigInteger.valueOf(155L));
+        instance.setBigDecimalValue(BigDecimal.valueOf(155.15));
+        sut.serialize(instance);
+        final JsonArray result = parseAndExpand(jsonWriter.getResult());
+        final JsonObject obj = result.getJsonObject(0);
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "doubleValue", XSD.DOUBLE, instance.getDoubleValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "floatValue", XSD.FLOAT, instance.getFloatValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "longValue", XSD.LONG, instance.getLongValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "shortValue", XSD.SHORT, instance.getShortValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "intValue", XSD.INT, instance.getIntValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigIntegerValue", XSD.INTEGER, instance.getBigIntegerValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigDecimalValue", XSD.DECIMAL, instance.getBigDecimalValue());
+    }
+
+    private static void checkValueDatatype(JsonObject result, String attIri, String datatype, Number value) {
+        final JsonArray att = result.getJsonArray(attIri);
+        assertEquals(1, att.size());
+        assertEquals(datatype, att.getJsonObject(0).getString("@type"));
+        assertEquals(value.toString(), att.getJsonObject(0).getJsonNumber("@value").toString());
     }
 }

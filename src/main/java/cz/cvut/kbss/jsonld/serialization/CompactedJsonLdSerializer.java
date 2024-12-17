@@ -24,14 +24,21 @@ import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ObjectGraphValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.*;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.DefaultValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.IdentifierSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.IndividualSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.MultilingualStringSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.NumberSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.ObjectPropertyValueSerializer;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.TypesSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TemporalAmountSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.datetime.TemporalSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.datetime.DateSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContextFactory;
 
-import java.time.*;
+import java.time.Duration;
+import java.time.Period;
 import java.util.Date;
 
 /**
@@ -57,19 +64,14 @@ public class CompactedJsonLdSerializer extends JsonLdSerializer {
         valueSerializers.registerTypesSerializer(new TypesSerializer());
         valueSerializers.registerIndividualSerializer(new IndividualSerializer());
         final TemporalSerializer ts = new TemporalSerializer();
-        valueSerializers.registerSerializer(LocalDate.class, ts);
         // Register the same temporal serializer for each of the types it supports (needed for key-based map access)
-        valueSerializers.registerSerializer(LocalDate.class, ts);
-        valueSerializers.registerSerializer(LocalTime.class, ts);
-        valueSerializers.registerSerializer(OffsetTime.class, ts);
-        valueSerializers.registerSerializer(LocalDateTime.class, ts);
-        valueSerializers.registerSerializer(OffsetDateTime.class, ts);
-        valueSerializers.registerSerializer(ZonedDateTime.class, ts);
-        valueSerializers.registerSerializer(Instant.class, ts);
+        TemporalSerializer.getSupportedTypes().forEach(cls -> valueSerializers.registerSerializer(cls, ts));
         valueSerializers.registerSerializer(Date.class, new DateSerializer(ts));
         final TemporalAmountSerializer tas = new TemporalAmountSerializer();
         valueSerializers.registerSerializer(Duration.class, tas);
         valueSerializers.registerSerializer(Period.class, tas);
+        final NumberSerializer numberSerializer = new NumberSerializer();
+        NumberSerializer.getSupportedTypes().forEach(cls -> valueSerializers.registerSerializer(cls, numberSerializer));
         return valueSerializers;
     }
 

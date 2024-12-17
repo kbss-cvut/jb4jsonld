@@ -108,7 +108,7 @@ public class Study implements GeneratesRdf {
         model.add(id, RDF.TYPE, vf.createIRI(Vocabulary.STUDY));
         model.add(id, vf.createIRI(RDFS.LABEL), vf.createLiteral(name));
         model.add(id, vf.createIRI(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED),
-                  vf.createLiteral(noOfPeopleInvolved.toString(), vf.createIRI(XSD.INTEGER)));
+                  vf.createLiteral(noOfPeopleInvolved.toString(), vf.createIRI(XSD.INT)));
         if (members != null) {
             members.forEach(m -> {
                 model.add(id, vf.createIRI(Vocabulary.HAS_MEMBER), vf.createIRI(m.getUri().toString()));

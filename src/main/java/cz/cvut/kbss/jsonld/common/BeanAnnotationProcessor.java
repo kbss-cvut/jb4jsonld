@@ -46,6 +46,9 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Utilities for mapping-related tasks.
+ */
 public class BeanAnnotationProcessor {
 
     private static final String[] EMPTY_ARRAY = new String[0];

@@ -28,7 +28,7 @@ public class ContextBuildingEpochBasedDateTimeSerializer extends EpochBasedDateT
 
     @Override
     public JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
-        if (ctx.getTerm() != null) {
+        if (ctx.getTerm() != null && ctx.getFieldName() != null) {
             ctx.registerTermMapping(ctx.getFieldName(), ctx.getTerm());
         }
         return super.serialize(value, ctx);

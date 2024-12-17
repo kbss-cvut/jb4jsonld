@@ -36,6 +36,7 @@ import cz.cvut.kbss.jsonld.environment.model.Attribute;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithAnnotationProperties;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithMultilingualString;
+import cz.cvut.kbss.jsonld.environment.model.ObjectWithNumericAttributes;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
 import cz.cvut.kbss.jsonld.environment.model.Person;
@@ -52,6 +53,8 @@ import org.eclipse.rdf4j.model.util.Models;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -408,5 +411,37 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
         final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
         assertThat(context, hasKey("origins"));
+    }
+
+    @Test
+    @Override
+    void serializationIncludesDatatypeOfNumericLiterals() {
+        final ObjectWithNumericAttributes instance = new ObjectWithNumericAttributes(Generator.generateUri());
+        instance.setDoubleValue(155.15);
+        instance.setFloatValue(155.15f);
+        instance.setLongValue(155L);
+        instance.setShortValue((short) 155);
+        instance.setIntValue(155);
+        instance.setBigIntegerValue(BigInteger.valueOf(155L));
+        instance.setBigDecimalValue(BigDecimal.valueOf(155.15));
+
+        final JsonObject json = serializeAndRead(instance).asJsonObject();
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
+        checkContextTerm(context, "doubleValue", Vocabulary.DEFAULT_PREFIX + "doubleValue", XSD.DOUBLE);
+        checkContextTerm(context, "floatValue", Vocabulary.DEFAULT_PREFIX + "floatValue", XSD.FLOAT);
+        checkContextTerm(context, "longValue", Vocabulary.DEFAULT_PREFIX + "longValue", XSD.LONG);
+        checkContextTerm(context, "shortValue", Vocabulary.DEFAULT_PREFIX + "shortValue", XSD.SHORT);
+        checkContextTerm(context, "intValue", Vocabulary.DEFAULT_PREFIX + "intValue", XSD.INT);
+        checkContextTerm(context, "bigIntegerValue", Vocabulary.DEFAULT_PREFIX + "bigIntegerValue", XSD.INTEGER);
+        checkContextTerm(context, "bigDecimalValue", Vocabulary.DEFAULT_PREFIX + "bigDecimalValue", XSD.DECIMAL);
+    }
+
+    private static void checkContextTerm(JsonObject context, String att, String iri, String datatype) {
+        assertThat(context, hasKey(att));
+        final JsonObject keyCtx = context.getJsonObject(att);
+        assertEquals(datatype, keyCtx.getString(JsonLd.TYPE));
+        assertEquals(iri, keyCtx.getString(JsonLd.ID));
     }
 }

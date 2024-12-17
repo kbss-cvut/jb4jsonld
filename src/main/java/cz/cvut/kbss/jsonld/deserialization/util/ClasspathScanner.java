@@ -133,7 +133,7 @@ public class ClasspathScanner {
                 }
             }
         } catch (IOException e) {
-            LOG.error("Unable to scan classes in JAR file " + jarPath, e);
+            LOG.error("Unable to scan classes in JAR file {}", jarPath, e);
         }
     }
 

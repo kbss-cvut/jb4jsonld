@@ -32,11 +32,13 @@ public class ContextBuildingLocalDateSerializer extends LocalDateSerializer {
 
     @Override
     public JsonNode serialize(LocalDate value, SerializationContext<TemporalAccessor> ctx) {
-        if (ctx.getTerm() != null) {
+        if (ctx.getTerm() != null && ctx.getFieldName() != null) {
             final ObjectNode termDef =
                     SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(), XSD.DATE);
             ctx.registerTermMapping(ctx.getFieldName(), termDef);
+            return JsonNodeFactory.createLiteralNode(ctx.getTerm(), FORMATTER.format(value));
+        } else {
+            return super.serialize(value, ctx);
         }
-        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), FORMATTER.format(value));
     }
 }
