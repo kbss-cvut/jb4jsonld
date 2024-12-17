@@ -497,15 +497,15 @@ public abstract class JsonLdSerializerTestBase {
     }
 
     @OWLClass(iri = Vocabulary.DEFAULT_PREFIX + "Product")
-    private static class Product implements GeneratesRdf {
+    static class Product implements GeneratesRdf {
         @Id
-        private URI uri;
+        URI uri;
 
         @OWLAnnotationProperty(iri = DC.Terms.TITLE)
-        private String name;
+        String name;
 
         @OWLDataProperty(iri = "https://schema.org/price")
-        private Double price;
+        Double price;
 
         @Override
         public URI getUri() {

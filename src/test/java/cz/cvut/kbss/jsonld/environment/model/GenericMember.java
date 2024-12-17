@@ -62,8 +62,7 @@ public class GenericMember implements GeneratesRdf {
         visited.add(uri);
         final IRI id = vf.createIRI(uri.toString());
         model.add(id, RDF.TYPE, vf.createIRI(Vocabulary.GENERIC_MEMBER));
-        if (memberOf != null && memberOf instanceof GeneratesRdf) {
-            final GeneratesRdf org = (GeneratesRdf) memberOf;
+        if (memberOf != null && memberOf instanceof GeneratesRdf org) {
             model.add(id, vf.createIRI(Vocabulary.IS_MEMBER_OF), vf.createIRI(org.getUri().toString()));
             org.toRdf(model, vf, visited);
         }

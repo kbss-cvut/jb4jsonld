@@ -409,4 +409,22 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
         assertThat(context, hasKey("origins"));
     }
+
+    @Test
+    @Override
+    void serializationIncludesDatatypeOfNumericLiterals() {
+        final Product p = new Product();
+        p.price = 155.15;
+        p.name = "Test product";
+        p.uri = Generator.generateUri();
+
+        final JsonObject json = serializeAndRead(p).asJsonObject();
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
+        assertThat(context, hasKey("price"));
+        final JsonObject keyCtx = context.getJsonObject("price");
+        assertEquals(XSD.DOUBLE, keyCtx.getString(JsonLd.TYPE));
+        assertEquals("https://schema.org/price", keyCtx.getString(JsonLd.ID));
+    }
 }
