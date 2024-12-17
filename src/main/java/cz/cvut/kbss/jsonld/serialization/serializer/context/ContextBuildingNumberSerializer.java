@@ -18,7 +18,9 @@ public class ContextBuildingNumberSerializer extends NumberSerializer {
             final ObjectNode termDef =
                     SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(), getDatatype(value));
             ctx.registerTermMapping(ctx.getFieldName(), termDef);
+            return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value);
+        } else {
+            return super.serialize(value, ctx);
         }
-        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value);
     }
 }

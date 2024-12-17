@@ -35,7 +35,9 @@ public class ContextBuildingTemporalAmountSerializer implements ValueSerializer<
             final ObjectNode termDef = SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(),
                                                                                  XSD.DURATION);
             ctx.registerTermMapping(ctx.getFieldName(), termDef);
+            return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value.toString());
+        } else {
+            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, XSD.DURATION);
         }
-        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value.toString());
     }
 }

@@ -35,7 +35,9 @@ public class ContextBuildingTimeSerializer extends cz.cvut.kbss.jsonld.serializa
             final ObjectNode termDef =
                     SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(), XSD.TIME);
             ctx.registerTermMapping(ctx.getFieldName(), termDef);
+            return JsonNodeFactory.createLiteralNode(ctx.getTerm(), FORMATTER.format(value));
+        } else {
+            return super.serialize(value, ctx);
         }
-        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), FORMATTER.format(value));
     }
 }
