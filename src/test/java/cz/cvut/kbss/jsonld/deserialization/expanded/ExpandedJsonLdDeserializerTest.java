@@ -109,7 +109,7 @@ class ExpandedJsonLdDeserializerTest {
     @BeforeEach
     void setUp() {
         final Configuration config = new Configuration();
-        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld.environment");
         config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
         this.sut = JsonLdDeserializer.createExpandedDeserializer(config);
     }
@@ -751,6 +751,9 @@ class ExpandedJsonLdDeserializerTest {
     @Test
     void deserializationThrowsAmbiguousTargetTypeExceptionForAmbiguousTargetTypeWithDisabledOptimisticTargetTypeResolution()
             throws Exception {
+        final Configuration config = sut.configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        this.sut = ExpandedJsonLdDeserializer.createExpandedDeserializer(config);
         final JsonArray input = readAndExpand("objectWithPluralOptimisticallyTypedReference.json");
         assertThrows(AmbiguousTargetTypeException.class, () -> sut.deserialize(input, StudyOnPersons.class));
     }
