@@ -1,0 +1,41 @@
+{
+  "@context": {
+    "intValue": {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/intValue",
+      "@type": "http://www.w3.org/2001/XMLSchema#int"
+    },
+    "shortValue": {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/shortValue",
+      "@type": "http://www.w3.org/2001/XMLSchema#short"
+    },
+    "longValue": {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/longValue",
+      "@type": "http://www.w3.org/2001/XMLSchema#long"
+    },
+    "floatValue": {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/floatValue",
+      "@type": "http://www.w3.org/2001/XMLSchema#float"
+    },
+    "doubleValue": {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/doubleValue",
+      "@type": "http://www.w3.org/2001/XMLSchema#double"
+    },
+    "bigIntegerValue": {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/bigIntegerValue",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "bigDecimalValue": {
+      "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/bigDecimalValue",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    }
+  },
+  "@id": "http://example.com/objectWithNumericValues",
+  "@type": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/ObjectWithNumericAttributes",
+  "shortValue": 128,
+  "intValue": 128,
+  "longValue": 128,
+  "floatValue": 128.3,
+  "doubleValue": 128.3,
+  "bigIntegerValue": 128000,
+  "bigDecimalValue": 128000.821
+}
