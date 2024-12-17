@@ -1,5 +1,9 @@
 # JB4JSON-LD Changelog
 
+## 0.15.1 - 2024-12-17
+- Ensure datatype is output with numeric values to preserve their type on serialization (Enhancement #66).
+- Dependency updates: JOPA 2.2.1, build plugins.
+
 ## 0.15.0 - 2024-08-26
 - Support deserializing objects containing only identifier when `ASSUME_TARGET_TYPE` is enabled (Enhancement #69).
 - Cache deserialization type map (Enhancement #68).
