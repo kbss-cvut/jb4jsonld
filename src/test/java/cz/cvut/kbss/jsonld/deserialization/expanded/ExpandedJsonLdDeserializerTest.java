@@ -36,6 +36,7 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.GenericMember;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithAnnotationProperties;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithMultilingualString;
+import cz.cvut.kbss.jsonld.environment.model.ObjectWithNumericAttributes;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithPluralMultilingualString;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
@@ -56,6 +57,8 @@ import jakarta.json.JsonValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
@@ -862,5 +865,19 @@ class ExpandedJsonLdDeserializerTest {
         assertNotNull(result.getEmployer());
         assertEquals(TestUtil.UNSC_URI, result.getEmployer().getUri());
         assertNull(result.getEmployer().getName());
+    }
+
+    @Test
+    void deserializationHandlesNumericValuesWithDatatypes() throws Exception {
+        final JsonArray input = readAndExpand("objectWithNumericValues.json");
+        final ObjectWithNumericAttributes result = sut.deserialize(input, ObjectWithNumericAttributes.class);
+        assertNotNull(result);
+        assertEquals((short) 128, result.getShortValue());
+        assertEquals(128, result.getIntValue());
+        assertEquals(128L, result.getLongValue());
+        assertEquals(128.3f, result.getFloatValue());
+        assertEquals(128.3, result.getDoubleValue());
+        assertEquals(BigInteger.valueOf(128000), result.getBigIntegerValue());
+        assertEquals(BigDecimal.valueOf(128000.821), result.getBigDecimalValue());
     }
 }
