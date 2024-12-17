@@ -18,10 +18,8 @@
 package cz.cvut.kbss.jsonld.serialization;
 
 import cz.cvut.kbss.jopa.model.annotations.Id;
-import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
-import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
@@ -34,6 +32,7 @@ import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.GeneratesRdf;
 import cz.cvut.kbss.jsonld.environment.model.GenericMember;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithAnnotationProperties;
+import cz.cvut.kbss.jsonld.environment.model.ObjectWithNumericAttributes;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
 import cz.cvut.kbss.jsonld.environment.model.Person;
@@ -50,7 +49,6 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -65,6 +63,8 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -83,6 +83,7 @@ import static cz.cvut.kbss.jsonld.environment.TestUtil.parseAndExpand;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -483,41 +484,30 @@ public abstract class JsonLdSerializerTestBase {
 
     @Test
     void serializationIncludesDatatypeOfNumericLiterals() throws Exception {
-        final Product p = new Product();
-        p.price = 155.15;
-        p.name = "Test product";
-        p.uri = Generator.generateUri();
-        sut.serialize(p);
+        final ObjectWithNumericAttributes instance = new ObjectWithNumericAttributes(Generator.generateUri());
+        instance.setDoubleValue(155.15);
+        instance.setFloatValue(155.15f);
+        instance.setLongValue(155L);
+        instance.setShortValue((short) 155);
+        instance.setIntValue(155);
+        instance.setBigIntegerValue(BigInteger.valueOf(155L));
+        instance.setBigDecimalValue(BigDecimal.valueOf(155.15));
+        sut.serialize(instance);
         final JsonArray result = parseAndExpand(jsonWriter.getResult());
         final JsonObject obj = result.getJsonObject(0);
-        final JsonArray priceAtt = obj.getJsonArray("https://schema.org/price");
-        assertEquals(1, priceAtt.size());
-        assertEquals(XSD.DOUBLE, priceAtt.getJsonObject(0).getString("@type"));
-        assertEquals(p.price.toString(), priceAtt.getJsonObject(0).getJsonNumber("@value").toString());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "doubleValue", XSD.DOUBLE, instance.getDoubleValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "floatValue", XSD.FLOAT, instance.getFloatValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "longValue", XSD.LONG, instance.getLongValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "shortValue", XSD.SHORT, instance.getShortValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "intValue", XSD.INT, instance.getIntValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigIntegerValue", XSD.INTEGER, instance.getBigIntegerValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigDecimalValue", XSD.DECIMAL, instance.getBigDecimalValue());
     }
 
-    @OWLClass(iri = Vocabulary.DEFAULT_PREFIX + "Product")
-    static class Product implements GeneratesRdf {
-        @Id
-        URI uri;
-
-        @OWLAnnotationProperty(iri = DC.Terms.TITLE)
-        String name;
-
-        @OWLDataProperty(iri = "https://schema.org/price")
-        Double price;
-
-        @Override
-        public URI getUri() {
-            return uri;
-        }
-
-        @Override
-        public void toRdf(Model model, ValueFactory vf, Set<URI> visited) {
-            final IRI subject = vf.createIRI(uri.toString());
-            model.add(subject, RDF.TYPE, vf.createIRI(Vocabulary.DEFAULT_PREFIX + "Product"));
-            model.add(subject, vf.createIRI(DC.Terms.TITLE), vf.createLiteral(name));
-            model.add(subject, vf.createIRI("https://schema.org/price"), vf.createLiteral(price));
-        }
+    private static void checkValueDatatype(JsonObject result, String attIri, String datatype, Number value) {
+        final JsonArray att = result.getJsonArray(attIri);
+        assertEquals(1, att.size());
+        assertEquals(datatype, att.getJsonObject(0).getString("@type"));
+        assertEquals(value.toString(), att.getJsonObject(0).getJsonNumber("@value").toString());
     }
 }
