@@ -19,6 +19,11 @@ package cz.cvut.kbss.jsonld.serialization.model;
 
 import java.util.Collection;
 
+/**
+ * JSON node representing a collection.
+ *
+ * @param <T> Node type
+ */
 public abstract class CollectionNode<T extends Collection<JsonNode>> extends CompositeNode<T> {
 
     CollectionNode() {
