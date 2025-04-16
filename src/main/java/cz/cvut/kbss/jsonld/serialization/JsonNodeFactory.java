@@ -1,6 +1,6 @@
 /*
  * JB4JSON-LD
- * Copyright (C) 2024 Czech Technical University in Prague
+ * Copyright (C) 2025 Czech Technical University in Prague
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -103,6 +103,10 @@ public class JsonNodeFactory {
 
     public static SetNode createCollectionNodeFromArray(String name) {
         return createSetNode(name);
+    }
+
+    public static SetNode createArrayNode() {
+        return new SetNode();
     }
 
     public static ObjectNode createObjectNode() {
