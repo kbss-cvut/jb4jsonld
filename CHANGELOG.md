@@ -1,5 +1,9 @@
 # JB4JSON-LD Changelog
 
+## 0.15.2 - 2025-04-16
+- Serialize empty collection as empty JSON array when it is passed as root object for serialization (GH-78).
+- Dependency updates: JOPA 2.3.1, test dependencies.
+
 ## 0.15.1 - 2024-12-17
 - Ensure datatype is output with numeric values to preserve their type on serialization (Enhancement #66).
 - Dependency updates: JOPA 2.2.1, build plugins.
