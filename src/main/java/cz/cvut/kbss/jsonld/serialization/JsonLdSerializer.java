@@ -23,6 +23,7 @@ import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
 
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -80,8 +81,13 @@ public abstract class JsonLdSerializer implements Configured {
      */
     public void serialize(Object root) {
         Objects.requireNonNull(root);
-        serializers.configure(configuration);
-        final JsonNode jsonRoot = buildJsonTree(root);
+        final JsonNode jsonRoot;
+        if (root instanceof Collection<?> collection && collection.isEmpty()) {
+            jsonRoot = JsonNodeFactory.createArrayNode();
+        } else {
+            serializers.configure(configuration);
+            jsonRoot = buildJsonTree(root);
+        }
         jsonRoot.write(jsonGenerator);
     }
 
