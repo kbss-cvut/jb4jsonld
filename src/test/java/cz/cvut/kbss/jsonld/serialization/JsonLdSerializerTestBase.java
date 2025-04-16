@@ -17,6 +17,8 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import com.apicatalog.jsonld.document.Document;
+import com.apicatalog.jsonld.document.JsonDocument;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
@@ -74,6 +76,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -508,5 +511,11 @@ public abstract class JsonLdSerializerTestBase {
         assertEquals(1, att.size());
         assertEquals(datatype, att.getJsonObject(0).getString("@type"));
         assertEquals(value.toString(), att.getJsonObject(0).getJsonNumber("@value").toString());
+    }
+
+    @Test
+    void serializeEmptyCollectionReturnsEmptyArray() {
+        sut.serialize(List.of());
+        assertEquals("[]", jsonWriter.getResult());
     }
 }

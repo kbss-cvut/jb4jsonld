@@ -105,6 +105,10 @@ public class JsonNodeFactory {
         return createSetNode(name);
     }
 
+    public static SetNode createArrayNode() {
+        return new SetNode();
+    }
+
     public static ObjectNode createObjectNode() {
         return new ObjectNode();
     }
