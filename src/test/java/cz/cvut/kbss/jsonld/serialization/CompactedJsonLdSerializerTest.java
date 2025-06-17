@@ -20,6 +20,7 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
+import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
@@ -243,5 +244,22 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
             assertThat(element, hasKey(JsonLd.ID));
             assertEquals(OwlPropertyType.getMappedIndividual(value.get(i)), element.getString(JsonLd.ID));
         }
+    }
+
+    @Test
+    void serializationUsesTypedNumericValues() {
+        final Employee employee = Generator.generateEmployee();
+        employee.setSalary(134.56);
+
+        final JsonValue json = serializeAndRead(employee);
+        final JsonObject jsonObject = json.asJsonObject();
+        assertTrue(jsonObject.containsKey(Vocabulary.SALARY));
+        final JsonValue salary = jsonObject.get(Vocabulary.SALARY);
+        assertEquals(JsonValue.ValueType.OBJECT, salary.getValueType());
+        final JsonObject salaryObject = salary.asJsonObject();
+        assertTrue(salaryObject.containsKey(JsonLd.VALUE));
+        assertEquals(134.56, salaryObject.getJsonNumber(JsonLd.VALUE).doubleValue());
+        assertTrue(salaryObject.containsKey(JsonLd.TYPE));
+        assertEquals(XSD.DOUBLE, salaryObject.getString(JsonLd.TYPE));
     }
 }

@@ -38,6 +38,7 @@ public class Vocabulary {
     public static final String USERNAME = "http://xmlns.com/foaf/0.1/accountName";
     public static final String KNOWS = "http://xmlns.com/foaf/0.1/knows";
     public static final String DATE_CREATED = DC.Terms.NAMESPACE + "created";
+    public static final String SALARY = DEFAULT_PREFIX + "salary";
     public static final String IS_MEMBER_OF = DEFAULT_PREFIX + "isMemberOf";
     public static final String HAS_MEMBER = DEFAULT_PREFIX + "hasMember";
     public static final String HAS_PARTICIPANT = DEFAULT_PREFIX + "hasParticipant";
