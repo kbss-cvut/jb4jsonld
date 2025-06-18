@@ -506,7 +506,7 @@ public abstract class JsonLdSerializerTestBase {
         checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigDecimalValue", XSD.DECIMAL, instance.getBigDecimalValue());
     }
 
-    private static void checkValueDatatype(JsonObject result, String attId, String datatype, Number value) {
+    protected static void checkValueDatatype(JsonObject result, String attId, String datatype, Object value) {
         final JsonArray att = result.getJsonArray(attId);
         assertEquals(1, att.size());
         assertEquals(datatype, att.getJsonObject(0).getString("@type"));

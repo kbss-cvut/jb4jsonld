@@ -20,6 +20,7 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
+import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.util.*;
 
+import static cz.cvut.kbss.jsonld.environment.TestUtil.parseAndExpand;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -227,5 +229,16 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
             assertThat(element, hasKey(JsonLd.ID));
             assertEquals(OwlPropertyType.getMappedIndividual(value.get(i)), element.getString(JsonLd.ID));
         }
+    }
+
+    @Test
+    void serializationSerializesBooleanAsTypedLiteral() throws Exception {
+        final User user = Generator.generateUser();
+        user.setAdmin(true);
+
+        sut.serialize(user);
+        final JsonArray result = parseAndExpand(jsonWriter.getResult());
+        final JsonObject obj = result.getJsonObject(0);
+        checkValueDatatype(obj.asJsonObject(), Vocabulary.IS_ADMIN, XSD.BOOLEAN, user.getAdmin());
     }
 }

@@ -17,8 +17,10 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
+import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.serialization.model.*;
+import cz.cvut.kbss.jsonld.serialization.serializer.SerializerUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -37,11 +39,11 @@ public class JsonNodeFactory {
         BOOLEAN, NUMBER, STRING
     }
 
-    public static LiteralNode<?> createLiteralNode(Object value) {
+    public static JsonNode createLiteralNode(Object value) {
         return createLiteralNode(null, value);
     }
 
-    public static LiteralNode<?> createLiteralNode(String name, Object value) {
+    public static JsonNode createLiteralNode(String name, Object value) {
         final LiteralType type = determineLiteralType(value);
         return switch (type) {
             case BOOLEAN -> createBooleanLiteralNode(name, (Boolean) value);
@@ -59,8 +61,8 @@ public class JsonNodeFactory {
         return LiteralType.STRING;
     }
 
-    public static BooleanLiteralNode createBooleanLiteralNode(String name, Boolean value) {
-        return name != null ? new BooleanLiteralNode(name, value) : new BooleanLiteralNode(value);
+    public static JsonNode createBooleanLiteralNode(String name, Boolean value) {
+        return SerializerUtils.createdTypedValueNode(name, value.toString(), XSD.BOOLEAN);
     }
 
     public static NumericLiteralNode<Number> createNumericLiteralNode(String name, Number value) {

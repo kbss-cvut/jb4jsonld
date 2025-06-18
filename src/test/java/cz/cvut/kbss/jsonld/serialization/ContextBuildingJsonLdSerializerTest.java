@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.jsonld.environment.TestUtil.parseAndExpand;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItems;
@@ -144,17 +145,17 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(JsonValue.ValueType.OBJECT, jsonMap.get(Employee.getEmployerField().getName()).getValueType());
         final JsonObject orgMap = jsonMap.getJsonObject(Employee.getEmployerField().getName());
         assertEquals(employee.getEmployer().getName(),
-                     orgMap.getString(Organization.class.getDeclaredField("name").getName()));
+                orgMap.getString(Organization.class.getDeclaredField("name").getName()));
         assertEquals(
                 DateTimeFormatter.ISO_DATE_TIME.format(employee.getEmployer().getDateCreated().toInstant().atOffset(
                         ZoneOffset.UTC)),
                 orgMap.getString(Organization.class.getDeclaredField("dateCreated").getName()));
         assertEquals(JsonValue.ValueType.ARRAY,
-                     orgMap.get(Organization.class.getDeclaredField("brands").getName()).getValueType());
+                orgMap.get(Organization.class.getDeclaredField("brands").getName()).getValueType());
         final JsonArray jsonBrands = orgMap.getJsonArray(Organization.class.getDeclaredField("brands").getName());
         assertEquals(employee.getEmployer().getBrands().size(), jsonBrands.size());
         assertThat(jsonBrands.stream().map(item -> ((JsonString) item).getString()).collect(Collectors.toList()),
-                   hasItems(employee.getEmployer().getBrands().toArray(new String[]{})));
+                hasItems(employee.getEmployer().getBrands().toArray(new String[]{})));
     }
 
     @Test
@@ -185,9 +186,9 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
         assertEquals(RDFS.LABEL, context.getString(StudyWithNamespaces.class.getDeclaredField("name").getName()));
         assertEquals(Vocabulary.HAS_PARTICIPANT,
-                     context.getString(StudyWithNamespaces.class.getDeclaredField("participants").getName()));
+                context.getString(StudyWithNamespaces.class.getDeclaredField("participants").getName()));
         assertEquals(Vocabulary.HAS_MEMBER,
-                     context.getString(StudyWithNamespaces.class.getDeclaredField("members").getName()));
+                context.getString(StudyWithNamespaces.class.getDeclaredField("members").getName()));
     }
 
     @Test
@@ -258,8 +259,8 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final JsonObject json = serializeAndRead(instance).asJsonObject();
         assertThat(json, hasKey("types"));
         assertEquals(Collections.singletonList(Vocabulary.STUDY),
-                     json.getJsonArray("types").stream().map(v -> ((JsonString) v).getString()).collect(
-                             Collectors.toList()));
+                json.getJsonArray("types").stream().map(v -> ((JsonString) v).getString()).collect(
+                        Collectors.toList()));
     }
 
     @Test
@@ -453,9 +454,22 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(iri, keyCtx.getString(JsonLd.ID));
     }
 
-    private static void checkValue(JsonObject result, String attId, Number value) {
+    private static void checkValue(JsonObject result, String attId, Object value) {
         assertEquals(JsonValue.ValueType.STRING, result.get(attId).getValueType());
         final JsonString attValue = result.getJsonString(attId);
         assertEquals(value.toString(), attValue.getString());
+    }
+
+    @Test
+    void serializationSerializesBooleanAsTypedLiteral() {
+        final User user = Generator.generateUser();
+        user.setAdmin(true);
+
+        final JsonObject json = serializeAndRead(user).asJsonObject();
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
+        checkContextTerm(context, "admin", Vocabulary.IS_ADMIN, XSD.BOOLEAN);
+        checkValue(json, "admin", true);
     }
 }
