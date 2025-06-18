@@ -506,11 +506,12 @@ public abstract class JsonLdSerializerTestBase {
         checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigDecimalValue", XSD.DECIMAL, instance.getBigDecimalValue());
     }
 
-    private static void checkValueDatatype(JsonObject result, String attIri, String datatype, Number value) {
-        final JsonArray att = result.getJsonArray(attIri);
+    private static void checkValueDatatype(JsonObject result, String attId, String datatype, Number value) {
+        final JsonArray att = result.getJsonArray(attId);
         assertEquals(1, att.size());
         assertEquals(datatype, att.getJsonObject(0).getString("@type"));
-        assertEquals(value.toString(), att.getJsonObject(0).getJsonNumber("@value").toString());
+        assertEquals(JsonValue.ValueType.STRING, att.getJsonObject(0).get("@value").getValueType());
+        assertEquals(value.toString(), att.getJsonObject(0).getJsonString("@value").getString());
     }
 
     @Test

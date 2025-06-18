@@ -436,6 +436,14 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         checkContextTerm(context, "intValue", Vocabulary.DEFAULT_PREFIX + "intValue", XSD.INT);
         checkContextTerm(context, "bigIntegerValue", Vocabulary.DEFAULT_PREFIX + "bigIntegerValue", XSD.INTEGER);
         checkContextTerm(context, "bigDecimalValue", Vocabulary.DEFAULT_PREFIX + "bigDecimalValue", XSD.DECIMAL);
+
+        checkValue(json, "doubleValue", instance.getDoubleValue());
+        checkValue(json, "floatValue", instance.getFloatValue());
+        checkValue(json, "longValue", instance.getLongValue());
+        checkValue(json, "shortValue", instance.getShortValue());
+        checkValue(json, "intValue", instance.getIntValue());
+        checkValue(json, "bigIntegerValue", instance.getBigIntegerValue());
+        checkValue(json, "bigDecimalValue", instance.getBigDecimalValue());
     }
 
     private static void checkContextTerm(JsonObject context, String att, String iri, String datatype) {
@@ -443,5 +451,11 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final JsonObject keyCtx = context.getJsonObject(att);
         assertEquals(datatype, keyCtx.getString(JsonLd.TYPE));
         assertEquals(iri, keyCtx.getString(JsonLd.ID));
+    }
+
+    private static void checkValue(JsonObject result, String attId, Number value) {
+        assertEquals(JsonValue.ValueType.STRING, result.get(attId).getValueType());
+        final JsonString attValue = result.getJsonString(attId);
+        assertEquals(value.toString(), attValue.getString());
     }
 }

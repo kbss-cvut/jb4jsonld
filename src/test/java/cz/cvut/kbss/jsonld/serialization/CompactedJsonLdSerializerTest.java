@@ -20,20 +20,12 @@ package cz.cvut.kbss.jsonld.serialization;
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
-import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.common.IdentifierUtil;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import cz.cvut.kbss.jsonld.environment.model.Employee;
-import cz.cvut.kbss.jsonld.environment.model.ObjectWithMultilingualString;
-import cz.cvut.kbss.jsonld.environment.model.ObjectWithPluralMultilingualString;
-import cz.cvut.kbss.jsonld.environment.model.Organization;
-import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
-import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
-import cz.cvut.kbss.jsonld.environment.model.StudyWithNamespaces;
-import cz.cvut.kbss.jsonld.environment.model.User;
+import cz.cvut.kbss.jsonld.environment.model.*;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
@@ -41,19 +33,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -244,22 +227,5 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
             assertThat(element, hasKey(JsonLd.ID));
             assertEquals(OwlPropertyType.getMappedIndividual(value.get(i)), element.getString(JsonLd.ID));
         }
-    }
-
-    @Test
-    void serializationUsesTypedNumericValues() {
-        final Employee employee = Generator.generateEmployee();
-        employee.setSalary(134.56);
-
-        final JsonValue json = serializeAndRead(employee);
-        final JsonObject jsonObject = json.asJsonObject();
-        assertTrue(jsonObject.containsKey(Vocabulary.SALARY));
-        final JsonValue salary = jsonObject.get(Vocabulary.SALARY);
-        assertEquals(JsonValue.ValueType.OBJECT, salary.getValueType());
-        final JsonObject salaryObject = salary.asJsonObject();
-        assertTrue(salaryObject.containsKey(JsonLd.VALUE));
-        assertEquals(134.56, salaryObject.getJsonNumber(JsonLd.VALUE).doubleValue());
-        assertTrue(salaryObject.containsKey(JsonLd.TYPE));
-        assertEquals(XSD.DOUBLE, salaryObject.getString(JsonLd.TYPE));
     }
 }
