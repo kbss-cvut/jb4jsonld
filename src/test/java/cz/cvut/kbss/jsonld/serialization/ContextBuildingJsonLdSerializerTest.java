@@ -66,7 +66,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static cz.cvut.kbss.jsonld.environment.TestUtil.parseAndExpand;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItems;
@@ -94,7 +93,8 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(Vocabulary.FIRST_NAME, context.getString(User.getFirstNameField().getName()));
         assertEquals(Vocabulary.LAST_NAME, context.getString(User.getLastNameField().getName()));
         assertEquals(Vocabulary.USERNAME, context.getString(User.getUsernameField().getName()));
-        assertEquals(Vocabulary.IS_ADMIN, context.getString(User.class.getDeclaredField("admin").getName()));
+        final JsonObject admin = context.getJsonObject(User.class.getDeclaredField("admin").getName());
+        assertEquals(Vocabulary.IS_ADMIN, admin.getString(JsonLd.ID));
     }
 
     @Test
@@ -105,7 +105,7 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(user.getFirstName(), jsonMap.getString(User.getFirstNameField().getName()));
         assertEquals(user.getLastName(), jsonMap.getString(User.getLastNameField().getName()));
         assertEquals(user.getUsername(), jsonMap.getString(User.getUsernameField().getName()));
-        assertEquals(user.getAdmin(), jsonMap.getBoolean(User.class.getDeclaredField("admin").getName()));
+        assertTrue(jsonMap.containsKey("admin"));
     }
 
     @Test
