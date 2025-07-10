@@ -16,9 +16,9 @@ public class ContextBuildingBooleanSerializer implements ValueSerializer<Boolean
             final ObjectNode termDef =
                     SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(), XSD.BOOLEAN);
             ctx.registerTermMapping(ctx.getFieldName(), termDef);
-            return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value.toString());
+            return JsonNodeFactory.createBooleanLiteralNode(ctx.getTerm(), value);
         } else {
-            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value.toString(), XSD.BOOLEAN);
+            return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, XSD.BOOLEAN);
         }
     }
 }

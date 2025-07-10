@@ -41,7 +41,7 @@ public class ContextBuildingTypesSerializer implements ValueSerializer<Set<Strin
         } else {
             typesNode = new ContextBasedTypesNode(ctx);
         }
-        value.forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
+        value.forEach(type -> typesNode.addItem(JsonNodeFactory.createStringLiteralNode(type)));
         return typesNode;
     }
 

@@ -46,8 +46,8 @@ public class MultilingualStringSerializer implements ValueSerializer<Multilingua
 
     private static JsonNode createNode(String attName, String value, String language) {
         final ObjectNode node = JsonNodeFactory.createObjectNode(attName);
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.LANGUAGE, language != null ? language : JsonLd.NONE));
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value));
+        node.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.LANGUAGE, language != null ? language : JsonLd.NONE));
+        node.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.VALUE, value));
         return node;
     }
 

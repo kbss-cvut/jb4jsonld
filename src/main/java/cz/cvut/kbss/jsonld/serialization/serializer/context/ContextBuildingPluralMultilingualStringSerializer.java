@@ -44,10 +44,10 @@ public class ContextBuildingPluralMultilingualStringSerializer implements ValueS
         allValues.forEach((lang, texts) -> {
             final String langKey = lang != null ? lang : JsonLd.NONE;
             if (texts.size() == 1) {
-                node.addItem(JsonNodeFactory.createLiteralNode(langKey, texts.iterator().next()));
+                node.addItem(JsonNodeFactory.createStringLiteralNode(langKey, texts.iterator().next()));
             } else {
                 final CollectionNode<?> translations = JsonNodeFactory.createCollectionNodeFromArray(langKey);
-                texts.forEach(t -> translations.addItem(JsonNodeFactory.createLiteralNode(t)));
+                texts.forEach(t -> translations.addItem(JsonNodeFactory.createStringLiteralNode(t)));
                 node.addItem(translations);
             }
         });
@@ -56,8 +56,8 @@ public class ContextBuildingPluralMultilingualStringSerializer implements ValueS
 
     static void registerTermMapping(SerializationContext<Collection<MultilingualString>> ctx) {
         final ObjectNode mapping = JsonNodeFactory.createObjectNode(ctx.getFieldName());
-        mapping.addItem(JsonNodeFactory.createLiteralNode(JsonLd.ID, ctx.getTerm()));
-        mapping.addItem(JsonNodeFactory.createLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE));
+        mapping.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.ID, ctx.getTerm()));
+        mapping.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE));
         ctx.registerTermMapping(ctx.getFieldName(), mapping);
     }
 }

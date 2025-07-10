@@ -56,8 +56,8 @@ public class SerializerUtils {
      */
     public static ObjectNode createTypedTermDefinition(String term, String id, String type) {
         final ObjectNode termDef = JsonNodeFactory.createObjectNode(term);
-        termDef.addItem(JsonNodeFactory.createLiteralNode(JsonLd.ID, id));
-        termDef.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, type));
+        termDef.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.ID, id));
+        termDef.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, type));
         return termDef;
     }
 
@@ -72,7 +72,7 @@ public class SerializerUtils {
      */
     public static JsonNode createdTypedValueNode(String term, Object value, String type) {
         final ObjectNode node = JsonNodeFactory.createObjectNode(term);
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, type));
+        node.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, type));
         node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value));
         return node;
     }

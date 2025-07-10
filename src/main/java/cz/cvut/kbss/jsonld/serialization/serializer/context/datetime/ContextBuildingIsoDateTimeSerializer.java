@@ -36,7 +36,7 @@ public class ContextBuildingIsoDateTimeSerializer extends IsoDateTimeSerializer 
             final ObjectNode termDef =
                     SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(), XSD.DATETIME);
             ctx.registerTermMapping(ctx.getFieldName(), termDef);
-            return JsonNodeFactory.createLiteralNode(ctx.getTerm(), formatter.format(value));
+            return JsonNodeFactory.createStringLiteralNode(ctx.getTerm(), formatter.format(value));
         } else {
             return super.serialize(value, ctx);
         }

@@ -29,7 +29,7 @@ public class TypesSerializer implements ValueSerializer<Set<String>> {
     @Override
     public JsonNode serialize(Set<String> value, SerializationContext<Set<String>> ctx) {
         final CollectionNode<?> typesNode = JsonNodeFactory.createSetNode(ctx.getTerm());
-        value.forEach(type -> typesNode.addItem(JsonNodeFactory.createLiteralNode(type)));
+        value.forEach(type -> typesNode.addItem(JsonNodeFactory.createStringLiteralNode(type)));
         return typesNode;
     }
 }

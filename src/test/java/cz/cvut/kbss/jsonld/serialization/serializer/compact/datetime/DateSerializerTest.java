@@ -51,9 +51,9 @@ class DateSerializerTest {
         assertInstanceOf(ObjectNode.class, result);
         assertEquals(ctx.getTerm(), result.getName());
         assertThat(((ObjectNode) result).getItems(), hasItems(
-                JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value.toInstant().atOffset(ZoneOffset.UTC)
+                JsonNodeFactory.createStringLiteralNode(JsonLd.VALUE, value.toInstant().atOffset(ZoneOffset.UTC)
                                                                      .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
-                JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.DATETIME)
+                JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, XSD.DATETIME)
         ));
     }
 

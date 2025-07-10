@@ -455,9 +455,8 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
     }
 
     private static void checkValue(JsonObject result, String attId, Object value) {
-        assertEquals(JsonValue.ValueType.STRING, result.get(attId).getValueType());
-        final JsonString attValue = result.getJsonString(attId);
-        assertEquals(value.toString(), attValue.getString());
+        final JsonValue attValue = result.get(attId);
+        assertEquals(value.toString(), attValue.toString());
     }
 
     @Test

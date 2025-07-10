@@ -52,8 +52,8 @@ class ContextBuildingMultilingualStringSerializerTest {
         verify(jsonLdCtx).registerTermMapping(eq(ObjectWithMultilingualString.getLabelField().getName()),
                                               captor.capture());
         assertThat(captor.getValue().getItems(), hasItems(
-                JsonNodeFactory.createLiteralNode(JsonLd.ID, RDFS.LABEL),
-                JsonNodeFactory.createLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE)
+                JsonNodeFactory.createStringLiteralNode(JsonLd.ID, RDFS.LABEL),
+                JsonNodeFactory.createStringLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE)
         ));
     }
 
@@ -67,7 +67,7 @@ class ContextBuildingMultilingualStringSerializerTest {
                                                                                   new MappingJsonLdContext()));
         assertEquals(ObjectWithMultilingualString.getLabelField().getName(), result.getName());
         value.getValue().forEach(
-                (lang, str) -> assertThat(result.getItems(), hasItem(JsonNodeFactory.createLiteralNode(lang, str))));
+                (lang, str) -> assertThat(result.getItems(), hasItem(JsonNodeFactory.createStringLiteralNode(lang, str))));
     }
 
     @Test
@@ -75,6 +75,6 @@ class ContextBuildingMultilingualStringSerializerTest {
         final MultilingualString value = MultilingualString.create("English", "en");
         value.set("Language-less");
         final ObjectNode result = sut.serialize(value, new SerializationContext<>(value,DummyJsonLdContext.INSTANCE));
-        assertThat(result.getItems(), hasItem(JsonNodeFactory.createLiteralNode(JsonLd.NONE, value.get())));
+        assertThat(result.getItems(), hasItem(JsonNodeFactory.createStringLiteralNode(JsonLd.NONE, value.get())));
     }
 }

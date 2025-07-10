@@ -48,8 +48,8 @@ class TemporalAmountSerializerTest {
         assertInstanceOf(ObjectNode.class, result);
         assertEquals(ctx.getTerm(), result.getName());
         final ObjectNode node = (ObjectNode) result;
-        assertThat(node.getItems(), hasItems(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value.toString()),
-                JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.DURATION)));
+        assertThat(node.getItems(), hasItems(JsonNodeFactory.createStringLiteralNode(JsonLd.VALUE, value.toString()),
+                JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, XSD.DURATION)));
     }
 
     @Test
@@ -60,7 +60,7 @@ class TemporalAmountSerializerTest {
         assertInstanceOf(ObjectNode.class, result);
         assertEquals(ctx.getTerm(), result.getName());
         final ObjectNode node = (ObjectNode) result;
-        assertThat(node.getItems(), hasItems(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value.toString()),
-                JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.DURATION)));
+        assertThat(node.getItems(), hasItems(JsonNodeFactory.createStringLiteralNode(JsonLd.VALUE, value.toString()),
+                JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, XSD.DURATION)));
     }
 }

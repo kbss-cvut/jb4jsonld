@@ -58,8 +58,8 @@ class ContextBuildingLocalDateSerializerTest {
         final ArgumentCaptor<ObjectNode> captor = ArgumentCaptor.forClass(ObjectNode.class);
         verify(ctx).registerTermMapping(eq(field.getName()), captor.capture());
         assertThat(captor.getValue().getItems(), hasItems(
-                JsonNodeFactory.createLiteralNode(JsonLd.ID, Vocabulary.DATE_CREATED),
-                JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.DATE)
+                JsonNodeFactory.createStringLiteralNode(JsonLd.ID, Vocabulary.DATE_CREATED),
+                JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, XSD.DATE)
         ));
     }
 

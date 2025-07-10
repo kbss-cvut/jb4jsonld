@@ -55,7 +55,7 @@ class CustomSerializersTest {
         final Study study = new Study();
         study.setUri(Generator.generateUri());
         study.setNoOfPeopleInvolved(10);
-        final JsonNode serialized = JsonNodeFactory.createLiteralNode(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED,
+        final JsonNode serialized = JsonNodeFactory.createNumericLiteralNode(Vocabulary.NUMBER_OF_PEOPLE_INVOLVED,
                                                                       (long) study.getNoOfPeopleInvolved());
         when(intSerializer.serialize(any(), any())).thenReturn(serialized);
         treeBuilder.openObject(new SerializationContext<>(study, DummyJsonLdContext.INSTANCE));

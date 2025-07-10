@@ -26,12 +26,12 @@ import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAccessor;
 
 /**
- * Serializes datetime as the amount of milliseconds since epoch at UTC time zone.
+ * Serializes datetime as the number of milliseconds since epoch at UTC time zone.
  */
 public class EpochBasedDateTimeSerializer extends DateTimeSerializer {
 
     @Override
     public JsonNode serialize(OffsetDateTime value, SerializationContext<TemporalAccessor> ctx) {
-        return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value.toInstant().toEpochMilli());
+        return JsonNodeFactory.createNumericLiteralNode(ctx.getTerm(), value.toInstant().toEpochMilli());
     }
 }
