@@ -36,7 +36,7 @@ public class NumberSerializer implements ValueSerializer<Number> {
     @Override
     public JsonNode serialize(Number value, SerializationContext<Number> ctx) {
         Objects.requireNonNull(value);
-        return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value.toString(), getDatatype(value));
+        return SerializerUtils.createdTypedValueNode(ctx.getTerm(), value, getDatatype(value));
     }
 
     protected String getDatatype(Number value) {

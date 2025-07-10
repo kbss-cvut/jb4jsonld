@@ -42,7 +42,7 @@ class JsonLdContextTest {
         assertTrue(sut.hasTermMapping(term));
         final Optional<JsonNode> result = sut.getTermMapping(term);
         assertTrue(result.isPresent());
-        assertEquals(result.get(), JsonNodeFactory.createLiteralNode(term, Vocabulary.FIRST_NAME));
+        assertEquals(result.get(), JsonNodeFactory.createStringLiteralNode(term, Vocabulary.FIRST_NAME));
     }
 
     @Test
@@ -63,7 +63,7 @@ class JsonLdContextTest {
         assertThat(result, instanceOf(CompositeNode.class));
         final CompositeNode<?> compositeResult = (CompositeNode<?>) result;
         assertThat(compositeResult.getItems(),
-                   hasItems(JsonNodeFactory.createLiteralNode(firstName, Vocabulary.FIRST_NAME),
-                            JsonNodeFactory.createLiteralNode(lastName, Vocabulary.LAST_NAME)));
+                   hasItems(JsonNodeFactory.createStringLiteralNode(firstName, Vocabulary.FIRST_NAME),
+                            JsonNodeFactory.createStringLiteralNode(lastName, Vocabulary.LAST_NAME)));
     }
 }

@@ -24,6 +24,7 @@ import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.serializer.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ObjectGraphValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.compact.BooleanSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.DefaultValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.IdentifierSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.IndividualSerializer;
@@ -72,6 +73,7 @@ public class CompactedJsonLdSerializer extends JsonLdSerializer {
         valueSerializers.registerSerializer(Period.class, tas);
         final NumberSerializer numberSerializer = new NumberSerializer();
         NumberSerializer.getSupportedTypes().forEach(cls -> valueSerializers.registerSerializer(cls, numberSerializer));
+        valueSerializers.registerSerializer(Boolean.class, new BooleanSerializer());
         return valueSerializers;
     }
 

@@ -17,10 +17,16 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
-import cz.cvut.kbss.jopa.vocabulary.XSD;
 import cz.cvut.kbss.jsonld.common.CollectionType;
-import cz.cvut.kbss.jsonld.serialization.model.*;
-import cz.cvut.kbss.jsonld.serialization.serializer.SerializerUtils;
+import cz.cvut.kbss.jsonld.serialization.model.BooleanLiteralNode;
+import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
+import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
+import cz.cvut.kbss.jsonld.serialization.model.ListNode;
+import cz.cvut.kbss.jsonld.serialization.model.NumericLiteralNode;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectIdNode;
+import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
+import cz.cvut.kbss.jsonld.serialization.model.SetNode;
+import cz.cvut.kbss.jsonld.serialization.model.StringLiteralNode;
 
 import java.util.Collection;
 import java.util.List;
@@ -62,7 +68,7 @@ public class JsonNodeFactory {
     }
 
     public static JsonNode createBooleanLiteralNode(String name, Boolean value) {
-        return SerializerUtils.createdTypedValueNode(name, value.toString(), XSD.BOOLEAN);
+        return name != null ? new BooleanLiteralNode(name, value) : new BooleanLiteralNode(value);
     }
 
     public static NumericLiteralNode<Number> createNumericLiteralNode(String name, Number value) {
@@ -71,6 +77,10 @@ public class JsonNodeFactory {
 
     public static StringLiteralNode createStringLiteralNode(String name, String value) {
         return name != null ? new StringLiteralNode(name, value) : new StringLiteralNode(value);
+    }
+
+    public static StringLiteralNode createStringLiteralNode(String value) {
+        return new StringLiteralNode(value);
     }
 
     /**

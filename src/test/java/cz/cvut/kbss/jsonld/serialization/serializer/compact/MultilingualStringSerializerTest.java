@@ -25,14 +25,15 @@ import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.LiteralNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
-import cz.cvut.kbss.jsonld.serialization.serializer.compact.MultilingualStringSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MultilingualStringSerializerTest {
 
@@ -65,8 +66,8 @@ class MultilingualStringSerializerTest {
         value.getValue().forEach((k, v) -> assertTrue(result.getItems().stream().anyMatch(n -> {
             assertInstanceOf(ObjectNode.class, n);
             final ObjectNode langNode = (ObjectNode) n;
-            return langNode.getItems().contains(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, v)) &&
-                    langNode.getItems().contains(JsonNodeFactory.createLiteralNode(JsonLd.LANGUAGE, k));
+            return langNode.getItems().contains(JsonNodeFactory.createStringLiteralNode(JsonLd.VALUE, v)) &&
+                    langNode.getItems().contains(JsonNodeFactory.createStringLiteralNode(JsonLd.LANGUAGE, k));
         })));
     }
 

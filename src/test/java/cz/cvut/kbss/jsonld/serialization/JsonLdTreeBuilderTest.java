@@ -111,7 +111,7 @@ public class JsonLdTreeBuilderTest {
         assertFalse(sut.getTreeRoot().getItems().isEmpty());
         final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(sut.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
-        assertTrue(typesNode.getItems().contains(JsonNodeFactory.createLiteralNode(Vocabulary.PERSON)));
+        assertTrue(typesNode.getItems().contains(JsonNodeFactory.createStringLiteralNode(Vocabulary.PERSON)));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class JsonLdTreeBuilderTest {
         final CollectionNode<?> typesNode = (CollectionNode<?>) getNode(sut.getTreeRoot(), JsonLd.TYPE);
         assertNotNull(typesNode);
         for (String t : types) {
-            assertTrue(typesNode.getItems().contains(JsonNodeFactory.createLiteralNode(t)));
+            assertTrue(typesNode.getItems().contains(JsonNodeFactory.createStringLiteralNode(t)));
         }
     }
 
@@ -229,7 +229,7 @@ public class JsonLdTreeBuilderTest {
         sut.visitAttribute(ctx(Vocabulary.FIRST_NAME, Person.getFirstNameField(), user.getFirstName()));
         assertFalse(sut.getTreeRoot().getItems().isEmpty());
         assertTrue(sut.getTreeRoot().getItems()
-                      .contains(JsonNodeFactory.createLiteralNode(Vocabulary.FIRST_NAME, user.getFirstName())));
+                      .contains(JsonNodeFactory.createStringLiteralNode(Vocabulary.FIRST_NAME, user.getFirstName())));
     }
 
     @Test
@@ -239,7 +239,7 @@ public class JsonLdTreeBuilderTest {
         sut.visitAttribute(ctx(RDFS.LABEL, Organization.class.getDeclaredField("name"), org.getName()));
         assertFalse(sut.getTreeRoot().getItems().isEmpty());
         assertTrue(sut.getTreeRoot().getItems()
-                      .contains(JsonNodeFactory.createLiteralNode(RDFS.LABEL, org.getName())));
+                      .contains(JsonNodeFactory.createStringLiteralNode(RDFS.LABEL, org.getName())));
     }
 
     @Test
@@ -253,7 +253,7 @@ public class JsonLdTreeBuilderTest {
         assertNotNull(brandsNode);
         assertInstanceOf(SetNode.class, brandsNode);
         for (String brand : org.getBrands()) {
-            assertTrue(brandsNode.getItems().contains(JsonNodeFactory.createLiteralNode(brand)));
+            assertTrue(brandsNode.getItems().contains(JsonNodeFactory.createStringLiteralNode(brand)));
         }
     }
 

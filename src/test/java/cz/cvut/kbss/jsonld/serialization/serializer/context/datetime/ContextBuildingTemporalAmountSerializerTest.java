@@ -59,8 +59,8 @@ class ContextBuildingTemporalAmountSerializerTest {
         final ArgumentCaptor<ObjectNode> captor = ArgumentCaptor.forClass(ObjectNode.class);
         verify(ctx).registerTermMapping(eq(field.getName()), captor.capture());
         assertThat(captor.getValue().getItems(), hasItems(
-                JsonNodeFactory.createLiteralNode(JsonLd.ID, property),
-                JsonNodeFactory.createLiteralNode(JsonLd.TYPE, XSD.DURATION)
+                JsonNodeFactory.createStringLiteralNode(JsonLd.ID, property),
+                JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, XSD.DURATION)
         ));
     }
 

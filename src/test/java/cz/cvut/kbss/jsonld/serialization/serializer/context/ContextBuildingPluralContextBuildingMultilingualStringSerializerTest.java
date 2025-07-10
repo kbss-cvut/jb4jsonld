@@ -60,8 +60,8 @@ class ContextBuildingPluralContextBuildingMultilingualStringSerializerTest {
         verify(jsonLdCtx).registerTermMapping(eq(ObjectWithPluralMultilingualString.getAltLabelField().getName()),
                                               captor.capture());
         assertThat(captor.getValue().getItems(), hasItems(
-                JsonNodeFactory.createLiteralNode(JsonLd.ID, SKOS.ALT_LABEL),
-                JsonNodeFactory.createLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE)
+                JsonNodeFactory.createStringLiteralNode(JsonLd.ID, SKOS.ALT_LABEL),
+                JsonNodeFactory.createStringLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE)
         ));
     }
 
@@ -74,13 +74,13 @@ class ContextBuildingPluralContextBuildingMultilingualStringSerializerTest {
         final ObjectNode result = sut.serialize(value, new SerializationContext<>(SKOS.ALT_LABEL,
                                                                                   ObjectWithPluralMultilingualString.getAltLabelField(),
                                                                                   value, new MappingJsonLdContext()));
-        assertThat(result.getItems(), hasItem(JsonNodeFactory.createLiteralNode("cs", mlsOne.get("cs"))));
+        assertThat(result.getItems(), hasItem(JsonNodeFactory.createStringLiteralNode("cs", mlsOne.get("cs"))));
         final Optional<JsonNode> enItems = result.getItems().stream().filter(n -> n.getName().equals("en")).findAny();
         assertTrue(enItems.isPresent());
         assertInstanceOf(CollectionNode.class, enItems.get());
         assertThat(((CollectionNode<?>) enItems.get()).getItems(),
-                   hasItems(JsonNodeFactory.createLiteralNode(mlsOne.get("en")),
-                            JsonNodeFactory.createLiteralNode(mlsTwo.get("en"))));
+                   hasItems(JsonNodeFactory.createStringLiteralNode(mlsOne.get("en")),
+                            JsonNodeFactory.createStringLiteralNode(mlsTwo.get("en"))));
     }
 
     @Test
