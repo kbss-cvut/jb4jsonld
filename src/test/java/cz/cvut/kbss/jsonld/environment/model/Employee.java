@@ -18,6 +18,7 @@
 package cz.cvut.kbss.jsonld.environment.model;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import org.eclipse.rdf4j.model.IRI;
@@ -36,12 +37,23 @@ public class Employee extends User {
     @OWLObjectProperty(iri = Vocabulary.IS_MEMBER_OF)
     private Organization employer;
 
+    @OWLDataProperty(iri = Vocabulary.SALARY)
+    private Double salary;
+
     public Organization getEmployer() {
         return employer;
     }
 
     public void setEmployer(Organization employer) {
         this.employer = employer;
+    }
+
+    public Double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Double salary) {
+        this.salary = salary;
     }
 
     @Override
@@ -61,9 +73,8 @@ public class Employee extends User {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Employee)) return false;
-        Employee employee = (Employee) o;
+        if (this == o) {return true;}
+        if (!(o instanceof Employee employee)) {return false;}
         return Objects.equals(getUri(), employee.getUri());
     }
 

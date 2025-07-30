@@ -89,7 +89,7 @@ public class ContextBuildingDefaultValueSerializer implements ValueSerializer {
         } else {
             node = JsonNodeFactory.createObjectNode();
         }
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.ID, value));
+        node.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.ID, value.toString()));
         return node;
     }
 

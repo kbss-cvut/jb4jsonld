@@ -17,8 +17,6 @@
  */
 package cz.cvut.kbss.jsonld.serialization;
 
-import com.apicatalog.jsonld.document.Document;
-import com.apicatalog.jsonld.document.JsonDocument;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
@@ -389,8 +387,8 @@ public abstract class JsonLdSerializerTestBase {
 
     @Test
     void serializationSupportsRegistrationAndUsageOfCustomSerializers() throws Exception {
-        sut.registerSerializer(LocalDate.class, ((value, ctx) -> JsonNodeFactory.createLiteralNode(ctx.getTerm(),
-                                                                                                   value.toString())));
+        sut.registerSerializer(LocalDate.class, ((value, ctx) -> JsonNodeFactory.createStringLiteralNode(ctx.getTerm(),
+                                                                                                         value.toString())));
         final CompactedJsonLdSerializerTest.OrganizationWithLocalDate
                 organization = new CompactedJsonLdSerializerTest.OrganizationWithLocalDate();
         organization.uri = Generator.generateUri();
@@ -436,8 +434,8 @@ public abstract class JsonLdSerializerTestBase {
             final ObjectNode node =
                     ctx.getTerm() != null ? JsonNodeFactory.createObjectNode(ctx.getTerm()) :
                     JsonNodeFactory.createObjectNode();
-            node.addItem(JsonNodeFactory.createObjectIdNode(JsonLd.ID, value.getUri().toString()));
-            node.addItem(JsonNodeFactory.createLiteralNode(Vocabulary.USERNAME, value.getUsername()));
+            node.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.ID, value.getUri().toString()));
+            node.addItem(JsonNodeFactory.createStringLiteralNode(Vocabulary.USERNAME, value.getUsername()));
             return node;
         };
         sut.registerSerializer(Employee.class, serializer);
@@ -502,15 +500,17 @@ public abstract class JsonLdSerializerTestBase {
         checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "longValue", XSD.LONG, instance.getLongValue());
         checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "shortValue", XSD.SHORT, instance.getShortValue());
         checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "intValue", XSD.INT, instance.getIntValue());
-        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigIntegerValue", XSD.INTEGER, instance.getBigIntegerValue());
-        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigDecimalValue", XSD.DECIMAL, instance.getBigDecimalValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigIntegerValue", XSD.INTEGER,
+                           instance.getBigIntegerValue());
+        checkValueDatatype(obj, Vocabulary.DEFAULT_PREFIX + "bigDecimalValue", XSD.DECIMAL,
+                           instance.getBigDecimalValue());
     }
 
-    private static void checkValueDatatype(JsonObject result, String attIri, String datatype, Number value) {
-        final JsonArray att = result.getJsonArray(attIri);
+    protected static void checkValueDatatype(JsonObject result, String attId, String datatype, Object value) {
+        final JsonArray att = result.getJsonArray(attId);
         assertEquals(1, att.size());
         assertEquals(datatype, att.getJsonObject(0).getString("@type"));
-        assertEquals(value.toString(), att.getJsonObject(0).getJsonNumber("@value").toString());
+        assertEquals(value.toString(), att.getJsonObject(0).get("@value").toString());
     }
 
     @Test

@@ -93,7 +93,8 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(Vocabulary.FIRST_NAME, context.getString(User.getFirstNameField().getName()));
         assertEquals(Vocabulary.LAST_NAME, context.getString(User.getLastNameField().getName()));
         assertEquals(Vocabulary.USERNAME, context.getString(User.getUsernameField().getName()));
-        assertEquals(Vocabulary.IS_ADMIN, context.getString(User.class.getDeclaredField("admin").getName()));
+        final JsonObject admin = context.getJsonObject(User.class.getDeclaredField("admin").getName());
+        assertEquals(Vocabulary.IS_ADMIN, admin.getString(JsonLd.ID));
     }
 
     @Test
@@ -104,7 +105,7 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(user.getFirstName(), jsonMap.getString(User.getFirstNameField().getName()));
         assertEquals(user.getLastName(), jsonMap.getString(User.getLastNameField().getName()));
         assertEquals(user.getUsername(), jsonMap.getString(User.getUsernameField().getName()));
-        assertEquals(user.getAdmin(), jsonMap.getBoolean(User.class.getDeclaredField("admin").getName()));
+        assertTrue(jsonMap.containsKey("admin"));
     }
 
     @Test
@@ -144,17 +145,17 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(JsonValue.ValueType.OBJECT, jsonMap.get(Employee.getEmployerField().getName()).getValueType());
         final JsonObject orgMap = jsonMap.getJsonObject(Employee.getEmployerField().getName());
         assertEquals(employee.getEmployer().getName(),
-                     orgMap.getString(Organization.class.getDeclaredField("name").getName()));
+                orgMap.getString(Organization.class.getDeclaredField("name").getName()));
         assertEquals(
                 DateTimeFormatter.ISO_DATE_TIME.format(employee.getEmployer().getDateCreated().toInstant().atOffset(
                         ZoneOffset.UTC)),
                 orgMap.getString(Organization.class.getDeclaredField("dateCreated").getName()));
         assertEquals(JsonValue.ValueType.ARRAY,
-                     orgMap.get(Organization.class.getDeclaredField("brands").getName()).getValueType());
+                orgMap.get(Organization.class.getDeclaredField("brands").getName()).getValueType());
         final JsonArray jsonBrands = orgMap.getJsonArray(Organization.class.getDeclaredField("brands").getName());
         assertEquals(employee.getEmployer().getBrands().size(), jsonBrands.size());
         assertThat(jsonBrands.stream().map(item -> ((JsonString) item).getString()).collect(Collectors.toList()),
-                   hasItems(employee.getEmployer().getBrands().toArray(new String[]{})));
+                hasItems(employee.getEmployer().getBrands().toArray(new String[]{})));
     }
 
     @Test
@@ -185,9 +186,9 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
         assertEquals(RDFS.LABEL, context.getString(StudyWithNamespaces.class.getDeclaredField("name").getName()));
         assertEquals(Vocabulary.HAS_PARTICIPANT,
-                     context.getString(StudyWithNamespaces.class.getDeclaredField("participants").getName()));
+                context.getString(StudyWithNamespaces.class.getDeclaredField("participants").getName()));
         assertEquals(Vocabulary.HAS_MEMBER,
-                     context.getString(StudyWithNamespaces.class.getDeclaredField("members").getName()));
+                context.getString(StudyWithNamespaces.class.getDeclaredField("members").getName()));
     }
 
     @Test
@@ -258,8 +259,8 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final JsonObject json = serializeAndRead(instance).asJsonObject();
         assertThat(json, hasKey("types"));
         assertEquals(Collections.singletonList(Vocabulary.STUDY),
-                     json.getJsonArray("types").stream().map(v -> ((JsonString) v).getString()).collect(
-                             Collectors.toList()));
+                json.getJsonArray("types").stream().map(v -> ((JsonString) v).getString()).collect(
+                        Collectors.toList()));
     }
 
     @Test
@@ -436,6 +437,14 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         checkContextTerm(context, "intValue", Vocabulary.DEFAULT_PREFIX + "intValue", XSD.INT);
         checkContextTerm(context, "bigIntegerValue", Vocabulary.DEFAULT_PREFIX + "bigIntegerValue", XSD.INTEGER);
         checkContextTerm(context, "bigDecimalValue", Vocabulary.DEFAULT_PREFIX + "bigDecimalValue", XSD.DECIMAL);
+
+        checkValue(json, "doubleValue", instance.getDoubleValue());
+        checkValue(json, "floatValue", instance.getFloatValue());
+        checkValue(json, "longValue", instance.getLongValue());
+        checkValue(json, "shortValue", instance.getShortValue());
+        checkValue(json, "intValue", instance.getIntValue());
+        checkValue(json, "bigIntegerValue", instance.getBigIntegerValue());
+        checkValue(json, "bigDecimalValue", instance.getBigDecimalValue());
     }
 
     private static void checkContextTerm(JsonObject context, String att, String iri, String datatype) {
@@ -443,5 +452,23 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final JsonObject keyCtx = context.getJsonObject(att);
         assertEquals(datatype, keyCtx.getString(JsonLd.TYPE));
         assertEquals(iri, keyCtx.getString(JsonLd.ID));
+    }
+
+    private static void checkValue(JsonObject result, String attId, Object value) {
+        final JsonValue attValue = result.get(attId);
+        assertEquals(value.toString(), attValue.toString());
+    }
+
+    @Test
+    void serializationSerializesBooleanAsTypedLiteral() {
+        final User user = Generator.generateUser();
+        user.setAdmin(true);
+
+        final JsonObject json = serializeAndRead(user).asJsonObject();
+        assertThat(json, hasKey(JsonLd.CONTEXT));
+        assertEquals(JsonValue.ValueType.OBJECT, json.get(JsonLd.CONTEXT).getValueType());
+        final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
+        checkContextTerm(context, "admin", Vocabulary.IS_ADMIN, XSD.BOOLEAN);
+        checkValue(json, "admin", true);
     }
 }

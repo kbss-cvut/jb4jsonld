@@ -56,8 +56,8 @@ class ContextBuildingNumberSerializerTest {
         assertInstanceOf(ObjectNode.class, mapping.get());
         final ObjectNode objectNode = (ObjectNode) mapping.get();
         assertThat(objectNode.getItems(),
-                   hasItems(JsonNodeFactory.createLiteralNode(JsonLd.ID, "http://example.com/number"),
-                            JsonNodeFactory.createLiteralNode(JsonLd.TYPE, expectedDatatype)));
+                   hasItems(JsonNodeFactory.createStringLiteralNode(JsonLd.ID, "http://example.com/number"),
+                            JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, expectedDatatype)));
     }
 
     static Stream<Arguments> serializationData() {

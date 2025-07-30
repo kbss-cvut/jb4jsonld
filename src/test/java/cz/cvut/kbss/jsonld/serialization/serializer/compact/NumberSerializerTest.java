@@ -58,8 +58,8 @@ class NumberSerializerTest {
 
     private static JsonNode typedNode(Number value, String datatype) {
         final ObjectNode node = JsonNodeFactory.createObjectNode();
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.TYPE, datatype));
-        node.addItem(JsonNodeFactory.createLiteralNode(JsonLd.VALUE, value));
+        node.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.TYPE, datatype));
+        node.addItem(JsonNodeFactory.createNumericLiteralNode(JsonLd.VALUE, value));
         return node;
     }
 }

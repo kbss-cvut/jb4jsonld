@@ -33,6 +33,7 @@ import cz.cvut.kbss.jsonld.serialization.serializer.LiteralValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ObjectGraphValueSerializers;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializers;
+import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingBooleanSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingDefaultValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingIdentifierSerializer;
 import cz.cvut.kbss.jsonld.serialization.serializer.context.ContextBuildingIndividualSerializer;
@@ -84,6 +85,7 @@ public class ContextBuildingJsonLdSerializer extends JsonLdSerializer {
         final ContextBuildingTemporalAmountSerializer tas = new ContextBuildingTemporalAmountSerializer();
         valueSerializers.registerSerializer(Duration.class, tas);
         valueSerializers.registerSerializer(Period.class, tas);
+        valueSerializers.registerSerializer(Boolean.class, new ContextBuildingBooleanSerializer());
         final ContextBuildingNumberSerializer ns = new ContextBuildingNumberSerializer();
         ContextBuildingNumberSerializer.getSupportedTypes()
                                        .forEach(cls -> valueSerializers.registerSerializer(cls, ns));

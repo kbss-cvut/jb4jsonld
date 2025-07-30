@@ -36,7 +36,7 @@ public class ContextBuildingLocalDateSerializer extends LocalDateSerializer {
             final ObjectNode termDef =
                     SerializerUtils.createTypedTermDefinition(ctx.getFieldName(), ctx.getTerm(), XSD.DATE);
             ctx.registerTermMapping(ctx.getFieldName(), termDef);
-            return JsonNodeFactory.createLiteralNode(ctx.getTerm(), FORMATTER.format(value));
+            return JsonNodeFactory.createStringLiteralNode(ctx.getTerm(), FORMATTER.format(value));
         } else {
             return super.serialize(value, ctx);
         }
