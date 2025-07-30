@@ -22,6 +22,7 @@ import cz.cvut.kbss.jsonld.serialization.model.BooleanLiteralNode;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
 import cz.cvut.kbss.jsonld.serialization.model.ListNode;
+import cz.cvut.kbss.jsonld.serialization.model.LiteralNode;
 import cz.cvut.kbss.jsonld.serialization.model.NumericLiteralNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectIdNode;
 import cz.cvut.kbss.jsonld.serialization.model.ObjectNode;
@@ -45,11 +46,11 @@ public class JsonNodeFactory {
         BOOLEAN, NUMBER, STRING
     }
 
-    public static JsonNode createLiteralNode(Object value) {
+    public static LiteralNode<?> createLiteralNode(Object value) {
         return createLiteralNode(null, value);
     }
 
-    public static JsonNode createLiteralNode(String name, Object value) {
+    public static LiteralNode<?> createLiteralNode(String name, Object value) {
         final LiteralType type = determineLiteralType(value);
         return switch (type) {
             case BOOLEAN -> createBooleanLiteralNode(name, (Boolean) value);
@@ -67,7 +68,7 @@ public class JsonNodeFactory {
         return LiteralType.STRING;
     }
 
-    public static JsonNode createBooleanLiteralNode(String name, Boolean value) {
+    public static BooleanLiteralNode createBooleanLiteralNode(String name, Boolean value) {
         return name != null ? new BooleanLiteralNode(name, value) : new BooleanLiteralNode(value);
     }
 
