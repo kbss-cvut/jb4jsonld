@@ -1,7 +1,11 @@
 # JB4JSON-LD Changelog
 
+## 0.15.3 - 2025-07-30
+- Improve the consistency of typed literals serialization - use native JSON types when possible (Bug #81).
+- Dependency updates: JOPA 2.4.4.
+
 ## 0.15.2 - 2025-04-16
-- Serialize empty collection as empty JSON array when it is passed as root object for serialization (GH-78).
+- Serialize an empty collection as an empty JSON array when it is passed as the root object for serialization (GH-78).
 - Dependency updates: JOPA 2.3.1, test dependencies.
 
 ## 0.15.1 - 2024-12-17
@@ -12,10 +16,10 @@
 - Support deserializing objects containing only identifier when `ASSUME_TARGET_TYPE` is enabled (Enhancement #69).
 - Cache deserialization type map (Enhancement #68).
 - Dependency updates: JOPA 2.0.4, test deps.
-- **Breaking change:** Set Java 17 as minimum Java version.
+- **Breaking change:** Set Java 17 as the minimum Java version.
 
 ## 0.14.3 - 2024-04-16
-- Fix missing context entry when serializing empty collection mapped to data/annotation property.
+- Fix missing context entry when serializing an empty collection mapped to data/annotation property.
 
 ## 0.14.2 - 2024-03-13
 - Fix an issue with scanning classpath when running in a Spring Boot 3.2.x bundle (Bug #63).
