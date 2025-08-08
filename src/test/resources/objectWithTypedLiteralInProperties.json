@@ -1,0 +1,32 @@
+{
+  "@context": {
+    "firstName": "http://xmlns.com/foaf/0.1/firstName",
+    "lastName": "http://xmlns.com/foaf/0.1/lastName",
+    "types": "@type",
+    "iri": "@id"
+  },
+  "iri": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
+  "types": [
+    "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/User"
+  ],
+  "firstName": "Catherine",
+  "lastName": "Halsey",
+  "http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/warrantor": [
+    "Lord Hood"
+  ],
+  "http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/revision-count": [
+    {
+      "types": "http://www.w3.org/2001/XMLSchema#int",
+      "@value": 4
+    },
+    {
+      "types": "http://www.w3.org/2001/XMLSchema#int",
+      "@value": 8
+    }
+  ],
+  "http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved": [
+    true
+  ]
+}

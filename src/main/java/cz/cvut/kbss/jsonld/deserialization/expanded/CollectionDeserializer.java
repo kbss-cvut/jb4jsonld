@@ -76,14 +76,20 @@ class CollectionDeserializer extends Deserializer<JsonArray> {
         } else if (value.containsKey(JsonLd.LANGUAGE)) {
             assert value.containsKey(JsonLd.VALUE);
             instanceBuilder.addValue(
-                    new LangString(ValueUtils.stringValue(ValueUtils.getValue(value)), ValueUtils.stringValue(value.get(JsonLd.LANGUAGE))));
+                    new LangString(ValueUtils.stringValue(ValueUtils.getValue(value)),
+                                   ValueUtils.stringValue(value.get(JsonLd.LANGUAGE))));
         } else if (instanceBuilder.isCurrentCollectionProperties()) {
-            // If we are deserializing an object into @Properties, just extract the identifier and put it into the map
-            if (!value.containsKey(JsonLd.ID)) {
+            if (value.containsKey(JsonLd.TYPE) && value.containsKey(JsonLd.VALUE)) {
+                instanceBuilder.addValue(
+                        XSDTypeCoercer.coerceType(ValueUtils.stringValue(ValueUtils.getValue(value)),
+                                                  ValueUtils.stringValue(value.get(JsonLd.TYPE))));
+            } else if (!value.containsKey(JsonLd.ID)) {
                 throw new MissingIdentifierException(
                         "Cannot put an object without an identifier into @Properties. Object: " + value);
+            } else {
+                // If we are deserializing an object into @Properties, just extract the identifier and put it into the map
+                instanceBuilder.addValue(URI.create(ValueUtils.stringValue(value.get(JsonLd.ID))));
             }
-            instanceBuilder.addValue(URI.create(ValueUtils.stringValue(value.get(JsonLd.ID))));
         } else {
             final Class<?> elementType = instanceBuilder.getCurrentCollectionElementType();
             new ObjectDeserializer(instanceBuilder, config, elementType).processValue(value);
@@ -126,9 +132,11 @@ class CollectionDeserializer extends Deserializer<JsonArray> {
         final JsonValue val = value.get(JsonLd.VALUE);
         if (value.containsKey(JsonLd.TYPE)) {
             instanceBuilder
-                    .addValue(property, XSDTypeCoercer.coerceType(ValueUtils.stringValue(val), ValueUtils.stringValue(value.get(JsonLd.TYPE))));
+                    .addValue(property, XSDTypeCoercer.coerceType(ValueUtils.stringValue(val),
+                                                                  ValueUtils.stringValue(value.get(JsonLd.TYPE))));
         } else if (value.containsKey(JsonLd.LANGUAGE)) {
-            instanceBuilder.addValue(property, new LangString(ValueUtils.stringValue(val), ValueUtils.stringValue(value.get(JsonLd.LANGUAGE))));
+            instanceBuilder.addValue(property, new LangString(ValueUtils.stringValue(val),
+                                                              ValueUtils.stringValue(value.get(JsonLd.LANGUAGE))));
         } else {
             instanceBuilder.addValue(property, ValueUtils.literalValue(val));
         }
