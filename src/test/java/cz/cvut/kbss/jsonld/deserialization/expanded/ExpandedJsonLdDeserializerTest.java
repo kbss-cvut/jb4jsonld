@@ -917,4 +917,25 @@ class ExpandedJsonLdDeserializerTest {
         assertEquals(Set.of(true), result.getProperties().get(URI.create(
                 "http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved")));
     }
+
+    @Test
+    void deserializationHandlesTypedLiteralsForUntypedProperties() throws Exception {
+        final JsonArray input = readAndExpand("objectWithTypedLiteralInProperties.json");
+        final Person result = sut.deserialize(input, Person.class);
+        assertNotNull(result);
+        assertEquals("Catherine", result.getFirstName());
+        assertEquals("Halsey", result.getLastName());
+        assertThat(result.getProperties(),
+                   hasKey("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/warrantor"));
+        assertEquals(Set.of("Lord Hood"), result.getProperties()
+                                                .get("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/warrantor"));
+        assertThat(result.getProperties(),
+                   hasKey("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/revision-count"));
+        assertEquals(Set.of("4", "8"), result.getProperties()
+                                             .get("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/revision-count"));
+        assertThat(result.getProperties(),
+                   hasKey("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved"));
+        assertEquals(Set.of("true"), result.getProperties()
+                                           .get("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved"));
+    }
 }
