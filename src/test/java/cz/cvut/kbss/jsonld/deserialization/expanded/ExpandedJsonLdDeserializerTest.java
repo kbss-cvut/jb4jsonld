@@ -41,6 +41,7 @@ import cz.cvut.kbss.jsonld.environment.model.ObjectWithPluralMultilingualString;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
 import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
 import cz.cvut.kbss.jsonld.environment.model.Role;
 import cz.cvut.kbss.jsonld.environment.model.Study;
 import cz.cvut.kbss.jsonld.environment.model.StudyOnPersons;
@@ -75,6 +76,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -890,5 +892,50 @@ class ExpandedJsonLdDeserializerTest {
         assertEquals(128.3, result.getDoubleValue());
         assertEquals(BigInteger.valueOf(128000), result.getBigIntegerValue());
         assertEquals(BigDecimal.valueOf(128000.821), result.getBigDecimalValue());
+    }
+
+    /**
+     * Bug #84
+     */
+    @Test
+    void deserializationHandlesTypedLiteralsForTypedProperties() throws Exception {
+        final JsonArray input = readAndExpand("objectWithTypedLiteralInProperties.json");
+        final PersonWithTypedProperties result = sut.deserialize(input, PersonWithTypedProperties.class);
+        assertNotNull(result);
+        assertEquals("Catherine", result.getFirstName());
+        assertEquals("Halsey", result.getLastName());
+        assertThat(result.getProperties(),
+                   hasKey(URI.create("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/warrantor")));
+        assertEquals(Set.of("Lord Hood"), result.getProperties().get(URI.create(
+                "http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/warrantor")));
+        assertThat(result.getProperties(), hasKey(URI.create(
+                "http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/revision-count")));
+        assertEquals(Set.of(4, 8), result.getProperties().get(URI.create(
+                "http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/revision-count")));
+        assertThat(result.getProperties(),
+                   hasKey(URI.create("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved")));
+        assertEquals(Set.of(true), result.getProperties().get(URI.create(
+                "http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved")));
+    }
+
+    @Test
+    void deserializationHandlesTypedLiteralsForUntypedProperties() throws Exception {
+        final JsonArray input = readAndExpand("objectWithTypedLiteralInProperties.json");
+        final Person result = sut.deserialize(input, Person.class);
+        assertNotNull(result);
+        assertEquals("Catherine", result.getFirstName());
+        assertEquals("Halsey", result.getLastName());
+        assertThat(result.getProperties(),
+                   hasKey("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/warrantor"));
+        assertEquals(Set.of("Lord Hood"), result.getProperties()
+                                                .get("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/warrantor"));
+        assertThat(result.getProperties(),
+                   hasKey("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/revision-count"));
+        assertEquals(Set.of("4", "8"), result.getProperties()
+                                             .get("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/revision-count"));
+        assertThat(result.getProperties(),
+                   hasKey("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved"));
+        assertEquals(Set.of("true"), result.getProperties()
+                                           .get("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved"));
     }
 }

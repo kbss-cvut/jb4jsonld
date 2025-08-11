@@ -1,5 +1,8 @@
 # JB4JSON-LD Changelog
 
+## 0.15.4 - 2025-08-11
+- Fix an issue with deserializing typed literals into `@Properties` (Bug #84).
+
 ## 0.15.3 - 2025-07-30
 - Improve the consistency of typed literals serialization - use native JSON types when possible (Bug #81).
 - Dependency updates: JOPA 2.4.4.
