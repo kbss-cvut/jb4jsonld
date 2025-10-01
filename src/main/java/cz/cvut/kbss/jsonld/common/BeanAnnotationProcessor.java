@@ -20,6 +20,7 @@ package cz.cvut.kbss.jsonld.common;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.Namespace;
 import cz.cvut.kbss.jopa.model.annotations.Namespaces;
+import cz.cvut.kbss.jopa.model.annotations.OWLAbstractClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
@@ -77,6 +78,16 @@ public class BeanAnnotationProcessor {
      */
     public static boolean isOwlClassEntity(Class<?> cls) {
         return cls != null && cls.getDeclaredAnnotation(OWLClass.class) != null;
+    }
+
+	    /**
+     * Checks whether the specified class is annotated with the {@link OWLAbstractClass} annotation.
+     *
+     * @param cls The class to examine
+     * @return Whether it is annotated with {@link OWLAbstractClass}
+     */
+    public static boolean isOwlAbstractClassEntity(Class<?> cls) {
+        return cls != null && cls.getDeclaredAnnotation(OWLAbstractClass.class) != null;
     }
 
     /**

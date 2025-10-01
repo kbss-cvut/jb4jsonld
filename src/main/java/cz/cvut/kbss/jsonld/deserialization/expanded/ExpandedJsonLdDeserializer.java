@@ -29,14 +29,25 @@ import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
+	private final Map<String, Object> knownInstances;
+	final PendingReferenceRegistry referenceRegistry;
+
     public ExpandedJsonLdDeserializer() {
+		deserializers.configure(configuration());
+		knownInstances = new HashMap<>();
+		referenceRegistry = new PendingReferenceRegistry();
     }
 
     public ExpandedJsonLdDeserializer(Configuration configuration) {
         super(configuration);
+		deserializers.configure(configuration());
+		knownInstances = new HashMap<>();
+		referenceRegistry = new PendingReferenceRegistry();
     }
 
     @Override
@@ -50,22 +61,27 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
             throw new JsonLdDeserializationException(
                     "Input is not expanded JSON-LD. The input does not contain exactly one root element.");
         }
-        deserializers.configure(configuration());
         final JsonObject root = input.getJsonObject(0);
-        final PendingReferenceRegistry referenceRegistry = new PendingReferenceRegistry();
         if (deserializers.hasCustomDeserializer(resultClass)) {
             final DeserializationContext<T> ctx = new DeserializationContext<>(resultClass, classResolver);
             assert deserializers.getDeserializer(ctx).isPresent();
             return deserializers.getDeserializer(ctx).get().deserialize(root, ctx);
         }
-        final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(classResolver, referenceRegistry);
+        final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(classResolver, referenceRegistry, knownInstances);
         new ObjectDeserializer(instanceBuilder, new DeserializerConfig(configuration(), classResolver, deserializers), resultClass)
                 .processValue(root);
         if (configuration().is(ConfigParam.ASSUME_TARGET_TYPE)) {
             new AssumedTypeReferenceReplacer().replacePendingReferencesWithAssumedTypedObjects(referenceRegistry);
         }
-        referenceRegistry.verifyNoUnresolvedReferencesExist();
+		if (!configuration().is(ConfigParam.DISABLE_UNRESOLVED_REFERENCES_CHECK)) {
+			referenceRegistry.verifyNoUnresolvedReferencesExist();
+		}
         assert resultClass.isAssignableFrom(instanceBuilder.getCurrentRoot().getClass());
         return resultClass.cast(instanceBuilder.getCurrentRoot());
     }
+
+	@Override
+	public void cleanup() {
+		referenceRegistry.verifyNoUnresolvedReferencesExist();
+	}
 }

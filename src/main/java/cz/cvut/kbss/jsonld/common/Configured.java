@@ -30,4 +30,11 @@ public interface Configured {
      * @return Configuration
      */
     Configuration configuration();
+
+
+	/**
+	 * Updates the configuration for this JSON-LD processor.
+	 * @param configuration The {@link Configuration}.
+	 */
+	void updateConfiguration(Configuration configuration);
 }
