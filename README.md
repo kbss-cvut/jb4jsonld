@@ -104,6 +104,7 @@ public class User {
 | `serializeIndividualsUsingExpandedDefinition` | `false`       | Whether individuals should be serialized as string with expanded term definition in context (consisting of `@id` and `@type`) Relevant only for context-based serializer.                                                                                                    |
 | `disableTypeMapCache`                         | `false`       | Disables type map cache. Type map is built for deserialization by scanning the classpath.                                                                                                                                                                                    |
 | `disableUnresolvedReferencesCheck`            | `false`       | Whether to disable the unresolved references check after deserialization.                                                                                                                                                                                                    |
+| `classLoader`                                 | `null`        | Use a custom ClassLoader for loading the target classes.                                                                                                                                                                                                                     |
 See `cz.cvut.kbss.jsonld.ConfigParam`.
 
 ## Documentation
