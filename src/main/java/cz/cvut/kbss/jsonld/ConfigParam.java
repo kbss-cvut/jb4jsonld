@@ -133,7 +133,12 @@ public enum ConfigParam {
 	 * When a JSON-LD is used with @list in it, it refers to objects later in the same JSON-LD.
 	 * In this case, the unresolved references can only be checked after deserializing all entries.
 	 */
-	DISABLE_UNRESOLVED_REFERENCES_CHECK("disableUnresolvedReferencesCheck");
+	DISABLE_UNRESOLVED_REFERENCES_CHECK("disableUnresolvedReferencesCheck"),
+
+	/**
+	 * Set custom classLoader used for resolving types.
+	 */
+	CLASS_LOADER("classLoader");
 
     private final String name;
 

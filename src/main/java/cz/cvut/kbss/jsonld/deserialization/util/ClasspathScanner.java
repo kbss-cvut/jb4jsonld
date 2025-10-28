@@ -49,11 +49,20 @@ public class ClasspathScanner {
         this.listener = Objects.requireNonNull(listener);
     }
 
-    /**
+	/**
      * Scans classpath accessible from the current thread's class loader.
+	 */
+	public void processClasses(String scanPath) {
+		processClasses(Thread.currentThread().getContextClassLoader(), scanPath);
+	}
+
+    /**
+     * Scans classpath accessible from the class loader.
      * <p>
      * All available classes are passed to the registered consumer.
      * <p>
+     * The {@code loader} parameter is the loader that should be used to scan the classpath.
+	 * <p>
      * The {@code scanPath} parameter means that only the specified package (and it subpackages) should be searched.
      * This parameter is optional, but it is highly recommended to specify it, as it can speed up the process
      * dramatically.
@@ -63,19 +72,22 @@ public class ClasspathScanner {
      *
      * @param scanPath Package narrowing down the scan space. Optional
      */
-    public void processClasses(String scanPath) {
-        if (scanPath == null) {
+    public void processClasses(ClassLoader loader, String scanPath) {
+        if (loader == null) {
+			processClasses(scanPath);
+			return;
+		}
+		if (scanPath == null) {
             scanPath = "";
         }
-        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         try {
             Enumeration<URL> urls = loader.getResources(scanPath.replace('.', '/'));
             while (urls.hasMoreElements()) {
                 final URL url = urls.nextElement();
                 if (isJar(url.toString())) {
-                    processJarFile(url, scanPath);
+                    processJarFile(loader, url, scanPath);
                 } else {
-                    processDirectory(new File(getUrlAsUri(url).getPath()), scanPath);
+                    processDirectory(loader, new File(getUrlAsUri(url).getPath()), scanPath);
                 }
             }
             // Scan jar files on classpath
@@ -83,7 +95,7 @@ public class ClasspathScanner {
             while (resources.hasMoreElements()) {
                 URL resourceURL = resources.nextElement();
                 if (isJar(resourceURL.toString())) {
-                    processJarFile(resourceURL, scanPath);
+                    processJarFile(loader, resourceURL, scanPath);
                 }
             }
         } catch (IOException e) {
@@ -104,7 +116,7 @@ public class ClasspathScanner {
         }
     }
 
-    protected void processJarFile(URL jarResource, String packageName) {
+    protected void processJarFile(ClassLoader loader, URL jarResource, String packageName) {
         final String relPath = packageName.replace('.', '/');
         final String jarPath = jarResource.getPath().replaceFirst("[.]jar/?!.*", JAR_FILE_SUFFIX)
                                           .replaceFirst("file:", "")
@@ -129,7 +141,7 @@ public class ClasspathScanner {
                     className = className.substring(0, className.length() - CLASS_FILE_SUFFIX.length());
                 }
                 if (className != null) {
-                    processClass(className);
+                    processClass(loader, className);
                 }
             }
         } catch (IOException e) {
@@ -142,9 +154,9 @@ public class ClasspathScanner {
         return entryName.endsWith("module-info" + CLASS_FILE_SUFFIX);
     }
 
-    private void processClass(String className) {
+    private void processClass(ClassLoader loader, String className) {
         try {
-            final Class<?> cls = Class.forName(className);
+			final Class<?> cls = loader.loadClass(className);
             listener.accept(cls);
         } catch (Throwable e) {
             LOG.debug("Skipping non-loadable class {}, got error {}: {}.", className, e.getClass()
@@ -152,7 +164,7 @@ public class ClasspathScanner {
         }
     }
 
-    private void processDirectory(File dir, String packageName)
+    private void processDirectory(ClassLoader loader, File dir, String packageName)
             throws MalformedURLException {
         LOG.trace("Scanning directory {}.", dir);
         // Get the list of the files contained in the package
@@ -168,13 +180,13 @@ public class ClasspathScanner {
                 className = packageName + '.' + fileName.substring(0, fileName.length() - 6);
             }
             if (className != null) {
-                processClass(className);
+                processClass(loader, className);
             }
             final File subDir = new File(dir, fileName);
             if (subDir.isDirectory()) {
-                processDirectory(subDir, packageName + (!packageName.isEmpty() ? '.' : "") + fileName);
+                processDirectory(loader, subDir, packageName + (!packageName.isEmpty() ? '.' : "") + fileName);
             } else if (isJar(subDir.getAbsolutePath())) {
-                processJarFile(subDir.toURI().toURL(), packageName);
+                processJarFile(loader, subDir.toURI().toURL(), packageName);
             }
         }
     }

@@ -56,7 +56,7 @@ public abstract class JsonLdDeserializer implements Configured {
 
     private TargetClassResolver initializeTargetClassResolver() {
         final String scanPath = configuration.get(ConfigParam.SCAN_PACKAGE, "");
-        final TypeMap typeMap = discoverAvailableTypes(scanPath, configuration.is(ConfigParam.DISABLE_TYPE_MAP_CACHE));
+        final TypeMap typeMap = discoverAvailableTypes(scanPath, configuration.is(ConfigParam.DISABLE_TYPE_MAP_CACHE), configuration.getObject(ConfigParam.CLASS_LOADER));
         return new TargetClassResolver(typeMap,
                                        new TargetClassResolverConfig(
                                                configuration.is(ConfigParam.ASSUME_TARGET_TYPE),
@@ -70,17 +70,20 @@ public abstract class JsonLdDeserializer implements Configured {
      * @param scanPath Path to scan on classpath
      * @return Map of types to Java classes
      */
-    private static TypeMap discoverAvailableTypes(String scanPath, boolean disableCache) {
+    private static TypeMap discoverAvailableTypes(String scanPath, boolean disableCache, Object classLoader) {
         final TypeMap map = disableCache ? new TypeMap() : TYPE_MAP;
         if (!map.isEmpty()) {
             return map;
         }
+		if (!(classLoader instanceof ClassLoader)) {
+			classLoader = null;
+		}
         new ClasspathScanner(c -> {
             final OWLClass ann = c.getDeclaredAnnotation(OWLClass.class);
             if (ann != null) {
                 map.register(BeanAnnotationProcessor.expandIriIfNecessary(ann.iri(), c), c);
             }
-        }).processClasses(scanPath);
+        }).processClasses((ClassLoader) classLoader, scanPath);
         return map;
     }
 
