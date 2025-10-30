@@ -71,12 +71,36 @@ public class BeanAnnotationProcessor {
     }
 
     /**
+     * Checks whether the specified class is annotated with the {@link OWLClass} or
+	 * {@link JsonLdType} annotation. If it's annotated with {@link JsonLdType} the iri
+	 * is not empty, and it's not an abstract class.
+     *
+     * @param cls The class to examine
+     * @return Whether it is annotated with {@link OWLClass} or {@link JsonLdType}.
+     */
+	public static boolean isInstantiableMappedType(Class<?> cls) {
+        return isOwlClassEntity(cls) || isJsonLdTypeEntity(cls);
+    }
+
+	    /**
+     * Checks whether the specified class is annotated with the {@link OWLClass} or
+	 * {@link JsonLdType} annotation. If it's annotated with {@link JsonLdType} the IRI
+	 * 	may be empty and it may be an abstract class;
+     *
+     * @param cls The class to examine
+     * @return Whether it is annotated with {@link OWLClass} or {@link JsonLdType}.
+     */
+	public static boolean isMappedType(Class<?> cls) {
+        return isInstantiableMappedType(cls) || isJsonLdTypeAbstractEntity(cls);
+    }
+
+    /**
      * Checks whether the specified class is annotated with the {@link OWLClass} annotation.
      *
      * @param cls The class to examine
      * @return Whether it is annotated with {@link OWLClass}
      */
-    public static boolean isOwlClassEntity(Class<?> cls) {
+    protected static boolean isOwlClassEntity(Class<?> cls) {
         return cls != null && cls.getDeclaredAnnotation(OWLClass.class) != null;
     }
 
@@ -87,7 +111,7 @@ public class BeanAnnotationProcessor {
      * @param cls The class to examine
      * @return Whether it is annotated with {@link JsonLdType} and iri is provided
      */
-	public static boolean isJsonLdTypeEntity(Class<?> cls) {
+	protected static boolean isJsonLdTypeEntity(Class<?> cls) {
 		if (cls == null) {
 			return false;
 		}
@@ -108,7 +132,7 @@ public class BeanAnnotationProcessor {
      * @param cls The class to examine
      * @return Whether it is annotated with {@link JsonLdType} and iri is not provided
      */
-	public static boolean isJsonLdTypeAbstractEntity(Class<?> cls) {
+	protected static boolean isJsonLdTypeAbstractEntity(Class<?> cls) {
 		if (cls == null) {
 			return false;
 		}
