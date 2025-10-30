@@ -20,6 +20,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.annotation.JsonLdType;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.Configured;
 import cz.cvut.kbss.jsonld.deserialization.expanded.ExpandedJsonLdDeserializer;
@@ -76,9 +77,13 @@ public abstract class JsonLdDeserializer implements Configured {
             return map;
         }
         new ClasspathScanner(c -> {
-            final OWLClass ann = c.getDeclaredAnnotation(OWLClass.class);
-            if (ann != null) {
-                map.register(BeanAnnotationProcessor.expandIriIfNecessary(ann.iri(), c), c);
+            final OWLClass annOwl = c.getDeclaredAnnotation(OWLClass.class);
+            if (annOwl != null) {
+                map.register(BeanAnnotationProcessor.expandIriIfNecessary(annOwl.iri(), c), c);
+            }
+			final JsonLdType annJsonLd = c.getDeclaredAnnotation(JsonLdType.class);
+            if (annJsonLd != null) {
+                map.register(BeanAnnotationProcessor.expandIriIfNecessary(annJsonLd.iri(), c), c);
             }
         }).processClasses(scanPath);
         return map;

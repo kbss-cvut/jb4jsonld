@@ -24,7 +24,9 @@ public class Vocabulary {
     public static final String DEFAULT_PREFIX = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/";
 
     public static final String PERSON = "http://onto.fel.cvut.cz/ontologies/ufo/Person";
+	public static final String PERSON_LD = "http://onto.fel.cvut.cz/ontologies/ufo/PersonLd";
     public static final String USER = DEFAULT_PREFIX + "User";
+	public static final String USER_LD = DEFAULT_PREFIX + "UserLd";
     public static final String EMPLOYEE = DEFAULT_PREFIX + "Employee";
     public static final String ORGANIZATION = DEFAULT_PREFIX + "Organization";
     public static final String STUDY = DEFAULT_PREFIX + "Study";
