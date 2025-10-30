@@ -37,7 +37,7 @@ class InstanceTypeResolver {
      * <p>
      * This includes:
      * <ul>
-     * <li>{@link cz.cvut.kbss.jopa.model.annotations.OWLClass} values declared on the argument's class
+     * <li>{@link cz.cvut.kbss.jopa.model.annotations.OWLClass} or {@link cz.cvut.kbss.jsonld.annotation.JsonLdType} values declared on the argument's class
      * and any of its ancestors.</li>
      * <li>Value of types field in the instance.</li>
      * </ul>
@@ -47,7 +47,7 @@ class InstanceTypeResolver {
      */
     Set<String> resolveTypes(Object instance) {
         assert instance != null;
-        final Set<String> declaredTypes = BeanAnnotationProcessor.getOwlClasses(instance);
+        final Set<String> declaredTypes = BeanAnnotationProcessor.getJsonLdTypeOrOwlClasses(instance);
         final Optional<Field> typesField = BeanAnnotationProcessor.getTypesField(instance.getClass());
         typesField.ifPresent(f -> {
             if (!Collection.class.isAssignableFrom(f.getType())) {
@@ -60,7 +60,7 @@ class InstanceTypeResolver {
         });
         if (declaredTypes.isEmpty()) {
             throw new MissingTypeInfoException("No type info found on instance " + instance +
-                    ". Either annotate the class with @OWLClass or provide a non-empty @Types field. " +
+                    ". Either annotate the class with @OWLClass/@JsonLdType or provide a non-empty @Types field. " +
                     "If it is a literal, make sure that the property referencing is not an @OWLObjectProperty");
         }
         return declaredTypes;

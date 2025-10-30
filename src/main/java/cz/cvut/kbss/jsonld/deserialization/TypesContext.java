@@ -32,7 +32,7 @@ class TypesContext<T extends Collection<E>, E> extends InstanceContext<T> {
     TypesContext(T instance, Map<String, Object> knownInstances, Class<E> elementType, Class<?> ownerType) {
         super(instance, knownInstances);
         this.elementType = elementType;
-        this.mappedTypes = BeanAnnotationProcessor.getOwlClasses(ownerType);
+        this.mappedTypes = BeanAnnotationProcessor.getJsonLdTypeOrOwlClasses(ownerType);
     }
 
     @Override

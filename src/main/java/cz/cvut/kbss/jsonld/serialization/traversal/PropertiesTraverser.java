@@ -66,6 +66,8 @@ class PropertiesTraverser {
         final Class<?> cls = value.getClass();
         return (BeanClassProcessor.isIdentifierType(value.getClass()) && !String.class.equals(cls)) ||
                 BeanAnnotationProcessor.isOwlClassEntity(value.getClass()) ||
+				BeanAnnotationProcessor.isJsonLdTypeAbstractEntity(value.getClass()) ||
+				BeanAnnotationProcessor.isJsonLdTypeAbstractEntity(value.getClass()) ||
                 BeanAnnotationProcessor.hasTypesField(cls);
     }
 

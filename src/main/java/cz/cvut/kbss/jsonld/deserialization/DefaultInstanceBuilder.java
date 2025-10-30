@@ -83,7 +83,7 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
     private InstanceContext<?> openObjectForProperty(String id, List<String> types, Field targetField) {
         final Class<?> type = targetField.getType();
         final Class<?> targetClass = classResolver.getTargetClass(type, types);
-        assert BeanAnnotationProcessor.isOwlClassEntity(targetClass);
+        assert BeanAnnotationProcessor.isOwlClassEntity(targetClass) || BeanAnnotationProcessor.isJsonLdTypeEntity(targetClass);
         if (knownInstances.containsKey(id)) {
             return reopenExistingInstance(id, targetClass);
         } else {
