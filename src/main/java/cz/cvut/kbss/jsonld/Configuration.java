@@ -27,6 +27,7 @@ import java.util.Objects;
 public class Configuration {
 
     private final Map<String, String> config = new HashMap<>();
+	private final Map<String, Object> objectConfig = new HashMap<>();
 
     public Configuration() {
     }
@@ -34,6 +35,7 @@ public class Configuration {
     public Configuration(Configuration other) {
         Objects.requireNonNull(other);
         config.putAll(other.config);
+        objectConfig.putAll(other.objectConfig);
     }
 
     public String get(ConfigParam param) {
@@ -54,6 +56,24 @@ public class Configuration {
         return config.getOrDefault(param, defaultValue);
     }
 
+	public Object getObject(ConfigParam param) {
+        Objects.requireNonNull(param);
+        return getObject(param.getName());
+    }
+
+    public Object getObject(String param) {
+        return objectConfig.get(param);
+    }
+
+	public Object getObject(ConfigParam param, Object defaultValue) {
+        Objects.requireNonNull(param);
+        return objectConfig.getOrDefault(param.getName(), defaultValue);
+    }
+
+    public Object getObject(String param, Object defaultValue) {
+        return objectConfig.getOrDefault(param, defaultValue);
+    }
+
     public boolean is(ConfigParam param) {
         Objects.requireNonNull(param);
         return is(param.getName());
@@ -72,6 +92,16 @@ public class Configuration {
     public void set(String param, String value) {
         Objects.requireNonNull(param);
         config.put(param, value);
+    }
+
+	public void setObject(ConfigParam param, Object value) {
+        Objects.requireNonNull(param);
+        objectConfig.put(param.getName(), value);
+    }
+
+    public void setObject(String param, Object value) {
+        Objects.requireNonNull(param);
+        objectConfig.put(param, value);
     }
 
     public boolean has(String param) {

@@ -103,6 +103,7 @@ public class User {
 | `datetimeFormat`                              |               | Format in which datetime values are serialized (and expected for deserialization). Default is undefined, meaning that the ISO 8601 format is used.                                                                                                                           |
 | `serializeIndividualsUsingExpandedDefinition` | `false`       | Whether individuals should be serialized as string with expanded term definition in context (consisting of `@id` and `@type`) Relevant only for context-based serializer.                                                                                                    |
 | `disableTypeMapCache`                         | `false`       | Disables type map cache. Type map is built for deserialization by scanning the classpath.                                                                                                                                                                                    |
+| `classLoader`                                 | `null`        | Use a custom ClassLoader for loading the target classes.                                                                                                                                                                                                                     |
 
 See `cz.cvut.kbss.jsonld.ConfigParam`.
 
