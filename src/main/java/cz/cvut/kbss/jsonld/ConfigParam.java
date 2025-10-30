@@ -125,7 +125,12 @@ public enum ConfigParam {
      * If every deserializer instance should get a fresh type map based on the current configuration, disable this
      * cache.
      */
-    DISABLE_TYPE_MAP_CACHE("disableTypeMapCache");
+    DISABLE_TYPE_MAP_CACHE("disableTypeMapCache"),
+
+	/**
+	 * Set custom classLoader used for resolving types.
+	 */
+	CLASS_LOADER("classLoader");
 
     private final String name;
 
