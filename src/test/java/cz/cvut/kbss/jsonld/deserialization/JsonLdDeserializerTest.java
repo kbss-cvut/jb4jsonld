@@ -119,4 +119,15 @@ class JsonLdDeserializerTest {
         // If classpath scanning occurred again, the updated scan package would be too specific for Study
         assertThat(typeMapTwo.get(Vocabulary.STUDY), not(hasItem(Study.class)));
     }
+
+	@Test
+    void constructionScansClasspathAndBuildsTypeMapCustomLoader() throws Exception {
+        final Configuration config = new Configuration();
+        config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
+        config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
+		config.setObject(ConfigParam.CLASS_LOADER, Thread.currentThread().getContextClassLoader());
+        final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
+        assertFalse(typeMap(deserializer).get(Vocabulary.STUDY).isEmpty());
+        assertTrue(typeMap(deserializer).get(Vocabulary.STUDY).contains(Study.class));
+    }
 }
