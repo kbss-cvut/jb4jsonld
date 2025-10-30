@@ -39,7 +39,7 @@ import java.util.*;
 public class DefaultInstanceBuilder implements InstanceBuilder {
 
     // Identifiers to instances
-    private final Map<String, Object> knownInstances = new HashMap<>();
+    private final Map<String, Object> knownInstances;
     private final Stack<InstanceContext> openInstances = new Stack<>();
 
     private final TargetClassResolver classResolver;
@@ -52,6 +52,15 @@ public class DefaultInstanceBuilder implements InstanceBuilder {
                                   PendingReferenceRegistry pendingReferenceRegistry) {
         this.classResolver = classResolver;
         this.pendingReferenceRegistry = pendingReferenceRegistry;
+		this.knownInstances = new HashMap<>();
+    }
+
+	public DefaultInstanceBuilder(TargetClassResolver classResolver,
+                                  PendingReferenceRegistry pendingReferenceRegistry,
+								  Map<String, Object> knownInstances) {
+        this.classResolver = classResolver;
+        this.pendingReferenceRegistry = pendingReferenceRegistry;
+		this.knownInstances = knownInstances;
     }
 
     @Override

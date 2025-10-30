@@ -39,7 +39,7 @@ public abstract class JsonLdDeserializer implements Configured {
 
     private static final TypeMap TYPE_MAP = new TypeMap();
 
-    private final Configuration configuration;
+    private Configuration configuration;
 
     protected final TargetClassResolver classResolver;
 
@@ -97,6 +97,12 @@ public abstract class JsonLdDeserializer implements Configured {
         return configuration;
     }
 
+	@Override
+	public void updateConfiguration(Configuration configuration) {
+		this.configuration = configuration;
+	}
+
+
     /**
      * Registers a custom deserializer for the specified type.
      * <p>
@@ -121,6 +127,12 @@ public abstract class JsonLdDeserializer implements Configured {
      * @return Deserialized Java instance
      */
     public abstract <T> T deserialize(JsonValue jsonLd, Class<T> resultClass);
+
+	/**
+	 * Cleans up after deserialization. Should be called after the entire list is deserialized
+	 * using a custom {@link DeserializationContext}.
+	 */
+	public abstract void cleanup();
 
     /**
      * Creates deserializer for expanded JSON-LD, initialized with the specified configuration.
