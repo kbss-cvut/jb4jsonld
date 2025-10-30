@@ -26,8 +26,8 @@ import java.lang.annotation.Target;
 /**
  * Specifies that the class is an entity class and maps to an ontological class (RDFS or OWL).
  * <p>
- * This annotation is applied to the entity class.
- * Do not provide iri on an abstract class.
+ * This annotation is applied to the entity class, ff the IRI is empty, then it must be applied
+ * to an abstract class.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
