@@ -130,7 +130,15 @@ public enum ConfigParam {
 	/**
 	 * Set custom classLoader used for resolving types.
 	 */
-	CLASS_LOADER("classLoader");
+	CLASS_LOADER("classLoader"),
+
+	/**
+	 * Whether to postpone the unresolved references check after deserialization to the cleanup method.
+	 * <p>
+	 * When a JSON-LD is used with @list in it, it refers to objects later in the same JSON-LD.
+	 * In this case, the unresolved references can only be checked after deserializing all entries.
+	 */
+	POSTPONE_UNRESOLVED_REFERENCES_CHECK("postponeUnresolvedReferencesCheck");
 
     private final String name;
 

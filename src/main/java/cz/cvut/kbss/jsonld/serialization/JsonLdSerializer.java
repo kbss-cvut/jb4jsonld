@@ -33,7 +33,7 @@ import java.util.Objects;
  */
 public abstract class JsonLdSerializer implements Configured {
 
-    private final Configuration configuration;
+    private Configuration configuration;
 
     protected final JsonGenerator jsonGenerator;
 
@@ -55,6 +55,11 @@ public abstract class JsonLdSerializer implements Configured {
     public Configuration configuration() {
         return configuration;
     }
+
+	@Override
+	public void updateConfiguration(Configuration configuration) {
+		this.configuration = configuration;
+	}
 
     /**
      * Registers a custom serializer for the specified type.
