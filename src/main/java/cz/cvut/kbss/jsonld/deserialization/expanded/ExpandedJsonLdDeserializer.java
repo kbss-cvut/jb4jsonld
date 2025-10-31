@@ -75,6 +75,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 		if (!configuration().is(ConfigParam.POSTPONE_UNRESOLVED_REFERENCES_CHECK)) {
 			referenceRegistry.verifyNoUnresolvedReferencesExist();
 			referenceRegistry = new PendingReferenceRegistry();
+			knownInstances = new HashMap<>();
 		}
         assert resultClass.isAssignableFrom(instanceBuilder.getCurrentRoot().getClass());
         return resultClass.cast(instanceBuilder.getCurrentRoot());
