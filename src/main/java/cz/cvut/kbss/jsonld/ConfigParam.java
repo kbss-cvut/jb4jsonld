@@ -133,7 +133,7 @@ public enum ConfigParam {
 	CLASS_LOADER("classLoader"),
 
 	/**
-	 * Whether to disable the unresolved references check after deserialization.
+	 * Whether to postpone the unresolved references check after deserialization to the cleanup method.
 	 * <p>
 	 * When a JSON-LD is used with @list in it, it refers to objects later in the same JSON-LD.
 	 * In this case, the unresolved references can only be checked after deserializing all entries.
