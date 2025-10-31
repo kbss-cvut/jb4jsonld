@@ -26,8 +26,7 @@ import java.util.Objects;
  */
 public class Configuration {
 
-    private final Map<String, String> config = new HashMap<>();
-	private final Map<String, Object> objectConfig = new HashMap<>();
+    private final Map<String, Object> config = new HashMap<>();
 
     public Configuration() {
     }
@@ -35,7 +34,6 @@ public class Configuration {
     public Configuration(Configuration other) {
         Objects.requireNonNull(other);
         config.putAll(other.config);
-        objectConfig.putAll(other.objectConfig);
     }
 
     public String get(ConfigParam param) {
@@ -44,34 +42,34 @@ public class Configuration {
     }
 
     public String get(String param) {
-        return config.get(param);
+        return config.containsKey(param) ? config.get(param).toString() : null;
     }
 
     public String get(ConfigParam param, String defaultValue) {
         Objects.requireNonNull(param);
-        return config.getOrDefault(param.getName(), defaultValue);
+        return get(param.getName(), defaultValue);
     }
 
     public String get(String param, String defaultValue) {
-        return config.getOrDefault(param, defaultValue);
+        return config.getOrDefault(param, defaultValue).toString();
     }
 
-	public Object getObject(ConfigParam param) {
+    public Object getObject(ConfigParam param) {
         Objects.requireNonNull(param);
         return getObject(param.getName());
     }
 
     public Object getObject(String param) {
-        return objectConfig.get(param);
+        return config.get(param);
     }
 
-	public Object getObject(ConfigParam param, Object defaultValue) {
+    public Object getObject(ConfigParam param, Object defaultValue) {
         Objects.requireNonNull(param);
-        return objectConfig.getOrDefault(param.getName(), defaultValue);
+        return getObject(param.getName(), defaultValue);
     }
 
     public Object getObject(String param, Object defaultValue) {
-        return objectConfig.getOrDefault(param, defaultValue);
+        return config.getOrDefault(param, defaultValue);
     }
 
     public boolean is(ConfigParam param) {
@@ -84,24 +82,14 @@ public class Configuration {
         return Boolean.parseBoolean(value);
     }
 
-    public void set(ConfigParam param, String value) {
+    public void set(ConfigParam param, Object value) {
         Objects.requireNonNull(param);
         config.put(param.getName(), value);
     }
 
-    public void set(String param, String value) {
+    public void set(String param, Object value) {
         Objects.requireNonNull(param);
         config.put(param, value);
-    }
-
-	public void setObject(ConfigParam param, Object value) {
-        Objects.requireNonNull(param);
-        objectConfig.put(param.getName(), value);
-    }
-
-    public void setObject(String param, Object value) {
-        Objects.requireNonNull(param);
-        objectConfig.put(param, value);
     }
 
     public boolean has(String param) {

@@ -125,7 +125,7 @@ class JsonLdDeserializerTest {
         final Configuration config = new Configuration();
         config.set(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.jsonld");
         config.set(ConfigParam.DISABLE_TYPE_MAP_CACHE, "true");
-		config.setObject(ConfigParam.CLASS_LOADER, Thread.currentThread().getContextClassLoader());
+		config.set(ConfigParam.CLASS_LOADER, Thread.currentThread().getContextClassLoader());
         final JsonLdDeserializer deserializer = JsonLdDeserializer.createExpandedDeserializer(config);
         assertFalse(typeMap(deserializer).get(Vocabulary.STUDY).isEmpty());
         assertTrue(typeMap(deserializer).get(Vocabulary.STUDY).contains(Study.class));
