@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
-	private final Map<String, Object> knownInstances;
+	private Map<String, Object> knownInstances;
 	private PendingReferenceRegistry referenceRegistry;
 
     public ExpandedJsonLdDeserializer() {
