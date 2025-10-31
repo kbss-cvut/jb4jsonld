@@ -86,6 +86,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 		if (configuration().is(ConfigParam.POSTPONE_UNRESOLVED_REFERENCES_CHECK)) {
 			referenceRegistry.verifyNoUnresolvedReferencesExist();
 			referenceRegistry = new PendingReferenceRegistry();
+			knownInstances = new HashMap<>();
 		}
 	}
 }
