@@ -15,25 +15,28 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package cz.cvut.kbss.jsonld.common;
+package cz.cvut.kbss.jsonld.annotation;
 
-import cz.cvut.kbss.jsonld.Configuration;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Marker interface for classes whose instances can provide configuration.
+ * Specifies that the class is an entity class and maps to an ontological class (RDFS or OWL).
+ * <p>
+ * This annotation is applied to the entity class, if the IRI is empty, then it must be applied to an abstract class.
  */
-public interface Configured {
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface JsonLdType {
 
     /**
-     * Gets the configuration holder for this JSON-LD processor.
+     * IRI of the ontological class. When empty, the annotated class must be abstract.
      *
-     * @return Configuration
+     * @return IRI of the referenced class
      */
-    Configuration configuration();
-
-	/**
-	 * Updates the configuration for this JSON-LD processor.
-	 * @param configuration The {@link Configuration}.
-	 */
-	void updateConfiguration(Configuration configuration);
+    String iri() default "";
 }

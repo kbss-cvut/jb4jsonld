@@ -67,12 +67,15 @@ abstract class InstanceContext<T> {
                 throw UnknownPropertyException.create(JsonLd.ID, getInstanceType());
             }
         }
-        if (blankNode && !idField.getType().equals(String.class)) {
-            return;
-        }
-        setFieldValue(idField, value);
-        this.identifier = value;
-        knownInstances.put(value, instance);
+        if (!blankNode || idField.getType().equals(String.class)) {
+			setFieldValue(idField, value);
+		}
+		this.identifier = value;
+		try {
+			knownInstances.put(value, instance);
+		} catch (UnsupportedOperationException e) {
+			// do nothing
+		}
     }
 
     private static boolean isBlankNodeIdentifier(String identifier) {

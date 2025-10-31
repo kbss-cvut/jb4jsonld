@@ -29,14 +29,23 @@ import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
+	private Map<String, Object> knownInstances;
+	private PendingReferenceRegistry referenceRegistry;
+
     public ExpandedJsonLdDeserializer() {
+		this.knownInstances = new HashMap<>();
+        this.referenceRegistry = new PendingReferenceRegistry();
     }
 
     public ExpandedJsonLdDeserializer(Configuration configuration) {
         super(configuration);
+        this.knownInstances = new HashMap<>();
+        this.referenceRegistry = new PendingReferenceRegistry();
     }
 
     @Override
@@ -52,20 +61,32 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         }
         deserializers.configure(configuration());
         final JsonObject root = input.getJsonObject(0);
-        final PendingReferenceRegistry referenceRegistry = new PendingReferenceRegistry();
         if (deserializers.hasCustomDeserializer(resultClass)) {
             final DeserializationContext<T> ctx = new DeserializationContext<>(resultClass, classResolver);
             assert deserializers.getDeserializer(ctx).isPresent();
             return deserializers.getDeserializer(ctx).get().deserialize(root, ctx);
         }
-        final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(classResolver, referenceRegistry);
+        final InstanceBuilder instanceBuilder = new DefaultInstanceBuilder(classResolver, referenceRegistry, knownInstances);
         new ObjectDeserializer(instanceBuilder, new DeserializerConfig(configuration(), classResolver, deserializers), resultClass)
                 .processValue(root);
         if (configuration().is(ConfigParam.ASSUME_TARGET_TYPE)) {
             new AssumedTypeReferenceReplacer().replacePendingReferencesWithAssumedTypedObjects(referenceRegistry);
         }
-        referenceRegistry.verifyNoUnresolvedReferencesExist();
+		if (!configuration().is(ConfigParam.POSTPONE_UNRESOLVED_REFERENCES_CHECK)) {
+			referenceRegistry.verifyNoUnresolvedReferencesExist();
+            this.referenceRegistry = new PendingReferenceRegistry();
+            this.knownInstances = new HashMap<>();
+		}
         assert resultClass.isAssignableFrom(instanceBuilder.getCurrentRoot().getClass());
         return resultClass.cast(instanceBuilder.getCurrentRoot());
     }
+
+	@Override
+	public void cleanup() {
+		if (configuration().is(ConfigParam.POSTPONE_UNRESOLVED_REFERENCES_CHECK)) {
+			referenceRegistry.verifyNoUnresolvedReferencesExist();
+            this.referenceRegistry = new PendingReferenceRegistry();
+            this.knownInstances = new HashMap<>();
+		}
+	}
 }

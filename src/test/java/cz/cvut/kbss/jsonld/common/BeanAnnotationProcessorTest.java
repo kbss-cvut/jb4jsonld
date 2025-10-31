@@ -46,22 +46,45 @@ class BeanAnnotationProcessorTest {
     @Test
     void getOwlClassesExtractsClassIriFromObject() {
         final Person p = new Person();
-        final Set<String> result = BeanAnnotationProcessor.getOwlClasses(p);
+        final Set<String> result = BeanAnnotationProcessor.getJsonLdTypeOrOwlClasses(p);
         assertEquals(1, result.size());
         assertTrue(result.contains(Vocabulary.PERSON));
+    }
+
+	@Test
+    void getJsonLdTypesExtractsClassIriFromObject() {
+        final PersonLdType p = new PersonLdType();
+        final Set<String> result = BeanAnnotationProcessor.getJsonLdTypeOrOwlClasses(p);
+        assertEquals(1, result.size());
+        assertTrue(result.contains(Vocabulary.PERSON_LD));
     }
 
     @Test
     void getOwlClassesReturnsNullForNonOwlClass() {
         final URI uri = URI.create("http://test");
-        assertTrue(BeanAnnotationProcessor.getOwlClasses(uri).isEmpty());
+        assertTrue(BeanAnnotationProcessor.getJsonLdTypeOrOwlClasses(uri).isEmpty());
+    }
+
+	@Test
+    void getJsonLdTypesReturnsNullForNonOwlClass() {
+        final URI uri = URI.create("http://test");
+        assertTrue(BeanAnnotationProcessor.getJsonLdTypeOrOwlClasses(uri).isEmpty());
     }
 
     @Test
     void getOwlClassesExtractsClassesFromAncestors() {
         final User u = new User();
-        final Set<String> result = BeanAnnotationProcessor.getOwlClasses(u);
+        final Set<String> result = BeanAnnotationProcessor.getJsonLdTypeOrOwlClasses(u);
         assertTrue(result.contains(Vocabulary.USER));
+        assertTrue(result.contains(Vocabulary.PERSON));
+    }
+
+	@Test
+    void getJsonLdTypesExtractsClassesFromAncestors() {
+		// mix UserLdType with @JsonLdType and superclass Person with @OWLClass
+        final UserLdType u = new UserLdType();
+        final Set<String> result = BeanAnnotationProcessor.getJsonLdTypeOrOwlClasses(u);
+        assertTrue(result.contains(Vocabulary.USER_LD));
         assertTrue(result.contains(Vocabulary.PERSON));
     }
 
@@ -210,21 +233,52 @@ class BeanAnnotationProcessorTest {
         assertFalse(BeanAnnotationProcessor.isInstanceIdentifier(Person.class.getDeclaredField("firstName")));
     }
 
+
+	@Test
+    void isJsonLdTypeEntityReturnsTrueForClassAnnotatedWithJsonLdTypeClassAndIri() {
+        assertTrue(BeanAnnotationProcessor.isJsonLdTypeEntity(UserLdType.class));
+    }
+
+	@Test
+    void isJsonLdTypeEntityReturnsFalseForAbstractClassAnnotatedWithJsonLdTypeClassNoIri() {
+        assertFalse(BeanAnnotationProcessor.isJsonLdTypeEntity(AbstractLdType.class));
+    }
+
+	@Test
+    void isJsonLdTypeEntityReturnsFalseForClassAnnotatedWithJsonLdTypeClassNoIri() {
+        assertFalse(BeanAnnotationProcessor.isJsonLdTypeEntity(NonAbstractLdType.class));
+    }
+
+	@Test
+    void isJsonLdTypeAbstractEntityReturnsFalseForClassAnnotatedWithJsonLdTypeClassAndIri() {
+        assertFalse(BeanAnnotationProcessor.isJsonLdTypeAbstractEntity(UserLdType.class));
+    }
+
+	@Test
+    void isJsonLdTypeAbstractEntityReturnsTrueForAbstractClassAnnotatedWithJsonLdTypeClassNoIri() {
+        assertTrue(BeanAnnotationProcessor.isJsonLdTypeAbstractEntity(AbstractLdType.class));
+    }
+
+	@Test
+    void isJsonLdTypeAbstractEntityReturnsFalseForClassAnnotatedWithJsonLdTypeClassNoIri() {
+        assertFalse(BeanAnnotationProcessor.isJsonLdTypeAbstractEntity(NonAbstractLdType.class));
+    }
+
     @Test
     void getOwlClassExtractsClassIriFromJavaType() {
-        assertEquals(Vocabulary.EMPLOYEE, BeanAnnotationProcessor.getOwlClass(Employee.class));
+        assertEquals(Vocabulary.EMPLOYEE, BeanAnnotationProcessor.getJsonLdTypeOrOwlClass(Employee.class));
     }
 
     @Test
     void getOwlClassThrowsIllegalArgumentWhenNonOwlClassJavaTypeIsPassedAsArgument() {
         final IllegalArgumentException result = assertThrows(IllegalArgumentException.class,
-                () -> BeanAnnotationProcessor.getOwlClass(Integer.class));
-        assertEquals(Integer.class + " is not an OWL class entity.", result.getMessage());
+                () -> BeanAnnotationProcessor.getJsonLdTypeOrOwlClass(Integer.class));
+        assertEquals(Integer.class + " is not an JsonLdType/OWLClass entity.", result.getMessage());
     }
 
     @Test
     void getOwlClassExpandsIriIfItUsesNamespacePrefix() {
-        assertEquals(DC.Terms.AGENT, BeanAnnotationProcessor.getOwlClass(ClassWithNamespace.class));
+        assertEquals(DC.Terms.AGENT, BeanAnnotationProcessor.getJsonLdTypeOrOwlClass(ClassWithNamespace.class));
     }
 
     @Namespace(prefix = "dc", namespace = DC.Terms.NAMESPACE)
@@ -234,7 +288,7 @@ class BeanAnnotationProcessorTest {
 
     @Test
     void getOWLClassExpandsIriBasedOnNamespacesDeclarationIfItUsesPrefix() {
-        assertEquals(SKOS.CONCEPT, BeanAnnotationProcessor.getOwlClass(ClassWithNamespaces.class));
+        assertEquals(SKOS.CONCEPT, BeanAnnotationProcessor.getJsonLdTypeOrOwlClass(ClassWithNamespaces.class));
     }
 
     @Namespaces({@Namespace(prefix = "rdf", namespace = RDF.NAMESPACE),
@@ -251,7 +305,7 @@ class BeanAnnotationProcessorTest {
 
     @Test
     void getOWLClassExpandsIriBasedOnNamespaceDeclaredInAncestorIfItUsesPrefix() {
-        assertEquals(SKOS.CONCEPT_SCHEME, BeanAnnotationProcessor.getOwlClass(ClassWithParentNamespaces.class));
+        assertEquals(SKOS.CONCEPT_SCHEME, BeanAnnotationProcessor.getJsonLdTypeOrOwlClass(ClassWithParentNamespaces.class));
     }
 
     @OWLClass(iri = "skos:ConceptScheme")
@@ -260,7 +314,7 @@ class BeanAnnotationProcessorTest {
 
     @Test
     void getOwlClassesExpandsCompactIrisBasedOnNamespaces() {
-        final Set<String> result = BeanAnnotationProcessor.getOwlClasses(ClassWithParentNamespaces.class);
+        final Set<String> result = BeanAnnotationProcessor.getJsonLdTypeOrOwlClasses(ClassWithParentNamespaces.class);
         assertThat(result, hasItems(SKOS.CONCEPT_SCHEME, SKOS.CONCEPT));
     }
 

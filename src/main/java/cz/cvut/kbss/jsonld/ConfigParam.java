@@ -125,7 +125,20 @@ public enum ConfigParam {
      * If every deserializer instance should get a fresh type map based on the current configuration, disable this
      * cache.
      */
-    DISABLE_TYPE_MAP_CACHE("disableTypeMapCache");
+    DISABLE_TYPE_MAP_CACHE("disableTypeMapCache"),
+
+	/**
+	 * Set custom classLoader used for resolving types.
+	 */
+	CLASS_LOADER("classLoader"),
+
+	/**
+	 * Whether to postpone the unresolved references check after deserialization to the cleanup method.
+	 * <p>
+	 * When a JSON-LD is used with @list in it, it refers to objects later in the same JSON-LD.
+	 * In this case, the unresolved references can only be checked after deserializing all entries.
+	 */
+	POSTPONE_UNRESOLVED_REFERENCES_CHECK("postponeUnresolvedReferencesCheck");
 
     private final String name;
 

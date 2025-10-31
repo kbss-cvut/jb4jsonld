@@ -20,6 +20,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
+import cz.cvut.kbss.jsonld.annotation.JsonLdType;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.Configured;
 import cz.cvut.kbss.jsonld.deserialization.expanded.ExpandedJsonLdDeserializer;
@@ -38,7 +39,7 @@ public abstract class JsonLdDeserializer implements Configured {
 
     private static final TypeMap TYPE_MAP = new TypeMap();
 
-    private final Configuration configuration;
+    private Configuration configuration;
 
     protected final TargetClassResolver classResolver;
 
@@ -56,7 +57,7 @@ public abstract class JsonLdDeserializer implements Configured {
 
     private TargetClassResolver initializeTargetClassResolver() {
         final String scanPath = configuration.get(ConfigParam.SCAN_PACKAGE, "");
-        final TypeMap typeMap = discoverAvailableTypes(scanPath, configuration.is(ConfigParam.DISABLE_TYPE_MAP_CACHE));
+        final TypeMap typeMap = discoverAvailableTypes(scanPath, configuration.is(ConfigParam.DISABLE_TYPE_MAP_CACHE), configuration.getObject(ConfigParam.CLASS_LOADER));
         return new TargetClassResolver(typeMap,
                                        new TargetClassResolverConfig(
                                                configuration.is(ConfigParam.ASSUME_TARGET_TYPE),
@@ -70,17 +71,24 @@ public abstract class JsonLdDeserializer implements Configured {
      * @param scanPath Path to scan on classpath
      * @return Map of types to Java classes
      */
-    private static TypeMap discoverAvailableTypes(String scanPath, boolean disableCache) {
+    private static TypeMap discoverAvailableTypes(String scanPath, boolean disableCache, Object classLoader) {
         final TypeMap map = disableCache ? new TypeMap() : TYPE_MAP;
         if (!map.isEmpty()) {
             return map;
         }
+		if (!(classLoader instanceof ClassLoader)) {
+			classLoader = null;
+		}
         new ClasspathScanner(c -> {
-            final OWLClass ann = c.getDeclaredAnnotation(OWLClass.class);
-            if (ann != null) {
-                map.register(BeanAnnotationProcessor.expandIriIfNecessary(ann.iri(), c), c);
+            final OWLClass annOwl = c.getDeclaredAnnotation(OWLClass.class);
+            if (annOwl != null) {
+                map.register(BeanAnnotationProcessor.expandIriIfNecessary(annOwl.iri(), c), c);
             }
-        }).processClasses(scanPath);
+			final JsonLdType annJsonLd = c.getDeclaredAnnotation(JsonLdType.class);
+            if (annJsonLd != null) {
+                map.register(BeanAnnotationProcessor.expandIriIfNecessary(annJsonLd.iri(), c), c);
+            }
+        }).processClasses((ClassLoader) classLoader, scanPath);
         return map;
     }
 
@@ -88,6 +96,12 @@ public abstract class JsonLdDeserializer implements Configured {
     public Configuration configuration() {
         return configuration;
     }
+
+	@Override
+	public void updateConfiguration(Configuration configuration) {
+		this.configuration = configuration;
+	}
+
 
     /**
      * Registers a custom deserializer for the specified type.
@@ -113,6 +127,12 @@ public abstract class JsonLdDeserializer implements Configured {
      * @return Deserialized Java instance
      */
     public abstract <T> T deserialize(JsonValue jsonLd, Class<T> resultClass);
+
+	/**
+	 * Cleans up after deserialization. Should be called after the entire list is deserialized
+	 * using a custom {@link DeserializationContext}.
+	 */
+	public abstract void cleanup();
 
     /**
      * Creates deserializer for expanded JSON-LD, initialized with the specified configuration.

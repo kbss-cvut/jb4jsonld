@@ -56,7 +56,7 @@ class ClasspathScannerTest {
         final ClasspathScanner sut = new ClasspathScanner(cls -> {
             a.set(true);
         });
-        sut.processJarFile(url, pkg);
+        sut.processJarFile(loader, url, pkg);
         if (!a.get()) {
             fail();
         }

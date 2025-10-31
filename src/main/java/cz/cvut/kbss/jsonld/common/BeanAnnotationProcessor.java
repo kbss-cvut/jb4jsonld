@@ -28,6 +28,7 @@ import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
+import cz.cvut.kbss.jsonld.annotation.JsonLdType;
 import cz.cvut.kbss.jsonld.exception.JsonLdSerializationException;
 
 import java.lang.reflect.AnnotatedElement;
@@ -70,29 +71,100 @@ public class BeanAnnotationProcessor {
     }
 
     /**
+     * Checks whether the specified class is annotated with the {@link OWLClass} or
+	 * {@link JsonLdType} annotation. If it's annotated with {@link JsonLdType} the iri
+	 * is not empty, and it's not an abstract class.
+     *
+     * @param cls The class to examine
+     * @return Whether it is annotated with {@link OWLClass} or {@link JsonLdType}.
+     */
+	public static boolean isInstantiableMappedType(Class<?> cls) {
+        return isOwlClassEntity(cls) || isJsonLdTypeEntity(cls);
+    }
+
+	    /**
+     * Checks whether the specified class is annotated with the {@link OWLClass} or
+	 * {@link JsonLdType} annotation. If it's annotated with {@link JsonLdType} the IRI
+	 * 	may be empty and it may be an abstract class;
+     *
+     * @param cls The class to examine
+     * @return Whether it is annotated with {@link OWLClass} or {@link JsonLdType}.
+     */
+	public static boolean isMappedType(Class<?> cls) {
+        return isInstantiableMappedType(cls) || isJsonLdTypeAbstractEntity(cls);
+    }
+
+    /**
      * Checks whether the specified class is annotated with the {@link OWLClass} annotation.
      *
      * @param cls The class to examine
      * @return Whether it is annotated with {@link OWLClass}
      */
-    public static boolean isOwlClassEntity(Class<?> cls) {
+    protected static boolean isOwlClassEntity(Class<?> cls) {
         return cls != null && cls.getDeclaredAnnotation(OWLClass.class) != null;
     }
 
+	/**
+     * Checks whether the specified class is annotated with the {@link JsonLdType} annotation.
+	 * Additionally, iri should also be provided and the class should not be abstract.
+     *
+     * @param cls The class to examine
+     * @return Whether it is annotated with {@link JsonLdType} and iri is provided
+     */
+	protected static boolean isJsonLdTypeEntity(Class<?> cls) {
+		if (cls == null) {
+			return false;
+		}
+		if (Modifier.isAbstract(cls.getModifiers())) {
+			return false;
+		}
+		JsonLdType jsonLdType = cls.getDeclaredAnnotation(JsonLdType.class);
+		if (jsonLdType == null) {
+			return false;
+		}
+		return jsonLdType.iri() != null && !jsonLdType.iri().isEmpty();
+	}
+
+	/**
+     * Checks whether the specified class is annotated with the {@link JsonLdType} annotation.
+	 * Additionally, iri should not be provided and the class should be abstract.
+     *
+     * @param cls The class to examine
+     * @return Whether it is annotated with {@link JsonLdType} and iri is not provided
+     */
+	protected static boolean isJsonLdTypeAbstractEntity(Class<?> cls) {
+		if (cls == null) {
+			return false;
+		}
+		if (!Modifier.isAbstract(cls.getModifiers())) {
+			return false;
+		}
+		JsonLdType jsonLdType = cls.getDeclaredAnnotation(JsonLdType.class);
+		if (jsonLdType == null) {
+			return false;
+		}
+		return jsonLdType.iri() != null && jsonLdType.iri().isEmpty();
+	}
+
     /**
-     * Gets IRI of the OWL class represented by the specified Java class.
+     * Gets IRI of the JsonLdType/OWLClass represented by the specified Java class.
      *
      * @param cls Java class to examine
      * @return Represented ontological class
-     * @throws IllegalArgumentException If the specified class is not mapped by {@link OWLClass}
+     * @throws IllegalArgumentException If the specified class is not mapped by {@link JsonLdType} {@link OWLClass}
      */
-    public static String getOwlClass(Class<?> cls) {
+    public static String getJsonLdTypeOrOwlClass(Class<?> cls) {
         Objects.requireNonNull(cls);
         final OWLClass owlClass = cls.getDeclaredAnnotation(OWLClass.class);
-        if (owlClass == null) {
-            throw new IllegalArgumentException(cls + " is not an OWL class entity.");
+		if (owlClass != null) {
+			return expandIriIfNecessary(owlClass.iri(), cls);
+		}
+        final JsonLdType jsonLdType = cls.getDeclaredAnnotation(JsonLdType.class);
+        if (jsonLdType != null) {
+			return expandIriIfNecessary(jsonLdType.iri(), cls);
+
         }
-        return expandIriIfNecessary(owlClass.iri(), cls);
+        throw new IllegalArgumentException(cls + " is not an JsonLdType/OWLClass entity.");
     }
 
     /**
@@ -164,34 +236,41 @@ public class BeanAnnotationProcessor {
     }
 
     /**
-     * Resolves ontological types of the specified object, as specified by the {@link OWLClass} annotation.
+     * Resolves ontological types of the specified object, as specified by the {@link JsonLdType}
+     * and {@link OWLClass} annotation.
      *
      * @param object The object to resolve
-     * @return Resolved OWL types or an empty set if the object's class is not annotated with {@link OWLClass}
-     * @see #getOwlClasses(Class)
+     * @return Resolved JsonLdType/OwlClass types or an empty set if the object's class is not annotated
+	 * with {@link JsonLdType} or {@link OWLClass}
+     * @see #getJsonLdTypeOrOwlClasses(Class)
      */
-    public static Set<String> getOwlClasses(Object object) {
+    public static Set<String> getJsonLdTypeOrOwlClasses(Object object) {
         Objects.requireNonNull(object);
         final Class<?> cls = object.getClass();
-        return getOwlClasses(cls);
+        return getJsonLdTypeOrOwlClasses(cls);
     }
 
     /**
-     * Resolves a transitive closure of ontological types of the specified class, as specified by the {@link OWLClass}
-     * annotation.
+     * Resolves a transitive closure of ontological types of the specified class, as specified by the {@link JsonLdType}
+     * and {@link OWLClass} annotation.
      * <p>
      * I.e. the result contains also types mapped by the class's ancestors.
      *
      * @param cls The class to process
      * @return Set of mapped ontological classes (possibly empty)
      */
-    public static Set<String> getOwlClasses(Class<?> cls) {
+    public static Set<String> getJsonLdTypeOrOwlClasses(Class<?> cls) {
         final Set<String> classes = new HashSet<>();
         getAncestors(cls).forEach(c -> {
-            final OWLClass owlClass = c.getDeclaredAnnotation(OWLClass.class);
-            if (owlClass != null) {
-                classes.add(expandIriIfNecessary(owlClass.iri(), c));
-            }
+            final JsonLdType jsonLdType = c.getDeclaredAnnotation(JsonLdType.class);
+            if (jsonLdType != null) {
+                classes.add(expandIriIfNecessary(jsonLdType.iri(), c));
+            } else {
+				final OWLClass owlClass = c.getDeclaredAnnotation(OWLClass.class);
+				if (owlClass != null) {
+					classes.add(expandIriIfNecessary(owlClass.iri(), c));
+				}
+			}
         });
         return classes;
     }

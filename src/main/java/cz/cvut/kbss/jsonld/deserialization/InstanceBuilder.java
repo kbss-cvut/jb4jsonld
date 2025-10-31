@@ -19,6 +19,7 @@ package cz.cvut.kbss.jsonld.deserialization;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.Types;
+import cz.cvut.kbss.jsonld.annotation.JsonLdType;
 import cz.cvut.kbss.jsonld.common.CollectionType;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 
@@ -46,7 +47,7 @@ public interface InstanceBuilder {
      * @param id       Identifier of the object being open
      * @param property Property identifier (IRI)
      * @param types    Types of the object being open
-     * @throws IllegalStateException If there is no {@link OWLClass} instance open
+     * @throws IllegalStateException If there is no {@link OWLClass} or {@link JsonLdType} instance open
      */
     void openObject(String id, String property, List<String> types);
 
@@ -87,7 +88,7 @@ public interface InstanceBuilder {
      * This method assumes that the property is mapped, i.e. that {@link #isPropertyMapped(String)} returned true.
      *
      * @param property Property identifier (IRI)
-     * @throws IllegalStateException If there is no {@link OWLClass} instance open
+     * @throws IllegalStateException If there is no {@link OWLClass} or {@link JsonLdType} instance open
      */
     void openCollection(String property);
 
@@ -125,7 +126,7 @@ public interface InstanceBuilder {
      *
      * @param property Property identifier (IRI)
      * @param value    The value to set
-     * @throws IllegalStateException If there is no {@link OWLClass} instance open
+     * @throws IllegalStateException If there is no {@link OWLClass} or {@link JsonLdType} instance open
      */
     void addValue(String property, Object value);
 
@@ -171,7 +172,7 @@ public interface InstanceBuilder {
     /**
      * Returns current root of the deserialized object graph.
      *
-     * @return Object graph root, it can be a {@link OWLClass} instance, or a {@link java.util.Collection}
+     * @return Object graph root, it can be a {@link OWLClass} or {@link JsonLdType} instance, or a {@link java.util.Collection}
      */
     Object getCurrentRoot();
 

@@ -18,6 +18,7 @@
 package cz.cvut.kbss.jsonld.deserialization.util;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jsonld.annotation.JsonLdType;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.exception.AmbiguousTargetTypeException;
 import cz.cvut.kbss.jsonld.exception.TargetTypeException;
@@ -136,6 +137,8 @@ public class TargetClassResolver {
 
     private boolean doesExpectedClassMatchesTypes(Class<?> expectedClass, Collection<String> types) {
         final OWLClass owlClass = expectedClass.getDeclaredAnnotation(OWLClass.class);
-        return owlClass != null && types.contains(owlClass.iri());
+		final JsonLdType jsonLdType = expectedClass.getDeclaredAnnotation(JsonLdType.class);
+        return (owlClass != null && types.contains(owlClass.iri())) ||
+				(jsonLdType != null && types.contains(jsonLdType.iri()));
     }
 }

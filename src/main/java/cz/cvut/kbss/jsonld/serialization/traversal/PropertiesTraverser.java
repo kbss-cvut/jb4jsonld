@@ -65,7 +65,7 @@ class PropertiesTraverser {
     private static boolean isTraversable(Object value) {
         final Class<?> cls = value.getClass();
         return (BeanClassProcessor.isIdentifierType(value.getClass()) && !String.class.equals(cls)) ||
-                BeanAnnotationProcessor.isOwlClassEntity(value.getClass()) ||
+                BeanAnnotationProcessor.isMappedType(value.getClass()) ||
                 BeanAnnotationProcessor.hasTypesField(cls);
     }
 
