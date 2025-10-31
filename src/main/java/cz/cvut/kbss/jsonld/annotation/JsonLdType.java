@@ -26,8 +26,7 @@ import java.lang.annotation.Target;
 /**
  * Specifies that the class is an entity class and maps to an ontological class (RDFS or OWL).
  * <p>
- * This annotation is applied to the entity class, ff the IRI is empty, then it must be applied
- * to an abstract class.
+ * This annotation is applied to the entity class, if the IRI is empty, then it must be applied to an abstract class.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -35,7 +34,7 @@ import java.lang.annotation.Target;
 public @interface JsonLdType {
 
     /**
-     * IRI of the ontological class. Should be empty when used on an abstract class.
+     * IRI of the ontological class. When empty, the annotated class must be abstract.
      *
      * @return IRI of the referenced class
      */

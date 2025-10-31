@@ -4,7 +4,7 @@
 - Support providing custom `ClassLoader` for target type discovery (GH-88).
 - Add annotation `@JsonLdType` which can be used as a replacement for `@OWLClass` and does not require type IRI for abstract classes (GH-89).
 - Add support for deserializing collections where attributes of elements reference instances further in the collection (GH-90).
-- Thanks to @jyarisvt for contributing the PRs.
+- Thanks to @yarisvt for contributing the PRs.
 
 ## 0.15.4 - 2025-08-11
 - Fix an issue with deserializing typed literals into `@Properties` (Bug #84).
