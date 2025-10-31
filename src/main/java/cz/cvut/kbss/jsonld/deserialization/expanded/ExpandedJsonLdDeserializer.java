@@ -35,17 +35,15 @@ import java.util.Map;
 public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
 	private final Map<String, Object> knownInstances;
-	final PendingReferenceRegistry referenceRegistry;
+	private PendingReferenceRegistry referenceRegistry;
 
     public ExpandedJsonLdDeserializer() {
-		deserializers.configure(configuration());
 		knownInstances = new HashMap<>();
 		referenceRegistry = new PendingReferenceRegistry();
     }
 
     public ExpandedJsonLdDeserializer(Configuration configuration) {
         super(configuration);
-		deserializers.configure(configuration());
 		knownInstances = new HashMap<>();
 		referenceRegistry = new PendingReferenceRegistry();
     }
@@ -61,6 +59,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
             throw new JsonLdDeserializationException(
                     "Input is not expanded JSON-LD. The input does not contain exactly one root element.");
         }
+		deserializers.configure(configuration());
         final JsonObject root = input.getJsonObject(0);
         if (deserializers.hasCustomDeserializer(resultClass)) {
             final DeserializationContext<T> ctx = new DeserializationContext<>(resultClass, classResolver);
@@ -73,8 +72,9 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         if (configuration().is(ConfigParam.ASSUME_TARGET_TYPE)) {
             new AssumedTypeReferenceReplacer().replacePendingReferencesWithAssumedTypedObjects(referenceRegistry);
         }
-		if (!configuration().is(ConfigParam.DISABLE_UNRESOLVED_REFERENCES_CHECK)) {
+		if (!configuration().is(ConfigParam.POSTPONE_UNRESOLVED_REFERENCES_CHECK)) {
 			referenceRegistry.verifyNoUnresolvedReferencesExist();
+			referenceRegistry = new PendingReferenceRegistry();
 		}
         assert resultClass.isAssignableFrom(instanceBuilder.getCurrentRoot().getClass());
         return resultClass.cast(instanceBuilder.getCurrentRoot());
@@ -82,6 +82,9 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 
 	@Override
 	public void cleanup() {
-		referenceRegistry.verifyNoUnresolvedReferencesExist();
+		if (configuration().is(ConfigParam.POSTPONE_UNRESOLVED_REFERENCES_CHECK)) {
+			referenceRegistry.verifyNoUnresolvedReferencesExist();
+			referenceRegistry = new PendingReferenceRegistry();
+		}
 	}
 }
