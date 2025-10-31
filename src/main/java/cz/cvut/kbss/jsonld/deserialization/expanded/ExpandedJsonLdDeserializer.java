@@ -38,14 +38,14 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 	private PendingReferenceRegistry referenceRegistry;
 
     public ExpandedJsonLdDeserializer() {
-		knownInstances = new HashMap<>();
-		referenceRegistry = new PendingReferenceRegistry();
+		this.knownInstances = new HashMap<>();
+        this.referenceRegistry = new PendingReferenceRegistry();
     }
 
     public ExpandedJsonLdDeserializer(Configuration configuration) {
         super(configuration);
-		knownInstances = new HashMap<>();
-		referenceRegistry = new PendingReferenceRegistry();
+        this.knownInstances = new HashMap<>();
+        this.referenceRegistry = new PendingReferenceRegistry();
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
             throw new JsonLdDeserializationException(
                     "Input is not expanded JSON-LD. The input does not contain exactly one root element.");
         }
-		deserializers.configure(configuration());
+        deserializers.configure(configuration());
         final JsonObject root = input.getJsonObject(0);
         if (deserializers.hasCustomDeserializer(resultClass)) {
             final DeserializationContext<T> ctx = new DeserializationContext<>(resultClass, classResolver);
@@ -74,8 +74,8 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
         }
 		if (!configuration().is(ConfigParam.POSTPONE_UNRESOLVED_REFERENCES_CHECK)) {
 			referenceRegistry.verifyNoUnresolvedReferencesExist();
-			referenceRegistry = new PendingReferenceRegistry();
-			knownInstances = new HashMap<>();
+            this.referenceRegistry = new PendingReferenceRegistry();
+            this.knownInstances = new HashMap<>();
 		}
         assert resultClass.isAssignableFrom(instanceBuilder.getCurrentRoot().getClass());
         return resultClass.cast(instanceBuilder.getCurrentRoot());
@@ -85,8 +85,8 @@ public class ExpandedJsonLdDeserializer extends JsonLdDeserializer {
 	public void cleanup() {
 		if (configuration().is(ConfigParam.POSTPONE_UNRESOLVED_REFERENCES_CHECK)) {
 			referenceRegistry.verifyNoUnresolvedReferencesExist();
-			referenceRegistry = new PendingReferenceRegistry();
-			knownInstances = new HashMap<>();
+            this.referenceRegistry = new PendingReferenceRegistry();
+            this.knownInstances = new HashMap<>();
 		}
 	}
 }
