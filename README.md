@@ -46,7 +46,7 @@ public class User {
     @OWLDataProperty(iri = "http://xmlns.com/foaf/0.1/accountName")
     private String username;
 
-    @OWLDataProperty(iri = "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/role")
+    @OWLDataProperty(iri = "http://onto.fel.cvut.cz/ontologies/jb4jsonld/role")
     private Role role;  // Role is an enum
 
     @OWLDataProperty(iri = "http://purl.org/dc/terms/created")
@@ -69,14 +69,14 @@ public class User {
     "firstName": "http://xmlns.com/foaf/0.1/firstName",
     "lastName": "http://xmlns.com/foaf/0.1/lastName",
     "username": "http://xmlns.com/foaf/0.1/accountName",
-    "isAdmin": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/isAdmin",
-    "role": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/role",
+    "isAdmin": "http://onto.fel.cvut.cz/ontologies/jb4jsonld/isAdmin",
+    "role": "http://onto.fel.cvut.cz/ontologies/jb4jsonld/role",
     "dateCreated": {
       "@id": "http://purl.org/dc/terms/created",
       "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
     }
   },
-  "uri": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
+  "uri": "http://onto.fel.cvut.cz/ontologies/jb4jsonld/Catherine+Halsey",
   "types": [
     "http://onto.fel.cvut.cz/ontologies/jb4jsonld/User"
   ],

@@ -1,5 +1,8 @@
 # JB4JSON-LD Changelog
 
+## 0.17.0 - 2026-07-22
+- Dependency updates: JOPA 2.11.1, test dependencies.
+
 ## 0.16.0 - 2025-10-31
 - Support providing custom `ClassLoader` for target type discovery (GH-88).
 - Add annotation `@JsonLdType` which can be used as a replacement for `@OWLClass` and does not require type IRI for abstract classes (GH-89).
