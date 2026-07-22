@@ -1,6 +1,6 @@
 /*
  * JB4JSON-LD
- * Copyright (C) 2025 Czech Technical University in Prague
+ * Copyright (C) 2026 Czech Technical University in Prague
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,6 +18,7 @@
 package cz.cvut.kbss.jsonld.annotation;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -30,6 +31,7 @@ import java.lang.annotation.Target;
  * <p>
  * Note that this annotation expects the values to be names of the Java attributes, NOT their JSON-LD counterparts (IRIs).
  */
+@Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonLdAttributeOrder {
