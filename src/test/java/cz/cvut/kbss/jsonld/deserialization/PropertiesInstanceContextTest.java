@@ -181,4 +181,17 @@ class PropertiesInstanceContextTest {
                 MultilingualString.create("Worth", "en")
         ), map.get(property));
     }
+
+    @Test
+    void addItemAddsLexicalValueOfLanguageTaggedStringsToStringBasedProperties() throws Exception {
+        final Map<String, Set<String>> map = new HashMap<>();
+        final String property = Generator.generateUri().toString();
+        final InstanceContext<Map> ctx =
+                new PropertiesInstanceContext(map, property, Person.class.getDeclaredField("properties"));
+
+        ctx.addItem(new LangString("Hodnota", "cs"));
+        ctx.addItem(new LangString("Value", "en"));
+        ctx.addItem(new LangString("Worth", "en"));
+        assertEquals(Set.of("Hodnota", "Value", "Worth"), map.get(property));
+    }
 }
