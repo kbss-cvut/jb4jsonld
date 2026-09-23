@@ -31,17 +31,28 @@ public class PropertiesInstanceContext extends InstanceContext<Map> {
     private final Field propertiesField;
     private final String property;
 
+    // Cache resolved key/value/element types to prevent repeated reflection-based calls
+    private final Class<?> keyType;
+    private final Class<?> valueType;
+    private final Class<?> valueElementType;
+
     PropertiesInstanceContext(Map<?, ?> instance, String property, Field propertiesField) {
         super(instance, Collections.emptyMap());
         this.property = property;
         this.propertiesField = propertiesField;
+
+        this.keyType = BeanClassProcessor.getMapKeyType(propertiesField);
+        this.valueType = BeanClassProcessor.getMapValueType(propertiesField);
+        if (Collection.class.isAssignableFrom(valueType)) {
+            this.valueElementType = BeanClassProcessor.getMapGenericValueType(propertiesField);
+        } else {
+            this.valueElementType = null;
+        }
     }
 
     @Override
     void addItem(Object item) {
-        final Class<?> keyType = BeanClassProcessor.getMapKeyType(propertiesField);
         final Object typedProperty = DataTypeTransformer.transformValue(property, keyType);
-        final Class<?> valueType = BeanClassProcessor.getMapValueType(propertiesField);
         if (Collection.class.isAssignableFrom(valueType)) {
             Collection values;
             if (instance.containsKey(typedProperty)) {
@@ -50,8 +61,7 @@ public class PropertiesInstanceContext extends InstanceContext<Map> {
                 values = BeanClassProcessor.createCollection(valueType);
                 instance.put(typedProperty, values);
             }
-            final Class<?> itemType = BeanClassProcessor.getMapGenericValueType(propertiesField);
-            final Object itemValue = itemType != null ? DataTypeTransformer.transformValue(item, itemType) : item;
+            final Object itemValue = valueElementType != null ? DataTypeTransformer.transformValue(item, valueElementType) : item;
             values.add(itemValue);
         } else {
             if (instance.containsKey(typedProperty)) {

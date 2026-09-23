@@ -73,7 +73,8 @@ class PropertiesInstanceContextTest {
     void addItemPutsSingleValueIntoPropertiesMapWhenMapIsConfiguredAsSingleValued() throws Exception {
         final Map<?, ?> map = new HashMap<>();
         final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.USERNAME,
-                SingleValued.class.getDeclaredField("properties"));
+                                                                       SingleValued.class.getDeclaredField(
+                                                                               "properties"));
         ctx.addItem(VALUE);
         assertEquals(VALUE, map.get(Vocabulary.USERNAME));
     }
@@ -87,7 +88,8 @@ class PropertiesInstanceContextTest {
     void addItemConvertsPropertyIdentifierToCorrectType() throws Exception {
         final Map<URI, Set<?>> map = new HashMap<>();
         final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.USERNAME,
-                TypedProperties.class.getDeclaredField("properties"));
+                                                                       TypedProperties.class.getDeclaredField(
+                                                                               "properties"));
         ctx.addItem(VALUE);
         assertTrue(map.containsKey(URI.create(Vocabulary.USERNAME)));
     }
@@ -101,7 +103,8 @@ class PropertiesInstanceContextTest {
     void addItemInsertsValuesOfCorrectTypes() throws Exception {
         final Map<URI, Set<?>> map = new HashMap<>();
         final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.IS_ADMIN,
-                TypedProperties.class.getDeclaredField("properties"));
+                                                                       TypedProperties.class.getDeclaredField(
+                                                                               "properties"));
         ctx.addItem(true);
         assertEquals(Boolean.TRUE, map.get(URI.create(Vocabulary.IS_ADMIN)).iterator().next());
     }
@@ -115,14 +118,19 @@ class PropertiesInstanceContextTest {
     }
 
     @Test
-    void addItemThrowsExceptionWhenMultipleItemsForSingularPropertyAreAdded() throws Exception {
+    void contextThrowsExceptionWhenMultipleItemsForSingularPropertyAreAdded() throws Exception {
         final Map<String, String> map = new HashMap<>();
-        final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.USERNAME,
-                SingleValued.class.getDeclaredField("properties"));
-        ctx.addItem(VALUE);
         JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> ctx.addItem("halsey@oni.org"));
+                                                             () -> {
+                                                                 final InstanceContext<Map> ctx =
+                                                                         new PropertiesInstanceContext(map,
+                                                                                                       Vocabulary.USERNAME,
+                                                                                                       SingleValued.class.getDeclaredField(
+                                                                                                               "properties"));
+                                                                 ctx.addItem(VALUE);
+                                                                 ctx.addItem("halsey@oni.org");
+                                                             });
         assertThat(result.getMessage(),
-                containsString("Encountered multiple values of property " + Vocabulary.USERNAME));
+                   containsString("Encountered multiple values of property " + Vocabulary.USERNAME));
     }
 }
