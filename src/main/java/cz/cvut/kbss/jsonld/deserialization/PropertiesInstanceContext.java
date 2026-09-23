@@ -79,8 +79,7 @@ public class PropertiesInstanceContext extends InstanceContext<Map> {
 
     private Optional<Object> resolveItemValue(Object item, Class<?> targetType) {
         // If the value is a language-tagged string, use MultilingualString so that translations can be grouped together
-        if (item instanceof LangString langString && (targetType == null || Object.class.isAssignableFrom(
-                targetType))) {
+        if (item instanceof LangString langString && (targetType == null || Object.class.equals(targetType))) {
             final String langTag = langString.getLanguage().orElse(null);
             if (multilingualString == null || multilingualString.contains(langTag)) {
                 this.multilingualString = MultilingualString.create(langString.getValue(), langTag);
