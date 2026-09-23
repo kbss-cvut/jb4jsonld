@@ -58,7 +58,7 @@ public enum ConfigParam {
     /**
      * Enables optimistic target type resolution.
      * <p>
-     * This means that when a an ambiguous target type is encountered during deserialization of an object (i.e.,
+     * This means that when an ambiguous target type is encountered during deserialization of an object (i.e.,
      * multiple concrete classes match the data type), instead of throwing an
      * {@link cz.cvut.kbss.jsonld.exception.AmbiguousTargetTypeException}, one of the classes will be selected for
      * instantiation.

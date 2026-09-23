@@ -31,8 +31,7 @@ public class MultilingualStringContext extends InstanceContext<MultilingualStrin
     @Override
     void addItem(Object item) {
         assert item != null;
-        if (item instanceof LangString) {
-            final LangString ls = (LangString) item;
+        if (item instanceof LangString ls) {
             instance.set(ls.getLanguage().orElse(null), ls.getValue());
         } else {
             instance.set(item.toString());
@@ -41,9 +40,10 @@ public class MultilingualStringContext extends InstanceContext<MultilingualStrin
 
     /**
      * Returns {@link LangString} as item type supported by this context.
-     *
+     * <p>
      * This is because a {@link MultilingualString} is essentially a container for a collection of translations of the
      * same string, and it simplifies client code.
+     *
      * @return {@code LangString} class
      */
     @Override

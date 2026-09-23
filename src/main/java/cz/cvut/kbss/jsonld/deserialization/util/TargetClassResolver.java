@@ -59,7 +59,7 @@ public class TargetClassResolver {
      * @param expectedClass Expected class as specified by deserialization return type of field type
      * @param types         Types of the JSON-LD object to deserialize
      * @return Resolved target class. It has to be a subtype of the {@code expectedClass}
-     * @throws TargetTypeException If the resulting candidate is not assignable to the expected class or it cannot be
+     * @throws TargetTypeException If the resulting candidate is not assignable to the expected class, or it cannot be
      *                             determined
      */
     public <T> Class<? extends T> getTargetClass(Class<T> expectedClass, Collection<String> types) {

@@ -21,27 +21,6 @@ import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.deserialization.ValueDeserializers;
 import cz.cvut.kbss.jsonld.deserialization.util.TargetClassResolver;
 
-class DeserializerConfig {
-
-    private final Configuration configuration;
-    private final TargetClassResolver targetResolver;
-    private final ValueDeserializers deserializers;
-
-    DeserializerConfig(Configuration configuration, TargetClassResolver targetResolver, ValueDeserializers deserializers) {
-        this.configuration = configuration;
-        this.targetResolver = targetResolver;
-        this.deserializers = deserializers;
-    }
-
-    Configuration getConfiguration() {
-        return configuration;
-    }
-
-    TargetClassResolver getTargetResolver() {
-        return targetResolver;
-    }
-
-    ValueDeserializers getDeserializers() {
-        return deserializers;
-    }
+record DeserializerConfig(Configuration configuration, TargetClassResolver targetResolver,
+                          ValueDeserializers deserializers) {
 }

@@ -74,22 +74,22 @@ class DefaultInstanceBuilderTest {
         sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
         final Object res = sut.getCurrentRoot();
         assertNotNull(res);
-        assertTrue(res instanceof Person);
+        assertInstanceOf(Person.class, res);
     }
 
     @Test
     void openCollectionCreatesSet() {
         sut.openCollection(CollectionType.SET);
-        assertTrue(sut.getCurrentRoot() instanceof Set);
+        assertInstanceOf(Set.class, sut.getCurrentRoot());
     }
 
     @Test
     void openCollectionInCollectionPushesOriginalCollectionToStack() throws Exception {
         sut.openCollection(CollectionType.SET);
         sut.openCollection(CollectionType.SET);
-        assertTrue(sut.getCurrentRoot() instanceof Set);
+        assertInstanceOf(Set.class, sut.getCurrentRoot());
         assertFalse(getOpenInstances().isEmpty());
-        assertTrue(getOpenInstances().peek().getInstance() instanceof Set);
+        assertInstanceOf(Set.class, getOpenInstances().peek().getInstance());
         assertNotSame(sut.getCurrentRoot(), getOpenInstances().peek().getInstance());
     }
 
@@ -98,10 +98,10 @@ class DefaultInstanceBuilderTest {
         sut.openCollection(CollectionType.SET);
         sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         final Object root = sut.getCurrentRoot();
-        assertTrue(root instanceof Employee);
+        assertInstanceOf(Employee.class, root);
         assertFalse(getOpenInstances().isEmpty());
         final Object stackTop = getOpenInstances().peek().getInstance();
-        assertTrue(stackTop instanceof Set);
+        assertInstanceOf(Set.class, stackTop);
         final Set<?> set = (Set<?>) stackTop;
         assertTrue(((Set<?>) stackTop).isEmpty());
         sut.closeObject();
@@ -129,7 +129,7 @@ class DefaultInstanceBuilderTest {
     void closeObjectPopsPreviousInstanceFromTheStack() throws Exception {
         sut.openCollection(CollectionType.SET);
         final Object originalRoot = sut.getCurrentRoot();
-        assertTrue(originalRoot instanceof Set);
+        assertInstanceOf(Set.class, originalRoot);
         sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         assertFalse(getOpenInstances().isEmpty());
         sut.closeObject();
@@ -155,7 +155,7 @@ class DefaultInstanceBuilderTest {
         }
         sut.openCollection(CollectionType.LIST);
         items.forEach(item -> sut.addValue(item));
-        assertTrue(sut.getCurrentRoot() instanceof List);
+        assertInstanceOf(List.class, sut.getCurrentRoot());
         final List<?> result = (List<?>) sut.getCurrentRoot();
         for (int i = 0; i < items.size(); i++) {
             assertEquals(items.get(i), result.get(i));
@@ -167,7 +167,7 @@ class DefaultInstanceBuilderTest {
         sut.openObject(TestUtil.PALMER_URI.toString(), Employee.class);
         sut.openObject(Generator.generateUri().toString(), Vocabulary.IS_MEMBER_OF,
                 Collections.singletonList(Vocabulary.ORGANIZATION));
-        assertTrue(sut.getCurrentRoot() instanceof Organization);
+        assertInstanceOf(Organization.class, sut.getCurrentRoot());
     }
 
     @Test
@@ -177,7 +177,7 @@ class DefaultInstanceBuilderTest {
                 Collections.singletonList(Vocabulary.ORGANIZATION));
         assertFalse(getOpenInstances().isEmpty());
         final Object top = getOpenInstances().peek().getInstance();
-        assertTrue(top instanceof Employee);
+        assertInstanceOf(Employee.class, top);
         assertNotNull(((Employee) top).getEmployer());
     }
 
@@ -200,7 +200,7 @@ class DefaultInstanceBuilderTest {
         sut.openObject(Generator.generateUri().toString(), Organization.class);
         sut.openCollection(Vocabulary.HAS_MEMBER);
         assertFalse(getOpenInstances().isEmpty());
-        assertTrue(sut.getCurrentRoot() instanceof Set);
+        assertInstanceOf(Set.class, sut.getCurrentRoot());
     }
 
     @Test
@@ -208,7 +208,7 @@ class DefaultInstanceBuilderTest {
         sut.openObject(Generator.generateUri().toString(), Organization.class);
         sut.openCollection(Vocabulary.HAS_MEMBER);
         assertFalse(getOpenInstances().isEmpty());
-        assertTrue(getOpenInstances().peek().getInstance() instanceof Organization);
+        assertInstanceOf(Organization.class, getOpenInstances().peek().getInstance());
         final Organization org = (Organization) getOpenInstances().peek().getInstance();
         assertSame(sut.getCurrentRoot(), org.getEmployees());
     }
@@ -246,7 +246,7 @@ class DefaultInstanceBuilderTest {
         sut.openObject(TestUtil.PALMER_URI.toString(), User.class);
         sut.openCollection(JsonLd.TYPE);
         final InstanceContext<?> result = getCurrentInstance();
-        assertTrue(result instanceof TypesContext);
+        assertInstanceOf(TypesContext.class, result);
         final TypesContext<?, ?> ctx = (TypesContext<?, ?>) result;
         assertEquals(String.class, ctx.getItemType());
     }
@@ -278,11 +278,11 @@ class DefaultInstanceBuilderTest {
     @Test
     void openCollectionOpensDummyCollectionContextForTypeInInstanceWithoutTypesField() throws Exception {
         sut.openObject(TestUtil.PALMER_URI.toString(), Person.class);
-        assertTrue(getCurrentInstance() instanceof SingularObjectContext);
+        assertInstanceOf(SingularObjectContext.class, getCurrentInstance());
         sut.openCollection(JsonLd.TYPE);
-        assertTrue(getCurrentInstance() instanceof DummyCollectionInstanceContext);
+        assertInstanceOf(DummyCollectionInstanceContext.class, getCurrentInstance());
         sut.closeCollection();
-        assertTrue(getCurrentInstance() instanceof SingularObjectContext);
+        assertInstanceOf(SingularObjectContext.class, getCurrentInstance());
     }
 
     @Test
@@ -332,7 +332,7 @@ class DefaultInstanceBuilderTest {
         sut.openCollection(Vocabulary.HAS_EVENT_TYPE);
         sut.openObject(Generator.generateUri().toString(), URI.class);
         final InstanceContext<?> ctx = getCurrentInstance();
-        assertTrue(ctx instanceof NodeReferenceContext);
+        assertInstanceOf(NodeReferenceContext.class, ctx);
     }
 
     @Test
@@ -340,7 +340,7 @@ class DefaultInstanceBuilderTest {
         sut.openObject(Generator.generateUri().toString(), Organization.class);
         sut.openObject(Generator.generateUri().toString(), Vocabulary.ORIGIN, Collections.emptyList());
         final InstanceContext<?> ctx = getCurrentInstance();
-        assertTrue(ctx instanceof NodeReferenceContext);
+        assertInstanceOf(NodeReferenceContext.class, ctx);
     }
 
     @Test
@@ -433,7 +433,7 @@ class DefaultInstanceBuilderTest {
     void objectIsStoredInKnownInstancesWhenItIsOpen() throws Exception {
         sut.openObject(TestUtil.PALMER_URI.toString(), User.class);
         assertTrue(getKnownInstances().containsKey(TestUtil.PALMER_URI.toString()));
-        assertTrue(getKnownInstances().get(TestUtil.PALMER_URI.toString()) instanceof User);
+        assertInstanceOf(User.class, getKnownInstances().get(TestUtil.PALMER_URI.toString()));
     }
 
     @Test

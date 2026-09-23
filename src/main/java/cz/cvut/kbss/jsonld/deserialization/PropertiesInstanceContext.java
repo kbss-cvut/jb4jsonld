@@ -17,31 +17,47 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.deserialization.util.DataTypeTransformer;
+import cz.cvut.kbss.jsonld.deserialization.util.LangString;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 public class PropertiesInstanceContext extends InstanceContext<Map> {
 
     private final Field propertiesField;
     private final String property;
 
+    // Cache resolved key/value/element types to prevent repeated reflection-based calls
+    private final Class<?> keyType;
+    private final Class<?> valueType;
+    private final Class<?> valueElementType;
+
+    private MultilingualString multilingualString;
+
     PropertiesInstanceContext(Map<?, ?> instance, String property, Field propertiesField) {
         super(instance, Collections.emptyMap());
         this.property = property;
         this.propertiesField = propertiesField;
+
+        this.keyType = BeanClassProcessor.getMapKeyType(propertiesField);
+        this.valueType = BeanClassProcessor.getMapValueType(propertiesField);
+        if (Collection.class.isAssignableFrom(valueType)) {
+            this.valueElementType = BeanClassProcessor.getMapGenericValueType(propertiesField);
+        } else {
+            this.valueElementType = null;
+        }
     }
 
     @Override
     void addItem(Object item) {
-        final Class<?> keyType = BeanClassProcessor.getMapKeyType(propertiesField);
         final Object typedProperty = DataTypeTransformer.transformValue(property, keyType);
-        final Class<?> valueType = BeanClassProcessor.getMapValueType(propertiesField);
         if (Collection.class.isAssignableFrom(valueType)) {
             Collection values;
             if (instance.containsKey(typedProperty)) {
@@ -50,15 +66,30 @@ public class PropertiesInstanceContext extends InstanceContext<Map> {
                 values = BeanClassProcessor.createCollection(valueType);
                 instance.put(typedProperty, values);
             }
-            final Class<?> itemType = BeanClassProcessor.getMapGenericValueType(propertiesField);
-            final Object itemValue = itemType != null ? DataTypeTransformer.transformValue(item, itemType) : item;
-            values.add(itemValue);
+            final Optional<Object> itemValue = resolveItemValue(item, valueElementType);
+            itemValue.ifPresent(values::add);
         } else {
             if (instance.containsKey(typedProperty)) {
                 throw JsonLdDeserializationException.singularAttributeCardinalityViolated(property, propertiesField);
             }
-            final Object typedValue = DataTypeTransformer.transformValue(item, valueType);
-            instance.put(typedProperty, typedValue);
+            final Optional<Object> typedValue = resolveItemValue(item, valueType);
+            typedValue.ifPresent(tv -> instance.put(typedProperty, tv));
+        }
+    }
+
+    private Optional<Object> resolveItemValue(Object item, Class<?> targetType) {
+        // If the value is a language-tagged string, use MultilingualString so that translations can be grouped together
+        if (item instanceof LangString langString && (targetType == null || Object.class.equals(targetType))) {
+            final String langTag = langString.getLanguage().orElse(null);
+            if (multilingualString == null || multilingualString.contains(langTag)) {
+                this.multilingualString = MultilingualString.create(langString.getValue(), langTag);
+                return Optional.of(multilingualString);
+            } else {
+                multilingualString.set(langTag, langString.getValue());
+                return Optional.empty();
+            }
+        } else {
+            return Optional.of(targetType != null ? DataTypeTransformer.transformValue(item, targetType) : item);
         }
     }
 

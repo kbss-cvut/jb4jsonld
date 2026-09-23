@@ -52,10 +52,9 @@ public class ObjectIdNode extends JsonNode {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ObjectIdNode)) {
+        if (!(o instanceof ObjectIdNode that)) {
             return false;
         }
-        ObjectIdNode that = (ObjectIdNode) o;
         return identifier.equals(that.identifier);
     }
 

@@ -30,13 +30,10 @@ public enum OwlPropertyType {
     OBJECT_PROPERTY;
 
     public static String getMappedIndividual(OwlPropertyType constant) {
-        switch (constant) {
-            case ANNOTATION_PROPERTY:
-                return OWL.ANNOTATION_PROPERTY;
-            case DATATYPE_PROPERTY:
-                return OWL.DATATYPE_PROPERTY;
-            default:
-                return OWL.OBJECT_PROPERTY;
-        }
+        return switch (constant) {
+            case ANNOTATION_PROPERTY -> OWL.ANNOTATION_PROPERTY;
+            case DATATYPE_PROPERTY -> OWL.DATATYPE_PROPERTY;
+            default -> OWL.OBJECT_PROPERTY;
+        };
     }
 }

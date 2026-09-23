@@ -40,7 +40,7 @@ abstract class Deserializer<X> {
     }
 
     Configuration configuration() {
-        return config.getConfiguration();
+        return config.configuration();
     }
 
     <T> Class<? extends T> resolveTargetClass(JsonObject jsonRoot, Class<T> resultClass) {
@@ -48,7 +48,7 @@ abstract class Deserializer<X> {
             return resultClass;
         }
         final List<String> types = getObjectTypes(jsonRoot);
-        return config.getTargetResolver().getTargetClass(resultClass, types);
+        return config.targetResolver().getTargetClass(resultClass, types);
     }
 
     List<String> getObjectTypes(JsonObject jsonLdObject) {

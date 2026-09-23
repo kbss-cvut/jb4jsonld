@@ -19,7 +19,7 @@ package cz.cvut.kbss.jsonld.exception;
 
 /**
  * Generic exception for issues with JB4JSON-LD.
- *
+ * <p>
  * Subclasses indicate particular problems.
  */
 public class JsonLdException extends RuntimeException {

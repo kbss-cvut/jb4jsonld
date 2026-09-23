@@ -18,7 +18,7 @@
 package cz.cvut.kbss.jsonld.exception;
 
 /**
- * Indicates that the serializer encountered an instance without an identifier and it was configured to require identifier presence.
+ * Indicates that the serializer encountered an instance without an identifier, and it was configured to require identifier presence.
  *
  * @see cz.cvut.kbss.jsonld.ConfigParam#REQUIRE_ID
  */

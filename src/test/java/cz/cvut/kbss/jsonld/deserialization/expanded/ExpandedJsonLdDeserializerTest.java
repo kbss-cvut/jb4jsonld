@@ -17,6 +17,7 @@
  */
 package cz.cvut.kbss.jsonld.deserialization.expanded;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.Id;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
@@ -57,6 +58,8 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -937,5 +940,19 @@ class ExpandedJsonLdDeserializerTest {
                    hasKey("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved"));
         assertEquals(Set.of("true"), result.getProperties()
                                            .get("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/approved"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"objectWithMultilingualUnmappedProperty_context.json",
+                "objectWithMultilingualUnmappedProperty_compact.json"})
+    void deserializationSupportsDeserializingMultilingualStringIntoTypedUnmappedProperties(
+            String source) throws Exception {
+        final JsonArray input = readAndExpand(source);
+        final URI property = URI.create("http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/mls");
+        final PersonWithTypedProperties result = sut.deserialize(input, PersonWithTypedProperties.class);
+        assertNotNull(result);
+        assertThat(result.getProperties(), hasKey(property));
+        assertEquals(Set.of(new MultilingualString(Map.of("cs", "Hodnota", "en", "Value"))),
+                     result.getProperties().get(property));
     }
 }

@@ -57,36 +57,31 @@ class BeanClassProcessorTest {
                 result.getMessage());
     }
 
-    private static class ClassWithoutPublicCtor {
-        private final String name;
-
-        public ClassWithoutPublicCtor(String name) {
-            this.name = name;
-        }
+    private record ClassWithoutPublicCtor(String name) {
     }
 
     @Test
     void testCreateCollectionOfListType() {
         final Collection<?> res = createCollection(CollectionType.LIST);
-        assertTrue(res instanceof List);
+        assertInstanceOf(List.class, res);
     }
 
     @Test
     void testCreateCollectionOfSetType() {
         final Collection<?> res = createCollection(CollectionType.SET);
-        assertTrue(res instanceof Set);
+        assertInstanceOf(Set.class, res);
     }
 
     @Test
     void testCreateCollectionFromSetField() throws Exception {
         final Collection<?> res = createCollection(Organization.class.getDeclaredField("employees"));
-        assertTrue(res instanceof Set);
+        assertInstanceOf(Set.class, res);
     }
 
     @Test
     void testCreateCollectionFromListField() throws Exception {
         final Collection<?> res = createCollection(ClassWithListField.class.getDeclaredField("list"));
-        assertTrue(res instanceof List);
+        assertInstanceOf(List.class, res);
     }
 
     private static class ClassWithListField {

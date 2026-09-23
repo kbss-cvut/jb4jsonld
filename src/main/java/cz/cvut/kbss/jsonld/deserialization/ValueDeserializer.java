@@ -50,5 +50,6 @@ public interface ValueDeserializer<T> extends Configurable {
      */
     @Override
     default void configure(Configuration config) {
+        // Empty method overridden because of Javadoc
     }
 }

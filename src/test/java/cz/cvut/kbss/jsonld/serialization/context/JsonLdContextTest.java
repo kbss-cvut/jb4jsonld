@@ -59,10 +59,9 @@ class JsonLdContextTest {
         final String lastName = Person.getLastNameField().getName();
         sut.registerTermMapping(lastName, Vocabulary.LAST_NAME);
 
-        final JsonNode result = sut.getContextNode();
-        assertThat(result, instanceOf(CompositeNode.class));
-        final CompositeNode<?> compositeResult = (CompositeNode<?>) result;
-        assertThat(compositeResult.getItems(),
+        assertThat(sut.getContextNode(), instanceOf(CompositeNode.class));
+        final CompositeNode<?> result = sut.getContextNode();
+        assertThat(result.getItems(),
                    hasItems(JsonNodeFactory.createStringLiteralNode(firstName, Vocabulary.FIRST_NAME),
                             JsonNodeFactory.createStringLiteralNode(lastName, Vocabulary.LAST_NAME)));
     }

@@ -17,9 +17,13 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
+import cz.cvut.kbss.jsonld.deserialization.util.LangString;
+import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +37,9 @@ import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PropertiesInstanceContextTest {
 
@@ -73,7 +79,8 @@ class PropertiesInstanceContextTest {
     void addItemPutsSingleValueIntoPropertiesMapWhenMapIsConfiguredAsSingleValued() throws Exception {
         final Map<?, ?> map = new HashMap<>();
         final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.USERNAME,
-                SingleValued.class.getDeclaredField("properties"));
+                                                                       SingleValued.class.getDeclaredField(
+                                                                               "properties"));
         ctx.addItem(VALUE);
         assertEquals(VALUE, map.get(Vocabulary.USERNAME));
     }
@@ -87,7 +94,8 @@ class PropertiesInstanceContextTest {
     void addItemConvertsPropertyIdentifierToCorrectType() throws Exception {
         final Map<URI, Set<?>> map = new HashMap<>();
         final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.USERNAME,
-                TypedProperties.class.getDeclaredField("properties"));
+                                                                       TypedProperties.class.getDeclaredField(
+                                                                               "properties"));
         ctx.addItem(VALUE);
         assertTrue(map.containsKey(URI.create(Vocabulary.USERNAME)));
     }
@@ -101,7 +109,8 @@ class PropertiesInstanceContextTest {
     void addItemInsertsValuesOfCorrectTypes() throws Exception {
         final Map<URI, Set<?>> map = new HashMap<>();
         final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.IS_ADMIN,
-                TypedProperties.class.getDeclaredField("properties"));
+                                                                       TypedProperties.class.getDeclaredField(
+                                                                               "properties"));
         ctx.addItem(true);
         assertEquals(Boolean.TRUE, map.get(URI.create(Vocabulary.IS_ADMIN)).iterator().next());
     }
@@ -115,14 +124,74 @@ class PropertiesInstanceContextTest {
     }
 
     @Test
-    void addItemThrowsExceptionWhenMultipleItemsForSingularPropertyAreAdded() throws Exception {
+    void contextThrowsExceptionWhenMultipleItemsForSingularPropertyAreAdded() {
         final Map<String, String> map = new HashMap<>();
-        final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, Vocabulary.USERNAME,
-                SingleValued.class.getDeclaredField("properties"));
-        ctx.addItem(VALUE);
         JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
-                () -> ctx.addItem("halsey@oni.org"));
+                                                             () -> {
+                                                                 final InstanceContext<Map> ctx =
+                                                                         new PropertiesInstanceContext(map,
+                                                                                                       Vocabulary.USERNAME,
+                                                                                                       SingleValued.class.getDeclaredField(
+                                                                                                               "properties"));
+                                                                 ctx.addItem(VALUE);
+                                                                 ctx.addItem("halsey@oni.org");
+                                                             });
         assertThat(result.getMessage(),
-                containsString("Encountered multiple values of property " + Vocabulary.USERNAME));
+                   containsString("Encountered multiple values of property " + Vocabulary.USERNAME));
+    }
+
+    @Test
+    void addItemSupportsBuildingMultilingualStringFromMultipleLangStringsInTypedProperties() throws Exception {
+        final Map<URI, Set<Object>> map = new HashMap<>();
+        final URI property = Generator.generateUri();
+        final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, property.toString(),
+                                                                       PersonWithTypedProperties.class.getDeclaredField(
+                                                                               "properties"));
+
+        ctx.addItem(new LangString("Hodnota", "cs"));
+        ctx.addItem(new LangString("Value", "en"));
+        assertEquals(Set.of(new MultilingualString(Map.of("cs", "Hodnota", "en", "Value"))), map.get(property));
+    }
+
+    @Test
+    void addItemRepresentsSingleLangStringAsMultilingualStringInTypedProperties() throws Exception {
+        final Map<URI, Set<Object>> map = new HashMap<>();
+        final URI property = Generator.generateUri();
+        final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, property.toString(),
+                                                                       PersonWithTypedProperties.class.getDeclaredField(
+                                                                               "properties"));
+
+        ctx.addItem(new LangString("Value", "en"));
+        assertEquals(Set.of(MultilingualString.create("Value", "en")), map.get(property));
+    }
+
+    @Test
+    void addItemConstructsMultipleMultilingualStringsWhenMultipleValuesWithSameLanguageAreAdded() throws Exception {
+        final Map<URI, Set<Object>> map = new HashMap<>();
+        final URI property = Generator.generateUri();
+        final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, property.toString(),
+                                                                       PersonWithTypedProperties.class.getDeclaredField(
+                                                                               "properties"));
+
+        ctx.addItem(new LangString("Hodnota", "cs"));
+        ctx.addItem(new LangString("Value", "en"));
+        ctx.addItem(new LangString("Worth", "en"));
+        assertEquals(Set.of(
+                new MultilingualString(Map.of("cs", "Hodnota", "en", "Value")),
+                MultilingualString.create("Worth", "en")
+        ), map.get(property));
+    }
+
+    @Test
+    void addItemAddsLexicalValueOfLanguageTaggedStringsToStringBasedProperties() throws Exception {
+        final Map<String, Set<String>> map = new HashMap<>();
+        final String property = Generator.generateUri().toString();
+        final InstanceContext<Map> ctx =
+                new PropertiesInstanceContext(map, property, Person.class.getDeclaredField("properties"));
+
+        ctx.addItem(new LangString("Hodnota", "cs"));
+        ctx.addItem(new LangString("Value", "en"));
+        ctx.addItem(new LangString("Worth", "en"));
+        assertEquals(Set.of("Hodnota", "Value", "Worth"), map.get(property));
     }
 }

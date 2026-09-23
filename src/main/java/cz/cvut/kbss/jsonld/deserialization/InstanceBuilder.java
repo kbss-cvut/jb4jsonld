@@ -144,7 +144,7 @@ public interface InstanceBuilder {
     /**
      * Adds a reference to a node to the currently open object.
      * <p>
-     * This methods is invoked in case the deserializer encounters an object with a single attribute - @id. This assumes
+     * This method is invoked in case the deserializer encounters an object with a single attribute - @id. This assumes
      * that the node either references an already encountered object (known instance) or that the node is a value of a
      * plain identifier-valued object property.
      * <p>
@@ -161,7 +161,7 @@ public interface InstanceBuilder {
     /**
      * Adds the specified value to the currently open collection.
      * <p>
-     * This methods is invoked in case the deserializer encounters an object with a single attribute - @id. This assumes
+     * This method is invoked in case the deserializer encounters an object with a single attribute - @id. This assumes
      * that the node either references an already encountered object (known instance) or that the node is a value of a
      * plain identifier-valued object property.
      *

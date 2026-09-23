@@ -67,7 +67,7 @@ class CollectionDeserializer extends Deserializer<JsonArray> {
 
     private void resolveValue(JsonObject value) {
         final Class<?> targetType = instanceBuilder.getCurrentCollectionElementType();
-        if (config.getDeserializers().hasCustomDeserializer(targetType)) {
+        if (config.deserializers().hasCustomDeserializer(targetType)) {
             instanceBuilder.addValue(deserializeUsingCustomDeserializer(targetType, value));
         } else if (value.size() == 1 && value.containsKey(JsonLd.VALUE)) {
             instanceBuilder.addValue(ValueUtils.literalValue(ValueUtils.getValue(value)));
@@ -109,7 +109,7 @@ class CollectionDeserializer extends Deserializer<JsonArray> {
 
     private void resolvePropertyValue(JsonObject value) {
         final Class<?> targetType = instanceBuilder.getTargetType(property);
-        if (config.getDeserializers().hasCustomDeserializer(targetType)) {
+        if (config.deserializers().hasCustomDeserializer(targetType)) {
             instanceBuilder.addValue(property, deserializeUsingCustomDeserializer(targetType, value));
             return;
         }
@@ -123,9 +123,9 @@ class CollectionDeserializer extends Deserializer<JsonArray> {
     }
 
     private <T> T deserializeUsingCustomDeserializer(Class<T> targetType, JsonObject value) {
-        final DeserializationContext<T> ctx = new DeserializationContext<>(targetType, config.getTargetResolver());
-        assert config.getDeserializers().getDeserializer(ctx).isPresent();
-        return config.getDeserializers().getDeserializer(ctx).get().deserialize(value, ctx);
+        final DeserializationContext<T> ctx = new DeserializationContext<>(targetType, config.targetResolver());
+        assert config.deserializers().getDeserializer(ctx).isPresent();
+        return config.deserializers().getDeserializer(ctx).get().deserialize(value, ctx);
     }
 
     private void extractLiteralValue(JsonObject value) {

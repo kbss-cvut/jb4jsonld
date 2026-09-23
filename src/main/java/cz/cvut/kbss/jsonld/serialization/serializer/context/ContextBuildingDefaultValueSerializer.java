@@ -45,8 +45,7 @@ public class ContextBuildingDefaultValueSerializer implements ValueSerializer {
 
     @Override
     public JsonNode serialize(Object value, SerializationContext ctx) {
-        if (value instanceof Collection) {
-            final Collection<?> col = (Collection<?>) value;
+        if (value instanceof Collection<?> col) {
             if (col.isEmpty()) {
                 ctx.registerTermMapping(ctx.getFieldName(), ctx.getTerm());
                 return JsonNodeFactory.createCollectionNode(ctx.getTerm(), col);

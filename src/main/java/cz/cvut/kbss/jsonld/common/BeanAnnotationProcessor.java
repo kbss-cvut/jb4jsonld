@@ -85,7 +85,7 @@ public class BeanAnnotationProcessor {
 	    /**
      * Checks whether the specified class is annotated with the {@link OWLClass} or
 	 * {@link JsonLdType} annotation. If it's annotated with {@link JsonLdType} the IRI
-	 * 	may be empty and it may be an abstract class;
+	 * 	may be empty, and it may be an abstract class;
      *
      * @param cls The class to examine
      * @return Whether it is annotated with {@link OWLClass} or {@link JsonLdType}.

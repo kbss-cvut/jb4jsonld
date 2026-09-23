@@ -32,8 +32,7 @@ class MultilingualStringCollectionContext<T extends Collection<MultilingualStrin
     @Override
     void addItem(Object item) {
         assert item != null;
-        if (item instanceof LangString) {
-            final LangString value = (LangString) item;
+        if (item instanceof LangString value) {
             final String language = value.getLanguage().orElse(null);
             final MultilingualString element = getFirstAvailable(language);
             element.set(language, value.getValue());
