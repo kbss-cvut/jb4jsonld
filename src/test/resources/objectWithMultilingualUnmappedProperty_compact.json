@@ -1,0 +1,19 @@
+{
+  "@id": "http://krizik.felk.cvut.cz/ontologies/jb4jsonld#Catherine+Halsey",
+  "@type": [
+    "http://onto.fel.cvut.cz/ontologies/ufo/Person",
+    "http://krizik.felk.cvut.cz/ontologies/jb4jsonld/Employee"
+  ],
+  "http://onto.fel.cvut.cz/ontologies/application/jb4jsonld/attribute/mls": [
+    {
+      "@language": "cs",
+      "@value": "Hodnota"
+    },
+    {
+      "@language": "en",
+      "@value": "Value"
+    }
+  ],
+  "http://xmlns.com/foaf/0.1/firstName": "Catherine",
+  "http://xmlns.com/foaf/0.1/lastName": "Halsey"
+}
