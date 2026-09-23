@@ -17,6 +17,7 @@
  */
 package cz.cvut.kbss.jsonld.serialization.traversal;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
 import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.serialization.context.JsonLdContext;
@@ -28,8 +29,8 @@ import java.util.Objects;
 /**
  * Serializes a {@link cz.cvut.kbss.jopa.model.annotations.Properties} field.
  * <p>
- * Note that at the moment, when the map also contains a property which is already mapped by another field, a conflict in
- * the resulting JSON-LD will arise.
+ * Note that at the moment, when the map also contains a property which is already mapped by another field, a conflict
+ * in the resulting JSON-LD will arise.
  */
 class PropertiesTraverser {
 
@@ -79,10 +80,17 @@ class PropertiesTraverser {
                 visitSingleValue(property, val, jsonLdContext);
             }
         } else {
-            final SerializationContext<Collection<?>> colContext = new SerializationContext<>(property, values, jsonLdContext);
-            parent.openCollection(colContext);
-            values.stream().filter(Objects::nonNull).forEach(v -> visitSingleValue(null, v, jsonLdContext));
-            parent.closeCollection(colContext);
+            if (values.iterator().next() instanceof MultilingualString) {
+                // Plural multilingual string is not serialized as a collection, but as an object with attributes
+                // corresponding to languages
+                parent.visitAttribute(new SerializationContext<>(property, values, jsonLdContext));
+            } else {
+                final SerializationContext<Collection<?>> colContext =
+                        new SerializationContext<>(property, values, jsonLdContext);
+                parent.openCollection(colContext);
+                values.stream().filter(Objects::nonNull).forEach(v -> visitSingleValue(null, v, jsonLdContext));
+                parent.closeCollection(colContext);
+            }
         }
     }
 }

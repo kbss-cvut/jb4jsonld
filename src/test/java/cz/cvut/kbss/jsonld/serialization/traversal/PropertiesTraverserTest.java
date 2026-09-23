@@ -27,19 +27,30 @@ import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
 import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class PropertiesTraverserTest {
 
     private Field field;
@@ -56,7 +67,6 @@ class PropertiesTraverserTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        MockitoAnnotations.openMocks(this);
         this.field = Person.class.getDeclaredField("properties");
         this.typedField = PersonWithTypedProperties.class.getDeclaredField("properties");
         this.property = Generator.generateUri().toString();
@@ -77,7 +87,7 @@ class PropertiesTraverserTest {
         final Map<String, Set<String>> properties = Generator.generateProperties(false);
         sut.traverseProperties(new SerializationContext<>(null, field, properties, DummyJsonLdContext.INSTANCE));
         for (Map.Entry<String, Set<String>> e : properties.entrySet()) {
-            if (e.getValue().size() > 0) {
+            if (!e.getValue().isEmpty()) {
                 verify(traverser).openCollection(new SerializationContext<>(e.getKey(), null, e.getValue(), DummyJsonLdContext.INSTANCE));
                 for (String v : e.getValue()) {
                     verify(traverser).visitAttribute(new SerializationContext<>(null, null, v, DummyJsonLdContext.INSTANCE));

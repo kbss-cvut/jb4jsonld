@@ -55,9 +55,6 @@ public class ContextBuildingPluralMultilingualStringSerializer implements ValueS
     }
 
     static void registerTermMapping(SerializationContext<Collection<MultilingualString>> ctx) {
-        final ObjectNode mapping = JsonNodeFactory.createObjectNode(ctx.getFieldName());
-        mapping.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.ID, ctx.getTerm()));
-        mapping.addItem(JsonNodeFactory.createStringLiteralNode(JsonLd.CONTAINER, JsonLd.LANGUAGE));
-        ctx.registerTermMapping(ctx.getFieldName(), mapping);
+        ContextBuildingMultilingualStringSerializer.registerTermMapping(ctx);
     }
 }
