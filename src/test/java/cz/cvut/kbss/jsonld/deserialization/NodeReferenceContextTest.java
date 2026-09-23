@@ -21,29 +21,27 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class NodeReferenceContextTest {
 
     @Mock
     private InstanceContext ownerMock;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void setIdentifierValueTransformsValueToTargetType() throws Exception {

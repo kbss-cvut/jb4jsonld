@@ -39,8 +39,7 @@ public class DefaultValueSerializer implements ValueSerializer {
 
     @Override
     public JsonNode serialize(Object value, SerializationContext ctx) {
-        if (value instanceof Collection) {
-            final Collection<?> col = (Collection<?>) value;
+        if (value instanceof Collection<?> col) {
             final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(ctx.getTerm(), col);
             col.forEach(item -> {
                 if (SerializerUtils.isAnnotationReference(item, ctx)) {

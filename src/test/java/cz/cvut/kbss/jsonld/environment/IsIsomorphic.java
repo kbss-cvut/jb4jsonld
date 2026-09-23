@@ -26,7 +26,7 @@ import java.util.Objects;
 
 /**
  * Matches two {@link Model}s if they are isomorphic.
- *
+ * <p>
  * That is, they contain the same statements (including some blank node magic).
  */
 public class IsIsomorphic extends TypeSafeMatcher<Model> {

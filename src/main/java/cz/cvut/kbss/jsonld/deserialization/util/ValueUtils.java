@@ -57,19 +57,13 @@ public class ValueUtils {
     }
 
     public static Object literalValue(JsonValue value) {
-        switch(value.getValueType()) {
-            case STRING:
-                return ((JsonString) value).getString();
-            case NUMBER:
-                return ((JsonNumber) value).numberValue();
-            case TRUE:
-                return true;
-            case FALSE:
-                return false;
-            case NULL:
-                return null;
-            default:
-                throw new IllegalArgumentException("Value " + value + " is not a literal.");
-        }
+        return switch (value.getValueType()) {
+            case STRING -> ((JsonString) value).getString();
+            case NUMBER -> ((JsonNumber) value).numberValue();
+            case TRUE -> true;
+            case FALSE -> false;
+            case NULL -> null;
+            default -> throw new IllegalArgumentException("Value " + value + " is not a literal.");
+        };
     }
 }

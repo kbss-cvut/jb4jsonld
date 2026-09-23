@@ -134,7 +134,7 @@ class CollectionDeserializerTest {
     void processValueUsesCustomDeserializerWhenItMatchesSingularPropertyTargetType() throws Exception {
         final JsonObject jsonLd = TestUtil.readAndExpand("objectWithSingularReference.json").getJsonObject(0);
         final OrganizationDeserializer customDeserializer = spy(new OrganizationDeserializer());
-        deserializerConfig.getDeserializers().registerDeserializer(Organization.class, customDeserializer);
+        deserializerConfig.deserializers().registerDeserializer(Organization.class, customDeserializer);
         final CollectionDeserializer sut =
                 new CollectionDeserializer(instanceBuilder, deserializerConfig, Vocabulary.IS_MEMBER_OF);
         instanceBuilder.openObject(Generator.generateUri().toString(), Employee.class);
@@ -162,7 +162,7 @@ class CollectionDeserializerTest {
     void processValueUsesCustomDeserializerWhenItMatchesPluralPropertyElementType() throws Exception {
         final JsonObject jsonLd = TestUtil.readAndExpand("objectWithPluralReference.json").getJsonObject(0);
         final EmployeeDeserializer customDeserializer = spy(new EmployeeDeserializer());
-        deserializerConfig.getDeserializers().registerDeserializer(Employee.class, customDeserializer);
+        deserializerConfig.deserializers().registerDeserializer(Employee.class, customDeserializer);
         final CollectionDeserializer sut =
                 new CollectionDeserializer(instanceBuilder, deserializerConfig, Vocabulary.HAS_MEMBER);
         instanceBuilder.openObject(Generator.generateUri().toString(), Organization.class);

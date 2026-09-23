@@ -59,8 +59,7 @@ public class ContextBuildingObjectPropertyValueSerializer extends ObjectProperty
         if (BeanClassProcessor.isIndividualType(ctx.getValue().getClass())) {
             return true;
         }
-        if (ctx.getValue() instanceof Collection) {
-            final Collection<?> c = (Collection<?>) ctx.getValue();
+        if (ctx.getValue() instanceof Collection<?> c) {
             for (Object elem : c) {
                 if (elem != null) {
                     return BeanClassProcessor.isIndividualType(elem.getClass());

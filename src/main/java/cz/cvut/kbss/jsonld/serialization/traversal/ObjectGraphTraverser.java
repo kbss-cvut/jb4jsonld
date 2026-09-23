@@ -176,7 +176,7 @@ public class ObjectGraphTraverser {
 
     private String resolveIdentifier(Object instance) {
         final Optional<Object> extractedId = BeanAnnotationProcessor.getInstanceIdentifier(instance);
-        if (!extractedId.isPresent() && requireId) {
+        if (extractedId.isEmpty() && requireId) {
             throw MissingIdentifierException.create(instance);
         }
         return extractedId.orElseGet(() -> knownInstances.containsKey(instance) ? knownInstances.get(instance) :

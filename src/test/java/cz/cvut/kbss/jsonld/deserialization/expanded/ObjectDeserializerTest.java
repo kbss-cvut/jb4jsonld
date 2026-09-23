@@ -40,15 +40,16 @@ import cz.cvut.kbss.jsonld.exception.UnknownPropertyException;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import org.hamcrest.core.StringStartsWith;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,10 +66,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ObjectDeserializerTest {
 
     @Mock
@@ -81,20 +84,20 @@ class ObjectDeserializerTest {
 
     private ObjectDeserializer sut;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
     void processValueProcessesAttributesInOrderSpecifiedByJsonLdAttributeOrder() throws Exception {
         doReturn(Study.class).when(tcResolverMock).getTargetClass(eq(Study.class), anyCollection());
         doReturn(Employee.class).when(tcResolverMock).getTargetClass(eq(Employee.class), anyCollection());
-        when(instanceBuilderMock.getCurrentRoot()).thenReturn(new Study());
         when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
+        lenient().when(instanceBuilderMock.isPlural(anyString())).thenReturn(false);
         when(instanceBuilderMock.isPlural(Vocabulary.HAS_MEMBER)).thenReturn(true);
         when(instanceBuilderMock.isPlural(Vocabulary.HAS_PARTICIPANT)).thenReturn(true);
+        doReturn(String.class).when(instanceBuilderMock).getTargetType(RDFS.LABEL);
         doReturn(Organization.class).when(instanceBuilderMock).getTargetType(Vocabulary.IS_MEMBER_OF);
+        doReturn(String.class).when(instanceBuilderMock).getTargetType(Vocabulary.USERNAME);
+        doReturn(String.class).when(instanceBuilderMock).getTargetType(Vocabulary.FIRST_NAME);
+        doReturn(String.class).when(instanceBuilderMock).getTargetType(Vocabulary.LAST_NAME);
+        doReturn(Date.class).when(instanceBuilderMock).getTargetType(Vocabulary.DATE_CREATED);
         doAnswer(inv -> Study.class).when(instanceBuilderMock).getCurrentContextType();
         doAnswer(inv -> Employee.class).when(instanceBuilderMock).getCurrentCollectionElementType();
         this.sut =
@@ -115,8 +118,6 @@ class ObjectDeserializerTest {
             throws
             Exception {
         doReturn(InvalidOrder.class).when(tcResolverMock).getTargetClass(eq(InvalidOrder.class), anyCollection());
-        when(instanceBuilderMock.getCurrentRoot()).thenReturn(new InvalidOrder());
-        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(true);
         doAnswer(inv -> InvalidOrder.class).when(instanceBuilderMock).getCurrentContextType();
         this.sut =
                 new ObjectDeserializer(instanceBuilderMock,
@@ -238,10 +239,8 @@ class ObjectDeserializerTest {
     @Test
     void processValueThrowsUnknownPropertyExceptionWhenObjectIsMissingIdField() throws Exception {
         doReturn(Object.class).when(tcResolverMock).getTargetClass(eq(Object.class), anyCollection());
-        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(false);
         final UnknownPropertyException ex = UnknownPropertyException.create(JsonLd.ID, Object.class);
         doThrow(ex).when(instanceBuilderMock).openObject(anyString(), any(Class.class));
-        when(instanceBuilderMock.isPropertyDeserializable(any())).thenReturn(false);
         this.sut = new ObjectDeserializer(instanceBuilderMock,
                                           new DeserializerConfig(new Configuration(), tcResolverMock, deserializers),
                                           Object.class);

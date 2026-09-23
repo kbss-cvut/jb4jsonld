@@ -24,8 +24,9 @@ public interface InstanceVisitor {
 
     /**
      * Visits an object that represents an individual, without any additional attributes.
-     *
+     * <p>
      * This can be an identifier-based attribute value (e.g., URI), or an enum constant mapped to an individual.
+     *
      * @param ctx Current serialization context
      */
     void visitIndividual(SerializationContext<?> ctx);
@@ -61,9 +62,10 @@ public interface InstanceVisitor {
     /**
      * Called when an attribute is processed by the object graph traverser.
      * <p>
-     * Note that identifiers ({@link cz.cvut.kbss.jopa.model.annotations.Id}) and types ({@link cz.cvut.kbss.jopa.model.annotations.Types})
-     * are processed separately and are not visited as attributes. Also, when processing {@link cz.cvut.kbss.jopa.model.annotations.Properties},
-     * this method is invoked for each property in the map.
+     * Note that identifiers ({@link cz.cvut.kbss.jopa.model.annotations.Id}) and types
+     * ({@link cz.cvut.kbss.jopa.model.annotations.Types}) are processed separately and are not visited as attributes.
+     * Also, when processing {@link cz.cvut.kbss.jopa.model.annotations.Properties}, this method is invoked for each
+     * property in the map.
      *
      * @param ctx Current serialization context
      */

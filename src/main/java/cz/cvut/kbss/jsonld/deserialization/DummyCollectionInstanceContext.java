@@ -33,11 +33,6 @@ class DummyCollectionInstanceContext extends InstanceContext<Collection<?>> {
     }
 
     @Override
-    void addItem(Object item) {
-        // Do nothing
-    }
-
-    @Override
     Class<?> getItemType() {
         return Void.class;
     }

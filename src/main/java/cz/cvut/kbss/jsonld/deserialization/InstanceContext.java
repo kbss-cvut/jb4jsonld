@@ -95,7 +95,7 @@ abstract class InstanceContext<T> {
         return identifier;
     }
 
-    // These methods are intended for overriding, because the behaviour is supported only by some context implementations
+    // These methods are intended for overriding, because the behavior is supported only by some context implementations
 
     /**
      * Gets a Java field mapped by the specified property.

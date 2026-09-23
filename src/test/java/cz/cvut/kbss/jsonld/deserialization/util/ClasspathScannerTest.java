@@ -44,7 +44,7 @@ class ClasspathScannerTest {
     }
 
     @Test
-    void processClassesSupportsSpringBootJarFiles() throws IOException, ClassNotFoundException {
+    void processClassesSupportsSpringBootJarFiles() throws IOException {
         processClassesSupportsJarFiles("testjar.jar", "cz.cvut.kbss.testjar.model");
     }
 
@@ -53,9 +53,7 @@ class ClasspathScannerTest {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         URL url = loader.getResources("./bug-31/" + jarFile).nextElement();
         AtomicBoolean a = new AtomicBoolean(false);
-        final ClasspathScanner sut = new ClasspathScanner(cls -> {
-            a.set(true);
-        });
+        final ClasspathScanner sut = new ClasspathScanner(cls -> a.set(true));
         sut.processJarFile(loader, url, pkg);
         if (!a.get()) {
             fail();
