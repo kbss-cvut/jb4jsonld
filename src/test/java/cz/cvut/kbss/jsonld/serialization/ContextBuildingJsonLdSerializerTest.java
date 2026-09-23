@@ -40,6 +40,7 @@ import cz.cvut.kbss.jsonld.environment.model.ObjectWithNumericAttributes;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
 import cz.cvut.kbss.jsonld.environment.model.OwlPropertyType;
 import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
 import cz.cvut.kbss.jsonld.environment.model.Study;
 import cz.cvut.kbss.jsonld.environment.model.StudyWithNamespaces;
 import cz.cvut.kbss.jsonld.environment.model.User;
@@ -63,6 +64,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -73,6 +76,7 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
@@ -470,5 +474,30 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final JsonObject context = json.getJsonObject(JsonLd.CONTEXT);
         checkContextTerm(context, "admin", Vocabulary.IS_ADMIN, XSD.BOOLEAN);
         checkValue(json, "admin", true);
+    }
+
+    @Test
+    void serializationCorrectlySerializesMultipleMultilingualStringValuesOfAnUnmappedProperty() {
+        final PersonWithTypedProperties person = new PersonWithTypedProperties();
+        person.setUri(Generator.generateUri());
+        person.setFirstName("Test");
+        person.setLastName("User");
+        final URI property = Generator.generateUri();
+        person.setProperties(Map.of(property, Set.of(new MultilingualString(Map.of("cs", "Hodnota", "en", "Value")),
+                                                     MultilingualString.create("Worth", "en"))));
+
+        final JsonObject json = serializeAndRead(person).asJsonObject();
+        final JsonValue propertyValue = json.get(property.toString());
+        assertInstanceOf(JsonObject.class, propertyValue);
+        final JsonArray enArray = propertyValue.asJsonObject().getJsonArray("en");
+        assertEquals(2, enArray.size());
+        assertThat(enArray.stream().map(jv -> {
+            JsonValue.ValueType vt = jv.getValueType();
+            assertEquals(JsonValue.ValueType.STRING, vt);
+            return ((JsonString) jv).getString();
+        }).toList(), hasItems("Value", "Worth"));
+        assertEquals(JsonValue.ValueType.STRING, propertyValue.asJsonObject().get("cs").getValueType());
+        final JsonString cs = propertyValue.asJsonObject().getJsonString("cs");
+        assertEquals("Hodnota", cs.getString());
     }
 }

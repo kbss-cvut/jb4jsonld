@@ -17,6 +17,7 @@
  */
 package cz.cvut.kbss.jsonld.integration;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.Configuration;
 import cz.cvut.kbss.jsonld.deserialization.JsonLdDeserializer;
@@ -25,6 +26,7 @@ import cz.cvut.kbss.jsonld.environment.TestUtil;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.ObjectWithNumericAttributes;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
 import cz.cvut.kbss.jsonld.environment.model.TemporalEntity;
 import cz.cvut.kbss.jsonld.environment.model.User;
 import cz.cvut.kbss.jsonld.serialization.JsonLdSerializer;
@@ -34,6 +36,10 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -129,5 +135,30 @@ abstract class DeSerializationSymmetryTest {
         assertEquals(1, result.getEmployees().size());
         assertEquals(result, result.getEmployees().iterator().next().getEmployer());
         assertSame(result, result.getEmployees().iterator().next().getEmployer());
+    }
+
+    @Test
+    void serializationAndDeserializationHandlesMultilingualStringsInUnmappedProperties() throws Exception {
+        final PersonWithTypedProperties person = new PersonWithTypedProperties();
+        person.setUri(Generator.generateUri());
+        person.setFirstName("Test");
+        person.setLastName("User");
+        final URI property = Generator.generateUri();
+        person.setProperties(Map.of(property, Set.of(new MultilingualString(Map.of("cs", "Hodnota", "en", "Value")),
+                                                     MultilingualString.create("Worth", "en"))));
+
+        final PersonWithTypedProperties result = serializeAndDeserialize(person);
+        assertEquals(groupTranslations(person.getProperties().get(property), "cs"),
+                     groupTranslations(result.getProperties().get(property), "cs"));
+        assertEquals(groupTranslations(person.getProperties().get(property), "en"),
+                     groupTranslations(result.getProperties().get(property), "en"));
+    }
+
+    private static Set<String> groupTranslations(Set<?> source, String lang) {
+        return source.stream()
+                     .filter(v -> v instanceof MultilingualString)
+                     .filter(mls -> ((MultilingualString) mls).contains(lang))
+                     .map(mls -> ((MultilingualString) mls).get(lang))
+                     .collect(Collectors.toSet());
     }
 }
