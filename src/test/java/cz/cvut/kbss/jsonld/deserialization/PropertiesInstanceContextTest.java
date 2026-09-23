@@ -17,9 +17,13 @@
  */
 package cz.cvut.kbss.jsonld.deserialization;
 
+import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
+import cz.cvut.kbss.jsonld.deserialization.util.LangString;
+import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Person;
+import cz.cvut.kbss.jsonld.environment.model.PersonWithTypedProperties;
 import cz.cvut.kbss.jsonld.exception.JsonLdDeserializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +37,9 @@ import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PropertiesInstanceContextTest {
 
@@ -118,7 +124,7 @@ class PropertiesInstanceContextTest {
     }
 
     @Test
-    void contextThrowsExceptionWhenMultipleItemsForSingularPropertyAreAdded() throws Exception {
+    void contextThrowsExceptionWhenMultipleItemsForSingularPropertyAreAdded() {
         final Map<String, String> map = new HashMap<>();
         JsonLdDeserializationException result = assertThrows(JsonLdDeserializationException.class,
                                                              () -> {
@@ -132,5 +138,47 @@ class PropertiesInstanceContextTest {
                                                              });
         assertThat(result.getMessage(),
                    containsString("Encountered multiple values of property " + Vocabulary.USERNAME));
+    }
+
+    @Test
+    void addItemSupportsBuildingMultilingualStringFromMultipleLangStringsInTypedProperties() throws Exception {
+        final Map<URI, Set<Object>> map = new HashMap<>();
+        final URI property = Generator.generateUri();
+        final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, property.toString(),
+                                                                       PersonWithTypedProperties.class.getDeclaredField(
+                                                                               "properties"));
+
+        ctx.addItem(new LangString("Hodnota", "cs"));
+        ctx.addItem(new LangString("Value", "en"));
+        assertEquals(Set.of(new MultilingualString(Map.of("cs", "Hodnota", "en", "Value"))), map.get(property));
+    }
+
+    @Test
+    void addItemRepresentsSingleLangStringAsMultilingualStringInTypedProperties() throws Exception {
+        final Map<URI, Set<Object>> map = new HashMap<>();
+        final URI property = Generator.generateUri();
+        final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, property.toString(),
+                                                                       PersonWithTypedProperties.class.getDeclaredField(
+                                                                               "properties"));
+
+        ctx.addItem(new LangString("Value", "en"));
+        assertEquals(Set.of(MultilingualString.create("Value", "en")), map.get(property));
+    }
+
+    @Test
+    void addItemConstructsMultipleMultilingualStringsWhenMultipleValuesWithSameLanguageAreAdded() throws Exception {
+        final Map<URI, Set<Object>> map = new HashMap<>();
+        final URI property = Generator.generateUri();
+        final InstanceContext<Map> ctx = new PropertiesInstanceContext(map, property.toString(),
+                                                                       PersonWithTypedProperties.class.getDeclaredField(
+                                                                               "properties"));
+
+        ctx.addItem(new LangString("Hodnota", "cs"));
+        ctx.addItem(new LangString("Value", "en"));
+        ctx.addItem(new LangString("Worth", "en"));
+        assertEquals(Set.of(
+                new MultilingualString(Map.of("cs", "Hodnota", "en", "Value")),
+                MultilingualString.create("Worth", "en")
+        ), map.get(property));
     }
 }
