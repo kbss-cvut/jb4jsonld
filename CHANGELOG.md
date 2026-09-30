@@ -1,5 +1,9 @@
 # JB4JSON-LD Changelog
 
+## 0.18.1 - 2026-09-30
+
+- Fix an issue with serializing singular multilingual string in unmapped properties.
+
 ## 0.18.0 - 2026-09-23
 
 - Support deserializing multilingual strings into typed unmapped properties (`@Properties Map<URI, Set<Object>>`) (GH-93)
