@@ -477,6 +477,26 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
     }
 
     @Test
+    void serializationCorrectlySerializesSingleMultilingualStringValueOfAnUnmappedProperty() {
+        final PersonWithTypedProperties person = new PersonWithTypedProperties();
+        person.setUri(Generator.generateUri());
+        person.setFirstName("Test");
+        person.setLastName("User");
+        final URI property = Generator.generateUri();
+        person.setProperties(Map.of(property, Set.of(new MultilingualString(Map.of("cs", "Hodnota", "en", "Value")))));
+
+        final JsonObject json = serializeAndRead(person).asJsonObject();
+        final JsonValue propertyValue = json.get(property.toString());
+        assertInstanceOf(JsonObject.class, propertyValue);
+        assertEquals(JsonValue.ValueType.STRING, propertyValue.asJsonObject().get("en").getValueType());
+        final JsonString en = propertyValue.asJsonObject().getJsonString("en");
+        assertEquals("Value", en.getString());
+        assertEquals(JsonValue.ValueType.STRING, propertyValue.asJsonObject().get("cs").getValueType());
+        final JsonString cs = propertyValue.asJsonObject().getJsonString("cs");
+        assertEquals("Hodnota", cs.getString());
+    }
+
+    @Test
     void serializationCorrectlySerializesMultipleMultilingualStringValuesOfAnUnmappedProperty() {
         final PersonWithTypedProperties person = new PersonWithTypedProperties();
         person.setUri(Generator.generateUri());
