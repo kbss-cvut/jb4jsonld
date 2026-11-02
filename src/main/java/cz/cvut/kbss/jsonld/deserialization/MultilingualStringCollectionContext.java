@@ -33,11 +33,11 @@ class MultilingualStringCollectionContext<T extends Collection<MultilingualStrin
     void addItem(Object item) {
         assert item != null;
         if (item instanceof LangString value) {
-            final String language = value.getLanguage().orElse(null);
+            final String language = value.getLanguage().orElse(MultilingualString.NO_LANG);
             final MultilingualString element = getFirstAvailable(language);
             element.set(language, value.getValue());
         } else {
-            final MultilingualString element = getFirstAvailable(null);
+            final MultilingualString element = getFirstAvailable(MultilingualString.NO_LANG);
             element.set(item.toString());
         }
     }

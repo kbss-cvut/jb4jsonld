@@ -35,8 +35,8 @@ public class MultilingualStringSerializer implements ValueSerializer<Multilingua
 
     @Override
     public JsonNode serialize(MultilingualString value, SerializationContext<MultilingualString> ctx) {
-        if (value.getValue().size() == 1) {
-            final Map.Entry<String, String> entry = value.getValue().entrySet().iterator().next();
+        if (value.size() == 1) {
+            final Map.Entry<String, String> entry = value.entrySet().iterator().next();
             return createNode(ctx.getTerm(), entry.getValue(), entry.getKey());
         }
         final SetNode collectionNode = JsonNodeFactory.createCollectionNodeFromArray(ctx.getTerm());
@@ -52,6 +52,6 @@ public class MultilingualStringSerializer implements ValueSerializer<Multilingua
     }
 
     private void addTranslationsToCollectionNode(MultilingualString str, SetNode target) {
-        str.getValue().forEach((lang, val) -> target.addItem(createNode(null, val, lang)));
+        str.forEach((lang, val) -> target.addItem(createNode(null, val, lang)));
     }
 }

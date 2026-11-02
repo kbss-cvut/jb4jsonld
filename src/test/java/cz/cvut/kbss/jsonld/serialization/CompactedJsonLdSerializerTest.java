@@ -114,7 +114,7 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(JsonValue.ValueType.OBJECT, json.getValueType());
         assertTrue(json.asJsonObject().containsKey(RDFS.LABEL));
         final JsonArray label = json.asJsonObject().getJsonArray(RDFS.LABEL);
-        assertEquals(name.getValue().size(), label.size());
+        assertEquals(name.size(), label.size());
         for (JsonValue item : label) {
             assertEquals(JsonValue.ValueType.OBJECT, item.getValueType());
             final JsonObject m = item.asJsonObject();
@@ -140,8 +140,7 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         sut.serialize(instance);
         final JsonArray resultExpanded = TestUtil.parseAndExpand(jsonWriter.getResult());
         final JsonArray strCol = resultExpanded.getJsonObject(0).getJsonArray(SKOS.ALT_LABEL);
-        instance.getAltLabel().forEach(ms -> ms.getValue()
-                                               .forEach((lang, lex) -> assertTrue(strCol.stream()
+        instance.getAltLabel().forEach(ms -> ms.forEach((lang, lex) -> assertTrue(strCol.stream()
                                                                                         .anyMatch(val -> lex.equals(
                                                                                                 val.asJsonObject()
                                                                                                    .getString(
@@ -164,7 +163,7 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(JsonValue.ValueType.OBJECT, json.getValueType());
         assertTrue(json.asJsonObject().containsKey(property.toString()));
         final JsonArray nick = json.asJsonObject().getJsonArray(property.toString());
-        assertEquals(ms.getValue().size(), nick.size());
+        assertEquals(ms.size(), nick.size());
         for (JsonValue item : nick) {
             assertEquals(JsonValue.ValueType.OBJECT, item.getValueType());
             final JsonObject m = item.asJsonObject();
@@ -206,7 +205,7 @@ class CompactedJsonLdSerializerTest extends JsonLdSerializerTestBase {
         assertEquals(JsonValue.ValueType.OBJECT, json.getValueType());
         assertTrue(json.asJsonObject().containsKey(RDFS.LABEL));
         final JsonArray label = json.asJsonObject().getJsonArray(RDFS.LABEL);
-        assertEquals(name.getValue().size(), label.size());
+        assertEquals(name.size(), label.size());
         final Optional<JsonValue> result = label.stream().filter(item -> {
             assertEquals(JsonValue.ValueType.OBJECT, item.getValueType());
             final JsonObject m = item.asJsonObject();

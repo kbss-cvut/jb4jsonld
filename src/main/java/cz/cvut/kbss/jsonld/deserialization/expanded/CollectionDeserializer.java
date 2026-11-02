@@ -42,7 +42,7 @@ class CollectionDeserializer extends Deserializer<JsonArray> {
 
     @Override
     void processValue(JsonArray value) {
-        if (value.size() == 1 && value.get(0).getValueType() == JsonValue.ValueType.OBJECT) {
+        if (value.size() == 1 && value.getFirst().getValueType() == JsonValue.ValueType.OBJECT) {
             final JsonObject obj = value.getJsonObject(0);
             if (!instanceBuilder.isPlural(property)) {
                 resolvePropertyValue(obj);

@@ -36,7 +36,7 @@ public class ContextBuildingPluralMultilingualStringSerializer implements ValueS
             registerTermMapping(ctx);
         }
         final Map<String, Set<String>> allValues = new HashMap<>();
-        value.forEach(ms -> ms.getValue().forEach((lang, text) -> {
+        value.forEach(ms -> ms.forEach((lang, text) -> {
             allValues.putIfAbsent(lang, new LinkedHashSet<>());
             allValues.get(lang).add(text);
         }));
