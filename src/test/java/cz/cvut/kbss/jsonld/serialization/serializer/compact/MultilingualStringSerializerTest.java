@@ -63,7 +63,7 @@ class MultilingualStringSerializerTest {
     }
 
     private void verifyTranslations(CollectionNode<?> result) {
-        value.getValue().forEach((k, v) -> assertTrue(result.getItems().stream().anyMatch(n -> {
+        value.forEach((k, v) -> assertTrue(result.getItems().stream().anyMatch(n -> {
             assertInstanceOf(ObjectNode.class, n);
             final ObjectNode langNode = (ObjectNode) n;
             return langNode.getItems().contains(JsonNodeFactory.createStringLiteralNode(JsonLd.VALUE, v)) &&

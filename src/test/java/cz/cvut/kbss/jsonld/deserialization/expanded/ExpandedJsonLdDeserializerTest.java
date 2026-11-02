@@ -822,12 +822,12 @@ class ExpandedJsonLdDeserializerTest {
             final Person result = new Person();
             final JsonValue firstName = jsonNode.asJsonObject().get(Vocabulary.FIRST_NAME);
             assert firstName.getValueType() == JsonValue.ValueType.ARRAY;
-            assert firstName.asJsonArray().get(0).getValueType() == JsonValue.ValueType.OBJECT;
-            result.setFirstName(firstName.asJsonArray().get(0).asJsonObject().getString(JsonLd.VALUE));
+            assert firstName.asJsonArray().getFirst().getValueType() == JsonValue.ValueType.OBJECT;
+            result.setFirstName(firstName.asJsonArray().getFirst().asJsonObject().getString(JsonLd.VALUE));
             final JsonValue lastName = jsonNode.asJsonObject().get(Vocabulary.LAST_NAME);
             assert lastName.getValueType() == JsonValue.ValueType.ARRAY;
-            assert lastName.asJsonArray().get(0).getValueType() == JsonValue.ValueType.OBJECT;
-            result.setLastName(lastName.asJsonArray().get(0).asJsonObject().getString(JsonLd.VALUE));
+            assert lastName.asJsonArray().getFirst().getValueType() == JsonValue.ValueType.OBJECT;
+            result.setLastName(lastName.asJsonArray().getFirst().asJsonObject().getString(JsonLd.VALUE));
             return result;
         }
     }

@@ -38,10 +38,10 @@ public class DataTypeTransformer {
         final Map<Pair, Function<Object, ?>> map = new HashMap<>();
         map.put(new Pair<>(LangString.class, MultilingualString.class), src -> {
             final LangString ls = (LangString) src;
-            return new MultilingualString(Collections.singletonMap(ls.getLanguage().orElse(null), ls.getValue()));
+            return new MultilingualString(Collections.singletonMap(ls.getLanguage().orElse(MultilingualString.NO_LANG), ls.getValue()));
         });
         map.put(new Pair<>(String.class, MultilingualString.class),
-                src -> new MultilingualString(Collections.singletonMap(null, src.toString())));
+                src -> new MultilingualString(Collections.singletonMap(MultilingualString.NO_LANG, src.toString())));
         map.put(new Pair<>(OffsetDateTime.class, LocalDateTime.class), src -> ((OffsetDateTime) src).toLocalDateTime());
         map.put(new Pair<>(OffsetDateTime.class, ZonedDateTime.class), src -> ((OffsetDateTime) src).toZonedDateTime());
         map.put(new Pair<>(OffsetDateTime.class, Instant.class), src -> ((OffsetDateTime) src).toInstant());
@@ -83,7 +83,7 @@ public class DataTypeTransformer {
      * @throws InvalidEnumMappingException When no matching enum constant is found for the specified identifier
      */
     public static <T extends Enum<T>> T transformIndividualToEnumConstant(String identifier, Class<T> targetClass) {
-        return EnumUtil.findMatchingConstant(targetClass, (e, iri) -> iri.equals(identifier), (e, iri) -> e)
+        return EnumUtil.findMatchingConstant(targetClass, (e, iri) -> iri.equals(identifier), (e, _) -> e)
                        .orElseThrow(() -> new InvalidEnumMappingException(
                                "No matching constant found for individual <" + identifier + "> in target class " + targetClass));
     }

@@ -32,7 +32,7 @@ public class MultilingualStringContext extends InstanceContext<MultilingualStrin
     void addItem(Object item) {
         assert item != null;
         if (item instanceof LangString ls) {
-            instance.set(ls.getLanguage().orElse(null), ls.getValue());
+            instance.set(ls.getLanguage().orElse(MultilingualString.NO_LANG), ls.getValue());
         } else {
             instance.set(item.toString());
         }

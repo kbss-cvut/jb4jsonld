@@ -66,7 +66,7 @@ class ContextBuildingMultilingualStringSerializerTest {
                                                                                   value,
                                                                                   new MappingJsonLdContext()));
         assertEquals(ObjectWithMultilingualString.getLabelField().getName(), result.getName());
-        value.getValue().forEach(
+        value.forEach(
                 (lang, str) -> assertThat(result.getItems(), hasItem(JsonNodeFactory.createStringLiteralNode(lang, str))));
     }
 
