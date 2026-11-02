@@ -1,5 +1,11 @@
 # JB4JSON-LD Changelog
 
+## 0.19.0 - 2026-11-02
+
+- Update to JOPA 3.0.0 which changes the internal representation of `MultilingualString`
+- Dependency updates: JOPA 3.0.0, test dependencies
+- **Breaking changes:** Minimum required Java version is now **Java 25**.
+
 ## 0.18.1 - 2026-09-30
 
 - Fix an issue with serializing singular multilingual string in unmapped properties.
