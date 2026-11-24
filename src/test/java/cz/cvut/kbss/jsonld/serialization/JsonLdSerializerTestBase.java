@@ -53,6 +53,8 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.util.Values;
+import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParser;
@@ -169,7 +171,7 @@ public abstract class JsonLdSerializerTestBase {
     void testSerializeObjectWithPluralReferences() throws Exception {
         final Organization org = Generator.generateOrganization();
         generateEmployees(org, true);
-        org.getEmployees().stream().filter(emp -> Generator.randomBoolean()).forEach(org::addAdmin);
+        org.getEmployees().stream().filter(_ -> Generator.randomBoolean()).forEach(org::addAdmin);
         if (org.getAdmins() == null || org.getAdmins().isEmpty()) {
             org.setAdmins(new HashSet<>(Collections.singletonList(org.getEmployees().iterator().next())));
         }
@@ -354,7 +356,7 @@ public abstract class JsonLdSerializerTestBase {
     void serializationSerializesUrisOfAnnotationPropertyAttributeAsObjectsWithId() throws Exception {
         final ObjectWithAnnotationProperties toSerialize = new ObjectWithAnnotationProperties(Generator.generateUri());
         toSerialize
-                .setOrigins(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
+                .setOrigins(IntStream.range(0, 5).mapToObj(_ -> Generator.generateUri()).collect(Collectors.toSet()));
 
         sut.serialize(toSerialize);
         final Model expected = toRdf(toSerialize);
@@ -517,5 +519,22 @@ public abstract class JsonLdSerializerTestBase {
     void serializeEmptyCollectionReturnsEmptyArray() {
         sut.serialize(List.of());
         assertEquals("[]", jsonWriter.getResult());
+    }
+
+    /**
+     * Bug #98
+     */
+    @Test
+    void serializeSerializesAnnotationPropertyValueReferringToAnotherEntity() throws Exception {
+        final cz.cvut.kbss.jsonld.environment.model.Statement instance =
+                new cz.cvut.kbss.jsonld.environment.model.Statement(
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(URI.create(RDF.TYPE.stringValue())),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(URI.create(Vocabulary.AGENT)),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()));
+
+        sut.serialize(instance);
+        final Model result = readJson(jsonWriter.getResult());
+        assertTrue(result.contains(null, DCTERMS.SOURCE, Values.iri(instance.getContext().value().toString())));
     }
 }
