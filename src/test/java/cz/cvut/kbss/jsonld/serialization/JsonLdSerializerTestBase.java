@@ -536,5 +536,25 @@ public abstract class JsonLdSerializerTestBase {
         sut.serialize(instance);
         final Model result = readJson(jsonWriter.getResult());
         assertTrue(result.contains(null, DCTERMS.SOURCE, Values.iri(instance.getContext().value().toString())));
+        // TODO The same for JsonLdProperty
+    }
+
+    @Test
+    void serializeSerializesPluralAnnotationPropertyValuesReferringToAnotherEntity() throws Exception {
+        final cz.cvut.kbss.jsonld.environment.model.Statement instance =
+                new cz.cvut.kbss.jsonld.environment.model.Statement(
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(URI.create(RDF.TYPE.stringValue())),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(URI.create(Vocabulary.AGENT)));
+        instance.setIsReferencedBy(Set.of(
+                new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()),
+                new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()),
+                new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri())
+        ));
+
+        sut.serialize(instance);
+        final Model result = readJson(jsonWriter.getResult());
+        instance.getIsReferencedBy().forEach(
+                iri -> assertTrue(result.contains(null, DCTERMS.IS_REFERENCED_BY, Values.iri(iri.value().toString()))));
     }
 }

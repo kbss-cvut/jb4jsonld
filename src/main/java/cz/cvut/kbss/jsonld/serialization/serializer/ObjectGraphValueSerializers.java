@@ -18,10 +18,12 @@
 package cz.cvut.kbss.jsonld.serialization.serializer;
 
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
+import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.ObjectPropertyValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -57,7 +59,16 @@ public class ObjectGraphValueSerializers implements ValueSerializers {
         final Field f = ctx.getField();
         return BeanAnnotationProcessor.isObjectProperty(f)
                 || (BeanAnnotationProcessor.isAnnotationProperty(f) && BeanAnnotationProcessor.isMappedType(
-                f.getType()));
+                getAnnotationPropertyValueType(f)));
+    }
+
+    private static Class<?> getAnnotationPropertyValueType(Field f) {
+        final Class<?> cls = f.getType();
+        if (Collection.class.isAssignableFrom(cls)) {
+            return BeanClassProcessor.getCollectionItemType(f);
+        } else {
+            return cls;
+        }
     }
 
     @Override
