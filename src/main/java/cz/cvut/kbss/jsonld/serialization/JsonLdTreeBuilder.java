@@ -32,8 +32,8 @@ import java.util.Set;
 import java.util.Stack;
 
 /**
- * Builds an abstract representation of a JSON-LD tree, which is a result of object graph traversal by {@link
- * cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser}.
+ * Builds an abstract representation of a JSON-LD tree, which is a result of object graph traversal by
+ * {@link cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser}.
  */
 public class JsonLdTreeBuilder implements InstanceVisitor {
 
@@ -136,7 +136,7 @@ public class JsonLdTreeBuilder implements InstanceVisitor {
 
     @Override
     public void openCollection(SerializationContext<? extends Collection<?>> ctx) {
-        final CollectionNode<?> newCurrent =JsonNodeFactory.createCollectionNode(ctx.getTerm(), ctx.getValue());
+        final CollectionNode<?> newCurrent = JsonNodeFactory.createCollectionNode(ctx.getTerm(), ctx.getValue());
         openNewNode(newCurrent);
     }
 

@@ -43,7 +43,8 @@ public class Statement {
     }
 
     @OWLClass(iri = RDFS.RESOURCE)
-    public record Iri(@Id URI value) {}
+    public record Iri(@Id URI value) {
+    }
 
     public Iri getSubject() {
         return subject;
