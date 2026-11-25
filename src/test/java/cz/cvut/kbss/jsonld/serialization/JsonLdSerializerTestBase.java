@@ -536,7 +536,6 @@ public abstract class JsonLdSerializerTestBase {
         sut.serialize(instance);
         final Model result = readJson(jsonWriter.getResult());
         assertTrue(result.contains(null, DCTERMS.SOURCE, Values.iri(instance.getContext().value().toString())));
-        // TODO The same for JsonLdProperty
     }
 
     @Test
@@ -556,5 +555,17 @@ public abstract class JsonLdSerializerTestBase {
         final Model result = readJson(jsonWriter.getResult());
         instance.getIsReferencedBy().forEach(
                 iri -> assertTrue(result.contains(null, DCTERMS.IS_REFERENCED_BY, Values.iri(iri.value().toString()))));
+    }
+
+    @Test
+    void serializeSerializesPluralAnnotationPropertyWithElementTypeObjectReferringToAnotherEntity() throws Exception {
+        final Person p = Generator.generatePerson();
+        final ObjectWithAnnotationProperties instance = new ObjectWithAnnotationProperties(Generator.generateUri());
+        instance.setOrigins(Set.of(p));
+
+        sut.serialize(instance);
+        final Model result = readJson(jsonWriter.getResult());
+        assertTrue(result.contains(Values.iri(instance.getId().toString()), Values.iri(Vocabulary.ORIGIN),
+                                   Values.iri(p.getUri().toString())));
     }
 }

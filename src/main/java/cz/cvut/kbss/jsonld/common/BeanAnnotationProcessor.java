@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 public class BeanAnnotationProcessor {
 
     private static final String[] EMPTY_ARRAY = new String[0];
-    private static final BiPredicate<Field, Class<?>> ALWAYS_TRUE = (f, cls) -> true;
+    private static final BiPredicate<Field, Class<?>> ALWAYS_TRUE = (_, _) -> true;
 
     private static PropertyAccessResolver propertyAccessResolver = new JsonLdPropertyAccessResolver();
 
@@ -524,7 +524,7 @@ public class BeanAnnotationProcessor {
      * @return Matching field, optionally empty
      */
     public static Optional<Field> getIdentifierField(Class<?> cls) {
-        return getMarshallableFields(cls, (f, c) -> f.isAnnotationPresent(Id.class)).stream().findFirst();
+        return getMarshallableFields(cls, (f, _) -> f.isAnnotationPresent(Id.class)).stream().findFirst();
     }
 
     /**

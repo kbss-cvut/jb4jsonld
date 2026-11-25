@@ -23,7 +23,7 @@ import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.jsonld.annotation.JsonLdProperty;
 import cz.cvut.kbss.jsonld.annotation.JsonLdType;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
-import java.lang.reflect.Field;
+
 import java.net.URI;
 import java.util.Set;
 import org.eclipse.rdf4j.model.IRI;
@@ -115,9 +115,5 @@ public class UserLdType extends Person {
         if (types != null) {
             types.forEach(t -> model.add(id, RDF.TYPE, vf.createIRI(t)));
         }
-    }
-
-    public static Field getUsernameField() throws NoSuchFieldException {
-        return UserLdType.class.getDeclaredField("username");
     }
 }

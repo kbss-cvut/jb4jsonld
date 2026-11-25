@@ -90,8 +90,13 @@ public class ObjectWithAnnotationProperties implements GeneratesRdf {
         }
         if (origins != null) {
             origins.forEach(o -> {
-                assert o instanceof URI;
-                model.add(iri, vf.createIRI(Vocabulary.ORIGIN), vf.createIRI(o.toString()));
+                if (o instanceof GeneratesRdf generatesRdf) {
+                    generatesRdf.toRdf(model, vf, visited);
+                } else if (o instanceof URI uri) {
+                    model.add(iri, vf.createIRI(Vocabulary.ORIGIN), vf.createIRI(uri.toString()));
+                } else {
+                    model.add(iri, vf.createIRI(Vocabulary.ORIGIN), vf.createLiteral(o.toString()));
+                }
             });
         }
     }
