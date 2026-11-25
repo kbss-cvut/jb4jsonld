@@ -17,11 +17,13 @@
  */
 package cz.cvut.kbss.jsonld.serialization.serializer;
 
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.environment.Generator;
 import cz.cvut.kbss.jsonld.environment.Vocabulary;
 import cz.cvut.kbss.jsonld.environment.model.Employee;
 import cz.cvut.kbss.jsonld.environment.model.Organization;
+import cz.cvut.kbss.jsonld.environment.model.Statement;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.context.DummyJsonLdContext;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.DefaultValueSerializer;
@@ -29,12 +31,14 @@ import cz.cvut.kbss.jsonld.serialization.serializer.compact.MultilingualStringSe
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.ObjectPropertyValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.ObjectGraphTraverser;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.net.URI;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -116,5 +120,21 @@ class ObjectGraphValueSerializersTest {
                                            DummyJsonLdContext.INSTANCE);
         final ValueSerializer<String> result = sut.getOrDefault(ctx);
         assertNotNull(result);
+    }
+
+    @Test
+    void getOrDefaultReturnsObjectPropertySerializerWhenAttributeIsAnnotationPropertyWithEntityValue() throws Exception {
+        final cz.cvut.kbss.jsonld.environment.model.Statement instance =
+                new cz.cvut.kbss.jsonld.environment.model.Statement(
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(URI.create(RDF.TYPE.stringValue())),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(URI.create(Vocabulary.AGENT)),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()));
+        final SerializationContext<Statement.Iri> ctx = new SerializationContext<>(DC.Terms.SOURCE,
+                                                                                   Statement.class.getDeclaredField("context"),
+                                                                                   instance.getContext(), DummyJsonLdContext.INSTANCE);
+
+        final ValueSerializer<Statement.Iri> result = sut.getOrDefault(ctx);
+        assertInstanceOf(ObjectPropertyValueSerializer.class, result);
     }
 }
