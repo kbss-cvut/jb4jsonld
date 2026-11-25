@@ -9,6 +9,7 @@ import cz.cvut.kbss.jopa.vocabulary.RDF;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 
 import java.net.URI;
+import java.util.Set;
 
 @OWLClass(iri = RDF.STATEMENT)
 public class Statement {
@@ -21,6 +22,9 @@ public class Statement {
     private Iri object;
     @OWLAnnotationProperty(iri = DC.Terms.SOURCE)
     private Iri context;
+
+    @OWLAnnotationProperty(iri = DC.Terms.IS_REFERENCED_BY)
+    private Set<Iri> isReferencedBy;
 
     public Statement() {
     }
@@ -71,5 +75,13 @@ public class Statement {
 
     public void setContext(Iri context) {
         this.context = context;
+    }
+
+    public Set<Iri> getIsReferencedBy() {
+        return isReferencedBy;
+    }
+
+    public void setIsReferencedBy(Set<Iri> isReferencedBy) {
+        this.isReferencedBy = isReferencedBy;
     }
 }

@@ -40,6 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -82,7 +83,7 @@ class ObjectGraphValueSerializersTest {
     @Test
     void getSerializerReturnsCustomSerializerWhenItIsRegisteredInCommon() throws Exception {
         final ValueSerializer<Organization> serializer =
-                ((value, ctx) -> JsonNodeFactory.createObjectIdNode(ctx.getTerm(), Generator.generateUri()));
+                ((_, ctx) -> JsonNodeFactory.createObjectIdNode(ctx.getTerm(), Generator.generateUri()));
         sut.registerSerializer(Organization.class, serializer);
         final SerializationContext<Organization> ctx =
                 new SerializationContext<>(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(),
@@ -104,7 +105,7 @@ class ObjectGraphValueSerializersTest {
     @Test
     void getOrDefaultReturnsCustomSerializerWhenItIsRegistered() throws Exception {
         final ValueSerializer<Organization> serializer =
-                ((value, ctx) -> JsonNodeFactory.createObjectIdNode(ctx.getTerm(), Generator.generateUri()));
+                ((_, ctx) -> JsonNodeFactory.createObjectIdNode(ctx.getTerm(), Generator.generateUri()));
         sut.registerSerializer(Organization.class, serializer);
         final SerializationContext<Organization> ctx =
                 new SerializationContext<>(Vocabulary.IS_MEMBER_OF, Employee.getEmployerField(),
@@ -131,10 +132,34 @@ class ObjectGraphValueSerializersTest {
                         new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(URI.create(Vocabulary.AGENT)),
                         new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()));
         final SerializationContext<Statement.Iri> ctx = new SerializationContext<>(DC.Terms.SOURCE,
-                                                                                   Statement.class.getDeclaredField("context"),
-                                                                                   instance.getContext(), DummyJsonLdContext.INSTANCE);
+                                                                                   Statement.class.getDeclaredField(
+                                                                                           "context"),
+                                                                                   instance.getContext(),
+                                                                                   DummyJsonLdContext.INSTANCE);
 
         final ValueSerializer<Statement.Iri> result = sut.getOrDefault(ctx);
+        assertInstanceOf(ObjectPropertyValueSerializer.class, result);
+    }
+
+    @Test
+    void getOrDefaultReturnsObjectPropertySerializerWhenAttributeIsPluralAnnotationPropertyWithEntityValue() throws Exception {
+        final cz.cvut.kbss.jsonld.environment.model.Statement instance =
+                new cz.cvut.kbss.jsonld.environment.model.Statement(
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(URI.create(RDF.TYPE.stringValue())),
+                        new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(URI.create(Vocabulary.AGENT)));
+        instance.setIsReferencedBy(Set.of(
+                new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()),
+                new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri()),
+                new cz.cvut.kbss.jsonld.environment.model.Statement.Iri(Generator.generateUri())
+        ));
+        final SerializationContext<Set<Statement.Iri>> ctx = new SerializationContext<>(DC.Terms.IS_REFERENCED_BY,
+                                                                                   Statement.class.getDeclaredField(
+                                                                                           "isReferencedBy"),
+                                                                                   instance.getIsReferencedBy(),
+                                                                                   DummyJsonLdContext.INSTANCE);
+
+        final ValueSerializer<Set<Statement.Iri>> result = sut.getOrDefault(ctx);
         assertInstanceOf(ObjectPropertyValueSerializer.class, result);
     }
 }
