@@ -19,6 +19,8 @@ package cz.cvut.kbss.jsonld.serialization.serializer.context;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
+import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -28,6 +30,7 @@ import cz.cvut.kbss.jsonld.serialization.serializer.ValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * Default serializer for non-object property values.
@@ -53,15 +56,25 @@ public class ContextBuildingDefaultValueSerializer implements ValueSerializer {
             final Object elem = col.iterator().next();
             if (SerializerUtils.isAnnotationReference(elem, ctx)) {
                 return serializeReferences(col, ctx);
+            } else if (BeanAnnotationProcessor.isMappedType(elem.getClass())) {
+                return serializeReferences(
+                        col.stream().flatMap(item -> BeanAnnotationProcessor.getInstanceIdentifier(item).stream())
+                           .collect(Collectors.toSet()), ctx);
             } else if (elem instanceof MultilingualString) {
                 return pluralMultilingualSerializer.serialize((Collection<MultilingualString>) col, ctx);
             } else {
                 return serializeLiterals(col, ctx);
             }
         } else {
-            if (SerializerUtils.isAnnotationReference(value, ctx)) {
-                return serializeReference(value, ctx);
-            } else if (value instanceof MultilingualString) {
+            if (BeanAnnotationProcessor.isAnnotationProperty(ctx.getField())) {
+                if (BeanAnnotationProcessor.isMappedType(value.getClass())) {
+                    return serializeReference(BeanAnnotationProcessor.getInstanceIdentifier(value).orElseThrow(
+                            () -> MissingIdentifierException.create(value)), ctx);
+                } else if (SerializerUtils.isAnnotationReference(value, ctx)) {
+                    return serializeReference(value, ctx);
+                }
+            }
+            if (value instanceof MultilingualString) {
                 return multilingualStringValueSerializer.serialize((MultilingualString) value, ctx);
             } else {
                 if (ctx.getField() != null) {

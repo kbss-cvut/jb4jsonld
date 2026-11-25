@@ -207,7 +207,7 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
     @Test
     void serializationOfCollectionReturnsJsonObjectWithContextAndGraphWithSerializedCollection() throws Exception {
         final List<User> users =
-                IntStream.range(0, 5).mapToObj(i -> Generator.generateUser()).collect(Collectors.toList());
+                IntStream.range(0, 5).mapToObj(_ -> Generator.generateUser()).collect(Collectors.toList());
 
         final JsonObject json = serializeAndRead(users).asJsonObject();
         assertThat(json, hasKey(JsonLd.CONTEXT));
@@ -231,7 +231,7 @@ class ContextBuildingJsonLdSerializerTest extends JsonLdSerializerTestBase {
         final JsonObject eOne = items.getJsonObject(0);
         final JsonObject orgOne = eOne.getJsonObject(Employee.getEmployerField().getName());
         assertThat(orgOne.size(), greaterThan(1));
-        assertEquals(employees.get(0).getEmployer().getUri().toString(), orgOne.getString(TestUtil.ID_FIELD_NAME));
+        assertEquals(employees.getFirst().getEmployer().getUri().toString(), orgOne.getString(TestUtil.ID_FIELD_NAME));
         final JsonObject eTwo = items.getJsonObject(1);
         final JsonObject orgTwo = eTwo.getJsonObject(Employee.getEmployerField().getName());
         assertEquals(1, orgTwo.size());

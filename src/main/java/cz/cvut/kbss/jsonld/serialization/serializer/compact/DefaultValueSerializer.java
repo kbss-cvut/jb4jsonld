@@ -19,6 +19,8 @@ package cz.cvut.kbss.jsonld.serialization.serializer.compact;
 
 import cz.cvut.kbss.jopa.model.MultilingualString;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
+import cz.cvut.kbss.jsonld.exception.MissingIdentifierException;
 import cz.cvut.kbss.jsonld.serialization.JsonNodeFactory;
 import cz.cvut.kbss.jsonld.serialization.model.CollectionNode;
 import cz.cvut.kbss.jsonld.serialization.model.JsonNode;
@@ -39,12 +41,20 @@ public class DefaultValueSerializer implements ValueSerializer {
 
     @Override
     public JsonNode serialize(Object value, SerializationContext ctx) {
+        final boolean annotationProperty = BeanAnnotationProcessor.isAnnotationProperty(ctx.getField());
         if (value instanceof Collection<?> col) {
             final CollectionNode<?> node = JsonNodeFactory.createCollectionNode(ctx.getTerm(), col);
             col.forEach(item -> {
-                if (SerializerUtils.isAnnotationReference(item, ctx)) {
-                    node.addItem(serializeReference(null, item));
-                } else if (item instanceof MultilingualString) {
+                if (annotationProperty) {
+                    if (BeanAnnotationProcessor.isMappedType(item.getClass())) {
+                        node.addItem(serializeReference(null, BeanAnnotationProcessor.getInstanceIdentifier(item).orElseThrow(() -> MissingIdentifierException.create(item))));
+                        return;
+                    } else if (SerializerUtils.isAnnotationReference(item, ctx)) {
+                        node.addItem(serializeReference(null, item));
+                        return;
+                    }
+                }
+                if (item instanceof MultilingualString) {
                     node.addItem(multilingualStringSerializer.serialize((MultilingualString) item,
                                                                         new SerializationContext<>(
                                                                                 (MultilingualString) item,
@@ -55,9 +65,14 @@ public class DefaultValueSerializer implements ValueSerializer {
             });
             return node;
         } else {
-            if (SerializerUtils.isAnnotationReference(value, ctx)) {
-                return serializeReference(ctx.getTerm(), value);
-            } else if (value instanceof MultilingualString) {
+            if (annotationProperty) {
+                if (BeanAnnotationProcessor.isMappedType(value.getClass())) {
+                    return serializeReference(null, BeanAnnotationProcessor.getInstanceIdentifier(value).orElseThrow(() -> MissingIdentifierException.create(value)));
+                } else if (SerializerUtils.isAnnotationReference(value, ctx)) {
+                    return serializeReference(ctx.getTerm(), value);
+                }
+            }
+            if (value instanceof MultilingualString) {
                 return multilingualStringSerializer.serialize((MultilingualString) value, ctx);
             }
             return JsonNodeFactory.createLiteralNode(ctx.getTerm(), value);

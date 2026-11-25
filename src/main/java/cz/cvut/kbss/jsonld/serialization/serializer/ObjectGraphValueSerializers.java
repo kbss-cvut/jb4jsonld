@@ -18,9 +18,12 @@
 package cz.cvut.kbss.jsonld.serialization.serializer;
 
 import cz.cvut.kbss.jsonld.common.BeanAnnotationProcessor;
+import cz.cvut.kbss.jsonld.common.BeanClassProcessor;
 import cz.cvut.kbss.jsonld.serialization.serializer.compact.ObjectPropertyValueSerializer;
 import cz.cvut.kbss.jsonld.serialization.traversal.SerializationContext;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -49,16 +52,29 @@ public class ObjectGraphValueSerializers implements ValueSerializers {
     @Override
     public <T> Optional<ValueSerializer<T>> getSerializer(SerializationContext<T> ctx) {
         final Optional<ValueSerializer<T>> result = serializers.getSerializer(ctx);
-        return result.isPresent() ? result :
-               (BeanAnnotationProcessor.isObjectProperty(ctx.getField()) ? Optional.of(opSerializer) :
-                Optional.empty());
+        return result.isPresent() ? result : (isTraversable(ctx) ? Optional.of(opSerializer) : Optional.empty());
+    }
+
+    private static <T> boolean isTraversable(SerializationContext<T> ctx) {
+        final Field f = ctx.getField();
+        return BeanAnnotationProcessor.isObjectProperty(f)
+                || (BeanAnnotationProcessor.isAnnotationProperty(f) && BeanAnnotationProcessor.isMappedType(
+                getAnnotationPropertyValueType(f)));
+    }
+
+    private static Class<?> getAnnotationPropertyValueType(Field f) {
+        final Class<?> cls = f.getType();
+        if (Collection.class.isAssignableFrom(cls)) {
+            return BeanClassProcessor.getCollectionItemType(f);
+        } else {
+            return cls;
+        }
     }
 
     @Override
     public <T> ValueSerializer<T> getOrDefault(SerializationContext<T> ctx) {
         final Optional<ValueSerializer<T>> result = serializers.getSerializer(ctx);
-        return result.orElseGet(() -> (BeanAnnotationProcessor.isObjectProperty(ctx.getField()) ? opSerializer :
-                                       serializers.getOrDefault(ctx)));
+        return result.orElseGet(() -> (isTraversable(ctx) ? opSerializer : serializers.getOrDefault(ctx)));
     }
 
     @Override
